@@ -63,6 +63,8 @@ export interface IStore {
   payment: IStorePayment;
   contact: IStoreContact;
   socialLinks: IStoreSocialLinks;
+  supportedLanguages: string[];
+  defaultLanguage: string;
   createdAt: Date;
   updatedAt: Date;
 }

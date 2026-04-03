@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import type { IHeroBanner } from "@/features/stores/types";
+import { useTranslations } from "next-intl";
 
 export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
+  const t = useTranslations("heroBanner");
   if (!banners || banners.length === 0) return null;
 
   const banner = banners[0];
@@ -36,7 +38,7 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
                 borderRadius: "var(--border-radius)",
               }}
             >
-              {banner.linkText || "Shop Now"}
+              {banner.linkText || t("shopNow")}
             </Link>
           )}
         </div>

@@ -2,12 +2,14 @@
 
 import type { IProduct } from "../types";
 import { ProductCard } from "./ProductCard";
+import { useTranslations } from "next-intl";
 
 export function ProductGrid({ products }: { products: IProduct[] }) {
+  const t = useTranslations("products");
   if (products.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <p className="text-lg">No products found</p>
+        <p className="text-lg">{t("noProducts")}</p>
       </div>
     );
   }

@@ -29,6 +29,8 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
       description: store.seo?.description || "",
       keywords: store.seo?.keywords?.join(", ") || "",
     },
+    supportedLanguages: store.supportedLanguages || ["en"],
+    defaultLanguage: store.defaultLanguage || "en",
   });
 
   const handleInputChange = (
@@ -131,6 +133,8 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
             description: formData.seo.description,
             keywords,
           },
+          supportedLanguages: formData.supportedLanguages,
+          defaultLanguage: formData.defaultLanguage,
         }),
       });
 
@@ -149,43 +153,43 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold mb-6">Edit Store</h2>
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-4">
+      <h2 className="text-lg font-semibold mb-3">Edit Store</h2>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
-          <AlertCircle size={18} />
+        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+          <AlertCircle size={16} />
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
-          <Check size={18} />
+        <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700 text-sm">
+          <Check size={16} />
           Store updated successfully
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Basic Info */}
-        <div className="col-span-full md:col-span-2">
-          <h3 className="font-medium mb-4">Basic Information</h3>
+        <div className="col-span-full">
+          <h3 className="font-medium mb-2 text-sm">Basic Information</h3>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Store Name</label>
+          <label className="block text-xs font-medium mb-1">Store Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Status</label>
+          <label className="block text-xs font-medium mb-1">Status</label>
           <select
             name="isActive"
             value={formData.isActive ? "true" : "false"}
@@ -195,7 +199,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
                 isActive: e.target.value === "true",
               }))
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           >
             <option value="true">Active</option>
@@ -203,55 +207,123 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           </select>
         </div>
 
-        <div className="col-span-2">
-          <label className="block text-sm font-medium mb-2">Domains (comma-separated)</label>
+        <div>
+          <label className="block text-xs font-medium mb-1">Default Language</label>
+          <select
+            value={formData.defaultLanguage}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                defaultLanguage: e.target.value,
+              }))
+            }
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            disabled={loading}
+          >
+            {formData.supportedLanguages.includes("en") && <option value="en">English</option>}
+            {formData.supportedLanguages.includes("bn") && <option value="bn">বাংলা (Bangla)</option>}
+          </select>
+        </div>
+
+        <div className="col-span-full">
+          <label className="block text-xs font-medium mb-1">Domains (comma-separated)</label>
           <input
             type="text"
             name="domains"
             value={formData.domains}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           />
         </div>
 
+        {/* Languages */}
+        <div className="col-span-full pt-3 border-t">
+          <h3 className="font-medium mb-2 text-sm">Languages</h3>
+        </div>
+
+        <div className="col-span-full">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="lang-en"
+                checked={formData.supportedLanguages.includes("en")}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    supportedLanguages: e.target.checked
+                      ? [...prev.supportedLanguages, "en"]
+                      : prev.supportedLanguages.filter((l) => l !== "en"),
+                  }));
+                }}
+                className="w-4 h-4 accent-blue-600"
+                disabled={loading}
+              />
+              <label htmlFor="lang-en" className="text-sm cursor-pointer">
+                English
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="lang-bn"
+                checked={formData.supportedLanguages.includes("bn")}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    supportedLanguages: e.target.checked
+                      ? [...prev.supportedLanguages, "bn"]
+                      : prev.supportedLanguages.filter((l) => l !== "bn"),
+                  }));
+                }}
+                className="w-4 h-4 accent-blue-600"
+                disabled={loading}
+              />
+              <label htmlFor="lang-bn" className="text-sm cursor-pointer">
+                বাংলা (Bangla)
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Theme */}
-        <div className="col-span-full md:col-span-2 pt-4 border-t">
-          <h3 className="font-medium mb-4">Theme Colors</h3>
+        <div className="col-span-full pt-3 border-t">
+          <h3 className="font-medium mb-2 text-sm">Theme Colors</h3>
         </div>
 
         <ColorInput
-          label="Primary Color"
+          label="Primary"
           value={formData.theme.primaryColor}
           onChange={(value) => handleColorChange("primaryColor", value)}
           disabled={loading}
         />
         <ColorInput
-          label="Secondary Color"
+          label="Secondary"
           value={formData.theme.secondaryColor}
           onChange={(value) => handleColorChange("secondaryColor", value)}
           disabled={loading}
         />
         <ColorInput
-          label="Accent Color"
+          label="Accent"
           value={formData.theme.accentColor}
           onChange={(value) => handleColorChange("accentColor", value)}
           disabled={loading}
         />
         <ColorInput
-          label="Background Color"
+          label="Background"
           value={formData.theme.backgroundColor}
           onChange={(value) => handleColorChange("backgroundColor", value)}
           disabled={loading}
         />
         <ColorInput
-          label="Text Color"
+          label="Text"
           value={formData.theme.textColor}
           onChange={(value) => handleColorChange("textColor", value)}
           disabled={loading}
         />
         <ColorInput
-          label="Header Background"
+          label="Header BG"
           value={formData.theme.headerBg}
           onChange={(value) => handleColorChange("headerBg", value)}
           disabled={loading}
@@ -264,18 +336,18 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         />
 
         {/* Font & Layout */}
-        <div className="col-span-full md:col-span-2 pt-4 border-t">
-          <h3 className="font-medium mb-4">Typography & Layout</h3>
+        <div className="col-span-full pt-3 border-t">
+          <h3 className="font-medium mb-2 text-sm">Typography & Layout</h3>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Font Family</label>
+          <label className="block text-xs font-medium mb-1">Font Family</label>
           <select
             value={formData.theme.fontFamily}
             onChange={(e) =>
               handleColorChange("fontFamily", e.target.value as any)
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           >
             <option>Inter</option>
@@ -287,13 +359,13 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Border Radius</label>
+          <label className="block text-xs font-medium mb-1">Border Radius</label>
           <select
             value={formData.theme.borderRadius}
             onChange={(e) =>
               handleColorChange("borderRadius", e.target.value as any)
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           >
             <option value="0rem">None</option>
@@ -305,16 +377,16 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
 
         {/* Hero Banners */}
-        <div className="col-span-full md:col-span-2 pt-4 border-t">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium">Hero Banners</h3>
+        <div className="col-span-full pt-3 border-t">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-sm">Hero Banners</h3>
             <button
               type="button"
               onClick={handleAddBanner}
-              className="px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               disabled={loading}
             >
-              + Add Banner
+              + Add
             </button>
           </div>
         </div>
@@ -322,172 +394,156 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         {formData.heroBanners.map((banner, index) => (
           <div
             key={index}
-            className="col-span-full md:col-span-2 p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3"
+            className="col-span-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg space-y-2"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-medium">Banner {index + 1}</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-medium">Banner {index + 1}</h4>
               <button
                 type="button"
                 onClick={() => handleRemoveBanner(index)}
-                className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition"
+                className="text-xs text-red-600 hover:bg-red-50 px-1.5 py-0.5 rounded transition"
                 disabled={loading}
               >
-                Remove
+                ✕
               </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Image URL *</label>
-              <input
-                type="text"
-                value={banner.image}
-                onChange={(e) => handleBannerChange(index, "image", e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                disabled={loading}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              value={banner.image}
+              onChange={(e) => handleBannerChange(index, "image", e.target.value)}
+              placeholder="Image URL"
+              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900"
+              disabled={loading}
+              required
+            />
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Title *</label>
-              <input
-                type="text"
-                value={banner.title}
-                onChange={(e) => handleBannerChange(index, "title", e.target.value)}
-                placeholder="Banner title"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                disabled={loading}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              value={banner.title}
+              onChange={(e) => handleBannerChange(index, "title", e.target.value)}
+              placeholder="Title"
+              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900"
+              disabled={loading}
+              required
+            />
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Subtitle</label>
+            <div className="grid grid-cols-3 gap-2">
               <input
                 type="text"
                 value={banner.subtitle}
                 onChange={(e) => handleBannerChange(index, "subtitle", e.target.value)}
-                placeholder="Banner subtitle"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                placeholder="Subtitle"
+                className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900"
                 disabled={loading}
               />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Link URL</label>
-                <input
-                  type="text"
-                  value={banner.linkUrl}
-                  onChange={(e) => handleBannerChange(index, "linkUrl", e.target.value)}
-                  placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Link Text</label>
-                <input
-                  type="text"
-                  value={banner.linkText}
-                  onChange={(e) => handleBannerChange(index, "linkText", e.target.value)}
-                  placeholder="Click here"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  disabled={loading}
-                />
-              </div>
+              <input
+                type="text"
+                value={banner.linkUrl}
+                onChange={(e) => handleBannerChange(index, "linkUrl", e.target.value)}
+                placeholder="Link URL"
+                className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900"
+                disabled={loading}
+              />
+              <input
+                type="text"
+                value={banner.linkText}
+                onChange={(e) => handleBannerChange(index, "linkText", e.target.value)}
+                placeholder="Link text"
+                className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900"
+                disabled={loading}
+              />
             </div>
           </div>
         ))}
 
         {/* Contact */}
-        <div className="col-span-full md:col-span-2 pt-4 border-t">
-          <h3 className="font-medium mb-4">Contact Information</h3>
+        <div className="col-span-full pt-3 border-t">
+          <h3 className="font-medium mb-2 text-sm">Contact</h3>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Email</label>
+          <label className="block text-xs font-medium mb-1">Email</label>
           <input
             type="email"
             name="email"
             value={formData.contact.email}
             onChange={(e) => handleInputChange(e, "contact")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Phone</label>
+          <label className="block text-xs font-medium mb-1">Phone</label>
           <input
             type="tel"
             name="phone"
             value={formData.contact.phone}
             onChange={(e) => handleInputChange(e, "contact")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           />
         </div>
 
-        <div className="col-span-full md:col-span-2">
-          <label className="block text-sm font-medium mb-2">Address</label>
+        <div className="col-span-full">
+          <label className="block text-xs font-medium mb-1">Address</label>
           <textarea
             name="address"
             value={formData.contact.address}
             onChange={(e) => handleInputChange(e, "contact")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-            rows={3}
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            rows={2}
             disabled={loading}
           />
         </div>
 
         {/* SEO */}
-        <div className="col-span-full md:col-span-2 pt-4 border-t">
-          <h3 className="font-medium mb-4">SEO Settings</h3>
+        <div className="col-span-full pt-3 border-t">
+          <h3 className="font-medium mb-2 text-sm">SEO</h3>
         </div>
 
-        <div className="col-span-full md:col-span-2">
-          <label className="block text-sm font-medium mb-2">SEO Title</label>
+        <div className="col-span-full">
+          <label className="block text-xs font-medium mb-1">SEO Title</label>
           <input
             type="text"
             name="title"
             value={formData.seo.title}
             onChange={(e) => handleInputChange(e, "seo")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           />
         </div>
 
-        <div className="col-span-full md:col-span-2">
-          <label className="block text-sm font-medium mb-2">SEO Description</label>
+        <div className="col-span-full">
+          <label className="block text-xs font-medium mb-1">SEO Description</label>
           <textarea
             name="description"
             value={formData.seo.description}
             onChange={(e) => handleInputChange(e, "seo")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-            rows={3}
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            rows={2}
             disabled={loading}
           />
         </div>
 
-        <div className="col-span-full md:col-span-2">
-          <label className="block text-sm font-medium mb-2">SEO Keywords (comma-separated)</label>
+        <div className="col-span-full">
+          <label className="block text-xs font-medium mb-1">Keywords (comma-separated)</label>
           <input
             type="text"
             name="keywords"
             value={formData.seo.keywords}
             onChange={(e) => handleInputChange(e, "seo")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             disabled={loading}
           />
         </div>
 
         {/* Submit */}
-        <div className="col-span-full md:col-span-2 pt-6 border-t flex gap-3">
+        <div className="col-span-full pt-3 border-t flex gap-2">
           <button
             type="submit"
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             disabled={loading}
           >
             {loading ? "Saving..." : "Save Changes"}
@@ -508,20 +564,20 @@ interface ColorInputProps {
 function ColorInput({ label, value, onChange, disabled }: ColorInputProps) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
-      <div className="flex gap-2">
+      <label className="block text-xs font-medium mb-1">{label}</label>
+      <div className="flex gap-1.5">
         <input
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-12 h-10 rounded-lg cursor-pointer"
+          className="w-10 h-8 rounded cursor-pointer"
           disabled={disabled}
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-900"
+          className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded font-mono focus:outline-none focus:ring-1 focus:ring-gray-900"
           disabled={disabled}
         />
       </div>

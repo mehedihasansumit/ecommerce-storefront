@@ -6,6 +6,7 @@ import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { createStoreMetadata } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -15,14 +16,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const tenant = await getTenant();
+  const t = await getTranslations("home");
 
   if (!tenant) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Store Not Found</h1>
+          <h1 className="text-2xl font-bold mb-2">{t("storeNotFound")}</h1>
           <p className="text-gray-500">
-            This domain is not configured for any store.
+            {t("noStoreConfigured")}
           </p>
         </div>
       </div>
@@ -42,7 +44,7 @@ export default async function HomePage() {
       {/* Categories */}
       {categories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h2 className="text-2xl font-bold mb-6">Shop by Category</h2>
+          <h2 className="text-2xl font-bold mb-6">{t("shopByCategory")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category) => (
               <Link
@@ -71,13 +73,13 @@ export default async function HomePage() {
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Featured Products</h2>
+          <h2 className="text-2xl font-bold">{t("featuredProducts")}</h2>
           <Link
             href="/products"
             className="text-sm font-medium hover:opacity-80"
             style={{ color: "var(--color-primary)" }}
           >
-            View All →
+            {t("viewAll")}
           </Link>
         </div>
         <ProductGrid products={featuredProducts} />

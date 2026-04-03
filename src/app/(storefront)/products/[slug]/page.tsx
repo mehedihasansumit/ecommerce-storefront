@@ -4,6 +4,7 @@ import { createStoreMetadata, buildProductJsonLd, buildBreadcrumbJsonLd } from "
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -31,6 +32,7 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const tenant = await getTenant();
+  const t = await getTranslations("productDetail");
   if (!tenant) return null;
 
   const { slug } = await params;
@@ -42,8 +44,8 @@ export default async function ProductDetailPage({
 
   const productJsonLd = buildProductJsonLd(product, storeUrl);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Home", url: storeUrl },
-    { name: "Products", url: `${storeUrl}/products` },
+    { name: t("home"), url: storeUrl },
+    { name: t("products"), url: `${storeUrl}/products` },
     { name: product.name, url: `${storeUrl}/products/${product.slug}` },
   ]);
 
@@ -62,11 +64,11 @@ export default async function ProductDetailPage({
         {/* Breadcrumbs */}
         <nav className="text-sm text-gray-500 mb-6">
           <Link href="/" className="hover:text-gray-900">
-            Home
+            {t("home")}
           </Link>
           <span className="mx-2">/</span>
           <Link href="/products" className="hover:text-gray-900">
-            Products
+            {t("products")}
           </Link>
           <span className="mx-2">/</span>
           <span className="text-gray-900">{product.name}</span>
@@ -87,7 +89,7 @@ export default async function ProductDetailPage({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  No Image
+                  {t("noImage")}
                 </div>
               )}
             </div>
@@ -123,7 +125,7 @@ export default async function ProductDetailPage({
                   {"☆".repeat(5 - Math.round(product.averageRating))}
                 </span>
                 <span className="text-sm text-gray-500">
-                  ({product.reviewCount} reviews)
+                  ({product.reviewCount} {t("reviews")})
                 </span>
               </div>
             )}
@@ -175,11 +177,11 @@ export default async function ProductDetailPage({
             <div className="mb-6">
               {product.stock > 0 ? (
                 <span className="text-sm text-green-600 font-medium">
-                  In Stock ({product.stock} available)
+                  {t("inStock", { available: product.stock })}
                 </span>
               ) : (
                 <span className="text-sm text-red-600 font-medium">
-                  Out of Stock
+                  {t("outOfStock")}
                 </span>
               )}
             </div>
@@ -193,13 +195,13 @@ export default async function ProductDetailPage({
               }}
               disabled={product.stock <= 0}
             >
-              {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
+              {product.stock > 0 ? t("addToCart") : t("outOfStock")}
             </button>
 
             {/* Description */}
             {product.description && (
               <div className="mt-8 pt-8 border-t border-gray-200">
-                <h2 className="text-lg font-semibold mb-4">Description</h2>
+                <h2 className="text-lg font-semibold mb-4">{t("description")}</h2>
                 <div className="text-gray-600 whitespace-pre-wrap">
                   {product.description}
                 </div>

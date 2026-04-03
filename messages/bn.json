@@ -1,0 +1,109 @@
+{
+  "header": {
+    "home": "হোম",
+    "products": "পণ্য",
+    "myAccount": "আমার অ্যাকাউন্ট",
+    "cart": "কার্ট",
+    "storeName": "স্টোর"
+  },
+  "footer": {
+    "quickLinks": "দ্রুত লিঙ্ক",
+    "allProducts": "সমস্ত পণ্য",
+    "cart": "কার্ট",
+    "myAccount": "আমার অ্যাকাউন্ট",
+    "myOrders": "আমার অর্ডার",
+    "followUs": "আমাদের অনুসরণ করুন",
+    "facebook": "ফেসবুক",
+    "instagram": "ইনস্টাগ্রাম",
+    "twitter": "টুইটার",
+    "copyright": "সর্বাধিকার সংরক্ষিত"
+  },
+  "heroBanner": {
+    "shopNow": "এখনই কিনুন"
+  },
+  "home": {
+    "shopByCategory": "বিভাগ অনুযায়ী কেনাকাটা করুন",
+    "featuredProducts": "বৈশিষ্ট্যযুক্ত পণ্য",
+    "viewAll": "সব দেখুন →",
+    "storeNotFound": "স্টোর খুঁজে পাওয়া যায়নি",
+    "noStoreConfigured": "এই ডোমেইনটি কোনও স্টোরের জন্য কনফিগার করা হয়নি।"
+  },
+  "products": {
+    "allProducts": "সমস্ত পণ্য",
+    "categories": "বিভাগ",
+    "all": "সব",
+    "noProducts": "কোন পণ্য পাওয়া যায়নি",
+    "categoryFilter": "বিভাগ: {category}"
+  },
+  "productDetail": {
+    "home": "হোম",
+    "products": "পণ্য",
+    "noImage": "কোন ছবি নেই",
+    "reviews": "পর্যালোচনা",
+    "inStock": "স্টকে আছে ({available} উপলব্ধ)",
+    "outOfStock": "স্টক খালি",
+    "addToCart": "কার্টে যোগ করুন",
+    "description": "বর্ণনা",
+    "price": "মূল্য",
+    "compareAt": "তুলনা করুন",
+    "availability": "উপলব্ধতা"
+  },
+  "productCard": {
+    "noImage": "কোন ছবি নেই"
+  },
+  "cart": {
+    "yourCart": "আপনার কার্ট",
+    "empty": "আপনার কার্ট খালি",
+    "continueShopping": "কেনাকাটা চালিয়ে যান",
+    "subtotal": "সাব টোটাল",
+    "shipping": "শিপিং",
+    "tax": "ট্যাক্স",
+    "total": "মোট",
+    "checkout": "চেকআউট",
+    "removeItem": "অপসারণ করুন"
+  },
+  "checkout": {
+    "checkout": "চেকআউট",
+    "notImplemented": "চেকআউট প্রবাহ এখানে প্রয়োগ করা হবে।"
+  },
+  "auth": {
+    "login": "লগইন",
+    "register": "নিবন্ধন করুন",
+    "email": "ইমেইল",
+    "password": "পাসওয়ার্ড",
+    "name": "নাম",
+    "createAccount": "অ্যাকাউন্ট তৈরি করুন",
+    "haveAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+    "noAccount": "অ্যাকাউন্ট নেই?",
+    "loggingIn": "লগইন করছি...",
+    "registering": "নিবন্ধন করছি...",
+    "error": "একটি ত্রুটি ঘটেছে"
+  },
+  "account": {
+    "myAccount": "আমার অ্যাকাউন্ট",
+    "notImplemented": "অ্যাকাউন্ট ব্যবস্থাপনা এখানে দেখানো হবে।",
+    "logout": "লগআউট"
+  },
+  "orders": {
+    "myOrders": "আমার অর্ডার",
+    "pleaseLogin": "আপনার অর্ডার দেখতে লগইন করুন।",
+    "orderNumber": "অর্ডার #",
+    "date": "তারিখ",
+    "total": "মোট",
+    "status": "অবস্থা"
+  },
+  "common": {
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "confirm": "নিশ্চিত করুন",
+    "cancel": "বাতিল করুন",
+    "save": "সংরক্ষণ করুন",
+    "delete": "মুছে ফেলুন",
+    "edit": "সম্পাদনা করুন",
+    "view": "দেখুন",
+    "back": "ফিরে যান",
+    "next": "পরবর্তী",
+    "previous": "আগের"
+  }
+}

@@ -69,6 +69,12 @@ const StoreSchema = new Schema<IStoreDocument>(
       instagram: { type: String, default: "" },
       twitter: { type: String, default: "" },
     },
+
+    supportedLanguages: {
+      type: [String],
+      default: ["en"],
+    },
+    defaultLanguage: { type: String, default: "en" },
   },
   { timestamps: true }
 );

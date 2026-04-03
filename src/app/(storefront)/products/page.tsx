@@ -6,6 +6,7 @@ import { createStoreMetadata } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -23,6 +24,7 @@ export default async function ProductsPage({
   searchParams: Promise<{ page?: string; category?: string; search?: string }>;
 }) {
   const tenant = await getTenant();
+  const t = await getTranslations("products");
   if (!tenant) return null;
 
   const params = await searchParams;
@@ -49,21 +51,21 @@ export default async function ProductsPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold mb-8">
-        {categorySlug ? `Category: ${categorySlug}` : "All Products"}
+        {categorySlug ? t("categoryFilter", { category: categorySlug }) : t("allProducts")}
       </h1>
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar - Categories */}
         {categories.length > 0 && (
           <aside className="w-full md:w-56 shrink-0">
-            <h3 className="font-semibold mb-3">Categories</h3>
+            <h3 className="font-semibold mb-3">{t("categories")}</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/products"
                   className={`text-sm ${!categorySlug ? "font-bold" : "text-gray-600 hover:text-gray-900"}`}
                 >
-                  All
+                  {t("all")}
                 </Link>
               </li>
               {categories.map((cat) => (

@@ -1,0 +1,109 @@
+{
+  "header": {
+    "home": "Home",
+    "products": "Products",
+    "myAccount": "My Account",
+    "cart": "Cart",
+    "storeName": "Store"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "allProducts": "All Products",
+    "cart": "Cart",
+    "myAccount": "My Account",
+    "myOrders": "My Orders",
+    "followUs": "Follow Us",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "twitter": "Twitter",
+    "copyright": "All rights reserved"
+  },
+  "heroBanner": {
+    "shopNow": "Shop Now"
+  },
+  "home": {
+    "shopByCategory": "Shop by Category",
+    "featuredProducts": "Featured Products",
+    "viewAll": "View All →",
+    "storeNotFound": "Store Not Found",
+    "noStoreConfigured": "This domain is not configured for any store."
+  },
+  "products": {
+    "allProducts": "All Products",
+    "categories": "Categories",
+    "all": "All",
+    "noProducts": "No products found",
+    "categoryFilter": "Category: {category}"
+  },
+  "productDetail": {
+    "home": "Home",
+    "products": "Products",
+    "noImage": "No Image",
+    "reviews": "reviews",
+    "inStock": "In Stock ({available} available)",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "description": "Description",
+    "price": "Price",
+    "compareAt": "Compare At",
+    "availability": "Availability"
+  },
+  "productCard": {
+    "noImage": "No Image"
+  },
+  "cart": {
+    "yourCart": "Your Cart",
+    "empty": "Your cart is empty",
+    "continueShopping": "Continue Shopping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "checkout": "Checkout",
+    "removeItem": "Remove"
+  },
+  "checkout": {
+    "checkout": "Checkout",
+    "notImplemented": "Checkout flow will be implemented here."
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "createAccount": "Create Account",
+    "haveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "loggingIn": "Logging in...",
+    "registering": "Registering...",
+    "error": "An error occurred"
+  },
+  "account": {
+    "myAccount": "My Account",
+    "notImplemented": "Account management will be shown here.",
+    "logout": "Logout"
+  },
+  "orders": {
+    "myOrders": "My Orders",
+    "pleaseLogin": "Please log in to view your orders.",
+    "orderNumber": "Order #",
+    "date": "Date",
+    "total": "Total",
+    "status": "Status"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}

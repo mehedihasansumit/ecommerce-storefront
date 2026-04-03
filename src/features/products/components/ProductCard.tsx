@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import type { IProduct } from "../types";
+import { useTranslations } from "next-intl";
 
 export function ProductCard({ product }: { product: IProduct }) {
+  const t = useTranslations("productCard");
   return (
     <Link
       href={`/products/${product.slug}`}
@@ -19,7 +21,7 @@ export function ProductCard({ product }: { product: IProduct }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
-            No Image
+            {t("noImage")}
           </div>
         )}
       </div>

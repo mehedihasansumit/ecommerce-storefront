@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useTenant } from "@/shared/hooks/useTenant";
+import { useTranslations } from "next-intl";
 
 export function Footer() {
   const tenant = useTenant();
+  const t = useTranslations("footer");
 
   return (
     <footer className="mt-auto border-t border-gray-200 bg-gray-50">
@@ -28,26 +30,26 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("quickLinks")}</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <Link href="/products" className="hover:text-gray-900">
-                  All Products
+                  {t("allProducts")}
                 </Link>
               </li>
               <li>
                 <Link href="/cart" className="hover:text-gray-900">
-                  Cart
+                  {t("cart")}
                 </Link>
               </li>
               <li>
                 <Link href="/account" className="hover:text-gray-900">
-                  My Account
+                  {t("myAccount")}
                 </Link>
               </li>
               <li>
                 <Link href="/orders" className="hover:text-gray-900">
-                  My Orders
+                  {t("myOrders")}
                 </Link>
               </li>
             </ul>
@@ -55,7 +57,7 @@ export function Footer() {
 
           {/* Social Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("followUs")}</h3>
             <div className="flex gap-4">
               {tenant?.socialLinks.facebook && (
                 <a
@@ -64,7 +66,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-gray-900"
                 >
-                  Facebook
+                  {t("facebook")}
                 </a>
               )}
               {tenant?.socialLinks.instagram && (
@@ -74,7 +76,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-gray-900"
                 >
-                  Instagram
+                  {t("instagram")}
                 </a>
               )}
               {tenant?.socialLinks.twitter && (
@@ -84,7 +86,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="text-gray-600 hover:text-gray-900"
                 >
-                  Twitter
+                  {t("twitter")}
                 </a>
               )}
             </div>
@@ -92,8 +94,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} {tenant?.name || "Store"}. All
-          rights reserved.
+          &copy; {new Date().getFullYear()} {tenant?.name || "Store"}. {t("copyright")}
         </div>
       </div>
     </footer>

@@ -27,6 +27,8 @@ export default function NewStorePage() {
     name: "",
     domains: "",
     theme: DEFAULT_THEME,
+    supportedLanguages: ["en"],
+    defaultLanguage: "en",
   });
 
   const handleInputChange = (
@@ -78,6 +80,8 @@ export default function NewStorePage() {
           name: formData.name,
           domains: domainsArray,
           theme: formData.theme,
+          supportedLanguages: formData.supportedLanguages,
+          defaultLanguage: formData.defaultLanguage,
         }),
       });
 
@@ -148,6 +152,73 @@ export default function NewStorePage() {
           <p className="text-xs text-gray-600 mt-1">
             Enter multiple domains separated by commas
           </p>
+        </div>
+
+        {/* Languages Section */}
+        <div className="border-t pt-6">
+          <h2 className="text-lg font-semibold mb-4">Languages</h2>
+          <p className="text-sm text-gray-600 mb-4">Select which languages this store should support</p>
+
+          <div className="space-y-3 mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="lang-en"
+                checked={formData.supportedLanguages.includes("en")}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    supportedLanguages: e.target.checked
+                      ? [...prev.supportedLanguages, "en"]
+                      : prev.supportedLanguages.filter((l) => l !== "en"),
+                  }));
+                }}
+                className="w-4 h-4 accent-blue-600"
+                disabled={loading}
+              />
+              <label htmlFor="lang-en" className="text-sm cursor-pointer">
+                English
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="lang-bn"
+                checked={formData.supportedLanguages.includes("bn")}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    supportedLanguages: e.target.checked
+                      ? [...prev.supportedLanguages, "bn"]
+                      : prev.supportedLanguages.filter((l) => l !== "bn"),
+                  }));
+                }}
+                className="w-4 h-4 accent-blue-600"
+                disabled={loading}
+              />
+              <label htmlFor="lang-bn" className="text-sm cursor-pointer">
+                বাংলা (Bangla)
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">Default Language</label>
+            <select
+              value={formData.defaultLanguage}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  defaultLanguage: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              disabled={loading}
+            >
+              {formData.supportedLanguages.includes("en") && <option value="en">English</option>}
+              {formData.supportedLanguages.includes("bn") && <option value="bn">বাংলা (Bangla)</option>}
+            </select>
+          </div>
         </div>
 
         {/* Theme Section */}

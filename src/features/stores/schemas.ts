@@ -31,6 +31,8 @@ export const createStoreSchema = z.object({
       currency: z.string().optional(),
     })
     .optional(),
+  supportedLanguages: z.array(z.string()).optional(),
+  defaultLanguage: z.string().optional(),
 });
 
 export const updateStoreSchema = z.object({
@@ -83,4 +85,6 @@ export const updateStoreSchema = z.object({
       twitter: z.string().optional(),
     })
     .optional(),
+  supportedLanguages: z.array(z.string()).optional(),
+  defaultLanguage: z.string().optional(),
 });

@@ -4,10 +4,13 @@ import Link from "next/link";
 import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
   const tenant = useTenant();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = useTranslations("header");
 
   return (
     <header
@@ -29,7 +32,7 @@ export function Header() {
               />
             ) : (
               <span className="text-xl font-bold">
-                {tenant?.name || "Store"}
+                {tenant?.name || t("storeName")}
               </span>
             )}
           </Link>
@@ -37,18 +40,19 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/" className="hover:opacity-80 transition-opacity">
-              Home
+              {t("home")}
             </Link>
             <Link
               href="/products"
               className="hover:opacity-80 transition-opacity"
             >
-              Products
+              {t("products")}
             </Link>
           </nav>
 
           {/* Actions */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <Link
               href="/products"
               className="hover:opacity-80 transition-opacity"
@@ -86,21 +90,21 @@ export function Header() {
               className="block py-2 hover:opacity-80"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Home
+              {t("home")}
             </Link>
             <Link
               href="/products"
               className="block py-2 hover:opacity-80"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Products
+              {t("products")}
             </Link>
             <Link
               href="/account"
               className="block py-2 hover:opacity-80"
               onClick={() => setMobileMenuOpen(false)}
             >
-              My Account
+              {t("myAccount")}
             </Link>
           </nav>
         )}

@@ -4,6 +4,8 @@ import { getTenant } from "@/shared/lib/tenant";
 import { TenantProvider } from "@/shared/context";
 import { DEFAULT_THEME } from "@/shared/lib/constants";
 import { Toaster } from "react-hot-toast";
+import { getLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -23,6 +25,7 @@ export default async function RootLayout({
 }) {
   const tenant = await getTenant();
   const theme = tenant?.theme || DEFAULT_THEME;
+  const locale = await getLocale();
 
   const themeVars: Record<string, string> = {
     "--color-primary": theme.primaryColor,
@@ -37,7 +40,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="en" style={themeVars as React.CSSProperties}>
+    <html lang={locale} style={themeVars as React.CSSProperties}>
       <head>
         {theme.fontFamily && theme.fontFamily !== "Inter" && (
           <link
@@ -47,10 +50,12 @@ export default async function RootLayout({
         )}
       </head>
       <body className="min-h-screen flex flex-col antialiased">
-        <TenantProvider tenant={tenant}>
-          {children}
-          <Toaster position="top-right" />
-        </TenantProvider>
+        <NextIntlClientProvider>
+          <TenantProvider tenant={tenant}>
+            {children}
+            <Toaster position="top-right" />
+          </TenantProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

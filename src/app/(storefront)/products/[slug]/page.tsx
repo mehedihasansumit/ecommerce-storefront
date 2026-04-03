@@ -133,12 +133,12 @@ export default async function ProductDetailPage({
                 className="text-3xl font-bold"
                 style={{ color: "var(--color-primary)" }}
               >
-                ${product.price.toFixed(2)}
+                ৳{product.price.toFixed(2)}
               </span>
               {product.compareAtPrice > 0 &&
                 product.compareAtPrice > product.price && (
                   <span className="text-lg text-gray-400 line-through">
-                    ${product.compareAtPrice.toFixed(2)}
+                    ৳{product.compareAtPrice.toFixed(2)}
                   </span>
                 )}
             </div>

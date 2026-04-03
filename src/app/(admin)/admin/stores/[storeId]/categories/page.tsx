@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CategoryService } from "@/features/categories/service";
 
 export default async function StoreCategoriesPage({
@@ -12,9 +13,12 @@ export default async function StoreCategoriesPage({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Categories</h1>
-        <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800">
+        <Link
+          href={`/admin/stores/${storeId}/categories/new`}
+          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800"
+        >
           + New Category
-        </button>
+        </Link>
       </div>
 
       {categories.length === 0 ? (
@@ -34,6 +38,9 @@ export default async function StoreCategoriesPage({
                 <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
                   Order
                 </th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -42,6 +49,14 @@ export default async function StoreCategoriesPage({
                   <td className="px-6 py-4 font-medium">{cat.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{cat.slug}</td>
                   <td className="px-6 py-4 text-sm">{cat.sortOrder}</td>
+                  <td className="px-6 py-4 text-right">
+                    <Link
+                      href={`/admin/stores/${storeId}/categories/${cat._id}`}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

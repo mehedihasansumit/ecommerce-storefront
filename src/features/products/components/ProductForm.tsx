@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { IProduct } from "../types";
+import type { IProduct, IVariant } from "../types";
 import type { ICategory } from "@/features/categories/types";
+import { VariantManager } from "./VariantManager";
 
 interface ProductFormProps {
   storeId: string;
@@ -34,8 +35,22 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
     tags: product?.tags.join(", ") ?? "",
   });
 
+  const [variants, setVariants] = useState<IVariant[]>(product?.variants ?? []);
+  const [newVariantType, setNewVariantType] = useState("");
+
   const set = (field: string, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  const addVariantType = () => {
+    if (!newVariantType.trim()) return;
+    if (variants.some((v) => v.name === newVariantType)) {
+      setError("Variant type already exists");
+      return;
+    }
+    setVariants([...variants, { name: newVariantType.trim(), options: [] }]);
+    setNewVariantType("");
+    setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +68,7 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         .map((t) => t.trim())
         .filter(Boolean),
       categoryId: form.categoryId || undefined,
+      variants: variants.length > 0 ? variants : undefined,
     };
 
     try {
@@ -263,6 +279,35 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
             />
             Featured
           </label>
+        </div>
+      </div>
+
+      {/* Variants - SKU Based */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <div>
+          <h2 className="font-semibold text-gray-900 mb-1">Product Variants</h2>
+          <p className="text-xs text-gray-500">Add variant types (Size, Color, etc.) and set stock per SKU</p>
+        </div>
+
+        <VariantManager variants={variants} onChange={setVariants} />
+
+        {/* Add Variant Type */}
+        <div className="border-t border-gray-200 pt-4 flex gap-2">
+          <input
+            type="text"
+            value={newVariantType}
+            onChange={(e) => setNewVariantType(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addVariantType())}
+            placeholder="Add variant type (e.g., Size, Color, Material)..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
+          />
+          <button
+            type="button"
+            onClick={addVariantType}
+            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
+          >
+            + Add Type
+          </button>
         </div>
       </div>
 

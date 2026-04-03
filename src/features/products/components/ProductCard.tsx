@@ -32,12 +32,12 @@ export function ProductCard({ product }: { product: IProduct }) {
             className="text-lg font-bold"
             style={{ color: "var(--color-primary)" }}
           >
-            ${product.price.toFixed(2)}
+            ৳{product.price.toFixed(2)}
           </span>
           {product.compareAtPrice > 0 &&
             product.compareAtPrice > product.price && (
               <span className="text-sm text-gray-400 line-through">
-                ${product.compareAtPrice.toFixed(2)}
+                ৳{product.compareAtPrice.toFixed(2)}
               </span>
             )}
         </div>

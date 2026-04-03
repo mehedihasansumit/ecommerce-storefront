@@ -2,6 +2,7 @@ import { StoreService } from "@/features/stores/service";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Package, Tag, ShoppingBag, Users } from "lucide-react";
+import StoreEditForm from "@/features/stores/components/StoreEditForm";
 
 export default async function StoreDetailPage({
   params,
@@ -58,8 +59,8 @@ export default async function StoreDetailPage({
       </div>
 
       {/* Theme Preview */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold mb-4">Theme</h2>
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-4">Current Theme</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <ColorSwatch label="Primary" color={store.theme.primaryColor} />
           <ColorSwatch label="Secondary" color={store.theme.secondaryColor} />
@@ -71,6 +72,9 @@ export default async function StoreDetailPage({
           Radius: {store.theme.borderRadius}
         </p>
       </div>
+
+      {/* Edit Store Form */}
+      <StoreEditForm store={store} />
     </div>
   );
 }

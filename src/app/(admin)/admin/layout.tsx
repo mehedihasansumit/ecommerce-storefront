@@ -1,11 +1,21 @@
 import Link from "next/link";
 import { Store, Package, Tag, ShoppingBag, Users, LayoutDashboard } from "lucide-react";
+import { getAdminToken } from "@/shared/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Check if user is authenticated
+  const adminToken = await getAdminToken();
+
+  if (!adminToken) {
+    // Only redirect if not already on login page
+    redirect("/admin/login");
+  }
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}

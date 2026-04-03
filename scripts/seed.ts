@@ -24,7 +24,7 @@ async function seed() {
 
   // ── Admin User ──────────────────────────────────────────────
   const passwordHash = await bcrypt.hash("admin123", 12);
-  const [admin] = await db.collection("adminusers").insertMany([
+  const adminResult = await db.collection("adminusers").insertMany([
     {
       name: "Super Admin",
       email: "admin@example.com",

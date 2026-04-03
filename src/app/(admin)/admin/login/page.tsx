@@ -28,7 +28,6 @@ export default function AdminLoginPage() {
         throw new Error(data.error || "Login failed");
       }
 
-      // Login successful, redirect to admin dashboard
       router.push("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

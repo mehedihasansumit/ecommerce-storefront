@@ -48,7 +48,7 @@ export default async function HomePage() {
               <Link
                 key={category._id}
                 href={`/categories/${category.slug}`}
-                className="group relative overflow-hidden bg-gray-100 aspect-[4/3] flex items-center justify-center"
+                className="group relative overflow-hidden bg-gray-100 aspect-4/3 flex items-center justify-center"
                 style={{ borderRadius: "var(--border-radius)" }}
               >
                 {category.image && (

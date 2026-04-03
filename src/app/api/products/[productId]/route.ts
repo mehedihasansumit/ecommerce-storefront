@@ -1,37 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ProductService } from "@/features/products/service";
+import { updateProductSchema } from "@/features/products/schemas";
+import { successResponse, errorResponse } from "@/shared/lib/api-response";
+import { ZodError } from "zod";
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+) {
   try {
-    // TODO: Implement get product
-    return NextResponse.json({ error: "Not implemented" }, { status: 501 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    const { productId } = await params;
+    const product = await ProductService.getById(productId);
+    if (!product) return errorResponse("Product not found", 404);
+    return successResponse(product);
+  } catch {
+    return errorResponse("Internal server error", 500);
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+) {
   try {
-    // TODO: Implement update product
-    return NextResponse.json({ error: "Not implemented" }, { status: 501 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    const { productId } = await params;
+    const body = await request.json();
+    const validated = updateProductSchema.parse(body);
+    const product = await ProductService.update(productId, validated);
+    if (!product) return errorResponse("Product not found", 404);
+    return successResponse(product);
+  } catch (err) {
+    if (err instanceof ZodError) return errorResponse(err.errors[0].message, 400);
+    return errorResponse("Internal server error", 500);
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+) {
   try {
-    // TODO: Implement delete product
-    return NextResponse.json({ error: "Not implemented" }, { status: 501 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    const { productId } = await params;
+    const deleted = await ProductService.delete(productId);
+    if (!deleted) return errorResponse("Product not found", 404);
+    return NextResponse.json({ success: true });
+  } catch {
+    return errorResponse("Internal server error", 500);
   }
 }

@@ -22,8 +22,9 @@ export default async function StoresPage() {
       {stores.length === 0 ? (
         <p className="text-gray-500">No stores yet. Create your first store.</p>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <table className="w-full">
+        <div className="overflow-x-auto">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <table className="w-full min-w-[500px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
@@ -70,6 +71,7 @@ export default async function StoresPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

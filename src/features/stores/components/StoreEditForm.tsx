@@ -134,9 +134,9 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Info */}
-        <div className="col-span-2">
+        <div className="col-span-full md:col-span-2">
           <h3 className="font-medium mb-4">Basic Information</h3>
         </div>
 
@@ -184,7 +184,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
 
         {/* Theme */}
-        <div className="col-span-2 pt-4 border-t">
+        <div className="col-span-full md:col-span-2 pt-4 border-t">
           <h3 className="font-medium mb-4">Theme Colors</h3>
         </div>
 
@@ -232,7 +232,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         />
 
         {/* Font & Layout */}
-        <div className="col-span-2 pt-4 border-t">
+        <div className="col-span-full md:col-span-2 pt-4 border-t">
           <h3 className="font-medium mb-4">Typography & Layout</h3>
         </div>
 
@@ -273,7 +273,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
 
         {/* Contact */}
-        <div className="col-span-2 pt-4 border-t">
+        <div className="col-span-full md:col-span-2 pt-4 border-t">
           <h3 className="font-medium mb-4">Contact Information</h3>
         </div>
 
@@ -301,7 +301,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-full md:col-span-2">
           <label className="block text-sm font-medium mb-2">Address</label>
           <textarea
             name="address"
@@ -314,11 +314,11 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
 
         {/* SEO */}
-        <div className="col-span-2 pt-4 border-t">
+        <div className="col-span-full md:col-span-2 pt-4 border-t">
           <h3 className="font-medium mb-4">SEO Settings</h3>
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-full md:col-span-2">
           <label className="block text-sm font-medium mb-2">SEO Title</label>
           <input
             type="text"
@@ -330,7 +330,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-full md:col-span-2">
           <label className="block text-sm font-medium mb-2">SEO Description</label>
           <textarea
             name="description"
@@ -342,7 +342,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           />
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-full md:col-span-2">
           <label className="block text-sm font-medium mb-2">SEO Keywords (comma-separated)</label>
           <input
             type="text"
@@ -355,7 +355,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         </div>
 
         {/* Submit */}
-        <div className="col-span-2 pt-6 border-t flex gap-3">
+        <div className="col-span-full md:col-span-2 pt-6 border-t flex gap-3">
           <button
             type="submit"
             className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"

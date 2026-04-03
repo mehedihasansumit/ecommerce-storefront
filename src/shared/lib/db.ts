@@ -33,6 +33,12 @@ export default async function dbConnect(): Promise<typeof mongoose> {
     });
   }
 
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (err) {
+    cached.promise = null;
+    throw new Error(err instanceof Error ? err.message : "Database connection failed");
+  }
+
   return cached.conn;
 }

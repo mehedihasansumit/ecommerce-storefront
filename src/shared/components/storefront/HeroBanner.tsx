@@ -9,7 +9,7 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
   const banner = banners[0];
 
   return (
-    <section className="relative w-full h-[400px] md:h-[500px] overflow-hidden bg-gray-100">
+    <section className="relative w-full h-100 md:h-125 overflow-hidden bg-gray-100">
       {banner.image && (
         <img
           src={banner.image}

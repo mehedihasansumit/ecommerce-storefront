@@ -43,11 +43,11 @@ export const updateStoreSchema = z.object({
   heroBanners: z
     .array(
       z.object({
-        image: z.string(),
-        title: z.string(),
-        subtitle: z.string(),
-        linkUrl: z.string(),
-        linkText: z.string(),
+        image: z.string().min(1, "Image URL is required"),
+        title: z.string().min(1, "Title is required"),
+        subtitle: z.string().optional(),
+        linkUrl: z.string().optional(),
+        linkText: z.string().optional(),
       })
     )
     .optional(),

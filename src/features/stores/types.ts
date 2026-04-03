@@ -16,9 +16,9 @@ export interface IStoreTheme {
 export interface IHeroBanner {
   image: string;
   title: string;
-  subtitle: string;
-  linkUrl: string;
-  linkText: string;
+  subtitle?: string;
+  linkUrl?: string;
+  linkText?: string;
 }
 
 export interface IStoreSeo {

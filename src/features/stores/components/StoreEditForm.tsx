@@ -18,6 +18,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
     domains: store.domains.join(", "),
     theme: { ...store.theme },
     isActive: store.isActive,
+    heroBanners: store.heroBanners || [],
     contact: {
       email: store.contact?.email || "",
       phone: store.contact?.phone || "",
@@ -68,6 +69,36 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
     }));
   };
 
+  const handleAddBanner = () => {
+    setFormData((prev) => ({
+      ...prev,
+      heroBanners: [
+        ...prev.heroBanners,
+        { image: "", title: "", subtitle: "", linkUrl: "", linkText: "" },
+      ],
+    }));
+  };
+
+  const handleRemoveBanner = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      heroBanners: prev.heroBanners.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleBannerChange = (
+    index: number,
+    field: keyof (typeof formData.heroBanners)[0],
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      heroBanners: prev.heroBanners.map((banner, i) =>
+        i === index ? { ...banner, [field]: value } : banner
+      ),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -93,6 +124,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           domains: domainsArray,
           theme: formData.theme,
           isActive: formData.isActive,
+          heroBanners: formData.heroBanners,
           contact: formData.contact,
           seo: {
             title: formData.seo.title,
@@ -271,6 +303,103 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
             <option value="1rem">Extra Large</option>
           </select>
         </div>
+
+        {/* Hero Banners */}
+        <div className="col-span-full md:col-span-2 pt-4 border-t">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium">Hero Banners</h3>
+            <button
+              type="button"
+              onClick={handleAddBanner}
+              className="px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              disabled={loading}
+            >
+              + Add Banner
+            </button>
+          </div>
+        </div>
+
+        {formData.heroBanners.map((banner, index) => (
+          <div
+            key={index}
+            className="col-span-full md:col-span-2 p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium">Banner {index + 1}</h4>
+              <button
+                type="button"
+                onClick={() => handleRemoveBanner(index)}
+                className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition"
+                disabled={loading}
+              >
+                Remove
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Image URL *</label>
+              <input
+                type="text"
+                value={banner.image}
+                onChange={(e) => handleBannerChange(index, "image", e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Title *</label>
+              <input
+                type="text"
+                value={banner.title}
+                onChange={(e) => handleBannerChange(index, "title", e.target.value)}
+                placeholder="Banner title"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Subtitle</label>
+              <input
+                type="text"
+                value={banner.subtitle}
+                onChange={(e) => handleBannerChange(index, "subtitle", e.target.value)}
+                placeholder="Banner subtitle"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Link URL</label>
+                <input
+                  type="text"
+                  value={banner.linkUrl}
+                  onChange={(e) => handleBannerChange(index, "linkUrl", e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Link Text</label>
+                <input
+                  type="text"
+                  value={banner.linkText}
+                  onChange={(e) => handleBannerChange(index, "linkText", e.target.value)}
+                  placeholder="Click here"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
 
         {/* Contact */}
         <div className="col-span-full md:col-span-2 pt-4 border-t">

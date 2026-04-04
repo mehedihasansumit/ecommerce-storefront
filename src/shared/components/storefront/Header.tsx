@@ -1,114 +1,220 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
+import {
+  ShoppingCart,
+  User,
+  Search,
+  Menu,
+  X,
+  ChevronRight,
+} from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
   const tenant = useTenant();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("header");
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  // Close mobile menu on escape
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/products?search=${encodeURIComponent(searchQuery.trim())}`;
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
+
   return (
-    <header
-      className="sticky top-0 z-50"
-      style={{
-        backgroundColor: "var(--color-header-bg)",
-        color: "var(--color-header-text)",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            {tenant?.logo ? (
-              <img
-                src={tenant.logo}
-                alt={tenant.name}
-                className="h-8 w-auto"
-              />
-            ) : (
-              <span className="text-xl font-bold">
-                {tenant?.name || t("storeName")}
-              </span>
-            )}
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="hover:opacity-80 transition-opacity">
-              {t("home")}
-            </Link>
-            <Link
-              href="/products"
-              className="hover:opacity-80 transition-opacity"
-            >
-              {t("products")}
-            </Link>
-          </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-4">
-            <LanguageSwitcher />
-            <Link
-              href="/products"
-              className="hover:opacity-80 transition-opacity"
-            >
-              <Search size={20} />
-            </Link>
-            <Link
-              href="/cart"
-              className="hover:opacity-80 transition-opacity relative"
-            >
-              <ShoppingCart size={20} />
-            </Link>
-            <Link
-              href="/account/login"
-              className="hover:opacity-80 transition-opacity"
-            >
-              <User size={20} />
-            </Link>
-
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden pb-4 space-y-2">
+    <>
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled ? "glass shadow-lg" : ""
+        }`}
+        style={{
+          backgroundColor: scrolled
+            ? "color-mix(in srgb, var(--color-header-bg) 85%, transparent)"
+            : "var(--color-header-bg)",
+          color: "var(--color-header-text)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
             <Link
               href="/"
-              className="block py-2 hover:opacity-80"
-              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 shrink-0 group"
             >
-              {t("home")}
+              {tenant?.logo ? (
+                <img
+                  src={tenant.logo}
+                  alt={tenant.name}
+                  className="h-8 w-auto transition-transform duration-200 group-hover:scale-105"
+                />
+              ) : (
+                <span className="text-xl font-bold tracking-tight">
+                  {tenant?.name || t("storeName")}
+                </span>
+              )}
             </Link>
-            <Link
-              href="/products"
-              className="block py-2 hover:opacity-80"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t("products")}
-            </Link>
-            <Link
-              href="/account"
-              className="block py-2 hover:opacity-80"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t("myAccount")}
-            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              {[
+                { href: "/", label: t("home") },
+                { href: "/products", label: t("products") },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="relative px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 rounded-lg"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1">
+              <LanguageSwitcher />
+
+              {/* Search toggle */}
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+
+              {/* Cart */}
+              <Link
+                href="/cart"
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors relative"
+              >
+                <ShoppingCart size={20} />
+              </Link>
+
+              {/* Account */}
+              <Link
+                href="/account/login"
+                className="hidden sm:flex p-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <User size={20} />
+              </Link>
+
+              {/* Mobile menu button */}
+              <button
+                className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Search bar dropdown */}
+          {searchOpen && (
+            <div className="pb-4 animate-slide-down">
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("searchPlaceholder") || "Search products..."}
+                  className="w-full px-4 py-2.5 pr-12 rounded-lg bg-white/10 border border-white/20 text-inherit placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
+                >
+                  <Search size={18} />
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Mobile Navigation - Slide-in overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 animate-fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Panel */}
+          <nav
+            className="absolute right-0 top-0 h-full w-72 shadow-2xl animate-slide-in-right flex flex-col"
+            style={{ backgroundColor: "var(--color-header-bg)", color: "var(--color-header-text)" }}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <span className="font-semibold text-lg">
+                {tenant?.name || t("storeName")}
+              </span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 py-4">
+              {[
+                { href: "/", label: t("home") },
+                { href: "/products", label: t("products") },
+                { href: "/account", label: t("myAccount") },
+                { href: "/orders", label: t("myOrders") || "Orders" },
+                { href: "/cart", label: t("cart") || "Cart" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="font-medium">{link.label}</span>
+                  <ChevronRight size={16} className="opacity-50" />
+                </Link>
+              ))}
+            </div>
           </nav>
-        )}
-      </div>
-    </header>
+        </div>
+      )}
+    </>
   );
 }

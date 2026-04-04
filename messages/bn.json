@@ -3,8 +3,10 @@
     "home": "হোম",
     "products": "পণ্য",
     "myAccount": "আমার অ্যাকাউন্ট",
+    "myOrders": "অর্ডার",
     "cart": "কার্ট",
-    "storeName": "স্টোর"
+    "storeName": "স্টোর",
+    "searchPlaceholder": "পণ্য খুঁজুন..."
   },
   "footer": {
     "quickLinks": "দ্রুত লিঙ্ক",
@@ -16,24 +18,53 @@
     "facebook": "ফেসবুক",
     "instagram": "ইনস্টাগ্রাম",
     "twitter": "টুইটার",
-    "copyright": "সর্বাধিকার সংরক্ষিত"
+    "copyright": "সর্বাধিকার সংরক্ষিত",
+    "storeDescription": "মানসম্পন্ন পণ্যের জন্য আপনার বিশ্বস্ত গন্তব্য।",
+    "customerService": "গ্রাহক সেবা",
+    "shippingPolicy": "শিপিং নীতি",
+    "returnPolicy": "রিটার্ন নীতি",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "termsOfService": "সেবার শর্তাবলী",
+    "contactUs": "যোগাযোগ করুন",
+    "paymentMethods": "আমরা সকল প্রধান পেমেন্ট পদ্ধতি গ্রহণ করি"
   },
   "heroBanner": {
     "shopNow": "এখনই কিনুন"
   },
   "home": {
     "shopByCategory": "বিভাগ অনুযায়ী কেনাকাটা করুন",
+    "shopByCategoryDesc": "আমাদের নির্বাচিত সংগ্রহ অন্বেষণ করুন",
     "featuredProducts": "বৈশিষ্ট্যযুক্ত পণ্য",
-    "viewAll": "সব দেখুন →",
+    "featuredProductsDesc": "আপনার জন্য বাছাই করা পণ্য",
+    "viewAll": "সব দেখুন",
+    "explore": "অন্বেষণ করুন",
     "storeNotFound": "স্টোর খুঁজে পাওয়া যায়নি",
-    "noStoreConfigured": "এই ডোমেইনটি কোনও স্টোরের জন্য কনফিগার করা হয়নি।"
+    "noStoreConfigured": "এই ডোমেইনটি কোনও স্টোরের জন্য কনফিগার করা হয়নি।",
+    "freeShipping": "বিনামূল্যে শিপিং",
+    "freeShippingDesc": "৳৫০০ এর উপরে অর্ডারে",
+    "securePayment": "নিরাপদ পেমেন্ট",
+    "securePaymentDesc": "১০০% নিরাপদ চেকআউট",
+    "easyReturns": "সহজ রিটার্ন",
+    "easyReturnsDesc": "৩০ দিনের রিটার্ন নীতি",
+    "support247": "২৪/৭ সাপোর্ট",
+    "support247Desc": "নিবেদিত সাপোর্ট",
+    "newsletterTitle": "আপডেট থাকুন",
+    "newsletterDesc": "বিশেষ অফার, বিনামূল্যে উপহার এবং নতুন পণ্যের খবর পেতে সাবস্ক্রাইব করুন।",
+    "emailPlaceholder": "আপনার ইমেইল লিখুন",
+    "subscribe": "সাবস্ক্রাইব"
   },
   "products": {
     "allProducts": "সমস্ত পণ্য",
     "categories": "বিভাগ",
     "all": "সব",
     "noProducts": "কোন পণ্য পাওয়া যায়নি",
-    "categoryFilter": "বিভাগ: {category}"
+    "noProductsHint": "আপনার সার্চ বা ফিল্টার পরিবর্তন করে দেখুন",
+    "categoryFilter": "বিভাগ: {category}",
+    "searchResults": "অনুসন্ধান ফলাফল",
+    "searchPlaceholder": "খুঁজুন...",
+    "showing": "দেখানো হচ্ছে",
+    "of": "এর মধ্যে",
+    "productsLabel": "পণ্য"
   },
   "productDetail": {
     "home": "হোম",
@@ -46,10 +77,16 @@
     "description": "বর্ণনা",
     "price": "মূল্য",
     "compareAt": "তুলনা করুন",
-    "availability": "উপলব্ধতা"
+    "availability": "উপলব্ধতা",
+    "save": "সেভ",
+    "freeShipping": "বিনামূল্যে শিপিং",
+    "easyReturns": "সহজ রিটার্ন",
+    "secureCheckout": "নিরাপদ চেকআউট"
   },
   "productCard": {
-    "noImage": "কোন ছবি নেই"
+    "noImage": "কোন ছবি নেই",
+    "outOfStock": "স্টক খালি",
+    "viewDetails": "বিস্তারিত দেখুন"
   },
   "cart": {
     "yourCart": "আপনার কার্ট",

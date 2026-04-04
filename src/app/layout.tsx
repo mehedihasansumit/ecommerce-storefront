@@ -27,6 +27,9 @@ export default async function RootLayout({
   const theme = tenant?.theme || DEFAULT_THEME;
   const locale = await getLocale();
 
+  const isBengali = locale === "bn";
+  const bnFont = "Hind Siliguri";
+
   const themeVars: Record<string, string> = {
     "--color-primary": theme.primaryColor,
     "--color-secondary": theme.secondaryColor,
@@ -35,18 +38,27 @@ export default async function RootLayout({
     "--color-text": theme.textColor,
     "--color-header-bg": theme.headerBg,
     "--color-header-text": theme.headerText,
-    "--font-family": `'${theme.fontFamily}', sans-serif`,
+    "--font-family": isBengali
+      ? `'${bnFont}', sans-serif`
+      : `'${theme.fontFamily}', sans-serif`,
     "--border-radius": theme.borderRadius,
   };
 
   return (
     <html lang={locale} style={themeVars as React.CSSProperties}>
       <head>
-        {theme.fontFamily && theme.fontFamily !== "Inter" && (
+        {isBengali ? (
           <link
-            href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(theme.fontFamily)}:wght@400;500;600;700&display=swap`}
+            href={`https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap`}
             rel="stylesheet"
           />
+        ) : (
+          theme.fontFamily && theme.fontFamily !== "Inter" && (
+            <link
+              href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(theme.fontFamily)}:wght@400;500;600;700&display=swap`}
+              rel="stylesheet"
+            />
+          )
         )}
       </head>
       <body className="min-h-screen flex flex-col antialiased">

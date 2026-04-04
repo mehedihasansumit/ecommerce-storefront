@@ -1,15 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { IProduct, IVariant } from "../types";
+import { X, Plus, Trash2 } from "lucide-react";
+import type { IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
 import type { ICategory } from "@/features/categories/types";
-import { VariantManager } from "./VariantManager";
 
 interface ProductFormProps {
   storeId: string;
   categories: ICategory[];
   product?: IProduct;
+}
+
+// Cartesian product helper
+function cartesian(arrays: string[][]): string[][] {
+  if (arrays.length === 0) return [[]];
+  const [first, ...rest] = arrays;
+  const restProduct = cartesian(rest);
+  return first.flatMap((val) => restProduct.map((combo) => [val, ...combo]));
+}
+
+function regenerateVariants(
+  newOptions: IProductOption[],
+  existing: IProductVariant[],
+  colorImages: Record<string, IProductImage[]>,
+  basePrice: number
+): IProductVariant[] {
+  const nonEmpty = newOptions.filter((o) => o.values.length > 0);
+  if (nonEmpty.length === 0) return [];
+
+  const combos = cartesian(nonEmpty.map((o) => o.values));
+  return combos.map((combo) => {
+    const optionValues: Record<string, string> = {};
+    nonEmpty.forEach((opt, i) => {
+      optionValues[opt.name] = combo[i];
+    });
+
+    const key = JSON.stringify(optionValues);
+    const existingMatch = existing.find(
+      (v) => JSON.stringify(v.optionValues) === key
+    );
+
+    const colorValue = optionValues["Color"];
+    const images = colorValue ? (colorImages[colorValue] ?? existingMatch?.images ?? []) : (existingMatch?.images ?? []);
+
+    return {
+      _id: existingMatch?._id,
+      optionValues,
+      price: existingMatch?.price ?? basePrice,
+      compareAtPrice: existingMatch?.compareAtPrice ?? 0,
+      stock: existingMatch?.stock ?? 0,
+      sku: existingMatch?.sku ?? "",
+      images,
+    };
+  });
 }
 
 export function ProductForm({ storeId, categories, product }: ProductFormProps) {
@@ -35,23 +79,103 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
     tags: product?.tags.join(", ") ?? "",
   });
 
-  const [variants, setVariants] = useState<IVariant[]>(product?.variants ?? []);
-  const [newVariantType, setNewVariantType] = useState("");
+  const [options, setOptions] = useState<IProductOption[]>(product?.options ?? []);
+  const [variants, setVariants] = useState<IProductVariant[]>(product?.variants ?? []);
+
+  // colorImages: { Red: [{url, alt}, ...], Blue: [...] }
+  const [colorImages, setColorImages] = useState<Record<string, IProductImage[]>>(() => {
+    const initial: Record<string, IProductImage[]> = {};
+    if (product?.variants) {
+      product.variants.forEach((v) => {
+        const color = v.optionValues["Color"];
+        if (color && v.images.length > 0) {
+          initial[color] = v.images;
+        }
+      });
+    }
+    return initial;
+  });
+
+  const [newOptionName, setNewOptionName] = useState("");
+  const [newOptionValues, setNewOptionValues] = useState<Record<number, string>>({});
+  const [newImageUrls, setNewImageUrls] = useState<Record<string, string>>({});
 
   const set = (field: string, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const addVariantType = () => {
-    if (!newVariantType.trim()) return;
-    if (variants.some((v) => v.name === newVariantType)) {
-      setError("Variant type already exists");
+  // Re-generate variants whenever options or colorImages change
+  useEffect(() => {
+    setVariants((prev) =>
+      regenerateVariants(options, prev, colorImages, Number(form.price) || 0)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options, colorImages]);
+
+  // --- Options management ---
+  const addOption = () => {
+    if (!newOptionName.trim()) return;
+    if (options.some((o) => o.name === newOptionName.trim())) {
+      setError("Option type already exists");
       return;
     }
-    setVariants([...variants, { name: newVariantType.trim(), options: [] }]);
-    setNewVariantType("");
+    setOptions([...options, { name: newOptionName.trim(), values: [] }]);
+    setNewOptionName("");
     setError("");
   };
 
+  const removeOption = (idx: number) => {
+    setOptions(options.filter((_, i) => i !== idx));
+  };
+
+  const addValueToOption = (idx: number) => {
+    const val = (newOptionValues[idx] ?? "").trim();
+    if (!val) return;
+    if (options[idx].values.includes(val)) return;
+    const updated = [...options];
+    updated[idx] = { ...updated[idx], values: [...updated[idx].values, val] };
+    setOptions(updated);
+    setNewOptionValues((prev) => ({ ...prev, [idx]: "" }));
+  };
+
+  const removeValueFromOption = (optIdx: number, valIdx: number) => {
+    const updated = [...options];
+    updated[optIdx] = {
+      ...updated[optIdx],
+      values: updated[optIdx].values.filter((_, i) => i !== valIdx),
+    };
+    setOptions(updated);
+  };
+
+  // --- Color images management ---
+  const colorOption = options.find((o) => o.name.toLowerCase() === "color");
+
+  const addColorImage = (color: string) => {
+    const url = (newImageUrls[color] ?? "").trim();
+    if (!url) return;
+    setColorImages((prev) => ({
+      ...prev,
+      [color]: [...(prev[color] ?? []), { url, alt: color }],
+    }));
+    setNewImageUrls((prev) => ({ ...prev, [color]: "" }));
+  };
+
+  const removeColorImage = (color: string, imgIdx: number) => {
+    setColorImages((prev) => ({
+      ...prev,
+      [color]: (prev[color] ?? []).filter((_, i) => i !== imgIdx),
+    }));
+  };
+
+  // --- Variants table editing ---
+  const updateVariant = (idx: number, field: keyof IProductVariant, value: unknown) => {
+    setVariants((prev) => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  // --- Form submit ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -68,14 +192,17 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         .map((t) => t.trim())
         .filter(Boolean),
       categoryId: form.categoryId || undefined,
-      variants: variants.length > 0 ? variants : undefined,
+      options,
+      variants: variants.map((v) => ({
+        ...v,
+        price: Number(v.price),
+        compareAtPrice: Number(v.compareAtPrice ?? 0),
+        stock: Number(v.stock),
+      })),
     };
 
     try {
-      const url = isEdit
-        ? `/api/products/${product._id}`
-        : `/api/products`;
-
+      const url = isEdit ? `/api/products/${product._id}` : `/api/products`;
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -207,7 +334,7 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Stock</label>
+            <label className="block text-sm font-medium mb-1">Base Stock</label>
             <input
               type="number"
               min="0"
@@ -282,34 +409,227 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         </div>
       </div>
 
-      {/* Variants - SKU Based */}
+      {/* Options (variant axes) */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <div>
-          <h2 className="font-semibold text-gray-900 mb-1">Product Variants</h2>
-          <p className="text-xs text-gray-500">Add variant types (Size, Color, etc.) and set stock per SKU</p>
+          <h2 className="font-semibold text-gray-900 mb-1">Product Options</h2>
+          <p className="text-xs text-gray-500">Define variant dimensions like Color and Size. Variant combinations are auto-generated below.</p>
         </div>
 
-        <VariantManager variants={variants} onChange={setVariants} />
+        {options.map((opt, optIdx) => (
+          <div key={optIdx} className="border border-gray-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm text-gray-900">{opt.name}</span>
+              <button
+                type="button"
+                onClick={() => removeOption(optIdx)}
+                className="text-red-500 hover:text-red-700 p-1"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
 
-        {/* Add Variant Type */}
-        <div className="border-t border-gray-200 pt-4 flex gap-2">
+            {/* Values */}
+            <div className="flex flex-wrap gap-2">
+              {opt.values.map((val, valIdx) => (
+                <span
+                  key={valIdx}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                >
+                  {val}
+                  <button
+                    type="button"
+                    onClick={() => removeValueFromOption(optIdx, valIdx)}
+                    className="text-gray-400 hover:text-gray-700"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            {/* Add value input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newOptionValues[optIdx] ?? ""}
+                onChange={(e) =>
+                  setNewOptionValues((prev) => ({ ...prev, [optIdx]: e.target.value }))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addValueToOption(optIdx);
+                  }
+                }}
+                placeholder={`Add ${opt.name} value...`}
+                className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => addValueToOption(optIdx)}
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {/* Add option type */}
+        <div className="flex gap-2 pt-1">
           <input
             type="text"
-            value={newVariantType}
-            onChange={(e) => setNewVariantType(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addVariantType())}
-            placeholder="Add variant type (e.g., Size, Color, Material)..."
+            value={newOptionName}
+            onChange={(e) => setNewOptionName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addOption();
+              }
+            }}
+            placeholder="Option name (e.g., Color, Size, Material)..."
             className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
           />
           <button
             type="button"
-            onClick={addVariantType}
+            onClick={addOption}
             className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
           >
-            + Add Type
+            + Add Option
           </button>
         </div>
       </div>
+
+      {/* Color Images (shown only when Color option exists) */}
+      {colorOption && colorOption.values.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+          <div>
+            <h2 className="font-semibold text-gray-900 mb-1">Color Images</h2>
+            <p className="text-xs text-gray-500">Add images per color. These will show in the gallery when that color is selected.</p>
+          </div>
+
+          {colorOption.values.map((color) => (
+            <div key={color} className="border border-gray-200 rounded-lg p-4 space-y-3">
+              <h3 className="font-medium text-sm text-gray-900">{color}</h3>
+
+              {/* Existing images */}
+              {(colorImages[color] ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {(colorImages[color] ?? []).map((img, imgIdx) => (
+                    <div key={imgIdx} className="relative group w-20 h-20">
+                      <img
+                        src={img.url}
+                        alt={img.alt}
+                        className="w-full h-full object-cover rounded border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeColorImage(color, imgIdx)}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add image URL */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newImageUrls[color] ?? ""}
+                  onChange={(e) =>
+                    setNewImageUrls((prev) => ({ ...prev, [color]: e.target.value }))
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addColorImage(color);
+                    }
+                  }}
+                  placeholder="Image URL..."
+                  className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => addColorImage(color)}
+                  className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Variants Table */}
+      {variants.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+          <div>
+            <h2 className="font-semibold text-gray-900 mb-1">Variant Combinations</h2>
+            <p className="text-xs text-gray-500">Auto-generated from your options. Set price, stock, and SKU per combination.</p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  {options.map((opt) => (
+                    <th key={opt.name} className="px-3 py-2 text-left font-medium text-gray-700">
+                      {opt.name}
+                    </th>
+                  ))}
+                  <th className="px-3 py-2 text-left font-medium text-gray-700">Price</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-700">Stock</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-700">SKU</th>
+                </tr>
+              </thead>
+              <tbody>
+                {variants.map((variant, idx) => (
+                  <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
+                    {options.map((opt) => (
+                      <td key={opt.name} className="px-3 py-2 text-gray-700 font-medium">
+                        {variant.optionValues[opt.name]}
+                      </td>
+                    ))}
+                    <td className="px-3 py-2">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={variant.price}
+                        onChange={(e) => updateVariant(idx, "price", Number(e.target.value))}
+                        className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input
+                        type="number"
+                        min="0"
+                        value={variant.stock}
+                        onChange={(e) => updateVariant(idx, "stock", Number(e.target.value))}
+                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input
+                        type="text"
+                        value={variant.sku}
+                        onChange={(e) => updateVariant(idx, "sku", e.target.value)}
+                        placeholder="SKU"
+                        className="w-32 px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-wrap items-start justify-between gap-4">

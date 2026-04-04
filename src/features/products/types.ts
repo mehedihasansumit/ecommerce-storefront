@@ -1,15 +1,18 @@
 import { Types } from "mongoose";
 
-export interface IVariantOption {
-  value: string;
-  priceModifier: number;
-  stock: number;
-  sku: string;
+export interface IProductOption {
+  name: string;
+  values: string[];
 }
 
-export interface IVariant {
-  name: string;
-  options: IVariantOption[];
+export interface IProductVariant {
+  _id?: string;
+  optionValues: Record<string, string>;
+  price: number;
+  compareAtPrice?: number;
+  stock: number;
+  sku: string;
+  images: IProductImage[];
 }
 
 export interface IProductImage {
@@ -40,7 +43,8 @@ export interface IProduct {
   thumbnail: string;
   categoryId: string;
   tags: string[];
-  variants: IVariant[];
+  options: IProductOption[];
+  variants: IProductVariant[];
   isActive: boolean;
   isFeatured: boolean;
   seo: IProductSeo;

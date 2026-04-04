@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Store, LayoutDashboard, Menu, X } from "lucide-react";
+import { Store, LayoutDashboard, ShoppingBag, Menu, X } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -24,6 +24,9 @@ export default function AdminLayout({
           </SidebarLink>
           <SidebarLink href="/admin/stores" icon={<Store size={18} />}>
             Stores
+          </SidebarLink>
+          <SidebarLink href="/admin/orders" icon={<ShoppingBag size={18} />}>
+            All Orders
           </SidebarLink>
         </nav>
       </aside>
@@ -73,6 +76,13 @@ function MobileAdminNav() {
             onClick={() => setIsOpen(false)}
           >
             Stores
+          </MobileSidebarLink>
+          <MobileSidebarLink
+            href="/admin/orders"
+            icon={<ShoppingBag size={18} />}
+            onClick={() => setIsOpen(false)}
+          >
+            All Orders
           </MobileSidebarLink>
         </nav>
       )}

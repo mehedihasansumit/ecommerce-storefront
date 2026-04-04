@@ -1,25 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
-
-export async function GET(request: NextRequest) {
-  try {
-    // TODO: Implement get cart
-    return NextResponse.json({ error: "Not implemented" }, { status: 501 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    // TODO: Implement add to cart
-    return NextResponse.json({ error: "Not implemented" }, { status: 501 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+// Cart is now managed client-side via localStorage (CartContext).
+// These routes are no longer used.
+export {};

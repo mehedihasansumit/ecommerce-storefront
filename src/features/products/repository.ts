@@ -91,6 +91,12 @@ export const ProductRepository = {
     return !!result;
   },
 
+  async findManyByIds(ids: string[]): Promise<IProduct[]> {
+    await dbConnect();
+    const products = await ProductModel.find({ _id: { $in: ids } }).lean();
+    return products.map(serialize);
+  },
+
   async countByStore(storeId: string): Promise<number> {
     await dbConnect();
     return ProductModel.countDocuments({ storeId });

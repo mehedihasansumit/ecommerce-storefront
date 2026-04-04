@@ -10,12 +10,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";
+import { useCart } from "@/shared/context/CartContext";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
   const tenant = useTenant();
+  const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -124,6 +126,11 @@ export function Header() {
                 className="p-2 rounded-lg hover:bg-white/10 transition-colors relative"
               >
                 <ShoppingCart size={20} />
+                {itemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                    {itemCount > 99 ? "99+" : itemCount}
+                  </span>
+                )}
               </Link>
 
               {/* Account */}

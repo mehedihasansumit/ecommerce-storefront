@@ -10,7 +10,9 @@ const OrderSchema = new Schema<IOrderDocument>(
       index: true,
     },
     orderNumber: { type: String, required: true },
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    userId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    guestPhone: { type: String, default: null },
+    guestEmail: { type: String, default: null },
 
     items: [
       {

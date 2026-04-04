@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 export interface ICartItem {
+  _id?: string;
   productId: string;
   variantSelections: Record<string, string>;
   quantity: number;

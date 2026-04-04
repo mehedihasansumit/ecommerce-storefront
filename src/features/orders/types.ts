@@ -32,7 +32,9 @@ export interface IOrder {
   _id: string;
   storeId: string;
   orderNumber: string;
-  userId: string;
+  userId: string | null;
+  guestPhone?: string;
+  guestEmail?: string;
   items: IOrderItem[];
   subtotal: number;
   shippingCost: number;
@@ -62,6 +64,6 @@ export interface IOrderDocument
   extends Omit<IOrder, "_id" | "storeId" | "userId" | "items"> {
   _id: Types.ObjectId;
   storeId: Types.ObjectId;
-  userId: Types.ObjectId;
+  userId: Types.ObjectId | null;
   items: IOrderItemDocument[];
 }

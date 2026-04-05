@@ -198,6 +198,10 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         price: Number(v.price),
         compareAtPrice: Number(v.compareAtPrice ?? 0),
         stock: Number(v.stock),
+        // Inject latest colorImages at submit time — bypasses useEffect race condition
+        images: v.optionValues?.Color
+          ? (colorImages[v.optionValues.Color] ?? v.images ?? [])
+          : (v.images ?? []),
       })),
     };
 

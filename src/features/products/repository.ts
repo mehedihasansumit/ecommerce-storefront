@@ -74,7 +74,8 @@ export const ProductRepository = {
   async create(data: Partial<IProduct>): Promise<IProduct> {
     await dbConnect();
     const product = await ProductModel.create(data);
-    return serialize(product.toObject());
+    const lean = await ProductModel.findById(product._id).lean();
+    return serialize(lean);
   },
 
   async update(id: string, data: Partial<IProduct>): Promise<IProduct | null> {

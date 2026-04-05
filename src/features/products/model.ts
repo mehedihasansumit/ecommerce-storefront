@@ -7,7 +7,7 @@ const ProductOptionSchema = new Schema(
 );
 
 const ProductVariantSchema = new Schema({
-  optionValues: { type: Map, of: String, required: true },
+  optionValues: { type: Schema.Types.Mixed, default: {} },
   price: { type: Number, required: true },
   compareAtPrice: { type: Number, default: 0 },
   stock: { type: Number, default: 0 },

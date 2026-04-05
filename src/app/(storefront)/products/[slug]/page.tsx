@@ -9,9 +9,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ProductImageGallery } from "@/features/products/components/ProductImageGallery";
-import { ChevronRight, Star, Truck, RotateCcw, Shield } from "lucide-react";
-import { AddToCartSection } from "@/features/products/components/AddToCartSection";
+import { ChevronRight, Truck, RotateCcw, Shield } from "lucide-react";
+import { ProductDetailClient } from "@/features/products/components/ProductDetailClient";
 
 export async function generateMetadata({
   params,
@@ -56,15 +55,6 @@ export default async function ProductDetailPage({
     { name: product.name, url: `${storeUrl}/products/${product.slug}` },
   ]);
 
-  const hasDiscount =
-    product.compareAtPrice > 0 && product.compareAtPrice > product.price;
-  const discountPercent = hasDiscount
-    ? Math.round(
-        ((product.compareAtPrice - product.price) / product.compareAtPrice) *
-          100
-      )
-    : 0;
-
   return (
     <>
       <script
@@ -83,10 +73,7 @@ export default async function ProductDetailPage({
             {t("home")}
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
-          <Link
-            href="/products"
-            className="hover:text-gray-900 transition-colors"
-          >
+          <Link href="/products" className="hover:text-gray-900 transition-colors">
             {t("products")}
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
@@ -95,123 +82,21 @@ export default async function ProductDetailPage({
           </span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* Images */}
-          <ProductImageGallery
-            images={product.images}
-            thumbnail={product.thumbnail}
-            productName={product.name}
-          />
+        {/* Interactive product section (gallery + options + cart) */}
+        <ProductDetailClient product={product} />
 
-          {/* Product Info */}
-          <div className="animate-fade-in-up">
-            {/* Discount badge */}
-            {hasDiscount && (
-              <span
-                className="inline-block px-3 py-1 text-xs font-bold text-white rounded-full mb-4"
-                style={{ backgroundColor: "var(--color-accent)" }}
-              >
-                {t("save") || "Save"} {discountPercent}%
-              </span>
-            )}
-
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
-              {product.name}
-            </h1>
-
-            {/* Rating */}
-            {product.averageRating > 0 && (
-              <div className="flex items-center gap-3 mb-5">
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={18}
-                      className={
-                        i < Math.round(product.averageRating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "fill-gray-200 text-gray-200"
-                      }
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500">
-                  ({product.reviewCount} {t("reviews")})
-                </span>
-              </div>
-            )}
-
-            {/* Price */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span
-                className="text-3xl md:text-4xl font-bold"
-                style={{ color: "var(--color-primary)" }}
-              >
-                ৳{product.price.toLocaleString()}
-              </span>
-              {hasDiscount && (
-                <span className="text-xl text-gray-400 line-through">
-                  ৳{product.compareAtPrice.toLocaleString()}
-                </span>
-              )}
+        {/* Trust signals */}
+        <div className="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-gray-100 max-w-lg">
+          {[
+            { icon: Truck, label: t("freeShipping") || "Free Shipping" },
+            { icon: RotateCcw, label: t("easyReturns") || "Easy Returns" },
+            { icon: Shield, label: t("secureCheckout") || "Secure Checkout" },
+          ].map((item) => (
+            <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
+              <item.icon size={18} className="text-gray-400" />
+              <span className="text-xs text-gray-500">{item.label}</span>
             </div>
-
-            {product.shortDescription && (
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {product.shortDescription}
-              </p>
-            )}
-
-            <div className="border-t border-gray-100 pt-6 space-y-6">
-              {/* Stock */}
-              <div>
-                {product.stock > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-sm text-green-600 font-medium">
-                      {t("inStock", { available: product.stock })}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-red-500 rounded-full" />
-                    <span className="text-sm text-red-600 font-medium">
-                      {t("outOfStock")}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <AddToCartSection
-                productId={product._id}
-                productName={product.name}
-                productSlug={product.slug}
-                thumbnail={product.thumbnail}
-                price={product.price}
-                stock={product.stock}
-                variants={product.variants}
-                addToCartLabel={t("addToCart")}
-                outOfStockLabel={t("outOfStock")}
-              />
-            </div>
-
-            {/* Trust signals */}
-            <div className="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
-              {[
-                { icon: Truck, label: t("freeShipping") || "Free Shipping" },
-                { icon: RotateCcw, label: t("easyReturns") || "Easy Returns" },
-                { icon: Shield, label: t("secureCheckout") || "Secure Checkout" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center gap-1.5 text-center"
-                >
-                  <item.icon size={18} className="text-gray-400" />
-                  <span className="text-xs text-gray-500">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Description & Tags */}

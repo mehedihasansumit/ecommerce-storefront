@@ -87,7 +87,7 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
     const initial: Record<string, IProductImage[]> = {};
     if (product?.variants) {
       product.variants.forEach((v) => {
-        const color = v.optionValues["Color"];
+        const color = v.optionValues && v.optionValues["Color"];
         if (color && v.images.length > 0) {
           initial[color] = v.images;
         }

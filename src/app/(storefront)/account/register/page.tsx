@@ -55,7 +55,7 @@ export default function RegisterPage() {
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500"
             style={{ borderRadius: "var(--border-radius)" }}
-            placeholder="Your Name"
+            placeholder={t("name")}
           />
         </div>
         <div>
@@ -67,13 +67,17 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500"
             style={{ borderRadius: "var(--border-radius)" }}
-            placeholder="your@email.com"
+            placeholder={t("email")}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">{t("phone")}</label>
+          <label className="block text-sm font-medium mb-1">
+            {t("phone")} <span className="text-red-500">*</span>
+          </label>
           <div className="flex">
-            <span className="px-4 py-2 border border-gray-300 bg-gray-50 px-4 py-2 rounded-l rounded-r-0" style={{ borderRadius: "var(--border-radius)" }}>880</span>
+            <span className="px-4 py-2 border border-gray-300 bg-gray-50 px-4 py-2 rounded-l rounded-r-0" style={{ borderRadius: "var(--border-radius)" }}>
+              +88
+            </span>
             <input
               type="tel"
               inputMode="numeric"
@@ -103,7 +107,7 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500"
             style={{ borderRadius: "var(--border-radius)" }}
-            placeholder="••••••••"
+            placeholder={t("password")}
           />
         </div>
         <button

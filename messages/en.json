@@ -97,11 +97,41 @@
     "tax": "Tax",
     "total": "Total",
     "checkout": "Checkout",
-    "removeItem": "Remove"
+    "removeItem": "Remove",
+    "orderSummary": "Order Summary",
+    "items": "{count, plural, one {# item} other {# items}}"
   },
   "checkout": {
     "checkout": "Checkout",
-    "notImplemented": "Checkout flow will be implemented here."
+    "notImplemented": "Checkout flow will be implemented here.",
+    "deliveryInfo": "Delivery Information",
+    "fullName": "Full Name",
+    "required": "Required",
+    "phoneNumber": "Phone Number",
+    "emailAddress": "Email Address",
+    "optional": "optional",
+    "streetAddress": "Street Address",
+    "city": "City",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "orderNotes": "Order Notes",
+    "paymentMethod": "Payment Method",
+    "cashOnDelivery": "Cash on Delivery",
+    "payWhenReceive": "Pay when you receive your order",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "placeOrder": "Place Order",
+    "placingOrder": "Placing Order...",
+    "backToCart": "Back to Cart",
+    "error": "Error",
+    "nameRequired": "Name is required",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Phone number must be exactly 11 digits",
+    "addressRequired": "Address is required",
+    "cityRequired": "City is required",
+    "submitting": "Placing order..."
   },
   "auth": {
     "login": "Login",
@@ -115,7 +145,8 @@
     "noAccount": "Don't have an account?",
     "loggingIn": "Logging in...",
     "registering": "Registering...",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "required": "Required"
   },
   "account": {
     "myAccount": "My Account",

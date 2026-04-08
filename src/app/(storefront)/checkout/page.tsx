@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/shared/context/CartContext";
 import { ShoppingBag, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface FormData {
   name: string;
@@ -30,6 +31,7 @@ const initialForm: FormData = {
 };
 
 export default function CheckoutPage() {
+  const t = useTranslations("checkout");
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
   const [form, setForm] = useState<FormData>(initialForm);
@@ -51,15 +53,15 @@ export default function CheckoutPage() {
 
   function validate(): boolean {
     const e: Partial<FormData> = {};
-    if (!form.name.trim()) e.name = "Name is required";
+    if (!form.name.trim()) e.name = t("nameRequired");
     const phone = form.phone.trim().replace(/\s/g, "");
     if (!phone) {
-      e.phone = "Phone number is required";
+      e.phone = t("phoneRequired");
     } else if (!/^[0-9]{11}$/.test(phone)) {
-      e.phone = "Phone number must be exactly 11 digits";
+      e.phone = t("phoneInvalid");
     }
-    if (!form.street.trim()) e.street = "Address is required";
-    if (!form.city.trim()) e.city = "City is required";
+    if (!form.street.trim()) e.street = t("addressRequired");
+    if (!form.city.trim()) e.city = t("cityRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -98,14 +100,14 @@ export default function CheckoutPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setServerError(data.error || "Failed to place order. Please try again.");
+        setServerError(data.error || t("error"));
         return;
       }
 
       clearCart();
       router.push(`/orders/${data.orderId}?confirmed=1`);
     } catch {
-      setServerError("Something went wrong. Please try again.");
+      setServerError(t("error"));
     } finally {
       setSubmitting(false);
     }
@@ -115,20 +117,20 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-8">Checkout</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-8">{t("checkout")}</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Shipping form */}
           <div className="lg:col-span-2 space-y-5">
             <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h2 className="font-bold text-lg mb-5">Delivery Information</h2>
+              <h2 className="font-bold text-lg mb-5">{t("deliveryInfo")}</h2>
 
               <div className="space-y-4">
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name <span className="text-red-500">*</span>
+                    {t("fullName")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -136,7 +138,7 @@ export default function CheckoutPage() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, name: e.target.value }))
                     }
-                    placeholder="Your full name"
+                    placeholder={t("fullName")}
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                       errors.name
                         ? "border-red-400 focus:ring-red-200"
@@ -151,7 +153,7 @@ export default function CheckoutPage() {
                 {/* Phone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number <span className="text-red-500">*</span>
+                    {t("phoneNumber")} <span className="text-red-500">*</span>
                   </label>
                   <div
                     className={`flex items-center border rounded-lg overflow-hidden transition-colors ${
@@ -180,8 +182,8 @@ export default function CheckoutPage() {
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address{" "}
-                    <span className="text-gray-400 font-normal">(optional)</span>
+                    {t("emailAddress")}{" "}
+                    <span className="text-gray-400 font-normal">{t("optional")}</span>
                   </label>
                   <input
                     type="email"
@@ -197,7 +199,7 @@ export default function CheckoutPage() {
                 {/* Street */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Street Address <span className="text-red-500">*</span>
+                    {t("streetAddress")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -205,7 +207,7 @@ export default function CheckoutPage() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, street: e.target.value }))
                     }
-                    placeholder="House, road, area"
+                    placeholder={t("streetAddress")}
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                       errors.street
                         ? "border-red-400 focus:ring-red-200"
@@ -221,7 +223,7 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      City <span className="text-red-500">*</span>
+                      {t("city")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -229,7 +231,7 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setForm((f) => ({ ...f, city: e.target.value }))
                       }
-                      placeholder="Dhaka"
+                      placeholder={t("city")}
                       className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                         errors.city
                           ? "border-red-400 focus:ring-red-200"
@@ -242,7 +244,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Postal Code
+                      {t("postalCode")}
                     </label>
                     <input
                       type="text"
@@ -250,7 +252,7 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setForm((f) => ({ ...f, postalCode: e.target.value }))
                       }
-                      placeholder="1200"
+                      placeholder={t("postalCode")}
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors"
                     />
                   </div>
@@ -259,7 +261,7 @@ export default function CheckoutPage() {
                 {/* Country */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Country
+                    {t("country")}
                   </label>
                   <select
                     value={form.country}
@@ -278,14 +280,14 @@ export default function CheckoutPage() {
                 {/* Notes */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Order Notes (optional)
+                    {t("orderNotes")} {t("optional")}
                   </label>
                   <textarea
                     value={form.notes}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, notes: e.target.value }))
                     }
-                    placeholder="Any special instructions..."
+                    placeholder={t("orderNotes")}
                     rows={3}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors resize-none"
                   />
@@ -295,7 +297,7 @@ export default function CheckoutPage() {
 
             {/* Payment method */}
             <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h2 className="font-bold text-lg mb-4">Payment Method</h2>
+              <h2 className="font-bold text-lg mb-4">{t("paymentMethod")}</h2>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="radio"
@@ -306,9 +308,9 @@ export default function CheckoutPage() {
                   style={{ accentColor: "var(--color-primary)" }}
                 />
                 <div>
-                  <p className="text-sm font-medium">Cash on Delivery</p>
+                  <p className="text-sm font-medium">{t("cashOnDelivery")}</p>
                   <p className="text-xs text-gray-500">
-                    Pay when you receive your order
+                    {t("payWhenReceive")}
                   </p>
                 </div>
               </label>
@@ -318,7 +320,7 @@ export default function CheckoutPage() {
           {/* Order summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl border border-gray-100 p-6 sticky top-4">
-              <h2 className="font-bold text-lg mb-4">Order Summary</h2>
+              <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
               {/* Items */}
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
@@ -359,17 +361,17 @@ export default function CheckoutPage() {
 
               <div className="border-t border-gray-100 pt-3 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
+                  <span>{t("subtotal")}</span>
                   <span>৳{subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Shipping</span>
+                  <span>{t("shipping")}</span>
                   <span className="text-green-600">Free</span>
                 </div>
               </div>
 
               <div className="border-t border-gray-100 mt-3 pt-3 flex justify-between font-bold">
-                <span>Total</span>
+                <span>{t("total")}</span>
                 <span>৳{subtotal.toLocaleString()}</span>
               </div>
 
@@ -391,10 +393,10 @@ export default function CheckoutPage() {
                 {submitting ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Placing Order...
+                    {t("placingOrder")}
                   </>
                 ) : (
-                  "Place Order"
+                  t("placeOrder")
                 )}
               </button>
 
@@ -402,7 +404,7 @@ export default function CheckoutPage() {
                 href="/cart"
                 className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-800 transition-colors"
               >
-                ← Back to Cart
+                {t("backToCart")}
               </Link>
             </div>
           </div>

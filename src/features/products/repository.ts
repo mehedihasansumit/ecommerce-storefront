@@ -18,8 +18,13 @@ export const ProductRepository = {
     if (params.categoryId) filter.categoryId = params.categoryId;
     if (params.featured) filter.isFeatured = true;
     if (params.search) {
+      const re = { $regex: params.search, $options: "i" };
       filter.$or = [
-        { name: { $regex: params.search, $options: "i" } },
+        // localized fields (en / bn and any future locale)
+        { "name.en": re },
+        { "name.bn": re },
+        // legacy plain-string name (backward compat)
+        { name: re },
         { tags: { $in: [new RegExp(params.search, "i")] } },
       ];
     }

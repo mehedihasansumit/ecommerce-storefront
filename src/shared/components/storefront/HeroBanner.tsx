@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import type { IHeroBanner } from "@/features/stores/types";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { t } from "@/shared/lib/i18n";
 
 export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
-  const t = useTranslations("heroBanner");
+  const tr = useTranslations("heroBanner");
+  const locale = useLocale();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const activeBanners = banners?.filter((b) => b.title) || [];
+  const activeBanners = banners?.filter((b) => t(b.title, locale)) || [];
 
   const goTo = useCallback(
     (index: number) => {
@@ -56,7 +58,7 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
           {b.image && (
             <img
               src={b.image}
-              alt={b.title}
+              alt={t(b.title, locale)}
               className={`w-full h-full object-cover ${
                 i === current ? "animate-hero-zoom" : ""
               }`}
@@ -78,11 +80,11 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
           }`}
         >
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight tracking-tight drop-shadow-lg">
-            {banner.title}
+            {t(banner.title, locale)}
           </h1>
-          {banner.subtitle && (
+          {t(banner.subtitle, locale) && (
             <p className="text-lg md:text-xl mb-8 opacity-90 max-w-xl mx-auto drop-shadow-md">
-              {banner.subtitle}
+              {t(banner.subtitle, locale)}
             </p>
           )}
           {banner.linkUrl && (
@@ -94,7 +96,7 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
                 borderRadius: "var(--border-radius)",
               }}
             >
-              {banner.linkText || t("shopNow")}
+              {banner.linkText || tr("shopNow")}
               <ChevronRight size={18} />
             </Link>
           )}

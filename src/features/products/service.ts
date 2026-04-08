@@ -1,7 +1,13 @@
 import { ProductRepository } from "./repository";
 import type { IProduct } from "./types";
+import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
 import slugify from "slugify";
+
+function nameToSlug(name: string | LocalizedString): string {
+  const raw = typeof name === "string" ? name : (name.en ?? Object.values(name)[0] ?? "product");
+  return slugify(raw, { lower: true, strict: true });
+}
 
 export const ProductService = {
   async getByStore(
@@ -27,7 +33,7 @@ export const ProductService = {
     storeId: string,
     data: Omit<IProduct, "_id" | "storeId" | "slug" | "averageRating" | "reviewCount" | "createdAt" | "updatedAt">
   ): Promise<IProduct> {
-    const slug = slugify(data.name, { lower: true, strict: true });
+    const slug = nameToSlug(data.name);
     return ProductRepository.create({
       ...data,
       storeId,
@@ -39,7 +45,7 @@ export const ProductService = {
 
   async update(id: string, data: Partial<IProduct>): Promise<IProduct | null> {
     if (data.name) {
-      data.slug = slugify(data.name, { lower: true, strict: true });
+      data.slug = nameToSlug(data.name);
     }
     return ProductRepository.update(id, data);
   },

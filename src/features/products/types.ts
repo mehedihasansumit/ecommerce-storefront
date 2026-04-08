@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface IProductOption {
   name: string;
@@ -21,17 +22,17 @@ export interface IProductImage {
 }
 
 export interface IProductSeo {
-  title: string;
-  description: string;
+  title: LocalizedString;
+  description: LocalizedString;
 }
 
 export interface IProduct {
   _id: string;
   storeId: string;
-  name: string;
+  name: LocalizedString;
   slug: string;
-  description: string;
-  shortDescription: string;
+  description: LocalizedString;
+  shortDescription: LocalizedString;
   price: number;
   compareAtPrice: number;
   costPrice: number;

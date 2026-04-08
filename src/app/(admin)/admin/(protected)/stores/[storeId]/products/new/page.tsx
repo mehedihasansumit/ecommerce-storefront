@@ -1,6 +1,8 @@
 import { CategoryService } from "@/features/categories/service";
+import { StoreService } from "@/features/stores/service";
 import { ProductForm } from "@/features/products/components/ProductForm";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export default async function NewProductPage({
   params,
@@ -8,7 +10,12 @@ export default async function NewProductPage({
   params: Promise<{ storeId: string }>;
 }) {
   const { storeId } = await params;
-  const categories = await CategoryService.getByStore(storeId);
+  const [store, categories] = await Promise.all([
+    StoreService.getById(storeId),
+    CategoryService.getByStore(storeId),
+  ]);
+
+  if (!store) notFound();
 
   return (
     <div>
@@ -22,7 +29,11 @@ export default async function NewProductPage({
 
       <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
 
-      <ProductForm storeId={storeId} categories={categories} />
+      <ProductForm
+        storeId={storeId}
+        categories={categories}
+        supportedLanguages={store.supportedLanguages}
+      />
     </div>
   );
 }

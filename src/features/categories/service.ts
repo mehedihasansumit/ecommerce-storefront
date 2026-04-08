@@ -1,6 +1,12 @@
 import { CategoryRepository } from "./repository";
 import type { ICategory } from "./types";
+import type { LocalizedString } from "@/shared/types/i18n";
 import slugify from "slugify";
+
+function nameToSlug(name: string | LocalizedString): string {
+  const raw = typeof name === "string" ? name : (name.en ?? Object.values(name)[0] ?? "category");
+  return slugify(raw, { lower: true, strict: true });
+}
 
 export const CategoryService = {
   async getByStore(storeId: string): Promise<ICategory[]> {
@@ -17,15 +23,15 @@ export const CategoryService = {
 
   async create(
     storeId: string,
-    data: { name: string; description?: string; image?: string; parentId?: string; sortOrder?: number }
+    data: { name: string | LocalizedString; description?: string | LocalizedString; image?: string; parentId?: string; sortOrder?: number }
   ): Promise<ICategory> {
-    const slug = slugify(data.name, { lower: true, strict: true });
-    return CategoryRepository.create({ ...data, storeId, slug });
+    const slug = nameToSlug(data.name);
+    return CategoryRepository.create({ ...data, storeId, slug } as Partial<ICategory>);
   },
 
   async update(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
     if (data.name) {
-      data.slug = slugify(data.name, { lower: true, strict: true });
+      data.slug = nameToSlug(data.name);
     }
     return CategoryRepository.update(id, data);
   },

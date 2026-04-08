@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CategoryService } from "@/features/categories/service";
+import { tAdmin } from "@/shared/lib/i18n";
 
 export default async function StoreCategoriesPage({
   params,
@@ -46,7 +47,7 @@ export default async function StoreCategoriesPage({
             <tbody className="divide-y divide-gray-200">
               {categories.map((cat) => (
                 <tr key={cat._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium">{cat.name}</td>
+                  <td className="px-6 py-4 font-medium">{tAdmin(cat.name)}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{cat.slug}</td>
                   <td className="px-6 py-4 text-sm">{cat.sortOrder}</td>
                   <td className="px-6 py-4 text-right">

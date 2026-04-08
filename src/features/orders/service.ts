@@ -2,6 +2,7 @@ import { OrderRepository } from "./repository";
 import { ProductRepository } from "@/features/products/repository";
 import type { IOrder, IOrderItem } from "./types";
 import type { CreateOrderInput } from "./schemas";
+import { tAdmin } from "@/shared/lib/i18n";
 
 function generateOrderNumber(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -24,13 +25,13 @@ export const OrderService = {
         throw new Error(`Product not found: ${lineItem.productId}`);
       }
       if (product.stock < lineItem.quantity) {
-        throw new Error(`Insufficient stock for: ${product.name}`);
+        throw new Error(`Insufficient stock for: ${tAdmin(product.name)}`);
       }
 
       const totalPrice = product.price * lineItem.quantity;
       orderItems.push({
         productId: product._id,
-        productName: product.name,
+        productName: tAdmin(product.name),
         variantSelections: lineItem.variantSelections,
         quantity: lineItem.quantity,
         unitPrice: product.price,

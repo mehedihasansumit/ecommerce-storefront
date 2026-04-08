@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
+import { getLocale } from "next-intl/server";
+import { t } from "@/shared/lib/i18n";
 
 export async function generateMetadata({
   params,
@@ -20,11 +22,13 @@ export async function generateMetadata({
   const category = await CategoryService.getBySlug(tenant._id, slug);
   if (!category) return { title: "Category Not Found" };
 
+  const locale = await getLocale();
+  const catName = t(category.name, locale);
   return createStoreMetadata(tenant, {
-    title: category.name,
-    description: category.description || `Browse ${category.name} products`,
+    title: catName,
+    description: t(category.description, locale) || `Browse ${catName} products`,
     path: `/categories/${category.slug}`,
-  });
+  }, locale);
 }
 
 export default async function CategoryPage({
@@ -40,8 +44,12 @@ export default async function CategoryPage({
   const { slug } = await params;
   const { page: pageParam } = await searchParams;
 
+  const locale = await getLocale();
   const category = await CategoryService.getBySlug(tenant._id, slug);
   if (!category) notFound();
+
+  const catName = t(category.name, locale);
+  const catDesc = t(category.description, locale);
 
   const page = parseInt(pageParam || "1", 10);
   const result = await ProductService.getByStore(tenant._id, {
@@ -57,12 +65,12 @@ export default async function CategoryPage({
           Home
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">{category.name}</span>
+        <span className="text-gray-900">{catName}</span>
       </nav>
 
-      <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
-      {category.description && (
-        <p className="text-gray-600 mb-8">{category.description}</p>
+      <h1 className="text-3xl font-bold mb-2">{catName}</h1>
+      {catDesc && (
+        <p className="text-gray-600 mb-8">{catDesc}</p>
       )}
 
       <ProductGrid products={result.data} />

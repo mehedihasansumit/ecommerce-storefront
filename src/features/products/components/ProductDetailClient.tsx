@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import { Star } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import type { IProduct, IProductVariant } from "../types";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { AddToCartSection } from "./AddToCartSection";
+import { t } from "@/shared/lib/i18n";
 
 interface ProductDetailClientProps {
   product: IProduct;
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
-  const t = useTranslations("productDetail");
+  const tr = useTranslations("productDetail");
+  const locale = useLocale();
   const [activeVariant, setActiveVariant] = useState<IProductVariant | null>(null);
 
   const galleryImages =
@@ -35,7 +37,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       <ProductImageGallery
         images={galleryImages}
         thumbnail={activeVariant?.images?.length ? undefined : product.thumbnail}
-        productName={product.name}
+        productName={t(product.name, locale)}
       />
 
       {/* Product Info */}
@@ -46,12 +48,12 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             className="inline-block px-3 py-1 text-xs font-bold text-white rounded-full mb-4"
             style={{ backgroundColor: "var(--color-accent)" }}
           >
-            {t("save") || "Save"} {discountPercent}%
+            {tr("save") || "Save"} {discountPercent}%
           </span>
         )}
 
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
-          {product.name}
+          {t(product.name, locale)}
         </h1>
 
         {/* Rating */}
@@ -71,7 +73,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
               ))}
             </div>
             <span className="text-sm text-gray-500">
-              ({product.reviewCount} {t("reviews")})
+              ({product.reviewCount} {tr("reviews")})
             </span>
           </div>
         )}
@@ -91,9 +93,9 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           )}
         </div>
 
-        {product.shortDescription && (
+        {t(product.shortDescription, locale) && (
           <p className="text-gray-600 leading-relaxed mb-6">
-            {product.shortDescription}
+            {t(product.shortDescription, locale)}
           </p>
         )}
 
@@ -104,14 +106,14 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-sm text-green-600 font-medium">
-                  {t("inStock", { available: displayStock })}
+                  {tr("inStock", { available: displayStock })}
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-red-500 rounded-full" />
                 <span className="text-sm text-red-600 font-medium">
-                  {t("outOfStock")}
+                  {tr("outOfStock")}
                 </span>
               </div>
             )}
@@ -119,15 +121,15 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
           <AddToCartSection
             productId={product._id}
-            productName={product.name}
+            productName={t(product.name, locale)}
             productSlug={product.slug}
             thumbnail={product.thumbnail}
             price={product.price}
             stock={product.stock}
             options={product.options ?? []}
             variants={product.variants ?? []}
-            addToCartLabel={t("addToCart")}
-            outOfStockLabel={t("outOfStock")}
+            addToCartLabel={tr("addToCart")}
+            outOfStockLabel={tr("outOfStock")}
             onVariantChange={setActiveVariant}
           />
         </div>

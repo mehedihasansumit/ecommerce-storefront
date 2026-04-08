@@ -9,9 +9,9 @@ const CategorySchema = new Schema<ICategoryDocument>(
       required: true,
       index: true,
     },
-    name: { type: String, required: true },
+    name: { type: Schema.Types.Mixed, required: true },
     slug: { type: String, required: true },
-    description: { type: String, default: "" },
+    description: { type: Schema.Types.Mixed, default: {} },
     image: { type: String, default: "" },
     parentId: {
       type: Schema.Types.ObjectId,

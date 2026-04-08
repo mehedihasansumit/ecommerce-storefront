@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { Star, Eye } from "lucide-react";
 import type { IProduct } from "../types";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { t } from "@/shared/lib/i18n";
 
 export function ProductCard({ product }: { product: IProduct }) {
-  const t = useTranslations("productCard");
+  const tr = useTranslations("productCard");
+  const locale = useLocale();
+  const productName = t(product.name, locale);
 
   const hasDiscount =
     product.compareAtPrice > 0 && product.compareAtPrice > product.price;
@@ -28,7 +31,7 @@ export function ProductCard({ product }: { product: IProduct }) {
         {product.thumbnail || product.images[0]?.url ? (
           <img
             src={product.thumbnail || product.images[0].url}
-            alt={product.images[0]?.alt || product.name}
+            alt={product.images[0]?.alt || productName}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
@@ -54,7 +57,7 @@ export function ProductCard({ product }: { product: IProduct }) {
         {product.stock <= 0 && (
           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
             <span className="px-3 py-1 bg-gray-900 text-white text-xs font-semibold rounded-full">
-              {t("outOfStock") || "Out of Stock"}
+              {tr("outOfStock") || "Out of Stock"}
             </span>
           </div>
         )}
@@ -69,7 +72,7 @@ export function ProductCard({ product }: { product: IProduct }) {
             }}
           >
             <Eye size={14} />
-            {t("viewDetails") || "View Details"}
+            {tr("viewDetails") || "View Details"}
           </span>
         </div>
       </div>
@@ -77,7 +80,7 @@ export function ProductCard({ product }: { product: IProduct }) {
       {/* Content */}
       <div className="p-4">
         <h3 className="font-medium text-sm text-gray-800 line-clamp-2 mb-2 group-hover:text-gray-900 transition-colors">
-          {product.name}
+          {productName}
         </h3>
 
         {/* Rating */}

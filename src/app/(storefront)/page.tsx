@@ -6,7 +6,8 @@ import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { createStoreMetadata } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { t } from "@/shared/lib/i18n";
 import {
   ArrowRight,
   Truck,
@@ -19,19 +20,21 @@ import { NewsletterForm } from "@/shared/components/storefront/NewsletterForm";
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
   if (!tenant) return { title: "Store" };
-  return createStoreMetadata(tenant, { path: "/" });
+  const locale = await getLocale();
+  return createStoreMetadata(tenant, { path: "/" }, locale);
 }
 
 export default async function HomePage() {
   const tenant = await getTenant();
-  const t = await getTranslations("home");
+  const locale = await getLocale();
+  const tr = await getTranslations("home");
 
   if (!tenant) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">{t("storeNotFound")}</h1>
-          <p className="text-gray-500">{t("noStoreConfigured")}</p>
+          <h1 className="text-2xl font-bold mb-2">{tr("storeNotFound")}</h1>
+          <p className="text-gray-500">{tr("noStoreConfigured")}</p>
         </div>
       </div>
     );
@@ -54,23 +57,23 @@ export default async function HomePage() {
             {[
               {
                 icon: Truck,
-                title: t("freeShipping") || "Free Shipping",
-                desc: t("freeShippingDesc") || "On orders over ৳500",
+                title: tr("freeShipping") || "Free Shipping",
+                desc: tr("freeShippingDesc") || "On orders over ৳500",
               },
               {
                 icon: Shield,
-                title: t("securePayment") || "Secure Payment",
-                desc: t("securePaymentDesc") || "100% secure checkout",
+                title: tr("securePayment") || "Secure Payment",
+                desc: tr("securePaymentDesc") || "100% secure checkout",
               },
               {
                 icon: RotateCcw,
-                title: t("easyReturns") || "Easy Returns",
-                desc: t("easyReturnsDesc") || "30-day return policy",
+                title: tr("easyReturns") || "Easy Returns",
+                desc: tr("easyReturnsDesc") || "30-day return policy",
               },
               {
                 icon: Headphones,
-                title: t("support247") || "24/7 Support",
-                desc: t("support247Desc") || "Dedicated support",
+                title: tr("support247") || "24/7 Support",
+                desc: tr("support247Desc") || "Dedicated support",
               },
             ].map((item) => (
               <div
@@ -103,9 +106,9 @@ export default async function HomePage() {
       {categories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">{t("shopByCategory")}</h2>
+            <h2 className="text-3xl font-bold mb-3">{tr("shopByCategory")}</h2>
             <p className="text-gray-500 max-w-md mx-auto">
-              {t("shopByCategoryDesc") ||
+              {tr("shopByCategoryDesc") ||
                 "Explore our curated collections"}
             </p>
           </div>
@@ -120,17 +123,17 @@ export default async function HomePage() {
                 {category.image && (
                   <img
                     src={category.image}
-                    alt={category.name}
+                    alt={t(category.name, locale)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-300" />
                 <div className="relative w-full p-5">
                   <span className="text-white font-semibold text-lg block">
-                    {category.name}
+                    {t(category.name, locale)}
                   </span>
                   <span className="inline-flex items-center gap-1 text-white/70 text-sm mt-1 group-hover:text-white/90 transition-colors">
-                    {t("explore") || "Explore"}
+                    {tr("explore") || "Explore"}
                     <ArrowRight
                       size={14}
                       className="transition-transform duration-200 group-hover:translate-x-1"
@@ -149,10 +152,10 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <h2 className="text-3xl font-bold mb-2">
-                {t("featuredProducts")}
+                {tr("featuredProducts")}
               </h2>
               <p className="text-gray-500">
-                {t("featuredProductsDesc") ||
+                {tr("featuredProductsDesc") ||
                   "Hand-picked products just for you"}
               </p>
             </div>
@@ -161,7 +164,7 @@ export default async function HomePage() {
               className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:opacity-80"
               style={{ color: "var(--color-primary)" }}
             >
-              {t("viewAll")}
+              {tr("viewAll")}
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -175,7 +178,7 @@ export default async function HomePage() {
                 borderRadius: "var(--border-radius)",
               }}
             >
-              {t("viewAll")}
+              {tr("viewAll")}
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -198,15 +201,15 @@ export default async function HomePage() {
 
             <div className="relative">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                {t("newsletterTitle") || "Stay in the Loop"}
+                {tr("newsletterTitle") || "Stay in the Loop"}
               </h2>
               <p className="text-white/80 max-w-md mx-auto mb-8">
-                {t("newsletterDesc") ||
+                {tr("newsletterDesc") ||
                   "Subscribe to get special offers, free giveaways, and new arrivals."}
               </p>
               <NewsletterForm
-                emailPlaceholder={t("emailPlaceholder")}
-                subscribeLabel={t("subscribe")}
+                emailPlaceholder={tr("emailPlaceholder")}
+                subscribeLabel={tr("subscribe")}
               />
             </div>
           </div>

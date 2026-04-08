@@ -23,10 +23,10 @@ const ProductSchema = new Schema<IProductDocument>(
       required: true,
       index: true,
     },
-    name: { type: String, required: true },
+    name: { type: Schema.Types.Mixed, required: true },
     slug: { type: String, required: true },
-    description: { type: String, default: "" },
-    shortDescription: { type: String, default: "" },
+    description: { type: Schema.Types.Mixed, default: {} },
+    shortDescription: { type: Schema.Types.Mixed, default: {} },
 
     price: { type: Number, required: true },
     compareAtPrice: { type: Number, default: 0 },
@@ -54,8 +54,8 @@ const ProductSchema = new Schema<IProductDocument>(
     isFeatured: { type: Boolean, default: false },
 
     seo: {
-      title: { type: String, default: "" },
-      description: { type: String, default: "" },
+      title: { type: Schema.Types.Mixed, default: {} },
+      description: { type: Schema.Types.Mixed, default: {} },
     },
 
     averageRating: { type: Number, default: 0 },

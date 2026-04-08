@@ -1,5 +1,7 @@
+import { StoreService } from "@/features/stores/service";
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export default async function NewCategoryPage({
   params,
@@ -7,6 +9,9 @@ export default async function NewCategoryPage({
   params: Promise<{ storeId: string }>;
 }) {
   const { storeId } = await params;
+  const store = await StoreService.getById(storeId);
+
+  if (!store) notFound();
 
   return (
     <div>
@@ -20,7 +25,7 @@ export default async function NewCategoryPage({
 
       <h1 className="text-2xl font-bold mb-6">Add New Category</h1>
 
-      <CategoryForm storeId={storeId} />
+      <CategoryForm storeId={storeId} supportedLanguages={store.supportedLanguages} />
     </div>
   );
 }

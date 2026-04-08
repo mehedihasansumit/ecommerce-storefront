@@ -8,9 +8,10 @@ import {
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { ChevronRight, Truck, RotateCcw, Shield } from "lucide-react";
 import { ProductDetailClient } from "@/features/products/components/ProductDetailClient";
+import { t } from "@/shared/lib/i18n";
 
 export async function generateMetadata({
   params,
@@ -24,12 +25,13 @@ export async function generateMetadata({
   const product = await ProductService.getBySlug(tenant._id, slug);
   if (!product) return { title: "Product Not Found" };
 
+  const locale = await getLocale();
   return createStoreMetadata(tenant, {
-    title: product.seo.title || product.name,
-    description: product.seo.description || product.shortDescription,
+    title: t(product.seo.title, locale) || t(product.name, locale),
+    description: t(product.seo.description, locale) || t(product.shortDescription, locale),
     image: product.thumbnail || product.images[0]?.url,
     path: `/products/${product.slug}`,
-  });
+  }, locale);
 }
 
 export default async function ProductDetailPage({
@@ -38,7 +40,8 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const tenant = await getTenant();
-  const t = await getTranslations("productDetail");
+  const tr = await getTranslations("productDetail");
+  const locale = await getLocale();
   if (!tenant) return null;
 
   const { slug } = await params;
@@ -48,11 +51,11 @@ export default async function ProductDetailPage({
   const domain = tenant.domains[0] || "localhost:3000";
   const storeUrl = `https://${domain}`;
 
-  const productJsonLd = buildProductJsonLd(product, storeUrl);
+  const productJsonLd = buildProductJsonLd(product, storeUrl, locale);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: t("home"), url: storeUrl },
-    { name: t("products"), url: `${storeUrl}/products` },
-    { name: product.name, url: `${storeUrl}/products/${product.slug}` },
+    { name: tr("home"), url: storeUrl },
+    { name: tr("products"), url: `${storeUrl}/products` },
+    { name: t(product.name, locale), url: `${storeUrl}/products/${product.slug}` },
   ]);
 
   return (
@@ -78,7 +81,7 @@ export default async function ProductDetailPage({
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
           <span className="text-gray-900 font-medium truncate max-w-48">
-            {product.name}
+            {t(product.name, locale)}
           </span>
         </nav>
 
@@ -88,9 +91,9 @@ export default async function ProductDetailPage({
         {/* Trust signals */}
         <div className="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-gray-100 max-w-lg">
           {[
-            { icon: Truck, label: t("freeShipping") || "Free Shipping" },
-            { icon: RotateCcw, label: t("easyReturns") || "Easy Returns" },
-            { icon: Shield, label: t("secureCheckout") || "Secure Checkout" },
+            { icon: Truck, label: tr("freeShipping") || "Free Shipping" },
+            { icon: RotateCcw, label: tr("easyReturns") || "Easy Returns" },
+            { icon: Shield, label: tr("secureCheckout") || "Secure Checkout" },
           ].map((item) => (
             <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
               <item.icon size={18} className="text-gray-400" />
@@ -101,11 +104,11 @@ export default async function ProductDetailPage({
 
         {/* Description & Tags */}
         <div className="mt-16 border-t border-gray-200 pt-12">
-          {product.description && (
+          {t(product.description, locale) && (
             <div className="max-w-3xl">
-              <h2 className="text-2xl font-bold mb-6">{t("description")}</h2>
+              <h2 className="text-2xl font-bold mb-6">{tr("description")}</h2>
               <div className="text-gray-600 leading-relaxed whitespace-pre-wrap">
-                {product.description}
+                {t(product.description, locale)}
               </div>
             </div>
           )}

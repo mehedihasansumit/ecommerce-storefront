@@ -1,7 +1,9 @@
 import { CategoryService } from "@/features/categories/service";
+import { StoreService } from "@/features/stores/service";
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { tAdmin } from "@/shared/lib/i18n";
 
 export default async function EditCategoryPage({
   params,
@@ -9,9 +11,12 @@ export default async function EditCategoryPage({
   params: Promise<{ storeId: string; categoryId: string }>;
 }) {
   const { storeId, categoryId } = await params;
-  const category = await CategoryService.getById(categoryId);
+  const [category, store] = await Promise.all([
+    CategoryService.getById(categoryId),
+    StoreService.getById(storeId),
+  ]);
 
-  if (!category) {
+  if (!category || !store) {
     notFound();
   }
 
@@ -22,12 +27,16 @@ export default async function EditCategoryPage({
           Categories
         </Link>
         <span>/</span>
-        <span className="text-gray-900">{category.name}</span>
+        <span className="text-gray-900">{tAdmin(category.name)}</span>
       </div>
 
       <h1 className="text-2xl font-bold mb-6">Edit Category</h1>
 
-      <CategoryForm storeId={storeId} category={category} />
+      <CategoryForm
+        storeId={storeId}
+        category={category}
+        supportedLanguages={store.supportedLanguages}
+      />
     </div>
   );
 }

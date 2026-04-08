@@ -31,16 +31,16 @@ const StoreSchema = new Schema<IStoreDocument>(
     heroBanners: [
       {
         image: String,
-        title: String,
-        subtitle: String,
+        title: { type: Schema.Types.Mixed, default: {} },
+        subtitle: { type: Schema.Types.Mixed, default: {} },
         linkUrl: String,
         linkText: String,
       },
     ],
 
     seo: {
-      title: { type: String, default: "" },
-      description: { type: String, default: "" },
+      title: { type: Schema.Types.Mixed, default: {} },
+      description: { type: Schema.Types.Mixed, default: {} },
       keywords: [String],
       ogImage: { type: String, default: "" },
     },

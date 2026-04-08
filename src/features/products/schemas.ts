@@ -20,10 +20,29 @@ const productVariantSchema = z.object({
   images: z.array(productImageSchema).optional().default([]),
 });
 
+/**
+ * Accepts either a LocalizedString object { en: "...", bn: "..." }
+ * or a plain string (auto-wrapped into { en: value } for backward compat).
+ */
+const localizedStringSchema = z
+  .union([
+    z.record(z.string(), z.string()),
+    z.string().transform((s) => ({ en: s })),
+  ])
+  .optional()
+  .default({});
+
+const requiredLocalizedStringSchema = z.union([
+  z.record(z.string(), z.string()).refine((r) => Object.keys(r).length > 0, {
+    message: "At least one language is required",
+  }),
+  z.string().min(1, "Product name is required").transform((s) => ({ en: s })),
+]);
+
 export const createProductSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
-  description: z.string().optional(),
-  shortDescription: z.string().optional(),
+  name: requiredLocalizedStringSchema,
+  description: localizedStringSchema,
+  shortDescription: localizedStringSchema,
   price: z.number().positive("Price must be positive"),
   compareAtPrice: z.number().optional(),
   costPrice: z.number().optional(),
@@ -41,8 +60,8 @@ export const createProductSchema = z.object({
   isFeatured: z.boolean().optional(),
   seo: z
     .object({
-      title: z.string().optional(),
-      description: z.string().optional(),
+      title: localizedStringSchema,
+      description: localizedStringSchema,
     })
     .optional(),
 });

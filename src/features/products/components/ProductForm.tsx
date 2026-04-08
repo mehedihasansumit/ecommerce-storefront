@@ -5,12 +5,20 @@ import { useRouter } from "next/navigation";
 import { X, Plus, Trash2 } from "lucide-react";
 import type { IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
 import type { ICategory } from "@/features/categories/types";
+import type { LocalizedString } from "@/shared/types/i18n";
+import { toLocalized } from "@/shared/lib/i18n";
 
 interface ProductFormProps {
   storeId: string;
   categories: ICategory[];
   product?: IProduct;
+  supportedLanguages?: string[];
 }
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: "English",
+  bn: "বাংলা",
+};
 
 // Cartesian product helper
 function cartesian(arrays: string[][]): string[][] {
@@ -56,17 +64,32 @@ function regenerateVariants(
   });
 }
 
-export function ProductForm({ storeId, categories, product }: ProductFormProps) {
+export function ProductForm({ storeId, categories, product, supportedLanguages = ["en"] }: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!product;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeLang, setActiveLang] = useState(supportedLanguages[0] ?? "en");
+
+  // Localized text fields
+  const [localizedName, setLocalizedName] = useState<LocalizedString>(
+    () => toLocalized(product?.name)
+  );
+  const [localizedShortDesc, setLocalizedShortDesc] = useState<LocalizedString>(
+    () => toLocalized(product?.shortDescription)
+  );
+  const [localizedDesc, setLocalizedDesc] = useState<LocalizedString>(
+    () => toLocalized(product?.description)
+  );
+  const [localizedSeoTitle, setLocalizedSeoTitle] = useState<LocalizedString>(
+    () => toLocalized(product?.seo?.title)
+  );
+  const [localizedSeoDesc, setLocalizedSeoDesc] = useState<LocalizedString>(
+    () => toLocalized(product?.seo?.description)
+  );
 
   const [form, setForm] = useState({
-    name: product?.name ?? "",
-    shortDescription: product?.shortDescription ?? "",
-    description: product?.description ?? "",
     price: product?.price ?? 0,
     compareAtPrice: product?.compareAtPrice ?? 0,
     costPrice: product?.costPrice ?? 0,
@@ -82,7 +105,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
   const [options, setOptions] = useState<IProductOption[]>(product?.options ?? []);
   const [variants, setVariants] = useState<IProductVariant[]>(product?.variants ?? []);
 
-  // colorImages: { Red: [{url, alt}, ...], Blue: [...] }
   const [colorImages, setColorImages] = useState<Record<string, IProductImage[]>>(() => {
     const initial: Record<string, IProductImage[]> = {};
     if (product?.variants) {
@@ -100,10 +122,15 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
   const [newOptionValues, setNewOptionValues] = useState<Record<number, string>>({});
   const [newImageUrls, setNewImageUrls] = useState<Record<string, string>>({});
 
+  const setLocalized = (
+    setter: React.Dispatch<React.SetStateAction<LocalizedString>>,
+    lang: string,
+    value: string
+  ) => setter((prev) => ({ ...prev, [lang]: value }));
+
   const set = (field: string, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  // Re-generate variants whenever options or colorImages change
   useEffect(() => {
     setVariants((prev) =>
       regenerateVariants(options, prev, colorImages, Number(form.price) || 0)
@@ -146,7 +173,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
     setOptions(updated);
   };
 
-  // --- Color images management ---
   const colorOption = options.find((o) => o.name.toLowerCase() === "color");
 
   const addColorImage = (color: string) => {
@@ -166,7 +192,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
     }));
   };
 
-  // --- Variants table editing ---
   const updateVariant = (idx: number, field: keyof IProductVariant, value: unknown) => {
     setVariants((prev) => {
       const updated = [...prev];
@@ -175,7 +200,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
     });
   };
 
-  // --- Form submit ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -183,6 +207,13 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
 
     const payload = {
       ...form,
+      name: localizedName,
+      shortDescription: localizedShortDesc,
+      description: localizedDesc,
+      seo: {
+        title: localizedSeoTitle,
+        description: localizedSeoDesc,
+      },
       price: Number(form.price),
       compareAtPrice: Number(form.compareAtPrice),
       costPrice: Number(form.costPrice),
@@ -198,7 +229,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         price: Number(v.price),
         compareAtPrice: Number(v.compareAtPrice ?? 0),
         stock: Number(v.stock),
-        // Inject latest colorImages at submit time — bypasses useEffect race condition
         images: v.optionValues?.Color
           ? (colorImages[v.optionValues.Color] ?? v.images ?? [])
           : (v.images ?? []),
@@ -247,18 +277,45 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         </div>
       )}
 
+      {/* Language Tabs */}
+      {supportedLanguages.length > 1 && (
+        <div className="flex gap-1 border-b border-gray-200">
+          {supportedLanguages.map((lang) => (
+            <button
+              key={lang}
+              type="button"
+              onClick={() => setActiveLang(lang)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                activeLang === lang
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Basic Info */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">Basic Information</h2>
+        <h2 className="font-semibold text-gray-900">
+          Basic Information
+          {supportedLanguages.length > 1 && (
+            <span className="ml-2 text-xs font-normal text-gray-400">
+              — {LANGUAGE_LABELS[activeLang] || activeLang}
+            </span>
+          )}
+        </h2>
 
         <div>
           <label className="block text-sm font-medium mb-1">Product Name *</label>
           <input
             type="text"
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
+            value={localizedName[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-            required
+            required={activeLang === (supportedLanguages[0] ?? "en")}
           />
         </div>
 
@@ -266,8 +323,8 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
           <label className="block text-sm font-medium mb-1">Short Description</label>
           <input
             type="text"
-            value={form.shortDescription}
-            onChange={(e) => set("shortDescription", e.target.value)}
+            value={localizedShortDesc[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedShortDesc, activeLang, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
@@ -275,8 +332,8 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
+            value={localizedDesc[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
@@ -350,6 +407,36 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         </div>
       </div>
 
+      {/* SEO */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <h2 className="font-semibold text-gray-900">
+          SEO
+          {supportedLanguages.length > 1 && (
+            <span className="ml-2 text-xs font-normal text-gray-400">
+              — {LANGUAGE_LABELS[activeLang] || activeLang}
+            </span>
+          )}
+        </h2>
+        <div>
+          <label className="block text-sm font-medium mb-1">Meta Title</label>
+          <input
+            type="text"
+            value={localizedSeoTitle[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedSeoTitle, activeLang, e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Meta Description</label>
+          <textarea
+            value={localizedSeoDesc[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedSeoDesc, activeLang, e.target.value)}
+            rows={2}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+          />
+        </div>
+      </div>
+
       {/* Organization */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <h2 className="font-semibold text-gray-900">Organization</h2>
@@ -364,7 +451,7 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
             <option value="">No category</option>
             {categories.map((cat) => (
               <option key={cat._id} value={cat._id}>
-                {cat.name}
+                {typeof cat.name === "string" ? cat.name : (cat.name.en ?? Object.values(cat.name)[0])}
               </option>
             ))}
           </select>
@@ -433,7 +520,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
               </button>
             </div>
 
-            {/* Values */}
             <div className="flex flex-wrap gap-2">
               {opt.values.map((val, valIdx) => (
                 <span
@@ -452,7 +538,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
               ))}
             </div>
 
-            {/* Add value input */}
             <div className="flex gap-2">
               <input
                 type="text"
@@ -480,7 +565,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
           </div>
         ))}
 
-        {/* Add option type */}
         <div className="flex gap-2 pt-1">
           <input
             type="text"
@@ -505,7 +589,7 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
         </div>
       </div>
 
-      {/* Color Images (shown only when Color option exists) */}
+      {/* Color Images */}
       {colorOption && colorOption.values.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <div>
@@ -517,7 +601,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
             <div key={color} className="border border-gray-200 rounded-lg p-4 space-y-3">
               <h3 className="font-medium text-sm text-gray-900">{color}</h3>
 
-              {/* Existing images */}
               {(colorImages[color] ?? []).length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {(colorImages[color] ?? []).map((img, imgIdx) => (
@@ -539,7 +622,6 @@ export function ProductForm({ storeId, categories, product }: ProductFormProps) 
                 </div>
               )}
 
-              {/* Add image URL */}
               <div className="flex gap-2">
                 <input
                   type="text"

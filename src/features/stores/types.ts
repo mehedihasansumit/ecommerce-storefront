@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface IStoreTheme {
   primaryColor: string;
@@ -15,15 +16,15 @@ export interface IStoreTheme {
 
 export interface IHeroBanner {
   image: string;
-  title: string;
-  subtitle?: string;
+  title: LocalizedString;
+  subtitle?: LocalizedString;
   linkUrl?: string;
   linkText?: string;
 }
 
 export interface IStoreSeo {
-  title: string;
-  description: string;
+  title: LocalizedString;
+  description: LocalizedString;
   keywords: string[];
   ogImage: string;
 }

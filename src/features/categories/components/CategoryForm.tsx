@@ -3,25 +3,46 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ICategory } from "../types";
+import type { LocalizedString } from "@/shared/types/i18n";
+import { toLocalized } from "@/shared/lib/i18n";
 
 interface CategoryFormProps {
   storeId: string;
   category?: ICategory;
+  supportedLanguages?: string[];
 }
 
-export function CategoryForm({ storeId, category }: CategoryFormProps) {
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: "English",
+  bn: "বাংলা",
+};
+
+export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }: CategoryFormProps) {
   const router = useRouter();
   const isEdit = !!category;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeLang, setActiveLang] = useState(supportedLanguages[0] ?? "en");
+
+  // Localized fields
+  const [localizedName, setLocalizedName] = useState<LocalizedString>(
+    () => toLocalized(category?.name)
+  );
+  const [localizedDesc, setLocalizedDesc] = useState<LocalizedString>(
+    () => toLocalized(category?.description)
+  );
 
   const [form, setForm] = useState({
-    name: category?.name ?? "",
-    description: category?.description ?? "",
     image: category?.image ?? "",
     sortOrder: category?.sortOrder ?? 0,
   });
+
+  const setLocalized = (
+    setter: React.Dispatch<React.SetStateAction<LocalizedString>>,
+    lang: string,
+    value: string
+  ) => setter((prev) => ({ ...prev, [lang]: value }));
 
   const set = (field: string, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -33,6 +54,8 @@ export function CategoryForm({ storeId, category }: CategoryFormProps) {
 
     const payload = {
       ...form,
+      name: localizedName,
+      description: localizedDesc,
       sortOrder: Number(form.sortOrder),
     };
 
@@ -81,26 +104,53 @@ export function CategoryForm({ storeId, category }: CategoryFormProps) {
         </div>
       )}
 
+      {/* Language Tabs */}
+      {supportedLanguages.length > 1 && (
+        <div className="flex gap-1 border-b border-gray-200">
+          {supportedLanguages.map((lang) => (
+            <button
+              key={lang}
+              type="button"
+              onClick={() => setActiveLang(lang)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                activeLang === lang
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Basic Info */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">Category Information</h2>
+        <h2 className="font-semibold text-gray-900">
+          Category Information
+          {supportedLanguages.length > 1 && (
+            <span className="ml-2 text-xs font-normal text-gray-400">
+              — {LANGUAGE_LABELS[activeLang] || activeLang}
+            </span>
+          )}
+        </h2>
 
         <div>
           <label className="block text-sm font-medium mb-1">Category Name *</label>
           <input
             type="text"
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
+            value={localizedName[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-            required
+            required={activeLang === (supportedLanguages[0] ?? "en")}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
+            value={localizedDesc[activeLang] ?? ""}
+            onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />

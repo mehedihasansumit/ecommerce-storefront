@@ -6,17 +6,19 @@ import { createStoreMetadata } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { t as tl } from "@/shared/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
   if (!tenant) return { title: "Products" };
+  const locale = await getLocale();
   return createStoreMetadata(tenant, {
     title: "All Products",
     description: `Browse all products at ${tenant.name}`,
     path: "/products",
-  });
+  }, locale);
 }
 
 export default async function ProductsPage({
@@ -26,6 +28,7 @@ export default async function ProductsPage({
 }) {
   const tenant = await getTenant();
   const t = await getTranslations("products");
+  const locale = await getLocale();
   if (!tenant) return null;
 
   const params = await searchParams;
@@ -144,7 +147,7 @@ export default async function ProductsPage({
                           : { borderRadius: "var(--border-radius)" }
                       }
                     >
-                      {cat.name}
+                      {tl(cat.name, locale)}
                     </Link>
                   </li>
                 ))}

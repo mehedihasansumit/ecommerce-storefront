@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { IStore } from "@/features/stores/types";
 import type { IProduct } from "@/features/products/types";
+import { t } from "@/shared/lib/i18n";
 
 interface PageMetaOptions {
   title?: string;
@@ -12,15 +13,19 @@ interface PageMetaOptions {
 
 export function createStoreMetadata(
   store: IStore,
-  options: PageMetaOptions = {}
+  options: PageMetaOptions = {},
+  locale = "en"
 ): Metadata {
   const domain = store.domains[0] || "localhost:3000";
   const baseUrl = `https://${domain}`;
+  const storeTitle = t(store.seo.title, locale) || store.name;
   const title = options.title
     ? `${options.title} | ${store.name}`
-    : store.seo.title || store.name;
+    : storeTitle;
   const description =
-    options.description || store.seo.description || `Shop at ${store.name}`;
+    options.description ||
+    t(store.seo.description, locale) ||
+    `Shop at ${store.name}`;
   const image = options.image || store.seo.ogImage || store.logo;
   const url = options.path ? `${baseUrl}${options.path}` : baseUrl;
 
@@ -48,12 +53,12 @@ export function createStoreMetadata(
   };
 }
 
-export function buildProductJsonLd(product: IProduct, storeUrl: string) {
+export function buildProductJsonLd(product: IProduct, storeUrl: string, locale = "en") {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.name,
-    description: product.shortDescription || product.description,
+    name: t(product.name, locale),
+    description: t(product.shortDescription, locale) || t(product.description, locale),
     image: product.images.map((img) => img.url),
     sku: product.sku,
     offers: {

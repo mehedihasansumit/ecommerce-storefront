@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProductService } from "@/features/products/service";
+import { tAdmin } from "@/shared/lib/i18n";
 
 export default async function StoreProductsPage({
   params,
@@ -54,11 +55,11 @@ export default async function StoreProductsPage({
                       {product.thumbnail && (
                         <img
                           src={product.thumbnail}
-                          alt={product.name}
+                          alt={tAdmin(product.name)}
                           className="w-10 h-10 rounded object-cover"
                         />
                       )}
-                      <span className="font-medium">{product.name}</span>
+                      <span className="font-medium">{tAdmin(product.name)}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">৳{product.price.toFixed(2)}</td>

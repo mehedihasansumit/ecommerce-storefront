@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nationalNumber, setNationalNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, phone: `880${nationalNumber}` }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -68,6 +69,30 @@ export default function RegisterPage() {
             style={{ borderRadius: "var(--border-radius)" }}
             placeholder="your@email.com"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">{t("phone")}</label>
+          <div className="flex">
+            <span className="px-4 py-2 border border-gray-300 bg-gray-50 px-4 py-2 rounded-l rounded-r-0" style={{ borderRadius: "var(--border-radius)" }}>880</span>
+            <input
+              type="tel"
+              inputMode="numeric"
+              autoComplete="off"
+              required
+              pattern="\d*"
+              value={nationalNumber}
+              onChange={(e) => setNationalNumber(e.target.value)}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                  e.preventDefault();
+                }
+              }}
+              className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500 focus:border-l-0"
+              style={{ borderRadius: "var(--border-radius)" }}
+              placeholder="1712345678"
+              maxLength={10}
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">{t("password")}</label>

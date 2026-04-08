@@ -6,20 +6,30 @@ import type { IUser, IAdminUser, JwtCustomerPayload, JwtAdminPayload } from "./t
 export const AuthService = {
   async registerCustomer(
     storeId: string,
-    data: { name: string; email: string; password: string; phone?: string }
+    data: { name: string; email?: string; password: string; phone: string }
   ): Promise<{ user: Omit<IUser, "passwordHash">; token: string }> {
-    const existing = await AuthRepository.findUserByEmail(storeId, data.email);
-    if (existing) {
-      throw new Error("Email already registered");
+    // Check for duplicate email
+    const email = data.email?.trim() ? data.email : "";
+    if (email) {
+      const existingEmail = await AuthRepository.findUserByEmail(storeId, email);
+      if (existingEmail) {
+        throw new Error("Email already registered");
+      }
+    }
+
+    // Check for duplicate phone
+    const existingPhone = await AuthRepository.findUserByPhone(storeId, data.phone);
+    if (existingPhone) {
+      throw new Error("Phone number already registered");
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12);
     const user = await AuthRepository.createUser({
       storeId,
       name: data.name,
-      email: data.email,
+      email: email,
       passwordHash,
-      phone: data.phone || "",
+      phone: data.phone,
     });
 
     const payload: JwtCustomerPayload = {

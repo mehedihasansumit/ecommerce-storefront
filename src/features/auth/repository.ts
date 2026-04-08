@@ -17,6 +17,12 @@ export const AuthRepository = {
     return user ? serializeUser(user) : null;
   },
 
+  async findUserByPhone(storeId: string, phone: string): Promise<IUser | null> {
+    await dbConnect();
+    const user = await UserModel.findOne({ storeId, phone }).lean();
+    return user ? serializeUser(user) : null;
+  },
+
   async findUserById(id: string): Promise<IUser | null> {
     await dbConnect();
     const user = await UserModel.findById(id).lean();

@@ -109,6 +109,7 @@
     "email": "Email",
     "password": "Password",
     "name": "Name",
+    "phone": "Phone",
     "createAccount": "Create Account",
     "haveAccount": "Already have an account?",
     "noAccount": "Don't have an account?",

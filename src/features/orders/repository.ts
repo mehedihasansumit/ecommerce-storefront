@@ -65,6 +65,14 @@ export const OrderRepository = {
     return { orders: orders.map(serialize), total };
   },
 
+  async findByUser(storeId: string, userId: string): Promise<IOrder[]> {
+    await dbConnect();
+    const orders = await OrderModel.find({ storeId, userId })
+      .sort({ createdAt: -1 })
+      .lean();
+    return orders.map(serialize);
+  },
+
   async countByStore(storeId: string): Promise<number> {
     await dbConnect();
     return OrderModel.countDocuments({ storeId });

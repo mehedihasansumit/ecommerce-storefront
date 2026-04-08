@@ -119,7 +119,13 @@
   "account": {
     "myAccount": "My Account",
     "notImplemented": "Account management will be shown here.",
-    "logout": "Logout"
+    "logout": "Logout",
+    "welcome": "Welcome, {name}",
+    "email": "Email",
+    "phone": "Phone",
+    "memberSince": "Member since",
+    "viewOrders": "View My Orders",
+    "notProvided": "Not provided"
   },
   "orders": {
     "myOrders": "My Orders",
@@ -127,7 +133,10 @@
     "orderNumber": "Order #",
     "date": "Date",
     "total": "Total",
-    "status": "Status"
+    "status": "Status",
+    "noOrders": "You haven't placed any orders yet.",
+    "items": "{count} items",
+    "viewOrder": "View Order"
   },
   "common": {
     "loading": "Loading...",

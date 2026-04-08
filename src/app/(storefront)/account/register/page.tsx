@@ -1,22 +1,57 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("auth");
-  return { title: t("createAccount") };
-}
+export default function RegisterPage() {
+  const t = useTranslations("auth");
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export default async function RegisterPage() {
-  const t = await getTranslations("auth");
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || t("error"));
+        return;
+      }
+      router.push("/account");
+      router.refresh();
+    } catch {
+      setError(t("error"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="max-w-md mx-auto px-4 py-16">
       <h1 className="text-2xl font-bold mb-8 text-center">{t("createAccount")}</h1>
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded">{error}</p>
+        )}
         <div>
           <label className="block text-sm font-medium mb-1">{t("name")}</label>
           <input
             type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500"
             style={{ borderRadius: "var(--border-radius)" }}
             placeholder="Your Name"
@@ -26,6 +61,9 @@ export default async function RegisterPage() {
           <label className="block text-sm font-medium mb-1">{t("email")}</label>
           <input
             type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500"
             style={{ borderRadius: "var(--border-radius)" }}
             placeholder="your@email.com"
@@ -35,6 +73,9 @@ export default async function RegisterPage() {
           <label className="block text-sm font-medium mb-1">{t("password")}</label>
           <input
             type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-gray-500"
             style={{ borderRadius: "var(--border-radius)" }}
             placeholder="••••••••"
@@ -42,13 +83,14 @@ export default async function RegisterPage() {
         </div>
         <button
           type="submit"
-          className="w-full py-2 text-white font-medium"
+          disabled={loading}
+          className="w-full py-2 text-white font-medium disabled:opacity-60"
           style={{
             backgroundColor: "var(--color-primary)",
             borderRadius: "var(--border-radius)",
           }}
         >
-          {t("register")}
+          {loading ? t("registering") : t("register")}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-500">

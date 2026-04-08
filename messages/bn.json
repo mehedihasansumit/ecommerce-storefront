@@ -119,7 +119,13 @@
   "account": {
     "myAccount": "আমার অ্যাকাউন্ট",
     "notImplemented": "অ্যাকাউন্ট ব্যবস্থাপনা এখানে দেখানো হবে।",
-    "logout": "লগআউট"
+    "logout": "লগআউট",
+    "welcome": "স্বাগতম, {name}",
+    "email": "ইমেইল",
+    "phone": "ফোন",
+    "memberSince": "সদস্যপদ থেকে",
+    "viewOrders": "আমার অর্ডার দেখুন",
+    "notProvided": "প্রদান করা হয়নি"
   },
   "orders": {
     "myOrders": "আমার অর্ডার",
@@ -127,7 +133,10 @@
     "orderNumber": "অর্ডার #",
     "date": "তারিখ",
     "total": "মোট",
-    "status": "অবস্থা"
+    "status": "অবস্থা",
+    "noOrders": "আপনি এখনো কোনো অর্ডার দেননি।",
+    "items": "{count} টি পণ্য",
+    "viewOrder": "অর্ডার দেখুন"
   },
   "common": {
     "loading": "লোড হচ্ছে...",

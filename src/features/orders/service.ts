@@ -79,6 +79,10 @@ export const OrderService = {
     return OrderRepository.findByStore(storeId, options);
   },
 
+  async getByUser(storeId: string, userId: string): Promise<IOrder[]> {
+    return OrderRepository.findByUser(storeId, userId);
+  },
+
   async updateStatus(
     storeId: string,
     orderId: string,

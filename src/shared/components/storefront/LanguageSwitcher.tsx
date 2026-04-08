@@ -38,13 +38,13 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       {tenant.supportedLanguages.map((lang) => (
         <button
           key={lang}
           onClick={() => handleLanguageChange(lang)}
           disabled={isPending}
-          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+          className={`px-2.5 py-1 rounded text-sm font-medium transition-colors whitespace-nowrap ${
             locale === lang
               ? "bg-primary text-white"
               : "bg-gray-200 text-gray-800 hover:bg-gray-300"

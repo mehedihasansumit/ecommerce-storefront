@@ -76,16 +76,16 @@ export function Header() {
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-2 shrink-0 group"
+              className="flex items-center gap-2 shrink-0 min-w-0 group"
             >
               {tenant?.logo ? (
                 <img
                   src={tenant.logo}
                   alt={tenant.name}
-                  className="h-8 w-auto transition-transform duration-200 group-hover:scale-105"
+                  className="h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
                 />
               ) : (
-                <span className="text-xl font-bold tracking-tight">
+                <span className="text-lg sm:text-xl font-bold tracking-tight truncate max-w-[140px] sm:max-w-none">
                   {tenant?.name || t("storeName")}
                 </span>
               )}
@@ -109,7 +109,9 @@ export function Header() {
 
             {/* Actions */}
             <div className="flex items-center gap-1">
-              <LanguageSwitcher />
+              <div className="hidden sm:block">
+                <LanguageSwitcher />
+              </div>
 
               {/* Search toggle */}
               <button
@@ -200,7 +202,7 @@ export function Header() {
                 <X size={20} />
               </button>
             </div>
-            <div className="flex-1 py-4">
+            <div className="flex-1 py-4 flex flex-col">
               {[
                 { href: "/", label: t("home") },
                 { href: "/products", label: t("products") },
@@ -218,6 +220,9 @@ export function Header() {
                   <ChevronRight size={16} className="opacity-50" />
                 </Link>
               ))}
+              <div className="px-6 pt-4 mt-auto border-t border-white/10">
+                <LanguageSwitcher />
+              </div>
             </div>
           </nav>
         </div>

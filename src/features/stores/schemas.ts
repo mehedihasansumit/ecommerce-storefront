@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+/** Accepts { en: "...", bn: "..." } or a plain string (wrapped to { en: value }). */
+const localizedStringSchema = z
+  .union([
+    z.record(z.string(), z.string()),
+    z.string().transform((s) => ({ en: s })),
+  ])
+  .optional()
+  .default({});
+
 export const storeThemeSchema = z.object({
   primaryColor: z.string().optional(),
   secondaryColor: z.string().optional(),
@@ -19,8 +28,8 @@ export const createStoreSchema = z.object({
   theme: storeThemeSchema.optional(),
   seo: z
     .object({
-      title: z.string().optional(),
-      description: z.string().optional(),
+      title: localizedStringSchema,
+      description: localizedStringSchema,
       keywords: z.array(z.string()).optional(),
       ogImage: z.string().optional(),
     })
@@ -46,8 +55,8 @@ export const updateStoreSchema = z.object({
     .array(
       z.object({
         image: z.string().min(1, "Image URL is required"),
-        title: z.string().min(1, "Title is required"),
-        subtitle: z.string().optional(),
+        title: localizedStringSchema,
+        subtitle: localizedStringSchema,
         linkUrl: z.string().optional(),
         linkText: z.string().optional(),
       })
@@ -55,8 +64,8 @@ export const updateStoreSchema = z.object({
     .optional(),
   seo: z
     .object({
-      title: z.string().optional(),
-      description: z.string().optional(),
+      title: localizedStringSchema,
+      description: localizedStringSchema,
       keywords: z.array(z.string()).optional(),
       ogImage: z.string().optional(),
     })

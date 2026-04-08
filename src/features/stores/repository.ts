@@ -42,10 +42,15 @@ export const StoreRepository = {
 
   async update(id: string, data: Record<string, unknown>): Promise<IStore | null> {
     await dbConnect();
-    const store = await StoreModel.findByIdAndUpdate(id, data, {
-      new: true,
-    }).lean();
-    return store ? serialize(store) : null;
+    const store = await StoreModel.findById(id);
+    if (!store) return null;
+    Object.entries(data).forEach(([key, value]) => store.set(key, value));
+    // Mixed-type fields must be explicitly marked modified so Mongoose persists them
+    (["heroBanners", "seo"] as const).forEach((field) => {
+      if (field in data) store.markModified(field);
+    });
+    await store.save();
+    return serialize(store.toObject());
   },
 
   async delete(id: string): Promise<boolean> {

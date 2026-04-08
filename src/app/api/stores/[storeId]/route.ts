@@ -3,6 +3,7 @@ import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse 
 import { StoreService } from "@/features/stores/service";
 import { updateStoreSchema } from "@/features/stores/schemas";
 import { getAdminToken } from "@/shared/lib/auth";
+import { ZodError } from "zod";
 
 export async function GET(
   _request: NextRequest,
@@ -29,13 +30,16 @@ export async function PUT(
     const { storeId } = await params;
     const body = await request.json();
     const validated = updateStoreSchema.parse(body);
-    const store = await StoreService.update(storeId, validated);
+    // Strip undefined values — MongoDB does not accept undefined in $set
+    const cleanData = JSON.parse(JSON.stringify(validated));
+    const store = await StoreService.update(storeId, cleanData);
     if (!store) return notFoundResponse("Store not found");
     return successResponse(store);
   } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
-      return errorResponse("Validation failed", 422);
+    if (error instanceof ZodError) {
+      return errorResponse(error.issues[0]?.message || "Validation failed", 422);
     }
+    console.error("[PUT /api/stores] error:", error);
     return errorResponse("Failed to update store", 500);
   }
 }

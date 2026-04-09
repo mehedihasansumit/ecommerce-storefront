@@ -8,22 +8,56 @@ import {
   Menu,
   X,
   ChevronRight,
+  LogOut,
+  Package,
 } from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { useCart } from "@/shared/context/CartContext";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useRouter, usePathname } from "next/navigation";
 
 export function Header() {
   const tenant = useTenant();
   const { itemCount } = useCart();
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("header");
+
+  useEffect(() => {
+    fetch("/api/auth/customer")
+      .then((r) => r.json())
+      .then((data) => setUserEmail(data.user?.email ?? null))
+      .catch(() => {});
+  }, [pathname]);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUserEmail(null);
+    setUserMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -136,12 +170,57 @@ export function Header() {
               </Link>
 
               {/* Account */}
-              <Link
-                href="/account/login"
-                className="hidden sm:flex p-2 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <User size={20} />
-              </Link>
+              <div className="hidden sm:block relative" ref={userMenuRef}>
+                {userEmail ? (
+                  <>
+                    <button
+                      onClick={() => setUserMenuOpen((v) => !v)}
+                      className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors"
+                      aria-label="Account menu"
+                    >
+                      <User size={20} />
+                    </button>
+                    {userMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white text-gray-800 shadow-lg border border-gray-100 rounded-xl py-1 z-50">
+                        <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
+                          {userEmail}
+                        </p>
+                        <Link
+                          href="/account"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                        >
+                          <User size={15} className="text-gray-400" />
+                          {t("myAccount")}
+                        </Link>
+                        <Link
+                          href="/orders"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                        >
+                          <Package size={15} className="text-gray-400" />
+                          {t("myOrders") || "My Orders"}
+                        </Link>
+                        <hr className="my-1 border-gray-100" />
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut size={15} />
+                          {t("logout") || "Logout"}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href="/account/login"
+                    className="flex p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    <User size={20} />
+                  </Link>
+                )}
+              </div>
 
               {/* Mobile menu button */}
               <button
@@ -206,8 +285,6 @@ export function Header() {
               {[
                 { href: "/", label: t("home") },
                 { href: "/products", label: t("products") },
-                { href: "/account", label: t("myAccount") },
-                { href: "/orders", label: t("myOrders") || "Orders" },
                 { href: "/cart", label: t("cart") || "Cart" },
               ].map((link) => (
                 <Link
@@ -220,6 +297,42 @@ export function Header() {
                   <ChevronRight size={16} className="opacity-50" />
                 </Link>
               ))}
+              {userEmail ? (
+                <>
+                  <Link
+                    href="/account"
+                    className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="font-medium">{t("myAccount")}</span>
+                    <ChevronRight size={16} className="opacity-50" />
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="font-medium">{t("myOrders") || "Orders"}</span>
+                    <ChevronRight size={16} className="opacity-50" />
+                  </Link>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                    className="flex items-center gap-2 px-6 py-3 text-red-400 hover:bg-white/10 transition-colors text-left"
+                  >
+                    <LogOut size={16} />
+                    <span className="font-medium">{t("logout") || "Logout"}</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/account/login"
+                  className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="font-medium">{t("login") || "Login"}</span>
+                  <ChevronRight size={16} className="opacity-50" />
+                </Link>
+              )}
               <div className="px-6 pt-4 mt-auto border-t border-white/10">
                 <LanguageSwitcher />
               </div>

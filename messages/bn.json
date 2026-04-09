@@ -6,7 +6,9 @@
     "myOrders": "অর্ডার",
     "cart": "কার্ট",
     "storeName": "স্টোর",
-    "searchPlaceholder": "পণ্য খুঁজুন..."
+    "searchPlaceholder": "পণ্য খুঁজুন...",
+    "login": "লগইন",
+    "logout": "লগআউট"
   },
   "footer": {
     "quickLinks": "দ্রুত লিঙ্ক",

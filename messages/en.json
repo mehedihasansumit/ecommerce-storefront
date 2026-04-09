@@ -6,7 +6,9 @@
     "myOrders": "Orders",
     "cart": "Cart",
     "storeName": "Store",
-    "searchPlaceholder": "Search products..."
+    "searchPlaceholder": "Search products...",
+    "login": "Login",
+    "logout": "Logout"
   },
   "footer": {
     "quickLinks": "Quick Links",

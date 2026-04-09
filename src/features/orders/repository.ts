@@ -10,7 +10,13 @@ function serialize(doc: unknown): IOrder {
 export const OrderRepository = {
   async create(data: Partial<IOrder>): Promise<IOrder> {
     await dbConnect();
-    const order = await OrderModel.create(data as any);
+    const now = new Date();
+    const order = await OrderModel.create({
+      ...data,
+      statusHistory: [
+        { status: data.status ?? "pending", changedAt: now, note: "" },
+      ],
+    } as any);
     return serialize(order.toObject());
   },
 
@@ -94,12 +100,16 @@ export const OrderRepository = {
 
   async updateStatus(
     id: string,
-    status: string
+    status: string,
+    note = ""
   ): Promise<IOrder | null> {
     await dbConnect();
     const order = await OrderModel.findByIdAndUpdate(
       id,
-      { status },
+      {
+        status,
+        $push: { statusHistory: { status, changedAt: new Date(), note } },
+      },
       { new: true }
     ).lean();
     return order ? serialize(order) : null;

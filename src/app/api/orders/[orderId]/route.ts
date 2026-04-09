@@ -10,6 +10,7 @@ const ORDER_STATUSES = [
 
 const updateStatusSchema = z.object({
   status: z.enum(ORDER_STATUSES),
+  note: z.string().optional(),
 });
 
 export async function GET(
@@ -50,10 +51,10 @@ export async function PUT(
     if (!storeId)
       return NextResponse.json({ error: "storeId required" }, { status: 400 });
 
-    const { status } = updateStatusSchema.parse(rest);
+    const { status, note } = updateStatusSchema.parse(rest);
     const { orderId } = await params;
 
-    const order = await OrderService.updateStatus(storeId, orderId, status);
+    const order = await OrderService.updateStatus(storeId, orderId, status, note);
     if (!order)
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
 

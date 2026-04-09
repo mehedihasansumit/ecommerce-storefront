@@ -62,6 +62,14 @@ const OrderSchema = new Schema<IOrderDocument>(
       default: "pending",
     },
 
+    statusHistory: [
+      {
+        status: { type: String, required: true },
+        changedAt: { type: Date, required: true },
+        note: { type: String, default: "" },
+      },
+    ],
+
     notes: { type: String, default: "" },
   },
   { timestamps: true }

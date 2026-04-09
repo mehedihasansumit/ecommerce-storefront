@@ -28,6 +28,12 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+export interface IStatusHistoryEntry {
+  status: OrderStatus;
+  changedAt: Date;
+  note?: string;
+}
+
 export interface IOrder {
   _id: string;
   storeId: string;
@@ -46,6 +52,7 @@ export interface IOrder {
   paymentStatus: PaymentStatus;
   paymentIntentId: string;
   status: OrderStatus;
+  statusHistory: IStatusHistoryEntry[];
   notes: string;
   createdAt: Date;
   updatedAt: Date;

@@ -90,10 +90,11 @@ export const OrderService = {
   async updateStatus(
     storeId: string,
     orderId: string,
-    status: string
+    status: string,
+    note?: string
   ): Promise<IOrder | null> {
     const order = await OrderRepository.findById(orderId);
     if (!order || order.storeId !== storeId) return null;
-    return OrderRepository.updateStatus(orderId, status);
+    return OrderRepository.updateStatus(orderId, status, note);
   },
 };

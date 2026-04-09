@@ -1,14 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/shared/context/CartContext";
 import { CartItemRow } from "@/features/cart/components/CartItemRow";
 import { useTranslations } from "next-intl";
+import { useTenant } from "@/shared/hooks/useTenant";
 
 export default function CartPage() {
   const t = useTranslations("cart");
   const { items, subtotal } = useCart();
+  const tenant = useTenant();
+
+  useEffect(() => {
+    document.title = `Cart | ${tenant?.name ?? "Store"}`;
+  }, [tenant?.name]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">

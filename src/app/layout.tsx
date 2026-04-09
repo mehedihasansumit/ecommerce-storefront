@@ -7,14 +7,31 @@ import { Toaster } from "react-hot-toast";
 import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 
+function localizedValue(
+  value: Record<string, string> | string | undefined,
+  locale: string,
+  fallback: string
+): string {
+  if (!value) return fallback;
+  if (typeof value === "string") return value || fallback;
+  return value[locale] || value["en"] || Object.values(value)[0] || fallback;
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
   if (!tenant) {
     return { title: "E-Commerce Platform" };
   }
+  const locale = await getLocale();
+  const favicon = tenant.favicon || tenant.logo;
   return {
-    title: String(tenant.seo.title || tenant.name),
-    description: String(tenant.seo.description || `Shop at ${tenant.name}`),
+    title: localizedValue(tenant.seo.title, locale, tenant.name),
+    description: localizedValue(
+      tenant.seo.description,
+      locale,
+      `Shop at ${tenant.name}`
+    ),
+    icons: favicon ? { icon: favicon, shortcut: favicon } : undefined,
   };
 }
 

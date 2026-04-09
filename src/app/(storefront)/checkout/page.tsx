@@ -9,6 +9,7 @@ import { ShoppingBag, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AddressSelector } from "@/features/auth/components/AddressSelector";
 import type { IAddress } from "@/features/auth/types";
+import { useTenant } from "@/shared/hooks/useTenant";
 
 interface FormData {
   name: string;
@@ -36,6 +37,11 @@ export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
+  const tenant = useTenant();
+
+  useEffect(() => {
+    document.title = `Checkout | ${tenant?.name ?? "Store"}`;
+  }, [tenant?.name]);
   const [form, setForm] = useState<FormData>(initialForm);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [submitting, setSubmitting] = useState(false);

@@ -8,10 +8,16 @@ import { Plus, ArrowLeft, MapPin } from "lucide-react";
 import { AddressForm } from "@/features/auth/components/AddressForm";
 import { AddressCard } from "@/features/auth/components/AddressCard";
 import type { IAddress } from "@/features/auth/types";
+import { useTenant } from "@/shared/hooks/useTenant";
 
 export default function AddressesPage() {
   const t = useTranslations("addresses");
   const router = useRouter();
+  const tenant = useTenant();
+
+  useEffect(() => {
+    document.title = `Addresses | ${tenant?.name ?? "Store"}`;
+  }, [tenant?.name]);
   const [addresses, setAddresses] = useState<IAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);

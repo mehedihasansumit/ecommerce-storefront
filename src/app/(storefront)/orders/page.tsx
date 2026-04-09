@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { getCustomerToken } from "@/shared/lib/auth";
 import { getStoreId } from "@/shared/lib/tenant";
 import { OrderService } from "@/features/orders/service";
+import { AuthRepository } from "@/features/auth/repository";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,12 +34,15 @@ export default async function OrdersPage() {
   const storeId = await getStoreId();
   if (!storeId) redirect("/");
 
-  const orders = await OrderService.getByUser(storeId, customerPayload.userId);
+  const user = await AuthRepository.findUserById(customerPayload.userId);
+  if (!user || !user.phone) redirect("/account");
+
+  const orders = await OrderService.getByPhone(storeId, user.phone);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">{t("myOrders")}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("myOrders")}</h1>
         <Link
           href="/account"
           className="text-sm"
@@ -67,7 +71,7 @@ export default async function OrdersPage() {
           {orders.map((order) => (
             <div
               key={order._id}
-              className="border border-gray-200 rounded-lg p-5 bg-white"
+              className="border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg p-6 bg-white hover:shadow-[var(--shadow-sm)] transition-shadow"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -85,7 +89,7 @@ export default async function OrdersPage() {
                 </div>
                 <div className="flex flex-col sm:items-end gap-2">
                   <span
-                    className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-700"}`}
+                    className={`inline-block px-2.5 py-0.5 text-[11px] font-medium rounded-md ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-700"}`}
                   >
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>

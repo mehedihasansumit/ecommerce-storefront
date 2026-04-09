@@ -71,7 +71,7 @@ export default async function ProductDetailPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+        <nav className="flex items-center gap-2 text-xs text-gray-400 mb-8">
           <Link href="/" className="hover:text-gray-900 transition-colors">
             {t("home")}
           </Link>
@@ -89,24 +89,24 @@ export default async function ProductDetailPage({
         <ProductDetailClient product={product} />
 
         {/* Trust signals */}
-        <div className="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-gray-100 max-w-lg">
+        <div className="mt-8 flex items-center gap-8 pt-6 border-t border-gray-100">
           {[
             { icon: Truck, label: tr("freeShipping") || "Free Shipping" },
             { icon: RotateCcw, label: tr("easyReturns") || "Easy Returns" },
             { icon: Shield, label: tr("secureCheckout") || "Secure Checkout" },
           ].map((item) => (
-            <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
-              <item.icon size={18} className="text-gray-400" />
+            <div key={item.label} className="flex items-center gap-2">
+              <item.icon size={16} style={{ color: "var(--color-primary)", opacity: 0.7 }} />
               <span className="text-xs text-gray-500">{item.label}</span>
             </div>
           ))}
         </div>
 
         {/* Description & Tags */}
-        <div className="mt-16 border-t border-gray-200 pt-12">
+        <div className="mt-20 border-t border-gray-200 pt-14">
           {t(product.description, locale) && (
             <div className="max-w-3xl">
-              <h2 className="text-2xl font-bold mb-6">{tr("description")}</h2>
+              <h2 className="text-xl font-semibold mb-6">{tr("description")}</h2>
               <div className="text-gray-600 leading-relaxed whitespace-pre-wrap">
                 {t(product.description, locale)}
               </div>
@@ -118,7 +118,7 @@ export default async function ProductDetailPage({
               {product.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors cursor-default"
+                  className="px-3 py-1.5 bg-gray-100 border border-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors cursor-default"
                   style={{ borderRadius: "var(--border-radius)" }}
                 >
                   #{tag}

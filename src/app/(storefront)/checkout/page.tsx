@@ -117,16 +117,16 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-8">{t("checkout")}</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-8">{t("checkout")}</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Shipping form */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
               <h2 className="font-bold text-lg mb-5">{t("deliveryInfo")}</h2>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                       errors.name
                         ? "border-red-400 focus:ring-red-200"
-                        : "border-gray-200 focus:ring-blue-200 focus:border-blue-400"
+                        : "border-gray-200 focus:ring-primary/20 focus:border-primary"
                     }`}
                   />
                   {errors.name && (
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
                       setForm((f) => ({ ...f, email: e.target.value }))
                     }
                     placeholder="you@example.com"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                   />
                 </div>
 
@@ -211,7 +211,7 @@ export default function CheckoutPage() {
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                       errors.street
                         ? "border-red-400 focus:ring-red-200"
-                        : "border-gray-200 focus:ring-blue-200 focus:border-blue-400"
+                        : "border-gray-200 focus:ring-primary/20 focus:border-primary"
                     }`}
                   />
                   {errors.street && (
@@ -235,7 +235,7 @@ export default function CheckoutPage() {
                       className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                         errors.city
                           ? "border-red-400 focus:ring-red-200"
-                          : "border-gray-200 focus:ring-blue-200 focus:border-blue-400"
+                          : "border-gray-200 focus:ring-primary/20 focus:border-primary"
                       }`}
                     />
                     {errors.city && (
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
                         setForm((f) => ({ ...f, postalCode: e.target.value }))
                       }
                       placeholder={t("postalCode")}
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                     />
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export default function CheckoutPage() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, country: e.target.value }))
                     }
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors bg-white"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white"
                   >
                     <option>Bangladesh</option>
                     <option>India</option>
@@ -289,16 +289,22 @@ export default function CheckoutPage() {
                     }
                     placeholder={t("orderNotes")}
                     rows={3}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors resize-none"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Payment method */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
               <h2 className="font-bold text-lg mb-4">{t("paymentMethod")}</h2>
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label
+                className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg border"
+                style={{
+                  backgroundColor: "color-mix(in srgb, var(--color-primary) 5%, transparent)",
+                  borderColor: "var(--color-primary)",
+                }}
+              >
                 <input
                   type="radio"
                   name="payment"
@@ -319,7 +325,7 @@ export default function CheckoutPage() {
 
           {/* Order summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-100 p-6 sticky top-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7 sticky top-24">
               <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
               {/* Items */}
@@ -384,7 +390,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-5 w-full flex items-center justify-center gap-2 py-4 text-white font-semibold transition-all hover:brightness-105 hover:shadow-[var(--shadow-md)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: "var(--color-primary)",
                   borderRadius: "var(--border-radius)",

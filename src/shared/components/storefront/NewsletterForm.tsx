@@ -22,7 +22,7 @@ export function NewsletterForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+      className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto"
     >
       <input
         type="email"
@@ -30,11 +30,11 @@ export function NewsletterForm({
         onChange={(e) => setEmail(e.target.value)}
         placeholder={emailPlaceholder}
         required
-        className="flex-1 px-5 py-3 rounded-lg bg-white/15 border border-white/25 text-white placeholder:text-white/50 focus:outline-none focus:bg-white/20 focus:border-white/40 transition-all"
+        className="flex-1 px-5 py-3.5 rounded-full bg-white/10 border border-white/25 text-white placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all"
       />
       <button
         type="submit"
-        className="px-6 py-3 bg-white font-semibold rounded-lg transition-all hover:shadow-lg hover:scale-105"
+        className="px-8 py-3.5 bg-white font-semibold rounded-full transition-all hover:shadow-lg hover:scale-105"
         style={{ color: "var(--color-primary)" }}
       >
         {subscribeLabel}

@@ -33,7 +33,7 @@ export function ProductImageGallery({
           <img
             src={currentImage}
             alt={images[selectedIndex]?.alt || productName}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg">
@@ -44,15 +44,15 @@ export function ProductImageGallery({
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-2.5">
           {images.map((img, i) => (
             <button
               key={i}
               onClick={() => setSelectedIndex(i)}
               className={`aspect-square overflow-hidden transition-all duration-200 ${
                 i === selectedIndex
-                  ? "ring-2 opacity-100"
-                  : "opacity-60 hover:opacity-100"
+                  ? "ring-2 ring-offset-2 opacity-100"
+                  : "opacity-50 hover:opacity-100"
               }`}
               style={{
                 borderRadius: "var(--border-radius)",

@@ -14,7 +14,7 @@ export default function LogoutButton({ label }: { label: string }) {
   return (
     <button
       onClick={handleLogout}
-      className="px-4 py-2 text-sm border border-gray-300 hover:bg-gray-50 transition-colors"
+      className="px-4 py-2 text-sm border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
       style={{ borderRadius: "var(--border-radius)" }}
     >
       {label}

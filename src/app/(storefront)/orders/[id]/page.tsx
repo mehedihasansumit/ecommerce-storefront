@@ -78,11 +78,11 @@ export default function OrderDetailPage({
       {confirmed && (
         <div className="text-center mb-8">
           <CheckCircle
-            size={48}
+            size={40}
             className="mx-auto mb-3"
             style={{ color: "var(--color-primary)" }}
           />
-          <h1 className="text-2xl font-bold mb-1">Order Placed!</h1>
+          <h1 className="text-2xl font-semibold mb-1">Order Placed!</h1>
           <p className="text-gray-500 text-sm">
             Thank you for your order. We&apos;ll contact you on{" "}
             <span className="font-medium text-gray-700">
@@ -98,9 +98,9 @@ export default function OrderDetailPage({
       )}
 
       {/* Order info card */}
-      <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-sm)] divide-y divide-gray-100">
         {/* Header */}
-        <div className="p-5 flex items-center justify-between flex-wrap gap-2">
+        <div className="p-6 flex items-center justify-between flex-wrap gap-2">
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">
               Order Number
@@ -119,8 +119,8 @@ export default function OrderDetailPage({
         </div>
 
         {/* Items */}
-        <div className="p-5">
-          <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <div className="p-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3 flex items-center gap-2">
             <Package size={15} />
             Items
           </p>
@@ -164,7 +164,7 @@ export default function OrderDetailPage({
 
         {/* Delivery address */}
         <div className="p-5 text-sm">
-          <p className="font-semibold mb-2">Delivery Address</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Delivery Address</p>
           <p className="text-gray-700">{order.shippingAddress.name}</p>
           <p className="text-gray-500">{order.shippingAddress.phone}</p>
           <p className="text-gray-500">{order.shippingAddress.street}</p>
@@ -189,7 +189,7 @@ export default function OrderDetailPage({
       <div className="mt-6 text-center">
         <Link
           href="/products"
-          className="inline-block px-6 py-2.5 text-white font-medium transition-opacity hover:opacity-90"
+          className="btn-primary"
           style={{
             backgroundColor: "var(--color-primary)",
             borderRadius: "var(--border-radius)",

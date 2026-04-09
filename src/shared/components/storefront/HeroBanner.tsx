@@ -36,7 +36,7 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
   // Auto-advance
   useEffect(() => {
     if (activeBanners.length <= 1) return;
-    const timer = setInterval(next, 6000);
+    const timer = setInterval(next, 7000);
     return () => clearInterval(timer);
   }, [next, activeBanners.length]);
 
@@ -46,12 +46,12 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
   const banner = activeBanners[current];
 
   return (
-    <section className="relative w-full h-112 md:h-144 lg:h-160 overflow-hidden bg-gray-900">
+    <section className="relative w-full h-[28rem] md:h-[36rem] lg:h-[42rem] overflow-hidden bg-gray-900">
       {/* Background images - all preloaded, only current visible */}
       {activeBanners.map((b, i) => (
         <div
           key={i}
-          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
             i === current ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -68,7 +68,7 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
       ))}
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-black/10" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/25 to-transparent" />
 
       {/* Content */}
       <div className="absolute inset-0 flex items-center justify-center">
@@ -83,14 +83,14 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
             {t(banner.title, locale)}
           </h1>
           {t(banner.subtitle, locale) && (
-            <p className="text-lg md:text-xl mb-8 opacity-90 max-w-xl mx-auto drop-shadow-md">
+            <p className="text-base md:text-lg font-light text-white/80 mb-8 max-w-xl mx-auto drop-shadow-md">
               {t(banner.subtitle, locale)}
             </p>
           )}
           {banner.linkUrl && (
             <Link
               href={banner.linkUrl}
-              className="inline-flex items-center gap-2 px-8 py-3.5 font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-xl shadow-lg"
+              className="inline-flex items-center gap-2 px-10 py-4 font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-xl shadow-lg backdrop-blur-sm"
               style={{
                 backgroundColor: "var(--color-primary)",
                 borderRadius: "var(--border-radius)",
@@ -108,14 +108,14 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/15 hover:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm"
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/15 hover:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm border border-white/10"
             aria-label="Previous banner"
           >
             <ChevronLeft size={24} />
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/15 hover:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm"
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/15 hover:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm border border-white/10"
             aria-label="Next banner"
           >
             <ChevronRight size={24} />
@@ -132,8 +132,8 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
               onClick={() => goTo(i)}
               className={`transition-all duration-300 rounded-full ${
                 i === current
-                  ? "w-8 h-2.5 bg-white"
-                  : "w-2.5 h-2.5 bg-white/50 hover:bg-white/70"
+                  ? "w-8 h-2 bg-white"
+                  : "w-2 h-2 bg-white/50 hover:bg-white/70"
               }`}
               aria-label={`Go to banner ${i + 1}`}
             />

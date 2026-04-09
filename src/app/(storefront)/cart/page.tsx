@@ -11,8 +11,8 @@ export default function CartPage() {
   const { items, subtotal } = useCart();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-8">{t("yourCart")}</h1>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-10">{t("yourCart")}</h1>
 
       {items.length === 0 ? (
         <div className="text-center py-20 flex flex-col items-center gap-4">
@@ -33,7 +33,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Items list */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-gray-100 px-4 sm:px-6">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] px-4 sm:px-6">
               {items.map((item, idx) => (
                 <CartItemRow
                   key={`${item.productId}-${JSON.stringify(item.variantSelections)}-${idx}`}
@@ -52,13 +52,13 @@ export default function CartPage() {
               href="/products"
               className="inline-block mt-4 text-sm text-gray-500 hover:text-gray-800 transition-colors"
             >
-              {t("continueShopping")} ←
+              ← {t("continueShopping")}
             </Link>
           </div>
 
           {/* Order summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-100 p-6 sticky top-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7 sticky top-24">
               <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
               <div className="space-y-2 text-sm">

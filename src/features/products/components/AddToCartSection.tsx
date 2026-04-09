@@ -91,7 +91,7 @@ export function AddToCartSection({
         <div className="space-y-4">
           {options.map((option) => (
             <div key={option.name}>
-              <label className="block text-sm font-semibold mb-2.5 text-gray-700">
+              <label className="block text-xs font-semibold uppercase tracking-wide mb-2.5 text-gray-500">
                 {option.name}
                 {selectedOptions[option.name] && (
                   <span className="font-normal text-gray-500 ml-1">
@@ -112,11 +112,14 @@ export function AddToCartSection({
                       disabled={!available}
                       className={`px-4 py-2.5 border text-sm font-medium transition-all duration-200 ${
                         selected
-                          ? "border-gray-900 bg-gray-900 text-white"
+                          ? "border-[var(--color-primary)] text-[var(--color-primary)]"
                           : available
                           ? "border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-sm"
                           : "border-gray-100 text-gray-300 cursor-not-allowed line-through"
                       }`}
+                      style={selected ? {
+                        backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
+                      } : undefined}
                       style={{ borderRadius: "var(--border-radius)" }}
                     >
                       {value}
@@ -132,7 +135,7 @@ export function AddToCartSection({
       {/* Quantity + Add to Cart */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div
-          className="flex items-center border border-gray-200 shrink-0"
+          className="flex items-center border border-gray-200 shadow-[var(--shadow-xs)] shrink-0"
           style={{ borderRadius: "var(--border-radius)" }}
         >
           <button
@@ -156,7 +159,7 @@ export function AddToCartSection({
 
         <button
           onClick={handleAddToCart}
-          className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 text-white font-semibold transition-all duration-200 hover:opacity-90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 text-white font-semibold transition-all duration-200 hover:brightness-105 hover:shadow-[var(--shadow-md)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             backgroundColor: "var(--color-primary)",
             borderRadius: "var(--border-radius)",
@@ -170,10 +173,10 @@ export function AddToCartSection({
 
       {message && (
         <div
-          className={`text-sm font-medium px-4 py-2 rounded-md ${
+          className={`text-sm font-medium px-4 py-2 rounded-md animate-fade-in ${
             message.type === "success"
-              ? "bg-green-50 text-green-700"
-              : "bg-red-50 text-red-700"
+              ? "bg-green-50 text-green-700 border border-green-100"
+              : "bg-red-50 text-red-700 border border-red-100"
           }`}
         >
           {message.text}

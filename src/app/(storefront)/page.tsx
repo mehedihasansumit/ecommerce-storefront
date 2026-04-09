@@ -52,7 +52,7 @@ export default async function HomePage() {
 
       {/* Trust badges */}
       <section className="border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               {
@@ -81,7 +81,7 @@ export default async function HomePage() {
                 className="flex items-center gap-3 text-center md:text-left"
               >
                 <div
-                  className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                  className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
                   style={{
                     backgroundColor:
                       "color-mix(in srgb, var(--color-primary) 10%, transparent)",
@@ -104,9 +104,9 @@ export default async function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">{tr("shopByCategory")}</h2>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+          <div className="text-center mb-12 md:mb-14">
+            <h2 className="text-3xl font-semibold tracking-tight mb-3">{tr("shopByCategory")}</h2>
             <p className="text-gray-500 max-w-md mx-auto">
               {tr("shopByCategoryDesc") ||
                 "Explore our curated collections"}
@@ -117,7 +117,7 @@ export default async function HomePage() {
               <Link
                 key={category._id}
                 href={`/categories/${category.slug}`}
-                className="group relative overflow-hidden bg-gray-100 aspect-[4/5] flex items-end"
+                className="group relative overflow-hidden bg-gray-100 aspect-[3/4] flex items-end"
                 style={{ borderRadius: "var(--border-radius)" }}
               >
                 {category.image && (
@@ -147,11 +147,11 @@ export default async function HomePage() {
       )}
 
       {/* Featured Products */}
-      <section className="bg-gray-50/50 py-16">
+      <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-3xl font-semibold tracking-tight mb-2">
                 {tr("featuredProducts")}
               </h2>
               <p className="text-gray-500">
@@ -161,8 +161,8 @@ export default async function HomePage() {
             </div>
             <Link
               href="/products"
-              className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:opacity-80"
-              style={{ color: "var(--color-primary)" }}
+              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+              style={{ borderRadius: "var(--border-radius)" }}
             >
               {tr("viewAll")}
               <ArrowRight size={16} />
@@ -186,18 +186,18 @@ export default async function HomePage() {
       </section>
 
       {/* Newsletter / CTA */}
-      <section className="py-20">
+      <section className="py-24 md:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="relative overflow-hidden px-8 py-16 md:px-16 text-center text-white"
+            className="relative overflow-hidden px-8 py-20 md:px-20 text-center text-white"
             style={{
               backgroundColor: "var(--color-primary)",
               borderRadius: "calc(var(--border-radius) * 2)",
             }}
           >
             {/* Decorative circles */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10" />
+            <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/10" />
 
             <div className="relative">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">

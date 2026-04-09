@@ -83,6 +83,10 @@ export const OrderService = {
     return OrderRepository.findByUser(storeId, userId);
   },
 
+  async getByPhone(storeId: string, phone: string): Promise<IOrder[]> {
+    return OrderRepository.findByPhone(storeId, phone);
+  },
+
   async updateStatus(
     storeId: string,
     orderId: string,

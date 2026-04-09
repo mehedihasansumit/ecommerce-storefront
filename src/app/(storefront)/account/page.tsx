@@ -32,25 +32,25 @@ export default async function AccountPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">{t("myAccount")}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("myAccount")}</h1>
         <LogoutButton label={t("logout")} />
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+      <div className="bg-white border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg p-8 space-y-4">
         <h2 className="text-lg font-semibold border-b pb-2">
           {t("welcome", { name: user.name })}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500">{t("email")}</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("email")}</p>
             <p className="font-medium">{user.email}</p>
           </div>
           <div>
-            <p className="text-gray-500">{t("phone")}</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("phone")}</p>
             <p className="font-medium">{user.phone || t("notProvided")}</p>
           </div>
           <div>
-            <p className="text-gray-500">{t("memberSince")}</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("memberSince")}</p>
             <p className="font-medium">{memberSince}</p>
           </div>
         </div>

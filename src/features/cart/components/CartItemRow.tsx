@@ -40,7 +40,7 @@ export function CartItemRow({
   const variantEntries = Object.entries(variantSelections);
 
   return (
-    <div className="flex gap-4 py-5 border-b border-gray-100 last:border-0">
+    <div className="flex gap-4 py-6 border-b border-gray-100 last:border-0">
       {/* Thumbnail */}
       <Link href={`/products/${productSlug}`} className="shrink-0">
         <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden relative">
@@ -61,7 +61,7 @@ export function CartItemRow({
       <div className="flex-1 min-w-0">
         <Link
           href={`/products/${productSlug}`}
-          className="font-semibold text-sm sm:text-base hover:underline line-clamp-2"
+          className="font-medium text-sm sm:text-base hover:underline line-clamp-2"
         >
           {productName}
         </Link>
@@ -69,7 +69,7 @@ export function CartItemRow({
         {variantEntries.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-2">
             {variantEntries.map(([key, val]) => (
-              <span key={key} className="text-xs text-gray-500">
+              <span key={key} className="text-[11px] text-gray-400 uppercase tracking-wide">
                 {key}: <span className="font-medium text-gray-700">{val}</span>
               </span>
             ))}
@@ -88,13 +88,13 @@ export function CartItemRow({
       <div className="flex flex-col items-end justify-between gap-2 shrink-0">
         <button
           onClick={() => handleUpdate(0)}
-          className="text-gray-400 hover:text-red-500 transition-colors"
+          className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
         >
           <Trash2 size={16} />
         </button>
 
         <div
-          className="flex items-center border border-gray-200"
+          className="flex items-center border border-gray-200 shadow-[var(--shadow-xs)]"
           style={{ borderRadius: "var(--border-radius)" }}
         >
           <button

@@ -96,7 +96,7 @@ export function Header() {
     <>
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled ? "glass shadow-lg" : ""
+          scrolled ? "glass shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : ""
         }`}
         style={{
           backgroundColor: scrolled
@@ -106,7 +106,7 @@ export function Header() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-[4.5rem]">
             {/* Logo */}
             <Link
               href="/"
@@ -126,7 +126,7 @@ export function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-0.5">
               {[
                 { href: "/", label: t("home") },
                 { href: "/products", label: t("products") },
@@ -134,7 +134,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 rounded-lg"
+                  className="relative px-4 py-2 text-[13px] font-medium uppercase tracking-widest transition-colors hover:bg-white/8 rounded-lg"
                 >
                   {link.label}
                 </Link>
@@ -142,7 +142,7 @@ export function Header() {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <div className="hidden sm:block">
                 <LanguageSwitcher />
               </div>
@@ -150,20 +150,26 @@ export function Header() {
               {/* Search toggle */}
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-2.5 rounded-lg hover:bg-white/10 transition-colors"
                 aria-label="Search"
               >
-                <Search size={20} />
+                <Search size={18} />
               </button>
 
               {/* Cart */}
               <Link
                 href="/cart"
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors relative"
+                className="p-2.5 rounded-lg hover:bg-white/10 transition-colors relative"
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={18} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                  <span
+                    className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center leading-none ring-2"
+                    style={{
+                      backgroundColor: "var(--color-accent)",
+                      ringColor: "var(--color-header-bg)",
+                    }}
+                  >
                     {itemCount > 99 ? "99+" : itemCount}
                   </span>
                 )}
@@ -175,13 +181,13 @@ export function Header() {
                   <>
                     <button
                       onClick={() => setUserMenuOpen((v) => !v)}
-                      className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-1.5 p-2.5 rounded-lg hover:bg-white/10 transition-colors"
                       aria-label="Account menu"
                     >
-                      <User size={20} />
+                      <User size={18} />
                     </button>
                     {userMenuOpen && (
-                      <div className="absolute right-0 top-full mt-2 w-48 bg-white text-gray-800 shadow-lg border border-gray-100 rounded-xl py-1 z-50">
+                      <div className="absolute right-0 top-full mt-2 w-52 bg-white text-gray-800 shadow-[var(--shadow-lg)] border border-gray-100 rounded-xl py-2 z-50 animate-scale-in">
                         <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
                           {userEmail}
                         </p>
@@ -215,9 +221,9 @@ export function Header() {
                 ) : (
                   <Link
                     href="/account/login"
-                    className="flex p-2 rounded-lg hover:bg-white/10 transition-colors"
+                    className="flex p-2.5 rounded-lg hover:bg-white/10 transition-colors"
                   >
-                    <User size={20} />
+                    <User size={18} />
                   </Link>
                 )}
               </div>
@@ -243,7 +249,7 @@ export function Header() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("searchPlaceholder") || "Search products..."}
-                  className="w-full px-4 py-2.5 pr-12 rounded-lg bg-white/10 border border-white/20 text-inherit placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all"
+                  className="w-full px-4 py-3 pr-12 rounded-lg bg-white/12 border border-white/15 text-inherit placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all"
                 />
                 <button
                   type="submit"
@@ -267,7 +273,7 @@ export function Header() {
           />
           {/* Panel */}
           <nav
-            className="absolute right-0 top-0 h-full w-72 shadow-2xl animate-slide-in-right flex flex-col"
+            className="absolute right-0 top-0 h-full w-80 shadow-2xl animate-slide-in-right flex flex-col"
             style={{ backgroundColor: "var(--color-header-bg)", color: "var(--color-header-text)" }}
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -290,7 +296,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="font-medium">{link.label}</span>
@@ -301,7 +307,7 @@ export function Header() {
                 <>
                   <Link
                     href="/account"
-                    className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                    className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="font-medium">{t("myAccount")}</span>
@@ -309,7 +315,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/orders"
-                    className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                    className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="font-medium">{t("myOrders") || "Orders"}</span>
@@ -326,7 +332,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/account/login"
-                  className="flex items-center justify-between px-6 py-3 hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="font-medium">{t("login") || "Login"}</span>

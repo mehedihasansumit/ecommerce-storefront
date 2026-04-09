@@ -8,8 +8,17 @@
   --color-text: #111827;
   --color-header-bg: #111827;
   --color-header-text: #FFFFFF;
+  --color-surface: #FAFAFA;
+  --color-border-subtle: #F3F4F6;
+  --color-text-secondary: #6B7280;
+  --color-text-tertiary: #9CA3AF;
   --font-family: 'Inter', sans-serif;
   --border-radius: 0.5rem;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme inline {
@@ -20,7 +29,15 @@
   --color-text: var(--color-text);
   --color-header-bg: var(--color-header-bg);
   --color-header-text: var(--color-header-text);
+  --color-surface: var(--color-surface);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
   --radius-theme: var(--border-radius);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
 html {
@@ -35,6 +52,9 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -45,11 +65,22 @@ a {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -107,7 +138,11 @@ a {
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out both;
+  animation: fadeInUp 0.5s var(--ease-out-expo) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s var(--ease-out-expo) both;
 }
 
 .animate-fade-in {
@@ -133,21 +168,63 @@ a {
 /* Stagger children animations */
 .stagger-children > * {
   opacity: 0;
-  animation: fadeInUp 0.5s ease-out both;
+  animation: fadeInUp 0.5s var(--ease-out-expo) both;
 }
 .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2) { animation-delay: 80ms; }
-.stagger-children > *:nth-child(3) { animation-delay: 160ms; }
-.stagger-children > *:nth-child(4) { animation-delay: 240ms; }
-.stagger-children > *:nth-child(5) { animation-delay: 320ms; }
-.stagger-children > *:nth-child(6) { animation-delay: 400ms; }
-.stagger-children > *:nth-child(7) { animation-delay: 480ms; }
-.stagger-children > *:nth-child(8) { animation-delay: 560ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
 
 /* Glass morphism utility */
 .glass {
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+/* Button utilities */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.05);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+.btn-secondary:active {
+  transform: scale(0.98);
 }
 
 /* Custom scrollbar */

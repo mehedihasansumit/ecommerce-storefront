@@ -52,7 +52,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           </span>
         )}
 
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4 leading-tight">
           {t(product.name, locale)}
         </h1>
 
@@ -63,7 +63,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  size={18}
+                  size={16}
                   className={
                     i < Math.round(product.averageRating)
                       ? "fill-yellow-400 text-yellow-400"
@@ -72,7 +72,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-500">
+            <span className="text-xs text-gray-500">
               ({product.reviewCount} {tr("reviews")})
             </span>
           </div>
@@ -81,7 +81,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         {/* Price */}
         <div className="flex items-baseline gap-3 mb-6">
           <span
-            className="text-3xl md:text-4xl font-bold"
+            className="text-2xl md:text-3xl font-bold"
             style={{ color: "var(--color-primary)" }}
           >
             ৳{displayPrice.toLocaleString()}

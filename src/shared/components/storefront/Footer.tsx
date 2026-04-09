@@ -11,31 +11,32 @@ export function Footer() {
 
   return (
     <footer
-      className="mt-auto border-t border-gray-200"
+      className="mt-auto"
       style={{
         backgroundColor: "var(--color-header-bg)",
         color: "var(--color-header-text)",
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
           {/* Store Info */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="text-lg font-bold mb-4">
+            <h3 className="text-xl font-semibold mb-5 tracking-tight">
               {tenant?.name || "Store"}
             </h3>
-            <p className="text-sm opacity-60 mb-5 leading-relaxed">
+            <p className="text-sm text-white/50 mb-6 leading-relaxed max-w-xs">
               {t("storeDescription") ||
                 "Your trusted destination for quality products."}
             </p>
             {/* Social Icons */}
-            <div className="flex gap-3">
+            <div className="flex gap-3.5">
               {tenant?.socialLinks?.facebook && (
                 <a
                   href={tenant.socialLinks.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  className="w-10 h-10 rounded-full bg-white/8 hover:bg-white/15 hover:scale-105 flex items-center justify-center transition-all duration-200"
                   aria-label="Facebook"
                 >
                   <svg
@@ -53,7 +54,7 @@ export function Footer() {
                   href={tenant.socialLinks.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  className="w-10 h-10 rounded-full bg-white/8 hover:bg-white/15 hover:scale-105 flex items-center justify-center transition-all duration-200"
                   aria-label="Instagram"
                 >
                   <svg
@@ -71,7 +72,7 @@ export function Footer() {
                   href={tenant.socialLinks.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  className="w-10 h-10 rounded-full bg-white/8 hover:bg-white/15 hover:scale-105 flex items-center justify-center transition-all duration-200"
                   aria-label="Twitter"
                 >
                   <svg
@@ -89,10 +90,10 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 opacity-70">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.15em] mb-5 text-white/40">
               {t("quickLinks")}
             </h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-3.5 text-sm">
               {[
                 { href: "/products", label: t("allProducts") },
                 { href: "/cart", label: t("cart") },
@@ -102,7 +103,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="opacity-60 hover:opacity-100 transition-opacity"
+                    className="text-white/50 hover:text-white/90 transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -113,10 +114,10 @@ export function Footer() {
 
           {/* Customer Service */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 opacity-70">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.15em] mb-5 text-white/40">
               {t("customerService") || "Customer Service"}
             </h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-3.5 text-sm">
               {[
                 t("shippingPolicy") || "Shipping Policy",
                 t("returnPolicy") || "Return Policy",
@@ -134,10 +135,10 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 opacity-70">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.15em] mb-5 text-white/40">
               {t("contactUs") || "Contact Us"}
             </h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-3.5 text-sm">
               {tenant?.contact?.address && (
                 <li className="flex items-start gap-2.5">
                   <MapPin size={16} className="shrink-0 mt-0.5 opacity-50" />
@@ -149,7 +150,7 @@ export function Footer() {
                   <Mail size={16} className="shrink-0 opacity-50" />
                   <a
                     href={`mailto:${tenant.contact.email}`}
-                    className="opacity-60 hover:opacity-100 transition-opacity"
+                    className="text-white/50 hover:text-white/90 transition-colors duration-200"
                   >
                     {tenant.contact.email}
                   </a>
@@ -160,7 +161,7 @@ export function Footer() {
                   <Phone size={16} className="shrink-0 opacity-50" />
                   <a
                     href={`tel:${tenant.contact.phone}`}
-                    className="opacity-60 hover:opacity-100 transition-opacity"
+                    className="text-white/50 hover:text-white/90 transition-colors duration-200"
                   >
                     {tenant.contact.phone}
                   </a>

@@ -1,6 +1,7 @@
 import dbConnect from "@/shared/lib/db";
 import { OrderModel } from "./model";
 import type { IOrder } from "./types";
+import { normalizePhone } from "@/shared/lib/phone";
 
 function serialize(doc: unknown): IOrder {
   return JSON.parse(JSON.stringify(doc));
@@ -68,6 +69,19 @@ export const OrderRepository = {
   async findByUser(storeId: string, userId: string): Promise<IOrder[]> {
     await dbConnect();
     const orders = await OrderModel.find({ storeId, userId })
+      .sort({ createdAt: -1 })
+      .lean();
+    return orders.map(serialize);
+  },
+
+  async findByPhone(storeId: string, phone: string): Promise<IOrder[]> {
+    await dbConnect();
+    const normalized = normalizePhone(phone);
+    const withoutPlus = normalized.replace(/^\+/, "");
+    const orders = await OrderModel.find({
+      storeId,
+      guestPhone: { $in: [normalized, withoutPlus] },
+    })
       .sort({ createdAt: -1 })
       .lean();
     return orders.map(serialize);

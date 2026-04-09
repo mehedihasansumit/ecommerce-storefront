@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizePhone, BD_PHONE_REGEX } from "@/shared/lib/phone";
 
 export const createOrderSchema = z.object({
   items: z.array(
@@ -13,11 +14,8 @@ export const createOrderSchema = z.object({
     phone: z
       .string()
       .min(1, "Phone is required")
-      .transform((v) => v.replace(/\s/g, ""))
-      .refine(
-        (v) => /^\+88[0-9]{11}$/.test(v) || /^[0-9]{11}$/.test(v),
-        "Invalid phone number"
-      ),
+      .transform(normalizePhone)
+      .refine((v) => BD_PHONE_REGEX.test(v), "Invalid phone number"),
     street: z.string().min(1, "Street address is required"),
     city: z.string().min(1, "City is required"),
     postalCode: z.string().default(""),

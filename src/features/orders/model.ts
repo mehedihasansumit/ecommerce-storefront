@@ -68,6 +68,7 @@ const OrderSchema = new Schema<IOrderDocument>(
 );
 
 OrderSchema.index({ storeId: 1, userId: 1, createdAt: -1 });
+OrderSchema.index({ storeId: 1, guestPhone: 1, createdAt: -1 });
 OrderSchema.index({ storeId: 1, orderNumber: 1 }, { unique: true });
 OrderSchema.index({ storeId: 1, status: 1 });
 

@@ -40,7 +40,15 @@ export default async function StoreOrdersPage({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Orders</h1>
-        <span className="text-sm text-gray-500">{orders.length} total</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">{orders.length} total</span>
+          <Link
+            href={`/admin/stores/${storeId}/orders/new`}
+            className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition-colors"
+          >
+            + Create Order
+          </Link>
+        </div>
       </div>
 
       {/* Status filter tabs */}

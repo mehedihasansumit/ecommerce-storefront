@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const product = await ProductService.create(storeId, validated as Parameters<typeof ProductService.create>[1]);
     return NextResponse.json(product, { status: 201 });
   } catch (err) {
-    if (err instanceof ZodError) return errorResponse(err.errors[0].message, 400);
+    if (err instanceof ZodError) return errorResponse(err.issues[0].message, 400);
     return errorResponse("Internal server error", 500);
   }
 }

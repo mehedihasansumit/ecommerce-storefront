@@ -167,7 +167,7 @@ export function Header() {
                     className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center leading-none ring-2"
                     style={{
                       backgroundColor: "var(--color-accent)",
-                      ringColor: "var(--color-header-bg)",
+                      ["--tw-ring-color" as string]: "var(--color-header-bg)",
                     }}
                   >
                     {itemCount > 99 ? "99+" : itemCount}

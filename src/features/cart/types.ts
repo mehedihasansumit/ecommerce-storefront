@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
 export interface ICartItem {
   _id?: string;
@@ -30,5 +30,5 @@ export interface ICartDocument extends Omit<ICart, "_id" | "storeId" | "userId" 
   _id: Types.ObjectId;
   storeId: Types.ObjectId;
   userId: Types.ObjectId | null;
-  items: ICartItemDocument[];
+  items: Types.DocumentArray<ICartItemDocument & Document>;
 }

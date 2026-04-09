@@ -30,12 +30,8 @@ export async function PUT(
     if (!product) return errorResponse("Product not found", 404);
     return successResponse(product);
   } catch (err) {
-    if (err instanceof Error && err.name === "ZodError") {
-      const zodError = err as any;
-      if (zodError.errors && zodError.errors.length > 0) {
-        return errorResponse(zodError.errors[0].message, 400);
-      }
-      return errorResponse("Invalid input data", 400);
+    if (err instanceof ZodError) {
+      return errorResponse(err.issues[0]?.message ?? "Invalid input data", 400);
     }
     return errorResponse("Internal server error", 500);
   }

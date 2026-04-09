@@ -7,7 +7,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
 
-  let locale = cookieLocale || requestLocale || routing.defaultLocale;
+  const resolvedLocale = await requestLocale;
+  let locale = cookieLocale || resolvedLocale || routing.defaultLocale;
 
   // Validate that the locale exists in our routing config
   if (!routing.locales.includes(locale as any)) {

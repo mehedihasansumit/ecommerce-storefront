@@ -10,7 +10,7 @@ function serialize(doc: unknown): IOrder {
 export const OrderRepository = {
   async create(data: Partial<IOrder>): Promise<IOrder> {
     await dbConnect();
-    const order = await OrderModel.create(data);
+    const order = await OrderModel.create(data as any);
     return serialize(order.toObject());
   },
 

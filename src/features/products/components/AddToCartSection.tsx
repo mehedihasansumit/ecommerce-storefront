@@ -117,10 +117,10 @@ export function AddToCartSection({
                           ? "border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-sm"
                           : "border-gray-100 text-gray-300 cursor-not-allowed line-through"
                       }`}
-                      style={selected ? {
-                        backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
-                      } : undefined}
-                      style={{ borderRadius: "var(--border-radius)" }}
+                      style={{
+                        borderRadius: "var(--border-radius)",
+                        ...(selected ? { backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)" } : undefined),
+                      }}
                     >
                       {value}
                     </button>

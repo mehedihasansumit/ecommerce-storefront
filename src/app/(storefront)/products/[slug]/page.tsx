@@ -73,11 +73,11 @@ export default async function ProductDetailPage({
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs text-gray-400 mb-8">
           <Link href="/" className="hover:text-gray-900 transition-colors">
-            {t("home")}
+            {tr("home")}
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
           <Link href="/products" className="hover:text-gray-900 transition-colors">
-            {t("products")}
+            {tr("products")}
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
           <span className="text-gray-900 font-medium truncate max-w-48">

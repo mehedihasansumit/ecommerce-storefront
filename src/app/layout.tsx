@@ -13,8 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
     return { title: "E-Commerce Platform" };
   }
   return {
-    title: tenant.seo.title || tenant.name,
-    description: tenant.seo.description || `Shop at ${tenant.name}`,
+    title: String(tenant.seo.title || tenant.name),
+    description: String(tenant.seo.description || `Shop at ${tenant.name}`),
   };
 }
 

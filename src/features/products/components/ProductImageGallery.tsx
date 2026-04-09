@@ -56,7 +56,7 @@ export function ProductImageGallery({
               }`}
               style={{
                 borderRadius: "var(--border-radius)",
-                ringColor: "var(--color-primary)",
+                ["--tw-ring-color" as string]: "var(--color-primary)",
               }}
             >
               <img

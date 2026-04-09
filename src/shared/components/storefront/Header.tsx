@@ -10,6 +10,7 @@ import {
   ChevronRight,
   LogOut,
   Package,
+  MapPin,
 } from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { useCart } from "@/shared/context/CartContext";
@@ -17,6 +18,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useRouter, usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 
 export function Header() {
   const tenant = useTenant();
@@ -28,15 +30,21 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("header");
+  const locale = useLocale();
+  const isBn = locale === "bn";
 
   useEffect(() => {
     fetch("/api/auth/customer")
       .then((r) => r.json())
-      .then((data) => setUserEmail(data.user?.email ?? null))
+      .then((data) => {
+        setUserEmail(data.user?.email ?? null);
+        setUserName(data.user?.name ?? null);
+      })
       .catch(() => {});
   }, [pathname]);
 
@@ -54,6 +62,7 @@ export function Header() {
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     setUserEmail(null);
+    setUserName(null);
     setUserMenuOpen(false);
     router.push("/");
     router.refresh();
@@ -134,7 +143,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-4 py-2 text-[13px] font-medium uppercase tracking-widest transition-colors hover:bg-white/8 rounded-lg"
+                  className={`relative px-4 py-2 font-medium transition-colors hover:bg-white/8 rounded-lg ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"}`}
                 >
                   {link.label}
                 </Link>
@@ -181,16 +190,26 @@ export function Header() {
                   <>
                     <button
                       onClick={() => setUserMenuOpen((v) => !v)}
-                      className="flex items-center gap-1.5 p-2.5 rounded-lg hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                       aria-label="Account menu"
                     >
-                      <User size={18} />
+                      <span
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white select-none"
+                        style={{ backgroundColor: "var(--color-primary)" }}
+                      >
+                        {userName
+                          ? userName.charAt(0).toUpperCase()
+                          : userEmail.charAt(0).toUpperCase()}
+                      </span>
                     </button>
                     {userMenuOpen && (
                       <div className="absolute right-0 top-full mt-2 w-52 bg-white text-gray-800 shadow-[var(--shadow-lg)] border border-gray-100 rounded-xl py-2 z-50 animate-scale-in">
-                        <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
-                          {userEmail}
-                        </p>
+                        <div className="px-4 py-2.5 border-b border-gray-100">
+                          {userName && (
+                            <p className="text-sm font-medium text-gray-800 truncate">{userName}</p>
+                          )}
+                          <p className="text-xs text-gray-400 truncate">{userEmail}</p>
+                        </div>
                         <Link
                           href="/account"
                           onClick={() => setUserMenuOpen(false)}
@@ -207,6 +226,14 @@ export function Header() {
                           <Package size={15} className="text-gray-400" />
                           {t("myOrders") || "My Orders"}
                         </Link>
+                        <Link
+                          href="/account/addresses"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                        >
+                          <MapPin size={15} className="text-gray-400" />
+                          {t("addresses") || "Addresses"}
+                        </Link>
                         <hr className="my-1 border-gray-100" />
                         <button
                           onClick={handleLogout}
@@ -221,9 +248,10 @@ export function Header() {
                 ) : (
                   <Link
                     href="/account/login"
-                    className="flex p-2.5 rounded-lg hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
                   >
                     <User size={18} />
+                    <span className="hidden lg:inline">{t("login") || "Login"}</span>
                   </Link>
                 )}
               </div>
@@ -305,6 +333,10 @@ export function Header() {
               ))}
               {userEmail ? (
                 <>
+                  <div className="px-6 py-3 border-b border-white/10">
+                    <p className="text-sm font-medium truncate">{userName || userEmail}</p>
+                    {userName && <p className="text-xs opacity-60 truncate">{userEmail}</p>}
+                  </div>
                   <Link
                     href="/account"
                     className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
@@ -319,6 +351,14 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="font-medium">{t("myOrders") || "Orders"}</span>
+                    <ChevronRight size={16} className="opacity-50" />
+                  </Link>
+                  <Link
+                    href="/account/addresses"
+                    className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="font-medium">{t("addresses") || "Addresses"}</span>
                     <ChevronRight size={16} className="opacity-50" />
                   </Link>
                   <button

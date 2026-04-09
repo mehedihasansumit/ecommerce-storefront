@@ -44,9 +44,9 @@ html {
   scroll-behavior: smooth;
 }
 
-html[lang="bn"] {
+/* html[lang="bn"] {
   font-size: 106.25%;
-}
+} */
 
 body {
   background-color: var(--color-bg);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCustomerToken } from "@/shared/lib/auth";
+import { AuthRepository } from "@/features/auth/repository";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 
 export async function GET() {
@@ -8,5 +9,6 @@ export async function GET() {
     return NextResponse.json({ user: null }, { status: 200 });
   }
   const { userId, email } = payload as JwtCustomerPayload;
-  return NextResponse.json({ user: { userId, email } }, { status: 200 });
+  const user = await AuthRepository.findUserById(userId);
+  return NextResponse.json({ user: { userId, email, name: user?.name ?? null } }, { status: 200 });
 }

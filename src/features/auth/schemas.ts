@@ -17,3 +17,17 @@ export const adminLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
+
+export const addressSchema = z.object({
+  label: z.string().default(""),
+  street: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().default(""),
+  postalCode: z.string().default(""),
+  country: z.string().default("Bangladesh"),
+  isDefault: z.boolean().default(false),
+});
+
+export const updateAddressSchema = addressSchema.partial();
+
+export type AddressInput = z.infer<typeof addressSchema>;

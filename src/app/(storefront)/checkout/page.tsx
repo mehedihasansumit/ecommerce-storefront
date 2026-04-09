@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/shared/context/CartContext";
 import { ShoppingBag, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AddressSelector } from "@/features/auth/components/AddressSelector";
+import type { IAddress } from "@/features/auth/types";
 
 interface FormData {
   name: string;
@@ -40,9 +42,51 @@ export default function CheckoutPage() {
   const [serverError, setServerError] = useState("");
   const [mounted, setMounted] = useState(false);
 
+  // Saved address state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<IAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [usingSavedAddress, setUsingSavedAddress] = useState(false);
+
+  const loadSavedAddresses = useCallback(async () => {
+    try {
+      const authRes = await fetch("/api/auth/customer");
+      const authData = await authRes.json();
+      if (!authData.user) return;
+
+      setIsLoggedIn(true);
+      const addrRes = await fetch("/api/addresses");
+      if (addrRes.ok) {
+        const addrData = await addrRes.json();
+        if (addrData.addresses?.length > 0) {
+          setSavedAddresses(addrData.addresses);
+          const defaultAddr =
+            addrData.addresses.find((a: IAddress) => a.isDefault) ||
+            addrData.addresses[0];
+          setSelectedAddressId(defaultAddr._id);
+          setUsingSavedAddress(true);
+          // Pre-fill form with default address
+          setForm((f) => ({
+            ...f,
+            street: defaultAddr.street,
+            city: defaultAddr.city,
+            postalCode: defaultAddr.postalCode || "",
+            country: defaultAddr.country || "Bangladesh",
+          }));
+        }
+      }
+    } catch {
+      // ignore - guest checkout
+    }
+  }, []);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted) loadSavedAddresses();
+  }, [mounted, loadSavedAddresses]);
 
   // Redirect to cart if empty (only after hydration)
   useEffect(() => {
@@ -50,6 +94,52 @@ export default function CheckoutPage() {
       router.replace("/cart");
     }
   }, [mounted, items.length, router]);
+
+  function handleAddressSelect(address: IAddress | null) {
+    if (address) {
+      setSelectedAddressId(address._id);
+      setUsingSavedAddress(true);
+      setForm((f) => ({
+        ...f,
+        street: address.street,
+        city: address.city,
+        postalCode: address.postalCode || "",
+        country: address.country || "Bangladesh",
+      }));
+    } else {
+      setSelectedAddressId(null);
+      setUsingSavedAddress(false);
+      setForm((f) => ({
+        ...f,
+        street: "",
+        city: "",
+        postalCode: "",
+        country: "Bangladesh",
+      }));
+    }
+  }
+
+  async function handleSaveNewAddress(data: Omit<IAddress, "_id">) {
+    const res = await fetch("/api/addresses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    setSavedAddresses(result.addresses);
+    // Select the newly added address (last one)
+    const newAddr = result.addresses[result.addresses.length - 1];
+    setSelectedAddressId(newAddr._id);
+    setUsingSavedAddress(true);
+    setForm((f) => ({
+      ...f,
+      street: newAddr.street,
+      city: newAddr.city,
+      postalCode: newAddr.postalCode || "",
+      country: newAddr.country || "Bangladesh",
+    }));
+  }
 
   function validate(): boolean {
     const e: Partial<FormData> = {};
@@ -123,6 +213,17 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Shipping form */}
           <div className="lg:col-span-2 space-y-5">
+            {/* Saved addresses selector */}
+            {isLoggedIn && savedAddresses.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
+                <AddressSelector
+                  addresses={savedAddresses}
+                  onSelect={handleAddressSelect}
+                  onSaveNew={handleSaveNewAddress}
+                />
+              </div>
+            )}
+
             <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
               <h2 className="font-bold text-lg mb-5">{t("deliveryInfo")}</h2>
 
@@ -207,8 +308,11 @@ export default function CheckoutPage() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, street: e.target.value }))
                     }
+                    readOnly={usingSavedAddress}
                     placeholder={t("streetAddress")}
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
+                      usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                    } ${
                       errors.street
                         ? "border-red-400 focus:ring-red-200"
                         : "border-gray-200 focus:ring-primary/20 focus:border-primary"
@@ -231,8 +335,11 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setForm((f) => ({ ...f, city: e.target.value }))
                       }
+                      readOnly={usingSavedAddress}
                       placeholder={t("city")}
                       className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
+                        usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                      } ${
                         errors.city
                           ? "border-red-400 focus:ring-red-200"
                           : "border-gray-200 focus:ring-primary/20 focus:border-primary"
@@ -252,8 +359,11 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setForm((f) => ({ ...f, postalCode: e.target.value }))
                       }
+                      readOnly={usingSavedAddress}
                       placeholder={t("postalCode")}
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      className={`w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
+                        usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                      }`}
                     />
                   </div>
                 </div>
@@ -268,7 +378,10 @@ export default function CheckoutPage() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, country: e.target.value }))
                     }
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white"
+                    disabled={usingSavedAddress}
+                    className={`w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white ${
+                      usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                    }`}
                   >
                     <option>Bangladesh</option>
                     <option>India</option>

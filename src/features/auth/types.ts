@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 export interface IAddress {
+  _id: string;
   label: string;
   street: string;
   city: string;

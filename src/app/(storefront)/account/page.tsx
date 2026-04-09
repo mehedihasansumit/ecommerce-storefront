@@ -56,7 +56,38 @@ export default async function AccountPage() {
         </div>
       </div>
 
-      <div className="mt-6">
+      {/* Default address summary */}
+      {user.addresses && user.addresses.length > 0 && (
+        <div className="mt-6 bg-white border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg p-8">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">
+            {t("defaultAddress")}
+          </h2>
+          {(() => {
+            const defaultAddr =
+              user.addresses.find((a) => a.isDefault) || user.addresses[0];
+            return (
+              <div className="text-sm text-gray-600 space-y-0.5">
+                {defaultAddr.label && (
+                  <p className="font-medium text-gray-800">
+                    {defaultAddr.label}
+                  </p>
+                )}
+                <p>{defaultAddr.street}</p>
+                <p>
+                  {defaultAddr.city}
+                  {defaultAddr.postalCode
+                    ? `, ${defaultAddr.postalCode}`
+                    : ""}
+                </p>
+                {defaultAddr.state && <p>{defaultAddr.state}</p>}
+                <p>{defaultAddr.country}</p>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      <div className="mt-6 flex flex-wrap gap-3">
         <Link
           href="/orders"
           className="inline-block px-6 py-2 text-white font-medium"
@@ -66,6 +97,15 @@ export default async function AccountPage() {
           }}
         >
           {t("viewOrders")}
+        </Link>
+        <Link
+          href="/account/addresses"
+          className="inline-block px-6 py-2 font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+          style={{
+            borderRadius: "var(--border-radius)",
+          }}
+        >
+          {t("manageAddresses")}
         </Link>
       </div>
     </div>

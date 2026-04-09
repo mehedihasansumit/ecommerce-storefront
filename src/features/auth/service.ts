@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import { AuthRepository } from "./repository";
 import { signToken } from "@/shared/lib/auth";
-import type { IUser, IAdminUser, JwtCustomerPayload, JwtAdminPayload } from "./types";
+import type { IUser, IAdminUser, IAddress, JwtCustomerPayload, JwtAdminPayload } from "./types";
+import type { AddressInput } from "./schemas";
 
 export const AuthService = {
   async registerCustomer(
@@ -109,5 +110,62 @@ export const AuthService = {
       passwordHash,
       role: data.role || "manager",
     });
+  },
+
+  async getAddresses(storeId: string, userId: string): Promise<IAddress[]> {
+    const user = await AuthRepository.findUserById(userId);
+    if (!user || user.storeId !== storeId) {
+      throw new Error("User not found");
+    }
+    return user.addresses || [];
+  },
+
+  async addAddress(
+    storeId: string,
+    userId: string,
+    data: AddressInput
+  ): Promise<IAddress[]> {
+    const user = await AuthRepository.findUserById(userId);
+    if (!user || user.storeId !== storeId) {
+      throw new Error("User not found");
+    }
+    if ((user.addresses || []).length >= 10) {
+      throw new Error("Maximum 10 addresses allowed");
+    }
+
+    const updated = await AuthRepository.addAddress(storeId, userId, data);
+    if (!updated) throw new Error("Failed to add address");
+    return updated.addresses;
+  },
+
+  async updateAddress(
+    storeId: string,
+    userId: string,
+    addressId: string,
+    data: Partial<AddressInput>
+  ): Promise<IAddress[]> {
+    const updated = await AuthRepository.updateAddress(storeId, userId, addressId, data);
+    if (!updated) throw new Error("Address not found");
+    return updated.addresses;
+  },
+
+  async removeAddress(
+    storeId: string,
+    userId: string,
+    addressId: string
+  ): Promise<IAddress[]> {
+    const updated = await AuthRepository.removeAddress(storeId, userId, addressId);
+    if (!updated) throw new Error("Address not found");
+    return updated.addresses;
+  },
+
+  async setDefaultAddress(
+    storeId: string,
+    userId: string,
+    addressId: string
+  ): Promise<IAddress[]> {
+    const updated = await AuthRepository.setDefaultAddress(storeId, userId, addressId);
+    if (!updated) throw new Error("Address not found");
+    return updated.addresses;
   },
 };

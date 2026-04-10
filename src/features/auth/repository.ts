@@ -53,6 +53,24 @@ export const AuthRepository = {
     return serializeAdmin(admin.toObject());
   },
 
+  async findAllAdmins(): Promise<IAdminUser[]> {
+    await dbConnect();
+    const admins = await AdminUserModel.find().sort({ createdAt: -1 }).lean();
+    return admins.map(serializeAdmin);
+  },
+
+  async updateAdmin(id: string, data: Partial<IAdminUser>): Promise<IAdminUser | null> {
+    await dbConnect();
+    const admin = await AdminUserModel.findByIdAndUpdate(id, data, { new: true }).lean();
+    return admin ? serializeAdmin(admin) : null;
+  },
+
+  async deleteAdmin(id: string): Promise<boolean> {
+    await dbConnect();
+    const result = await AdminUserModel.findByIdAndDelete(id);
+    return !!result;
+  },
+
   async findCustomersByStore(
     storeId: string,
     { skip = 0, limit = 20 }: { skip?: number; limit?: number } = {}

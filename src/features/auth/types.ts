@@ -1,4 +1,7 @@
 import { Types } from "mongoose";
+import type { Permission } from "@/shared/lib/permissions";
+
+export type { Permission };
 
 export interface IAddress {
   _id: string;
@@ -36,6 +39,7 @@ export interface IAdminUser {
   passwordHash: string;
   role: "superadmin" | "manager";
   assignedStores: string[];
+  permissions: Permission[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +59,8 @@ export interface JwtCustomerPayload {
 export interface JwtAdminPayload {
   adminId: string;
   role: "superadmin" | "manager";
+  permissions: Permission[];
+  assignedStores: string[];
   type: "admin";
 }
 

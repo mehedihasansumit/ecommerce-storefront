@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { OrderRepository } from "@/features/orders/repository";
 import { StoreService } from "@/features/stores/service";
+import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 import type { OrderStatus } from "@/features/orders/types";
 
 export const metadata: Metadata = { title: "All Orders" };
@@ -34,6 +38,9 @@ export default async function AllOrdersPage({
 }: {
   searchParams: Promise<{ status?: string; storeId?: string; page?: string }>;
 }) {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (!payload || !hasPermission(payload, PERMISSIONS.ORDERS_VIEW)) redirect("/admin");
+
   const { status, storeId: filterStore, page: pageParam } = await searchParams;
   const page = Math.max(1, parseInt(pageParam ?? "1") || 1);
 

@@ -2,10 +2,33 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Store, LayoutDashboard, ShoppingBag, Menu, X } from "lucide-react";
+import {
+  Store,
+  LayoutDashboard,
+  ShoppingBag,
+  Users,
+  UserCog,
+  Menu,
+  X,
+} from "lucide-react";
 
-export function MobileAdminNav() {
+interface MobileAdminNavProps {
+  isSuperAdmin: boolean;
+  canViewStores: boolean;
+  canViewOrders: boolean;
+  canViewCustomers: boolean;
+}
+
+export function MobileAdminNav({
+  isSuperAdmin,
+  canViewStores,
+  canViewOrders,
+  canViewCustomers,
+}: MobileAdminNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const navLinkClass =
+    "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors";
 
   return (
     <div className="md:hidden bg-gray-900 text-white border-b border-gray-800">
@@ -26,27 +49,51 @@ export function MobileAdminNav() {
           <Link
             href="/admin"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+            className={navLinkClass}
           >
             <LayoutDashboard size={18} />
             <span className="text-sm">Dashboard</span>
           </Link>
-          <Link
-            href="/admin/stores"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <Store size={18} />
-            <span className="text-sm">Stores</span>
-          </Link>
-          <Link
-            href="/admin/orders"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <ShoppingBag size={18} />
-            <span className="text-sm">All Orders</span>
-          </Link>
+          {canViewStores && (
+            <Link
+              href="/admin/stores"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass}
+            >
+              <Store size={18} />
+              <span className="text-sm">Stores</span>
+            </Link>
+          )}
+          {canViewOrders && (
+            <Link
+              href="/admin/orders"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass}
+            >
+              <ShoppingBag size={18} />
+              <span className="text-sm">All Orders</span>
+            </Link>
+          )}
+          {canViewCustomers && (
+            <Link
+              href="/admin/customers"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass}
+            >
+              <Users size={18} />
+              <span className="text-sm">Customers</span>
+            </Link>
+          )}
+          {isSuperAdmin && (
+            <Link
+              href="/admin/admins"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass}
+            >
+              <UserCog size={18} />
+              <span className="text-sm">Admins</span>
+            </Link>
+          )}
         </nav>
       )}
     </div>

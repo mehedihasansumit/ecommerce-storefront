@@ -1,15 +1,15 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse, unauthorizedResponse } from "@/shared/lib/api-response";
+import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
 import { StoreService } from "@/features/stores/service";
 import { createStoreSchema } from "@/features/stores/schemas";
 import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 
 export async function GET() {
   try {
-    const admin = await getAdminToken();
-    if (!admin || admin.type !== "admin") {
-      return unauthorizedResponse();
-    }
+    const admin = (await getAdminToken()) as JwtAdminPayload | null;
+    if (!admin || admin.type !== "admin") return unauthorizedResponse();
 
     const stores = await StoreService.getAll();
     return successResponse(stores);
@@ -20,10 +20,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const admin = await getAdminToken();
-    if (!admin || admin.type !== "admin") {
-      return unauthorizedResponse();
-    }
+    const admin = (await getAdminToken()) as JwtAdminPayload | null;
+    if (!admin || admin.type !== "admin") return unauthorizedResponse();
+    if (!hasPermission(admin, PERMISSIONS.STORES_CREATE)) return forbiddenResponse("Missing permission: stores.create");
 
     const body = await request.json();
     const validated = createStoreSchema.parse(body);

@@ -42,6 +42,7 @@ const AdminUserSchema = new Schema<IAdminUserDocument>(
       default: "manager",
     },
     assignedStores: [{ type: Schema.Types.ObjectId, ref: "Store" }],
+    permissions: { type: [String], default: [] },
   },
   { timestamps: true }
 );

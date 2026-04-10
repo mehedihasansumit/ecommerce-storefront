@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { OrderRepository } from "@/features/orders/repository";
 import { StoreService } from "@/features/stores/service";
 import { PaymentsTable } from "./PaymentsTable";
 import { CreditCard, ChevronLeft, ChevronRight } from "lucide-react";
+import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 import type { Metadata } from "next";
 import type { PaymentStatus } from "@/features/orders/types";
 
@@ -26,7 +29,12 @@ export default async function PaymentsPage({
   params: Promise<{ storeId: string }>;
   searchParams: Promise<{ page?: string; status?: string }>;
 }) {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (!payload || !hasPermission(payload, PERMISSIONS.PAYMENTS_VIEW)) redirect("/admin");
+
   const { storeId } = await params;
+  if (!canAccessStore(payload, storeId)) redirect("/admin");
+
   const { page: pageStr, status } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 

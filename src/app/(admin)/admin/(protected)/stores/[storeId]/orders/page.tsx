@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { OrderService } from "@/features/orders/service";
+import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 import type { OrderStatus } from "@/features/orders/types";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -25,7 +29,11 @@ export default async function StoreOrdersPage({
   params: Promise<{ storeId: string }>;
   searchParams: Promise<{ status?: string }>;
 }) {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (!payload || !hasPermission(payload, PERMISSIONS.ORDERS_VIEW)) redirect("/admin");
+
   const { storeId } = await params;
+  if (!canAccessStore(payload, storeId)) redirect("/admin");
   const { status } = await searchParams;
 
   const orders = await OrderService.getByStore(storeId, {

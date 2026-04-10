@@ -1,11 +1,24 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { StoreService } from "@/features/stores/service";
+import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 import type { Metadata } from "next";
 import { Store, Plus, Globe, ExternalLink, Settings } from "lucide-react";
 
 export const metadata: Metadata = { title: "Manage Stores" };
 
 export default async function StoresPage() {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (
+    !payload ||
+    (!hasPermission(payload, PERMISSIONS.STORES_CREATE) &&
+      !hasPermission(payload, PERMISSIONS.STORES_EDIT))
+  ) {
+    redirect("/admin");
+  }
+
   const stores = await StoreService.getAll();
 
   return (

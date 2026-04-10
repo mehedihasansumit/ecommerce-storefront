@@ -1,15 +1,23 @@
 import { StoreService } from "@/features/stores/service";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Package, Tag, ShoppingBag, Users, CreditCard } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
+import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 
 export default async function StoreDetailPage({
   params,
 }: {
   params: Promise<{ storeId: string }>;
 }) {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (!payload || !hasPermission(payload, PERMISSIONS.STORES_EDIT)) redirect("/admin");
+
   const { storeId } = await params;
+  if (!canAccessStore(payload, storeId)) redirect("/admin");
+
   const store = await StoreService.getById(storeId);
 
   if (!store) notFound();

@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AuthService } from "@/features/auth/service";
 import { StoreService } from "@/features/stores/service";
+import { getAdminToken } from "@/shared/lib/auth";
+import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
+import type { JwtAdminPayload } from "@/features/auth/types";
 import { Users, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -22,6 +26,9 @@ export default async function AllCustomersPage({
 }: {
   searchParams: Promise<{ page?: string; store?: string }>;
 }) {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (!payload || !hasPermission(payload, PERMISSIONS.CUSTOMERS_VIEW)) redirect("/admin");
+
   const { page: pageStr, store: storeFilter } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 

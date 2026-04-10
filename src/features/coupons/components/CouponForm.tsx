@@ -25,6 +25,7 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
     validUntil: coupon ? new Date(coupon.validUntil).toISOString().slice(0, 16) : "",
     usageLimit: coupon?.usageLimit ?? "",
     perCustomerLimit: coupon?.perCustomerLimit ?? 1,
+    requiresLogin: coupon?.requiresLogin ?? false,
     isActive: coupon?.isActive ?? true,
   });
 
@@ -48,6 +49,7 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
       validUntil: form.validUntil,
       usageLimit: form.usageLimit ? Number(form.usageLimit) : null,
       perCustomerLimit: Number(form.perCustomerLimit),
+      requiresLogin: form.requiresLogin,
       isActive: form.isActive,
     };
 
@@ -237,17 +239,37 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="isActive"
-          checked={form.isActive}
-          onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
-          className="w-4 h-4 rounded border-gray-300"
-        />
-        <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-          Active
-        </label>
+      <div className="space-y-3">
+        <div className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-gray-50">
+          <input
+            type="checkbox"
+            id="requiresLogin"
+            checked={form.requiresLogin}
+            onChange={(e) => setForm((f) => ({ ...f, requiresLogin: e.target.checked }))}
+            className="w-4 h-4 mt-0.5 rounded border-gray-300"
+          />
+          <div>
+            <label htmlFor="requiresLogin" className="text-sm font-medium text-gray-700 cursor-pointer">
+              Requires login to use
+            </label>
+            <p className="text-xs text-gray-500 mt-0.5">
+              When enabled, only logged-in customers can apply this coupon. Guest checkouts will be rejected.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="isActive"
+            checked={form.isActive}
+            onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
+            className="w-4 h-4 rounded border-gray-300"
+          />
+          <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+            Active
+          </label>
+        </div>
       </div>
 
       <div className="flex gap-3 pt-2">

@@ -22,6 +22,7 @@ const CouponSchema = new Schema<ICouponDocument>(
     perCustomerLimit: { type: Number, default: 1 },
     applicableProducts: [{ type: Schema.Types.ObjectId, ref: "Product" }],
     applicableCategories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
+    requiresLogin: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

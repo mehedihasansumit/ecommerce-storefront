@@ -16,6 +16,7 @@ export interface ICoupon {
   perCustomerLimit: number;
   applicableProducts: string[];
   applicableCategories: string[];
+  requiresLogin: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -37,6 +38,7 @@ export interface ICouponDocument {
   perCustomerLimit: number;
   applicableProducts: import("mongoose").Types.ObjectId[];
   applicableCategories: import("mongoose").Types.ObjectId[];
+  requiresLogin: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

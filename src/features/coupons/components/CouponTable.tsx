@@ -58,6 +58,7 @@ export function CouponTable({ coupons: initialCoupons, storeId }: CouponTablePro
             <th className="pb-3 font-medium">Usage</th>
             <th className="pb-3 font-medium">Valid Until</th>
             <th className="pb-3 font-medium">Status</th>
+            <th className="pb-3 font-medium">Access</th>
             <th className="pb-3 font-medium text-right">Actions</th>
           </tr>
         </thead>
@@ -85,6 +86,15 @@ export function CouponTable({ coupons: initialCoupons, storeId }: CouponTablePro
                     className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${status.color}`}
                   >
                     {status.label}
+                  </span>
+                </td>
+                <td className="py-3">
+                  <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${
+                    coupon.requiresLogin
+                      ? "bg-purple-100 text-purple-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}>
+                    {coupon.requiresLogin ? "Login required" : "Anyone"}
                   </span>
                 </td>
                 <td className="py-3 text-right">

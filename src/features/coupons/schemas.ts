@@ -17,6 +17,7 @@ export const createCouponSchema = z.object({
   perCustomerLimit: z.number().int().positive().optional().default(1),
   applicableProducts: z.array(z.string()).optional().default([]),
   applicableCategories: z.array(z.string()).optional().default([]),
+  requiresLogin: z.boolean().optional().default(false),
   isActive: z.boolean().optional().default(true),
 });
 

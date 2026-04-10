@@ -80,6 +80,10 @@ export const CouponService = {
       return { valid: false, discount: 0, reason: "Coupon is inactive" };
     }
 
+    if (coupon.requiresLogin && !userId) {
+      return { valid: false, discount: 0, reason: "You must be logged in to use this coupon" };
+    }
+
     const now = new Date();
     if (now < new Date(coupon.validFrom)) {
       return { valid: false, discount: 0, reason: "Coupon is not yet valid" };

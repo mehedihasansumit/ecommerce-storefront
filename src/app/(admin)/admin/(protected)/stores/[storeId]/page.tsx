@@ -1,7 +1,7 @@
 import { StoreService } from "@/features/stores/service";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Package, Tag, ShoppingBag, Users } from "lucide-react";
+import { Package, Tag, ShoppingBag, Users, CreditCard } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 
 export default async function StoreDetailPage({
@@ -55,6 +55,11 @@ export default async function StoreDetailPage({
           href={`/admin/stores/${storeId}/customers`}
           icon={<Users size={24} />}
           label="Customers"
+        />
+        <QuickLink
+          href={`/admin/stores/${storeId}/payments`}
+          icon={<CreditCard size={24} />}
+          label="Payments"
         />
       </div>
 

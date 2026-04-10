@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Store, LayoutDashboard, ShoppingBag } from "lucide-react";
+import { Store, LayoutDashboard, ShoppingBag, Users } from "lucide-react";
 import { MobileAdminNav } from "./_components/MobileAdminNav";
 
 export default function AdminLayout({
@@ -37,6 +37,13 @@ export default function AdminLayout({
           >
             <ShoppingBag size={18} />
             <span className="text-sm">All Orders</span>
+          </Link>
+          <Link
+            href="/admin/customers"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+          >
+            <Users size={18} />
+            <span className="text-sm">Customers</span>
           </Link>
         </nav>
       </aside>

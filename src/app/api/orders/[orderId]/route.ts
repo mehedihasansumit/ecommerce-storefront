@@ -8,9 +8,17 @@ const ORDER_STATUSES = [
   "pending","confirmed","processing","shipped","delivered","cancelled",
 ] as const;
 
+const PAYMENT_STATUSES = ["pending", "paid", "failed", "refunded"] as const;
+
 const updateStatusSchema = z.object({
   status: z.enum(ORDER_STATUSES),
   note: z.string().optional(),
+});
+
+const updatePaymentSchema = z.object({
+  storeId: z.string(),
+  paymentStatus: z.enum(PAYMENT_STATUSES).optional(),
+  discount: z.number().min(0).optional(),
 });
 
 export async function GET(
@@ -67,5 +75,43 @@ export async function PUT(
       { error: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ orderId: string }> }
+) {
+  try {
+    const adminToken = await getAdminToken();
+    if (!adminToken)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await request.json();
+    const { storeId, paymentStatus, discount } = updatePaymentSchema.parse(body);
+    const { orderId } = await params;
+
+    let order = null;
+
+    if (paymentStatus !== undefined) {
+      order = await OrderService.updatePaymentStatus(storeId, orderId, paymentStatus);
+    }
+
+    if (discount !== undefined) {
+      order = await OrderService.applyDiscount(storeId, orderId, discount);
+    }
+
+    if (!order)
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+
+    return NextResponse.json({ order });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: "Invalid input", details: error.errors }, { status: 400 });
+    }
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

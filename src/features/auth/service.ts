@@ -112,6 +112,35 @@ export const AuthService = {
     });
   },
 
+  async getCustomersByStore(
+    storeId: string,
+    { page = 1, limit = 20 }: { page?: number; limit?: number } = {}
+  ): Promise<{ customers: Omit<IUser, "passwordHash">[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      AuthRepository.findCustomersByStore(storeId, { skip, limit }),
+      AuthRepository.countCustomersByStore(storeId),
+    ]);
+    return {
+      customers: users.map(({ passwordHash: _, ...u }) => u),
+      total,
+    };
+  },
+
+  async getAllCustomers(
+    { page = 1, limit = 20, storeId }: { page?: number; limit?: number; storeId?: string } = {}
+  ): Promise<{ customers: Omit<IUser, "passwordHash">[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      AuthRepository.findAllCustomers({ skip, limit, storeId }),
+      AuthRepository.countAllCustomers(storeId),
+    ]);
+    return {
+      customers: users.map(({ passwordHash: _, ...u }) => u),
+      total,
+    };
+  },
+
   async getAddresses(storeId: string, userId: string): Promise<IAddress[]> {
     const user = await AuthRepository.findUserById(userId);
     if (!user || user.storeId !== storeId) {

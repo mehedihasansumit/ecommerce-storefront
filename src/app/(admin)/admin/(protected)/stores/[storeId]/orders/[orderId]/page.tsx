@@ -132,9 +132,7 @@ export default async function OrderDetailPage({
           </h2>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600 capitalize">
-              {order.paymentMethod === "cod"
-                ? "Cash on Delivery"
-                : order.paymentMethod}
+              {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
             </span>
             <span
               className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${
@@ -142,12 +140,25 @@ export default async function OrderDetailPage({
                   ? "bg-green-100 text-green-800"
                   : order.paymentStatus === "failed"
                   ? "bg-red-100 text-red-800"
+                  : order.paymentStatus === "refunded"
+                  ? "bg-gray-100 text-gray-700"
                   : "bg-yellow-100 text-yellow-800"
               }`}
             >
               {order.paymentStatus}
             </span>
           </div>
+          {order.discount > 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              Discount: ৳{order.discount.toLocaleString()}
+            </p>
+          )}
+          <Link
+            href={`/admin/stores/${storeId}/payments`}
+            className="mt-3 inline-block text-xs text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Manage payment →
+          </Link>
         </div>
 
         {/* Notes */}

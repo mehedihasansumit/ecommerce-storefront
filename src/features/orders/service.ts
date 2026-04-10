@@ -87,6 +87,44 @@ export const OrderService = {
     return OrderRepository.findByPhone(storeId, phone);
   },
 
+  async getByPhonePaginated(
+    storeId: string,
+    phone: string,
+    { page = 1, limit = 10 }: { page?: number; limit?: number } = {}
+  ): Promise<{ orders: IOrder[]; total: number }> {
+    const skip = (page - 1) * limit;
+    return OrderRepository.findByPhonePaginated(storeId, phone, { skip, limit });
+  },
+
+  async getCustomerOrderStats(
+    storeId: string
+  ): Promise<{ userId: string; orderCount: number; totalSpent: number; lastOrderAt: string }[]> {
+    return OrderRepository.getCustomerOrderStats(storeId);
+  },
+
+  async updatePaymentStatus(
+    storeId: string,
+    orderId: string,
+    paymentStatus: string
+  ): Promise<IOrder | null> {
+    const order = await OrderRepository.findById(orderId);
+    if (!order || order.storeId !== storeId) return null;
+    return OrderRepository.updatePaymentStatus(orderId, paymentStatus);
+  },
+
+  async applyDiscount(
+    storeId: string,
+    orderId: string,
+    discount: number
+  ): Promise<IOrder | null> {
+    const order = await OrderRepository.findById(orderId);
+    if (!order || order.storeId !== storeId) return null;
+    if (discount < 0 || discount > order.subtotal + order.shippingCost + order.tax) {
+      throw new Error("Invalid discount amount");
+    }
+    return OrderRepository.applyDiscount(orderId, discount);
+  },
+
   async updateStatus(
     storeId: string,
     orderId: string,

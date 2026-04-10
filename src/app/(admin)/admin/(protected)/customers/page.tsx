@@ -1,10 +1,10 @@
-import { AuthService } from "@/features/auth/service";
-import { OrderService } from "@/features/orders/service";
-import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { AuthService } from "@/features/auth/service";
+import { StoreService } from "@/features/stores/service";
+import { Users, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Customers" };
+export const metadata: Metadata = { title: "All Customers" };
 
 const PAGE_SIZE = 10;
 
@@ -17,41 +17,71 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export default async function StoreCustomersPage({
-  params,
+export default async function AllCustomersPage({
   searchParams,
 }: {
-  params: Promise<{ storeId: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; store?: string }>;
 }) {
-  const { storeId } = await params;
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, store: storeFilter } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
-  const [{ customers, total }, orderStats] = await Promise.all([
-    AuthService.getCustomersByStore(storeId, { page, limit: PAGE_SIZE }),
-    OrderService.getCustomerOrderStats(storeId),
+  const [{ customers, total }, stores] = await Promise.all([
+    AuthService.getAllCustomers({ page, limit: PAGE_SIZE, storeId: storeFilter }),
+    StoreService.getAll(),
   ]);
 
-  const statsMap = new Map(orderStats.map((s) => [s.userId, s]));
+  const storeMap = new Map(stores.map((s) => [s._id, s]));
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
-  function buildHref(p: number) {
-    return `?page=${p}`;
+  function buildHref(p: number, store?: string) {
+    const sp = new URLSearchParams();
+    sp.set("page", String(p));
+    if (store) sp.set("store", store);
+    return `?${sp.toString()}`;
   }
 
   return (
     <div>
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {total} {total === 1 ? "customer" : "customers"} registered
+            {total} {total === 1 ? "customer" : "customers"}
+            {storeFilter ? " in this store" : " across all stores"}
           </p>
         </div>
       </div>
 
+      {/* Store filter tabs */}
+      {stores.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Link
+            href="?"
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!storeFilter
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              }`}
+          >
+            All Stores
+          </Link>
+          {stores.map((s) => (
+            <Link
+              key={s._id}
+              href={buildHref(1, s._id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${storeFilter === s._id
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                }`}
+            >
+              {s.name}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
       {total === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
           <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -64,18 +94,18 @@ export default async function StoreCustomersPage({
         <>
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
               <p className="text-sm text-gray-500">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
               <div className="flex items-center gap-1">
                 <Link
-                  href={buildHref(Math.max(1, currentPage - 1))}
+                  href={buildHref(Math.max(1, currentPage - 1), storeFilter)}
                   aria-disabled={currentPage <= 1}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${currentPage <= 1
-                    ? "opacity-30 pointer-events-none border-gray-200"
-                    : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-gray-200"
+                      : "border-gray-200 hover:bg-gray-100"
                     }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -101,10 +131,10 @@ export default async function StoreCustomersPage({
                     ) : (
                       <Link
                         key={item}
-                        href={buildHref(item as number)}
+                        href={buildHref(item as number, storeFilter)}
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
-                          ? "bg-gray-900 text-white"
-                          : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                            ? "bg-gray-900 text-white"
+                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
                           }`}
                       >
                         {item}
@@ -113,11 +143,11 @@ export default async function StoreCustomersPage({
                   )}
 
                 <Link
-                  href={buildHref(Math.min(totalPages, currentPage + 1))}
+                  href={buildHref(Math.min(totalPages, currentPage + 1), storeFilter)}
                   aria-disabled={currentPage >= totalPages}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${currentPage >= totalPages
-                    ? "opacity-30 pointer-events-none border-gray-200"
-                    : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-gray-200"
+                      : "border-gray-200 hover:bg-gray-100"
                     }`}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -128,7 +158,7 @@ export default async function StoreCustomersPage({
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-175">
+              <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -137,14 +167,13 @@ export default async function StoreCustomersPage({
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Contact
                     </th>
+                    {!storeFilter && (
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Store
+                      </th>
+                    )}
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Location
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Orders
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Total Spent
                     </th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Status
@@ -156,14 +185,13 @@ export default async function StoreCustomersPage({
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {customers.map((customer) => {
-                    const stats = statsMap.get(customer._id);
+                    const store = storeMap.get(customer.storeId);
                     const defaultAddress =
                       customer.addresses?.find((a) => a.isDefault) ??
                       customer.addresses?.[0];
 
                     return (
                       <tr key={customer._id} className="hover:bg-gray-50/60 transition-colors">
-                        {/* Customer */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -175,7 +203,6 @@ export default async function StoreCustomersPage({
                           </div>
                         </td>
 
-                        {/* Contact */}
                         <td className="px-5 py-4">
                           <div className="space-y-1">
                             {customer.email && (
@@ -196,7 +223,21 @@ export default async function StoreCustomersPage({
                           </div>
                         </td>
 
-                        {/* Location */}
+                        {!storeFilter && (
+                          <td className="px-5 py-4">
+                            {store ? (
+                              <Link
+                                href={`/admin/stores/${store._id}/customers`}
+                                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                              >
+                                {store.name}
+                              </Link>
+                            ) : (
+                              <span className="text-xs text-gray-400">—</span>
+                            )}
+                          </td>
+                        )}
+
                         <td className="px-5 py-4">
                           {defaultAddress ? (
                             <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -210,31 +251,11 @@ export default async function StoreCustomersPage({
                           )}
                         </td>
 
-                        {/* Orders */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-sm">
-                            <ShoppingBag className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="font-medium text-gray-900">
-                              {stats?.orderCount ?? 0}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Total spent */}
-                        <td className="px-5 py-4 text-sm font-semibold text-gray-900">
-                          {stats ? (
-                            <>৳{stats.totalSpent.toLocaleString()}</>
-                          ) : (
-                            <span className="text-gray-400 font-normal">—</span>
-                          )}
-                        </td>
-
-                        {/* Status */}
                         <td className="px-5 py-4">
                           <span
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${customer.isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
                               }`}
                           >
                             <span
@@ -245,7 +266,6 @@ export default async function StoreCustomersPage({
                           </span>
                         </td>
 
-                        {/* Joined */}
                         <td className="px-5 py-4 text-xs text-gray-500 whitespace-nowrap">
                           {new Date(customer.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",

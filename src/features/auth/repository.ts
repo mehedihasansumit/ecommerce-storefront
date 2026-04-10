@@ -53,13 +53,43 @@ export const AuthRepository = {
     return serializeAdmin(admin.toObject());
   },
 
-  async findCustomersByStore(storeId: string): Promise<IUser[]> {
+  async findCustomersByStore(
+    storeId: string,
+    { skip = 0, limit = 20 }: { skip?: number; limit?: number } = {}
+  ): Promise<IUser[]> {
     await dbConnect();
     const users = await UserModel.find({ storeId })
       .select("-passwordHash")
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
     return users.map(serializeUser);
+  },
+
+  async countCustomersByStore(storeId: string): Promise<number> {
+    await dbConnect();
+    return UserModel.countDocuments({ storeId });
+  },
+
+  async findAllCustomers(
+    { skip = 0, limit = 20, storeId }: { skip?: number; limit?: number; storeId?: string } = {}
+  ): Promise<IUser[]> {
+    await dbConnect();
+    const filter = storeId ? { storeId } : {};
+    const users = await UserModel.find(filter)
+      .select("-passwordHash")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    return users.map(serializeUser);
+  },
+
+  async countAllCustomers(storeId?: string): Promise<number> {
+    await dbConnect();
+    const filter = storeId ? { storeId } : {};
+    return UserModel.countDocuments(filter);
   },
 
   async addAddress(

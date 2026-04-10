@@ -105,7 +105,7 @@ export default async function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="text-center mb-12 md:mb-14">
             <h2 className="text-3xl font-semibold tracking-tight mb-3">{tr("shopByCategory")}</h2>
             <p className="text-gray-500 max-w-md mx-auto">
@@ -149,7 +149,7 @@ export default async function HomePage() {
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
-        <section className="py-20 md:py-28">
+        <section className="py-12 md:py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
@@ -188,7 +188,7 @@ export default async function HomePage() {
       )}
 
       {/* Featured Products */}
-      <section className="py-20 md:py-28">
+      <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -227,7 +227,7 @@ export default async function HomePage() {
       </section>
 
       {/* Newsletter / CTA */}
-      <section className="py-24 md:py-32">
+      <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             className="relative overflow-hidden px-8 py-20 md:px-20 text-center text-white"

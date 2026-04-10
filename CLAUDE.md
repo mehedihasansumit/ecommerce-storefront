@@ -78,11 +78,16 @@ ecommerce-website/
 │   │   │
 │   │   ├── (admin)/                          # Route group: admin panel
 │   │   │   └── admin/
-│   │   │       ├── layout.tsx                # Admin sidebar layout
-│   │   │       ├── page.tsx                  # Dashboard stats
+│   │   │       ├── layout.tsx                # Minimal pass-through (no sidebar)
 │   │   │       ├── login/
-│   │   │       │   └── page.tsx
-│   │   │       └── stores/
+│   │   │       │   └── page.tsx              # Login page (no sidebar/auth)
+│   │   │       ├── _components/              # Shared admin components (MobileAdminNav, AdminLogoutButton)
+│   │   │       └── (protected)/              # Auth-guarded route group
+│   │   │           ├── layout.tsx            # Sidebar + auth check + permission context
+│   │   │           ├── page.tsx              # Dashboard stats
+│   │   │           ├── roles/                # Role CRUD (superadmin only)
+│   │   │           ├── admins/               # Admin user CRUD (superadmin only)
+│   │   │           └── stores/
 │   │   │           ├── page.tsx              # List all stores
 │   │   │           ├── new/
 │   │   │           │   └── page.tsx
@@ -171,11 +176,11 @@ ecommerce-website/
 │   │   │       └── CategoryForm.tsx
 │   │   │
 │   │   ├── auth/
-│   │   │   ├── model.ts                      # User + AdminUser Mongoose schemas
+│   │   │   ├── model.ts                      # User + AdminUser Mongoose schemas (AdminUser: roleId, assignedStores)
 │   │   │   ├── repository.ts                 # findByEmail, createUser, etc.
-│   │   │   ├── service.ts                    # login, register, verifyToken, hashPassword
-│   │   │   ├── schemas.ts                    # loginSchema, registerSchema
-│   │   │   ├── types.ts
+│   │   │   ├── service.ts                    # login, register, CRUD admins, populateRole at runtime
+│   │   │   ├── schemas.ts                    # loginSchema, registerSchema, createAdminSchema (roleId required)
+│   │   │   ├── types.ts                      # IAdminUser, IAdminUserWithRole, JwtAdminPayload
 │   │   │   ├── hooks/
 │   │   │   │   └── useAuth.ts                # Client-side auth state
 │   │   │   └── components/
@@ -206,6 +211,15 @@ ecommerce-website/
 │   │   │       ├── OrderTable.tsx
 │   │   │       ├── OrderDetail.tsx
 │   │   │       └── CheckoutForm.tsx
+│   │   │
+│   │   ├── roles/
+│   │   │   ├── model.ts                      # Role schema (name, permissions[], isSuperAdmin)
+│   │   │   ├── repository.ts
+│   │   │   ├── service.ts                    # CRUD + blocks delete if admins assigned
+│   │   │   ├── schemas.ts                    # createRoleSchema (includes isSuperAdmin)
+│   │   │   ├── types.ts                      # IRole, IRoleDocument
+│   │   │   └── components/
+│   │   │       └── RoleForm.tsx
 │   │   │
 │   │   ├── reviews/
 │   │   │   ├── model.ts
@@ -324,9 +338,16 @@ The middleware SKIPS paths starting with `/admin`, `/api`, `/_next`. Admin route
 ### 7. Theming via CSS custom properties
 Theme colors/fonts are injected as CSS variables on `<html>` by root layout. Tailwind extends with these variables. Components use `bg-primary`, `text-secondary`, etc.
 
-### 8. Dual authentication system
+### 8. Role-based authentication system
 - **Customers:** per-store accounts, JWT in `customer-token` cookie
 - **Admins:** global accounts, JWT in `admin-token` cookie
+- **Admin roles** are stored in the `Role` collection with fields: `name`, `description`, `permissions[]`, `isSuperAdmin: boolean`
+- **AdminUser** has `roleId` (required ref to Role) and `assignedStores[]` — no inline `role` enum or `permissions` array
+- Permissions are resolved **at runtime** by populating `roleId` — no denormalized copy. Update a Role's permissions and all admins with that role get the change immediately.
+- `getAdminDbUser()` returns `IAdminUserWithRole` (admin + populated `.role`)
+- `hasPermission()` and `canAccessStore()` accept both flat `{ isSuperAdmin, permissions }` and nested `{ role: { isSuperAdmin, permissions } }` shapes
+- SuperAdmin bypass: `role.isSuperAdmin === true` grants unrestricted access (replaces old `role === "superadmin"` enum check)
+- Role deletion is blocked if admins are still assigned to it
 
 ### 9. File uploads go to RustFS
 All file uploads go to RustFS via S3-compatible API using `@aws-sdk/client-s3`. Use `src/shared/lib/storage.ts` for all upload/delete operations. Never store files locally in production.

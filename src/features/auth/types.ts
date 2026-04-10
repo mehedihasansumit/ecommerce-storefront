@@ -40,13 +40,15 @@ export interface IAdminUser {
   role: "superadmin" | "manager";
   assignedStores: string[];
   permissions: Permission[];
+  roleId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface IAdminUserDocument extends Omit<IAdminUser, "_id" | "assignedStores"> {
+export interface IAdminUserDocument extends Omit<IAdminUser, "_id" | "assignedStores" | "roleId"> {
   _id: Types.ObjectId;
   assignedStores: Types.ObjectId[];
+  roleId: Types.ObjectId | null;
 }
 
 export interface JwtCustomerPayload {

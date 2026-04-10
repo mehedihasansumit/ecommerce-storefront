@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminToken } from "@/shared/lib/auth";
 import { AuthService } from "@/features/auth/service";
+import { RoleService } from "@/features/roles/service";
 import type { JwtAdminPayload } from "@/features/auth/types";
 import type { Metadata } from "next";
 import { UserCog, Plus, Shield, ShieldCheck } from "lucide-react";
@@ -12,7 +13,11 @@ export default async function AdminsPage() {
   const payload = (await getAdminToken()) as JwtAdminPayload | null;
   if (!payload || payload.role !== "superadmin") redirect("/admin");
 
-  const admins = await AuthService.listAdmins();
+  const [admins, roles] = await Promise.all([
+    AuthService.listAdmins(),
+    RoleService.list(),
+  ]);
+  const roleMap = Object.fromEntries(roles.map((r) => [r._id, r.name]));
 
   return (
     <div>
@@ -92,9 +97,16 @@ export default async function AdminsPage() {
                     {admin.role === "superadmin" ? (
                       <span className="text-xs text-gray-500">All permissions</span>
                     ) : (
-                      <span className="text-xs text-gray-500">
-                        {admin.permissions.length} permission{admin.permissions.length !== 1 ? "s" : ""}
-                      </span>
+                      <div>
+                        {admin.roleId && roleMap[admin.roleId] && (
+                          <p className="text-xs font-medium text-blue-600 mb-0.5">
+                            {roleMap[admin.roleId]}
+                          </p>
+                        )}
+                        <span className="text-xs text-gray-500">
+                          {admin.permissions.length} permission{admin.permissions.length !== 1 ? "s" : ""}
+                        </span>
+                      </div>
                     )}
                   </td>
                   <td className="px-5 py-4">

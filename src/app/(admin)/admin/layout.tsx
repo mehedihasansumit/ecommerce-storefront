@@ -5,11 +5,14 @@ import {
   ShoppingBag,
   Users,
   UserCog,
+  Shield,
 } from "lucide-react";
 import { MobileAdminNav } from "./_components/MobileAdminNav";
+import { AdminLogoutButton } from "./_components/AdminLogoutButton";
 import { getAdminToken } from "@/shared/lib/auth";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
 import type { JwtAdminPayload } from "@/features/auth/types";
+import { AuthRepository } from "@/features/auth/repository";
 
 export default async function AdminLayout({
   children,
@@ -17,6 +20,11 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const payload = (await getAdminToken()) as JwtAdminPayload | null;
+
+  // Fetch admin name for display (only if logged in)
+  const adminUser = payload?.adminId
+    ? await AuthRepository.findAdminById(payload.adminId)
+    : null;
 
   const isSuperAdmin = payload?.role === "superadmin";
   const canViewStores =
@@ -67,15 +75,29 @@ export default async function AdminLayout({
             </Link>
           )}
           {isSuperAdmin && (
-            <Link href="/admin/admins" className={navLinkClass}>
-              <UserCog size={18} />
-              <span className="text-sm">Admins</span>
-            </Link>
+            <>
+              <Link href="/admin/roles" className={navLinkClass}>
+                <Shield size={18} />
+                <span className="text-sm">Roles</span>
+              </Link>
+              <Link href="/admin/admins" className={navLinkClass}>
+                <UserCog size={18} />
+                <span className="text-sm">Admins</span>
+              </Link>
+            </>
           )}
         </nav>
         {payload && (
-          <div className="p-4 border-t border-gray-800">
-            <p className="text-xs text-gray-400 truncate">{payload.role}</p>
+          <div className="p-4 border-t border-gray-800 space-y-2">
+            <div>
+              {adminUser && (
+                <p className="text-xs font-medium text-white truncate">
+                  {adminUser.name}
+                </p>
+              )}
+              <p className="text-xs text-gray-400 capitalize">{payload.role}</p>
+            </div>
+            <AdminLogoutButton />
           </div>
         )}
       </aside>
@@ -87,6 +109,8 @@ export default async function AdminLayout({
           canViewStores={canViewStores ?? false}
           canViewOrders={canViewOrders ?? false}
           canViewCustomers={canViewCustomers ?? false}
+          adminName={adminUser?.name}
+          adminRole={payload?.role}
         />
         <main className="flex-1">
           <div className="p-4 md:p-8">{children}</div>

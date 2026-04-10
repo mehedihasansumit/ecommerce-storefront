@@ -25,6 +25,7 @@ export const createAdminSchema = z.object({
   role: z.enum(["superadmin", "manager"]).default("manager"),
   permissions: z.array(z.string()).default([]),
   assignedStores: z.array(z.string()).default([]),
+  roleId: z.string().transform((v) => v || null).nullable().optional(),
 });
 
 export const updateAdminSchema = z.object({
@@ -34,6 +35,7 @@ export const updateAdminSchema = z.object({
   role: z.enum(["superadmin", "manager"]).optional(),
   permissions: z.array(z.string()).optional(),
   assignedStores: z.array(z.string()).optional(),
+  roleId: z.string().transform((v) => v || null).nullable().optional(),
 });
 
 export type CreateAdminInput = z.infer<typeof createAdminSchema>;

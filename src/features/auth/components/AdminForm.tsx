@@ -8,6 +8,7 @@ import {
   type Permission,
 } from "@/shared/lib/permissions";
 import type { IAdminUser } from "@/features/auth/types";
+import type { IRole } from "@/features/roles/types";
 
 interface Store {
   _id: string;
@@ -17,9 +18,10 @@ interface Store {
 interface AdminFormProps {
   admin?: Omit<IAdminUser, "passwordHash">;
   stores: Store[];
+  roles: IRole[];
 }
 
-export function AdminForm({ admin, stores }: AdminFormProps) {
+export function AdminForm({ admin, stores, roles }: AdminFormProps) {
   const router = useRouter();
   const isEditing = !!admin;
 
@@ -29,6 +31,9 @@ export function AdminForm({ admin, stores }: AdminFormProps) {
   const [role, setRole] = useState<"superadmin" | "manager">(
     admin?.role ?? "manager"
   );
+  const [selectedRoleId, setSelectedRoleId] = useState<string>(
+    admin?.roleId ?? ""
+  );
   const [permissions, setPermissions] = useState<Permission[]>(
     (admin?.permissions as Permission[]) ?? []
   );
@@ -37,6 +42,20 @@ export function AdminForm({ admin, stores }: AdminFormProps) {
   );
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  function applyRoleTemplate(roleId: string) {
+    setSelectedRoleId(roleId);
+    if (!roleId) return;
+    const found = roles.find((r) => r._id === roleId);
+    if (found) {
+      // Merge role permissions with existing admin permissions
+      const combined = new Set([
+        ...permissions,
+        ...(found.permissions as Permission[]),
+      ]);
+      setPermissions(Array.from(combined));
+    }
+  }
 
   function togglePermission(perm: Permission) {
     setPermissions((prev) =>
@@ -57,21 +76,21 @@ export function AdminForm({ admin, stores }: AdminFormProps) {
     setSaving(true);
     setError("");
 
+    if (!isEditing && !password) {
+      setError("Password is required");
+      setSaving(false);
+      return;
+    }
+
     const body: Record<string, unknown> = {
       name,
       email,
       role,
       permissions: role === "superadmin" ? [] : permissions,
       assignedStores: role === "superadmin" ? [] : assignedStores,
+      roleId: role === "superadmin" ? null : selectedRoleId || null,
     };
     if (password) body.password = password;
-    if (!isEditing) {
-      if (!password) {
-        setError("Password is required");
-        setSaving(false);
-        return;
-      }
-    }
 
     const url = isEditing ? `/api/admins/${admin!._id}` : "/api/admins";
     const method = isEditing ? "PUT" : "POST";
@@ -131,7 +150,12 @@ export function AdminForm({ admin, stores }: AdminFormProps) {
         </div>
         <div>
           <label className={labelClass}>
-            Password {isEditing && <span className="text-gray-400 font-normal">(leave blank to keep current)</span>}
+            Password{" "}
+            {isEditing && (
+              <span className="text-gray-400 font-normal">
+                (leave blank to keep current)
+              </span>
+            )}
           </label>
           <input
             type="password"
@@ -143,23 +167,70 @@ export function AdminForm({ admin, stores }: AdminFormProps) {
           />
         </div>
         <div>
-          <label className={labelClass}>Role</label>
+          <label className={labelClass}>System Role</label>
           <select
             className={inputClass}
             value={role}
-            onChange={(e) => setRole(e.target.value as "superadmin" | "manager")}
+            onChange={(e) =>
+              setRole(e.target.value as "superadmin" | "manager")
+            }
           >
             <option value="manager">Manager</option>
             <option value="superadmin">Superadmin</option>
           </select>
+          <p className="text-xs text-gray-400 mt-1">
+            Superadmin has unrestricted access to everything.
+          </p>
         </div>
       </div>
 
-      {/* Permissions (only for managers) */}
+      {/* Manager-only: Role template + Permissions + Stores */}
       {role === "manager" && (
         <>
+          {/* Role Template */}
+          {roles.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900">
+                  Role Template
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Apply a preset permission template. You can still customise
+                  permissions below after applying.
+                </p>
+              </div>
+              <select
+                className={inputClass}
+                value={selectedRoleId}
+                onChange={(e) => applyRoleTemplate(e.target.value)}
+              >
+                <option value="">— No template —</option>
+                {roles.map((r) => (
+                  <option key={r._id} value={r._id}>
+                    {r.name}
+                    {r.description ? ` — ${r.description}` : ""}
+                  </option>
+                ))}
+              </select>
+              {selectedRoleId && (
+                <p className="text-xs text-blue-600">
+                  Template applied. Permissions below include role permissions +
+                  any extra you add.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Permissions */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-900">Permissions</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-900">
+                Permissions
+              </h2>
+              <span className="text-xs text-gray-400">
+                {permissions.length} selected
+              </span>
+            </div>
             {PERMISSION_GROUPS.map((group) => (
               <div key={group.label}>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -191,9 +262,12 @@ export function AdminForm({ admin, stores }: AdminFormProps) {
           {stores.length > 0 && (
             <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
               <div>
-                <h2 className="text-sm font-semibold text-gray-900">Assigned Stores</h2>
+                <h2 className="text-sm font-semibold text-gray-900">
+                  Assigned Stores
+                </h2>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Manager can only access products, orders, and payments for these stores.
+                  Manager can only access products, orders, and payments for
+                  these stores.
                 </p>
               </div>
               <div className="space-y-2">

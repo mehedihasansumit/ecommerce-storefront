@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Store,
@@ -8,6 +9,8 @@ import {
   ShoppingBag,
   Users,
   UserCog,
+  Shield,
+  LogOut,
   Menu,
   X,
 } from "lucide-react";
@@ -17,6 +20,8 @@ interface MobileAdminNavProps {
   canViewStores: boolean;
   canViewOrders: boolean;
   canViewCustomers: boolean;
+  adminName?: string;
+  adminRole?: string;
 }
 
 export function MobileAdminNav({
@@ -24,8 +29,17 @@ export function MobileAdminNav({
   canViewStores,
   canViewOrders,
   canViewCustomers,
+  adminName,
+  adminRole,
 }: MobileAdminNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/admin-logout", { method: "POST" });
+    router.push("/admin/login");
+    router.refresh();
+  }
 
   const navLinkClass =
     "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors";
@@ -85,15 +99,45 @@ export function MobileAdminNav({
             </Link>
           )}
           {isSuperAdmin && (
-            <Link
-              href="/admin/admins"
-              onClick={() => setIsOpen(false)}
-              className={navLinkClass}
-            >
-              <UserCog size={18} />
-              <span className="text-sm">Admins</span>
-            </Link>
+            <>
+              <Link
+                href="/admin/roles"
+                onClick={() => setIsOpen(false)}
+                className={navLinkClass}
+              >
+                <Shield size={18} />
+                <span className="text-sm">Roles</span>
+              </Link>
+              <Link
+                href="/admin/admins"
+                onClick={() => setIsOpen(false)}
+                className={navLinkClass}
+              >
+                <UserCog size={18} />
+                <span className="text-sm">Admins</span>
+              </Link>
+            </>
           )}
+
+          <div className="pt-2 mt-2 border-t border-gray-800">
+            {(adminName || adminRole) && (
+              <div className="px-3 py-1 mb-1">
+                {adminName && (
+                  <p className="text-xs font-medium text-white">{adminName}</p>
+                )}
+                {adminRole && (
+                  <p className="text-xs text-gray-400 capitalize">{adminRole}</p>
+                )}
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            >
+              <LogOut size={18} />
+              <span className="text-sm">Logout</span>
+            </button>
+          </div>
         </nav>
       )}
     </div>

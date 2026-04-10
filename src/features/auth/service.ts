@@ -1,8 +1,22 @@
 import bcrypt from "bcryptjs";
 import { AuthRepository } from "./repository";
 import { signToken } from "@/shared/lib/auth";
+import { RoleRepository } from "@/features/roles/repository";
+import type { Permission } from "@/shared/lib/permissions";
 import type { IUser, IAdminUser, IAddress, JwtCustomerPayload, JwtAdminPayload } from "./types";
 import type { AddressInput, CreateAdminInput, UpdateAdminInput } from "./schemas";
+
+/** Merge role permissions + own permissions, returning deduplicated effective set */
+async function resolvePermissions(
+  roleId: string | null,
+  ownPermissions: Permission[]
+): Promise<Permission[]> {
+  if (!roleId) return ownPermissions;
+  const role = await RoleRepository.findById(roleId);
+  if (!role) return ownPermissions;
+  const combined = new Set([...(role.permissions as Permission[]), ...ownPermissions]);
+  return Array.from(combined);
+}
 
 export const AuthService = {
   async registerCustomer(
@@ -86,6 +100,7 @@ export const AuthService = {
       throw new Error("Invalid email or password");
     }
 
+    // Permissions are already fully resolved and stored in DB at create/update time
     const payload: JwtAdminPayload = {
       adminId: admin._id,
       role: admin.role,
@@ -103,13 +118,21 @@ export const AuthService = {
     const existing = await AuthRepository.findAdminByEmail(data.email);
     if (existing) throw new Error("Email already in use");
     const passwordHash = await bcrypt.hash(data.password, 12);
+
+    // Resolve effective permissions: role template + own permissions, stored in DB
+    const effectivePermissions = await resolvePermissions(
+      data.roleId ?? null,
+      (data.permissions ?? []) as Permission[]
+    );
+
     return AuthRepository.createAdmin({
       name: data.name,
       email: data.email,
       passwordHash,
       role: data.role || "manager",
-      permissions: (data.permissions ?? []) as IAdminUser["permissions"],
+      permissions: effectivePermissions,
       assignedStores: data.assignedStores ?? [],
+      roleId: data.roleId ?? null,
     });
   },
 
@@ -123,11 +146,22 @@ export const AuthService = {
     if (data.name !== undefined) updateData.name = data.name;
     if (data.email !== undefined) updateData.email = data.email;
     if (data.role !== undefined) updateData.role = data.role;
-    if (data.permissions !== undefined) updateData.permissions = data.permissions as IAdminUser["permissions"];
     if (data.assignedStores !== undefined) updateData.assignedStores = data.assignedStores;
+    if ("roleId" in data) updateData.roleId = data.roleId ?? null;
     if (data.password) {
       updateData.passwordHash = await bcrypt.hash(data.password, 12);
     }
+
+    // Re-resolve effective permissions when role or permissions change
+    if (data.permissions !== undefined || "roleId" in data) {
+      const current = await AuthRepository.findAdminById(id);
+      const roleId = "roleId" in data ? (data.roleId ?? null) : (current?.roleId ?? null);
+      const ownPerms = data.permissions !== undefined
+        ? (data.permissions as Permission[])
+        : (current?.permissions ?? []);
+      updateData.permissions = await resolvePermissions(roleId, ownPerms);
+    }
+
     const updated = await AuthRepository.updateAdmin(id, updateData);
     if (!updated) throw new Error("Admin not found");
     const { passwordHash: _, ...safe } = updated;

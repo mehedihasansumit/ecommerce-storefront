@@ -3,24 +3,50 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Package, Tag, ShoppingBag, Users, CreditCard } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import type { JwtAdminPayload } from "@/features/auth/types";
 
 export default async function StoreDetailPage({
   params,
 }: {
   params: Promise<{ storeId: string }>;
 }) {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || !hasPermission(payload, PERMISSIONS.STORES_EDIT)) redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser) redirect("/admin");
 
   const { storeId } = await params;
-  if (!canAccessStore(payload, storeId)) redirect("/admin");
+  if (!canAccessStore(adminUser, storeId)) redirect("/admin");
+
+  // Must have at least one store-scoped permission to see this page
+  const hasAnyAccess = [
+    PERMISSIONS.STORES_EDIT,
+    PERMISSIONS.PRODUCTS_CREATE,
+    PERMISSIONS.PRODUCTS_EDIT,
+    PERMISSIONS.PRODUCTS_DELETE,
+    PERMISSIONS.ORDERS_VIEW,
+    PERMISSIONS.ORDERS_UPDATE_STATUS,
+    PERMISSIONS.PAYMENTS_VIEW,
+    PERMISSIONS.PAYMENTS_UPDATE_STATUS,
+    PERMISSIONS.PAYMENTS_DISCOUNT,
+  ].some((p) => hasPermission(adminUser, p));
+  if (!hasAnyAccess) redirect("/admin");
 
   const store = await StoreService.getById(storeId);
-
   if (!store) notFound();
+
+  const canEditStore = hasPermission(adminUser, PERMISSIONS.STORES_EDIT);
+  const canViewProducts =
+    hasPermission(adminUser, PERMISSIONS.PRODUCTS_CREATE) ||
+    hasPermission(adminUser, PERMISSIONS.PRODUCTS_EDIT) ||
+    hasPermission(adminUser, PERMISSIONS.PRODUCTS_DELETE);
+  const canViewOrders =
+    hasPermission(adminUser, PERMISSIONS.ORDERS_VIEW) ||
+    hasPermission(adminUser, PERMISSIONS.ORDERS_UPDATE_STATUS);
+  const canViewPayments =
+    hasPermission(adminUser, PERMISSIONS.PAYMENTS_VIEW) ||
+    hasPermission(adminUser, PERMISSIONS.PAYMENTS_UPDATE_STATUS) ||
+    hasPermission(adminUser, PERMISSIONS.PAYMENTS_DISCOUNT);
+  const canViewCustomers = hasPermission(adminUser, PERMISSIONS.CUSTOMERS_VIEW);
 
   return (
     <div>
@@ -42,52 +68,64 @@ export default async function StoreDetailPage({
         </span>
       </div>
 
-      {/* Quick Links */}
+      {/* Quick Links — only show sections the manager can access */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <QuickLink
-          href={`/admin/stores/${storeId}/products`}
-          icon={<Package size={24} />}
-          label="Products"
-        />
-        <QuickLink
-          href={`/admin/stores/${storeId}/categories`}
-          icon={<Tag size={24} />}
-          label="Categories"
-        />
-        <QuickLink
-          href={`/admin/stores/${storeId}/orders`}
-          icon={<ShoppingBag size={24} />}
-          label="Orders"
-        />
-        <QuickLink
-          href={`/admin/stores/${storeId}/customers`}
-          icon={<Users size={24} />}
-          label="Customers"
-        />
-        <QuickLink
-          href={`/admin/stores/${storeId}/payments`}
-          icon={<CreditCard size={24} />}
-          label="Payments"
-        />
+        {canViewProducts && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/products`}
+            icon={<Package size={24} />}
+            label="Products"
+          />
+        )}
+        {canEditStore && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/categories`}
+            icon={<Tag size={24} />}
+            label="Categories"
+          />
+        )}
+        {canViewOrders && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/orders`}
+            icon={<ShoppingBag size={24} />}
+            label="Orders"
+          />
+        )}
+        {canViewCustomers && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/customers`}
+            icon={<Users size={24} />}
+            label="Customers"
+          />
+        )}
+        {canViewPayments && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/payments`}
+            icon={<CreditCard size={24} />}
+            label="Payments"
+          />
+        )}
       </div>
 
-      {/* Theme Preview */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Current Theme</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <ColorSwatch label="Primary" color={store.theme.primaryColor} />
-          <ColorSwatch label="Secondary" color={store.theme.secondaryColor} />
-          <ColorSwatch label="Accent" color={store.theme.accentColor} />
-          <ColorSwatch label="Header BG" color={store.theme.headerBg} />
-        </div>
-        <p className="mt-4 text-sm text-gray-500">
-          Font: {store.theme.fontFamily} | Layout: {store.theme.layoutStyle} |
-          Radius: {store.theme.borderRadius}
-        </p>
-      </div>
-
-      {/* Edit Store Form */}
-      <StoreEditForm store={store} />
+      {/* Theme Preview + Edit — only for managers with stores.edit */}
+      {canEditStore && (
+        <>
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+            <h2 className="text-lg font-semibold mb-4">Current Theme</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <ColorSwatch label="Primary" color={store.theme.primaryColor} />
+              <ColorSwatch label="Secondary" color={store.theme.secondaryColor} />
+              <ColorSwatch label="Accent" color={store.theme.accentColor} />
+              <ColorSwatch label="Header BG" color={store.theme.headerBg} />
+            </div>
+            <p className="mt-4 text-sm text-gray-500">
+              Font: {store.theme.fontFamily} | Layout: {store.theme.layoutStyle} |
+              Radius: {store.theme.borderRadius}
+            </p>
+          </div>
+          <StoreEditForm store={store} />
+        </>
+      )}
     </div>
   );
 }

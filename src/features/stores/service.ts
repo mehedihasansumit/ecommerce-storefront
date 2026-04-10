@@ -15,6 +15,11 @@ export const StoreService = {
     return StoreRepository.findAll();
   },
 
+  async getByIds(ids: string[]): Promise<IStore[]> {
+    if (ids.length === 0) return [];
+    return StoreRepository.findByIds(ids);
+  },
+
   async create(data: {
     name: string;
     domains: string[];

@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { RoleForm } from "@/features/roles/components/RoleForm";
-import type { JwtAdminPayload } from "@/features/auth/types";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "New Role" };
 
 export default async function NewRolePage() {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || payload.role !== "superadmin") redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
 
   return (
     <div>

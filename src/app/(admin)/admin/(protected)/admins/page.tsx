@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { AuthService } from "@/features/auth/service";
 import { RoleService } from "@/features/roles/service";
-import type { JwtAdminPayload } from "@/features/auth/types";
+
 import type { Metadata } from "next";
 import { UserCog, Plus, Shield, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = { title: "Manage Admins" };
 
 export default async function AdminsPage() {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || payload.role !== "superadmin") redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
 
   const [admins, roles] = await Promise.all([
     AuthService.listAdmins(),

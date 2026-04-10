@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { StoreService } from "@/features/stores/service";
 import { RoleService } from "@/features/roles/service";
 import { AdminForm } from "@/features/auth/components/AdminForm";
-import type { JwtAdminPayload } from "@/features/auth/types";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "New Admin" };
 
 export default async function NewAdminPage() {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || payload.role !== "superadmin") redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
 
   const [stores, roles] = await Promise.all([
     StoreService.getAll(),

@@ -8,8 +8,7 @@ import {
 } from "@/shared/lib/api-response";
 import { AuthService } from "@/features/auth/service";
 import { updateAdminSchema } from "@/features/auth/schemas";
-import { getAdminToken } from "@/shared/lib/auth";
-import type { JwtAdminPayload } from "@/features/auth/types";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { ZodError } from "zod";
 
 export async function GET(
@@ -17,15 +16,15 @@ export async function GET(
   { params }: { params: Promise<{ adminId: string }> }
 ) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const { adminId } = await params;
     const { AuthRepository } = await import("@/features/auth/repository");
-    const admin = await AuthRepository.findAdminById(adminId);
-    if (!admin) return notFoundResponse("Admin not found");
-    const { passwordHash: _, ...safe } = admin;
+    const target = await AuthRepository.findAdminById(adminId);
+    if (!target) return notFoundResponse("Admin not found");
+    const { passwordHash: _, ...safe } = target;
     return successResponse(safe);
   } catch {
     return errorResponse("Failed to fetch admin", 500);
@@ -37,15 +36,15 @@ export async function PUT(
   { params }: { params: Promise<{ adminId: string }> }
 ) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const { adminId } = await params;
     const body = await request.json();
     const validated = updateAdminSchema.parse(body);
-    const admin = await AuthService.updateAdmin(adminId, validated);
-    return successResponse(admin);
+    const updated = await AuthService.updateAdmin(adminId, validated);
+    return successResponse(updated);
   } catch (error) {
     if (error instanceof ZodError) {
       return errorResponse(error.issues[0]?.message ?? "Validation failed", 422);
@@ -62,13 +61,13 @@ export async function DELETE(
   { params }: { params: Promise<{ adminId: string }> }
 ) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const { adminId } = await params;
     // Prevent self-deletion
-    if (adminId === payload.adminId) {
+    if (adminId === admin._id) {
       return errorResponse("Cannot delete your own account", 400);
     }
     await AuthService.deleteAdmin(adminId);

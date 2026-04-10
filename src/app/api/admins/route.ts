@@ -7,15 +7,14 @@ import {
 } from "@/shared/lib/api-response";
 import { AuthService } from "@/features/auth/service";
 import { createAdminSchema } from "@/features/auth/schemas";
-import { getAdminToken } from "@/shared/lib/auth";
-import type { JwtAdminPayload } from "@/features/auth/types";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { ZodError } from "zod";
 
 export async function GET() {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const admins = await AuthService.listAdmins();
     return successResponse(admins);
@@ -26,14 +25,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const body = await request.json();
     const validated = createAdminSchema.parse(body);
-    const admin = await AuthService.createAdmin(validated);
-    const { passwordHash: _, ...safe } = admin;
+    const newAdmin = await AuthService.createAdmin(validated);
+    const { passwordHash: _, ...safe } = newAdmin;
     return successResponse(safe, 201);
   } catch (error) {
     if (error instanceof ZodError) {

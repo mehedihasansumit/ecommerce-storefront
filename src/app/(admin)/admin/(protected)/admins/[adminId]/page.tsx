@@ -1,10 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { AuthRepository } from "@/features/auth/repository";
 import { StoreService } from "@/features/stores/service";
 import { RoleService } from "@/features/roles/service";
 import { AdminForm } from "@/features/auth/components/AdminForm";
-import type { JwtAdminPayload } from "@/features/auth/types";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Edit Admin" };
@@ -14,8 +14,8 @@ export default async function EditAdminPage({
 }: {
   params: Promise<{ adminId: string }>;
 }) {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || payload.role !== "superadmin") redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
 
   const { adminId } = await params;
   const [admin, stores, roles] = await Promise.all([

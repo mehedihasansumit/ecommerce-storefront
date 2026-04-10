@@ -2,27 +2,26 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProductService } from "@/features/products/service";
 import { tAdmin } from "@/shared/lib/i18n";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import type { JwtAdminPayload } from "@/features/auth/types";
 
 export default async function StoreProductsPage({
   params,
 }: {
   params: Promise<{ storeId: string }>;
 }) {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  const adminUser = await getAdminDbUser();
   if (
-    !payload ||
-    (!hasPermission(payload, PERMISSIONS.PRODUCTS_CREATE) &&
-      !hasPermission(payload, PERMISSIONS.PRODUCTS_EDIT) &&
-      !hasPermission(payload, PERMISSIONS.PRODUCTS_DELETE))
+    !adminUser ||
+    (!hasPermission(adminUser, PERMISSIONS.PRODUCTS_CREATE) &&
+      !hasPermission(adminUser, PERMISSIONS.PRODUCTS_EDIT) &&
+      !hasPermission(adminUser, PERMISSIONS.PRODUCTS_DELETE))
   ) {
     redirect("/admin");
   }
 
   const { storeId } = await params;
-  if (!canAccessStore(payload, storeId)) redirect("/admin");
+  if (!canAccessStore(adminUser, storeId)) redirect("/admin");
   const result = await ProductService.getByStore(storeId, { page: 1, limit: 50 });
 
   return (

@@ -8,8 +8,7 @@ import {
 } from "@/shared/lib/api-response";
 import { RoleService } from "@/features/roles/service";
 import { updateRoleSchema } from "@/features/roles/schemas";
-import { getAdminToken } from "@/shared/lib/auth";
-import type { JwtAdminPayload } from "@/features/auth/types";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { ZodError } from "zod";
 
 export async function GET(
@@ -17,9 +16,9 @@ export async function GET(
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const { roleId } = await params;
     const role = await RoleService.getById(roleId);
@@ -35,9 +34,9 @@ export async function PUT(
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const { roleId } = await params;
     const body = await request.json();
@@ -60,9 +59,9 @@ export async function DELETE(
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const { roleId } = await params;
     await RoleService.delete(roleId);

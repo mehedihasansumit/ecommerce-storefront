@@ -7,15 +7,14 @@ import {
 } from "@/shared/lib/api-response";
 import { RoleService } from "@/features/roles/service";
 import { createRoleSchema } from "@/features/roles/schemas";
-import { getAdminToken } from "@/shared/lib/auth";
-import type { JwtAdminPayload } from "@/features/auth/types";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { ZodError } from "zod";
 
 export async function GET() {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const roles = await RoleService.list();
     return successResponse(roles);
@@ -26,9 +25,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!payload || payload.type !== "admin") return unauthorizedResponse();
-    if (payload.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
+    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
 
     const body = await request.json();
     const validated = createRoleSchema.parse(body);

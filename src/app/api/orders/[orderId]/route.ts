@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreId } from "@/shared/lib/tenant";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import type { JwtAdminPayload } from "@/features/auth/types";
 import { OrderService } from "@/features/orders/service";
 import { z } from "zod";
 
@@ -51,10 +50,10 @@ export async function PUT(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const adminToken = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!adminToken)
+    const admin = await getAdminDbUser();
+    if (!admin)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!hasPermission(adminToken, PERMISSIONS.ORDERS_UPDATE_STATUS))
+    if (!hasPermission(admin, PERMISSIONS.ORDERS_UPDATE_STATUS))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     // Admin passes storeId in body since middleware skips /api
@@ -62,7 +61,7 @@ export async function PUT(
     const { storeId, ...rest } = body;
     if (!storeId)
       return NextResponse.json({ error: "storeId required" }, { status: 400 });
-    if (!canAccessStore(adminToken, storeId))
+    if (!canAccessStore(admin, storeId))
       return NextResponse.json({ error: "No access to this store" }, { status: 403 });
 
     const { status, note } = updateStatusSchema.parse(rest);
@@ -89,20 +88,20 @@ export async function PATCH(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const adminToken = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!adminToken)
+    const admin = await getAdminDbUser();
+    if (!admin)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
     const { storeId, paymentStatus, discount } = updatePaymentSchema.parse(body);
 
-    if (!canAccessStore(adminToken, storeId))
+    if (!canAccessStore(admin, storeId))
       return NextResponse.json({ error: "No access to this store" }, { status: 403 });
 
     // Check specific payment permissions
-    if (paymentStatus !== undefined && !hasPermission(adminToken, PERMISSIONS.PAYMENTS_UPDATE_STATUS))
+    if (paymentStatus !== undefined && !hasPermission(admin, PERMISSIONS.PAYMENTS_UPDATE_STATUS))
       return NextResponse.json({ error: "Forbidden: missing payments.updateStatus" }, { status: 403 });
-    if (discount !== undefined && !hasPermission(adminToken, PERMISSIONS.PAYMENTS_DISCOUNT))
+    if (discount !== undefined && !hasPermission(admin, PERMISSIONS.PAYMENTS_DISCOUNT))
       return NextResponse.json({ error: "Forbidden: missing payments.discount" }, { status: 403 });
     const { orderId } = await params;
 

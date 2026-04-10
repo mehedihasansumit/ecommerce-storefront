@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { RoleService } from "@/features/roles/service";
-import type { JwtAdminPayload } from "@/features/auth/types";
+
 import type { Metadata } from "next";
 import { Shield, Plus } from "lucide-react";
 import { PERMISSION_LABELS } from "@/shared/lib/permissions";
@@ -11,8 +11,8 @@ import type { Permission } from "@/shared/lib/permissions";
 export const metadata: Metadata = { title: "Manage Roles" };
 
 export default async function RolesPage() {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || payload.role !== "superadmin") redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
 
   const roles = await RoleService.list();
 

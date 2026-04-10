@@ -1,8 +1,8 @@
 import { redirect, notFound } from "next/navigation";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { RoleService } from "@/features/roles/service";
 import { RoleForm } from "@/features/roles/components/RoleForm";
-import type { JwtAdminPayload } from "@/features/auth/types";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Edit Role" };
@@ -12,8 +12,8 @@ export default async function EditRolePage({
 }: {
   params: Promise<{ roleId: string }>;
 }) {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (!payload || payload.role !== "superadmin") redirect("/admin");
+  const adminUser = await getAdminDbUser();
+  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
 
   const { roleId } = await params;
   const role = await RoleService.getById(roleId);

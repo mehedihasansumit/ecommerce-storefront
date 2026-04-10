@@ -34,6 +34,12 @@ export const StoreRepository = {
     return stores.map(serialize);
   },
 
+  async findByIds(ids: string[]): Promise<IStore[]> {
+    await dbConnect();
+    const stores = await StoreModel.find({ _id: { $in: ids } }).sort({ createdAt: -1 }).lean();
+    return stores.map(serialize);
+  },
+
   async create(data: Partial<IStore>): Promise<IStore> {
     await dbConnect();
     const store = await StoreModel.create(data);

@@ -1,25 +1,44 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { StoreService } from "@/features/stores/service";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
-import type { JwtAdminPayload } from "@/features/auth/types";
 import type { Metadata } from "next";
 import { Store, Plus, Globe, ExternalLink, Settings } from "lucide-react";
 
 export const metadata: Metadata = { title: "Manage Stores" };
 
 export default async function StoresPage() {
-  const payload = (await getAdminToken()) as JwtAdminPayload | null;
-  if (
-    !payload ||
-    (!hasPermission(payload, PERMISSIONS.STORES_CREATE) &&
-      !hasPermission(payload, PERMISSIONS.STORES_EDIT))
-  ) {
-    redirect("/admin");
-  }
+  const adminUser = await getAdminDbUser();
+  if (!adminUser) redirect("/admin");
 
-  const stores = await StoreService.getAll();
+  // Allow access if manager has any store-scoped permission
+  const hasAnyStoreAccess =
+    adminUser.role === "superadmin" ||
+    [
+      PERMISSIONS.STORES_CREATE,
+      PERMISSIONS.STORES_EDIT,
+      PERMISSIONS.STORES_DELETE,
+      PERMISSIONS.PRODUCTS_CREATE,
+      PERMISSIONS.PRODUCTS_EDIT,
+      PERMISSIONS.PRODUCTS_DELETE,
+      PERMISSIONS.ORDERS_VIEW,
+      PERMISSIONS.ORDERS_UPDATE_STATUS,
+      PERMISSIONS.PAYMENTS_VIEW,
+      PERMISSIONS.PAYMENTS_UPDATE_STATUS,
+      PERMISSIONS.PAYMENTS_DISCOUNT,
+    ].some((p) => hasPermission(adminUser, p));
+
+  if (!hasAnyStoreAccess) redirect("/admin");
+
+  const canCreateStore = hasPermission(adminUser, PERMISSIONS.STORES_CREATE);
+
+  // Superadmin sees all stores; managers only see their assigned stores
+  // (empty assignedStores for managers means all stores — no restriction)
+  const stores =
+    adminUser.role === "superadmin" || (adminUser.assignedStores ?? []).length === 0
+      ? await StoreService.getAll()
+      : await StoreService.getByIds(adminUser.assignedStores);
 
   return (
     <div>
@@ -31,13 +50,15 @@ export default async function StoresPage() {
             {stores.length} {stores.length === 1 ? "store" : "stores"} total
           </p>
         </div>
-        <Link
-          href="/admin/stores/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Store
-        </Link>
+        {canCreateStore && (
+          <Link
+            href="/admin/stores/new"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Store
+          </Link>
+        )}
       </div>
 
       {/* Empty state */}
@@ -48,13 +69,15 @@ export default async function StoresPage() {
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">No stores yet</h3>
           <p className="text-sm text-gray-500 mb-6">Create your first store to get started.</p>
-          <Link
-            href="/admin/stores/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Create Store
-          </Link>
+          {canCreateStore && (
+            <Link
+              href="/admin/stores/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Create Store
+            </Link>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

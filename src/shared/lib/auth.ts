@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import type { JwtPayload } from "@/features/auth/types";
+import type { JwtPayload, JwtAdminPayload, IAdminUser } from "@/features/auth/types";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d";
@@ -34,4 +34,16 @@ export async function getAdminToken(): Promise<JwtPayload | null> {
   const token = cookieStore.get("admin-token")?.value;
   if (!token) return null;
   return verifyToken(token);
+}
+
+/**
+ * Returns the full admin record from the database.
+ * Use this instead of relying on JWT payload for permission checks,
+ * since the JWT can be stale after a permission update.
+ */
+export async function getAdminDbUser(): Promise<IAdminUser | null> {
+  const payload = (await getAdminToken()) as JwtAdminPayload | null;
+  if (!payload?.adminId) return null;
+  const { AuthRepository } = await import("@/features/auth/repository");
+  return AuthRepository.findAdminById(payload.adminId);
 }

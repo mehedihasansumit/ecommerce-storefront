@@ -2,9 +2,8 @@ import { NextRequest } from "next/server";
 import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
 import { StoreService } from "@/features/stores/service";
 import { updateStoreSchema } from "@/features/stores/schemas";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import type { JwtAdminPayload } from "@/features/auth/types";
 import { ZodError } from "zod";
 
 export async function GET(
@@ -26,8 +25,8 @@ export async function PUT(
   { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
-    const admin = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!admin || admin.type !== "admin") return unauthorizedResponse();
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
     if (!hasPermission(admin, PERMISSIONS.STORES_EDIT)) return forbiddenResponse("Missing permission: stores.edit");
 
     const { storeId } = await params;
@@ -54,11 +53,12 @@ export async function DELETE(
   { params }: { params: Promise<{ storeId: string }> }
 ) {
   try {
-    const admin = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!admin || admin.type !== "admin") return unauthorizedResponse();
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
     if (!hasPermission(admin, PERMISSIONS.STORES_DELETE)) return forbiddenResponse("Missing permission: stores.delete");
 
     const { storeId } = await params;
+    if (!canAccessStore(admin, storeId)) return forbiddenResponse("No access to this store");
     const deleted = await StoreService.delete(storeId);
     if (!deleted) return notFoundResponse("Store not found");
     return successResponse({ message: "Store deleted" });

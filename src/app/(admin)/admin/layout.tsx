@@ -21,23 +21,41 @@ export default async function AdminLayout({
 }) {
   const payload = (await getAdminToken()) as JwtAdminPayload | null;
 
-  // Fetch admin name for display (only if logged in)
+  // Always read from DB so sidebar reflects the latest permissions
+  // (JWT can be stale if permissions changed after last login)
   const adminUser = payload?.adminId
     ? await AuthRepository.findAdminById(payload.adminId)
     : null;
 
-  const isSuperAdmin = payload?.role === "superadmin";
+  const isSuperAdmin = adminUser?.role === "superadmin";
+
+  // Use DB permissions (authoritative) not JWT permissions
+  const dbAdmin = adminUser
+    ? { role: adminUser.role, permissions: adminUser.permissions ?? [] }
+    : null;
+
+  // Show Stores link if manager has ANY store-scoped permission
   const canViewStores =
     isSuperAdmin ||
-    (payload &&
-      (hasPermission(payload, PERMISSIONS.STORES_CREATE) ||
-        hasPermission(payload, PERMISSIONS.STORES_EDIT)));
+    (dbAdmin &&
+      [
+        PERMISSIONS.STORES_CREATE,
+        PERMISSIONS.STORES_EDIT,
+        PERMISSIONS.PRODUCTS_CREATE,
+        PERMISSIONS.PRODUCTS_EDIT,
+        PERMISSIONS.PRODUCTS_DELETE,
+        PERMISSIONS.ORDERS_VIEW,
+        PERMISSIONS.ORDERS_UPDATE_STATUS,
+        PERMISSIONS.PAYMENTS_VIEW,
+        PERMISSIONS.PAYMENTS_UPDATE_STATUS,
+        PERMISSIONS.PAYMENTS_DISCOUNT,
+      ].some((p) => hasPermission(dbAdmin, p)));
+
   const canViewOrders =
-    isSuperAdmin ||
-    (payload && hasPermission(payload, PERMISSIONS.ORDERS_VIEW));
+    isSuperAdmin || (dbAdmin && hasPermission(dbAdmin, PERMISSIONS.ORDERS_VIEW));
+
   const canViewCustomers =
-    isSuperAdmin ||
-    (payload && hasPermission(payload, PERMISSIONS.CUSTOMERS_VIEW));
+    isSuperAdmin || (dbAdmin && hasPermission(dbAdmin, PERMISSIONS.CUSTOMERS_VIEW));
 
   const navLinkClass =
     "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors";
@@ -87,15 +105,13 @@ export default async function AdminLayout({
             </>
           )}
         </nav>
-        {payload && (
+        {adminUser && (
           <div className="p-4 border-t border-gray-800 space-y-2">
             <div>
-              {adminUser && (
-                <p className="text-xs font-medium text-white truncate">
-                  {adminUser.name}
-                </p>
-              )}
-              <p className="text-xs text-gray-400 capitalize">{payload.role}</p>
+              <p className="text-xs font-medium text-white truncate">
+                {adminUser.name}
+              </p>
+              <p className="text-xs text-gray-400 capitalize">{adminUser.role}</p>
             </div>
             <AdminLogoutButton />
           </div>
@@ -105,12 +121,12 @@ export default async function AdminLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-gray-50 min-w-0">
         <MobileAdminNav
-          isSuperAdmin={isSuperAdmin ?? false}
-          canViewStores={canViewStores ?? false}
-          canViewOrders={canViewOrders ?? false}
-          canViewCustomers={canViewCustomers ?? false}
+          isSuperAdmin={isSuperAdmin}
+          canViewStores={!!canViewStores}
+          canViewOrders={!!canViewOrders}
+          canViewCustomers={!!canViewCustomers}
           adminName={adminUser?.name}
-          adminRole={payload?.role}
+          adminRole={adminUser?.role}
         />
         <main className="flex-1">
           <div className="p-4 md:p-8">{children}</div>

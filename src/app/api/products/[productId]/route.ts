@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { ProductService } from "@/features/products/service";
 import { updateProductSchema } from "@/features/products/schemas";
 import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
-import { getAdminToken } from "@/shared/lib/auth";
+import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import type { JwtAdminPayload } from "@/features/auth/types";
 import { ZodError } from "zod";
 
 export async function GET(
@@ -26,8 +25,8 @@ export async function PUT(
   { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const admin = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!admin || admin.type !== "admin") return unauthorizedResponse();
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
     if (!hasPermission(admin, PERMISSIONS.PRODUCTS_EDIT)) return forbiddenResponse("Missing permission: products.edit");
 
     const { productId } = await params;
@@ -55,8 +54,8 @@ export async function DELETE(
   { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const admin = (await getAdminToken()) as JwtAdminPayload | null;
-    if (!admin || admin.type !== "admin") return unauthorizedResponse();
+    const admin = await getAdminDbUser();
+    if (!admin) return unauthorizedResponse();
     if (!hasPermission(admin, PERMISSIONS.PRODUCTS_DELETE)) return forbiddenResponse("Missing permission: products.delete");
 
     const { productId } = await params;

@@ -66,17 +66,25 @@ export const PERMISSION_GROUPS = [
 ] as const;
 
 export function hasPermission(
-  admin: { role: string; permissions: string[] },
+  admin: { role: string; permissions?: string[] | null },
   permission: Permission
 ): boolean {
   if (admin.role === "superadmin") return true;
-  return admin.permissions.includes(permission);
+  return (admin.permissions ?? []).includes(permission);
 }
 
+/**
+ * Check if an admin can access a specific store.
+ * - Superadmin: always true
+ * - Manager with empty assignedStores: access all stores (no restriction)
+ * - Manager with specific assignedStores: only those stores
+ */
 export function canAccessStore(
-  admin: { role: string; assignedStores: string[] },
+  admin: { role: string; assignedStores?: string[] | null },
   storeId: string
 ): boolean {
   if (admin.role === "superadmin") return true;
-  return admin.assignedStores.includes(storeId);
+  const stores = admin.assignedStores ?? [];
+  if (stores.length === 0) return true; // no restriction = all stores
+  return stores.includes(storeId);
 }

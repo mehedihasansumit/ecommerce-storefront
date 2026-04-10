@@ -5,6 +5,44 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import type { IAnnouncement, AnnouncementDisplayType } from "../types";
 
+function applyInline(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+
+function previewMessage(text: string): string {
+  const esc = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  const lines = esc.split("\n");
+  let html = "";
+  let inList = false;
+
+  for (const line of lines) {
+    const li = line.match(/^[-*]\s+(.+)/);
+    if (li) {
+      if (!inList) {
+        html += `<ul style="list-style-type:disc;padding-left:1.25rem;margin:0.4rem 0;text-align:left;">`;
+        inList = true;
+      }
+      html += `<li style="margin:0.4rem 0;">${applyInline(li[1])}</li>`;
+    } else {
+      if (inList) { html += `</ul>`; inList = false; }
+      if (line.trim() === "") {
+        html += `<br/>`;
+      } else {
+        html += applyInline(line) + `<br/>`;
+      }
+    }
+  }
+  if (inList) html += `</ul>`;
+
+  return html.replace(/<br\/>$/, "");
+}
+
 interface AnnouncementFormProps {
   storeId: string;
   announcement?: IAnnouncement;
@@ -109,7 +147,10 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
               </div>
               <div className="flex-1">
                 {form.title && <p className="text-sm font-semibold text-gray-900">{form.title}</p>}
-                <p className="text-xs text-gray-500 mt-0.5">{form.message || "Your announcement message..."}</p>
+                <p
+                  className="text-xs text-gray-500 mt-0.5 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: previewMessage(form.message) || "Your announcement message..." }}
+                />
                 {form.linkText && (
                   <p className="text-xs font-semibold mt-1.5" style={{ color: form.backgroundColor }}>
                     {form.linkText} →
@@ -124,7 +165,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
             style={{ backgroundColor: form.backgroundColor, color: form.textColor }}
           >
             {form.title && <span className="font-semibold">{form.title}</span>}
-            <span>{form.message || "Your announcement message..."}</span>
+            <span dangerouslySetInnerHTML={{ __html: previewMessage(form.message) || "Your announcement message..." }} />
             {form.linkText && <span className="underline font-medium">{form.linkText}</span>}
           </div>
         )}
@@ -151,11 +192,16 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
         <textarea
           value={form.message}
           onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-          placeholder="e.g. Get 20% off on all products. Use code SUMMER20"
+          placeholder="e.g. Get **20% off** on all products. Use code SUMMER20"
           rows={3}
           className={`${inputClass} resize-none`}
           required
         />
+        <p className="text-xs text-gray-400 mt-1">
+          Supports <code className="bg-gray-100 px-1 rounded">**bold**</code>{" "}
+          <code className="bg-gray-100 px-1 rounded">*italic*</code>{" "}
+          <code className="bg-gray-100 px-1 rounded">- list item</code> and line breaks
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

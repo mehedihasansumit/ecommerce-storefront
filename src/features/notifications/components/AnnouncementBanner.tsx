@@ -24,6 +24,45 @@ function addDismissed(id: string) {
   }
 }
 
+function applyInline(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+
+/** Converts **bold**, *italic*, - list items, and newlines to safe HTML. */
+function renderMessage(text: string): string {
+  const esc = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  const lines = esc.split("\n");
+  let html = "";
+  let inList = false;
+
+  for (const line of lines) {
+    const li = line.match(/^[-*]\s+(.+)/);
+    if (li) {
+      if (!inList) {
+        html += `<ul style="list-style-type:disc;padding-left:1.25rem;margin:0.4rem 0;text-align:left;">`;
+        inList = true;
+      }
+      html += `<li style="margin:0.4rem 0">${applyInline(li[1])}</li>`;
+    } else {
+      if (inList) { html += `</ul>`; inList = false; }
+      if (line.trim() === "") {
+        html += `<br/>`;
+      } else {
+        html += applyInline(line) + `<br/>`;
+      }
+    }
+  }
+  if (inList) html += `</ul>`;
+
+  return html.replace(/<br\/>$/, "");
+}
+
 function pickIcon(title: string, message: string) {
   const t = (title + message).toLowerCase();
   if (t.includes("sale") || t.includes("off") || t.includes("coupon") || t.includes("discount"))
@@ -101,7 +140,7 @@ export function AnnouncementBanner() {
             {a.title}
           </span>
           {a.title && <span className="opacity-30">|</span>}
-          <span>{a.message}</span>
+          <span dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }} />
           {a.linkUrl && a.linkText && (
             <Link
               href={a.linkUrl}
@@ -140,7 +179,7 @@ export function AnnouncementBanner() {
               {a.title && (
                 <p className="font-semibold text-sm tracking-tight">{a.title}</p>
               )}
-              <p className="text-sm opacity-80 leading-snug">{a.message}</p>
+              <p className="text-sm opacity-80 leading-snug" dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }} />
             </div>
             {a.linkUrl && a.linkText && (
               <Link
@@ -176,30 +215,59 @@ export function AnnouncementBanner() {
             <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden z-10 animate-scale-in">
               {/* Color header */}
               <div
-                className="px-8 pt-10 pb-8 text-center"
+                className="relative px-8 pt-12 pb-10 text-center overflow-hidden"
                 style={{ backgroundColor: a.backgroundColor, color: a.textColor }}
               >
+                {/* Decorative background blobs */}
                 <div
-                  className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-                  style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                >
-                  <Icon size={24} />
+                  className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20"
+                  style={{ backgroundColor: a.textColor }}
+                />
+                <div
+                  className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-10"
+                  style={{ backgroundColor: a.textColor }}
+                />
+                <div
+                  className="absolute top-1/2 left-4 w-12 h-12 rounded-full opacity-10"
+                  style={{ backgroundColor: a.textColor }}
+                />
+
+                {/* Icon */}
+                <div className="relative z-10 flex justify-center mb-5">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.25)",
+                      backdropFilter: "blur(8px)",
+                      border: "1.5px solid rgba(255,255,255,0.35)",
+                    }}
+                  >
+                    <Icon size={28} />
+                  </div>
                 </div>
-                <h2 className="text-xl font-bold tracking-tight">{a.title}</h2>
+
+                {/* Title */}
+                <h2 className="relative z-10 text-xl font-bold tracking-tight leading-snug">
+                  {a.title}
+                </h2>
               </div>
 
               {/* White body */}
-              <div className="px-8 py-6 text-center">
-                <p className="text-gray-500 text-sm leading-relaxed">{a.message}</p>
-                <div className="mt-6 flex flex-col gap-2">
+              <div className="px-8 py-7 text-center">
+                <p
+                  className="text-gray-500 text-[15px] leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }}
+                />
+                <div className="mt-7 flex flex-col gap-2.5">
                   {a.linkUrl && a.linkText && (
                     <Link
                       href={a.linkUrl}
                       onClick={() => handleDismiss(a._id)}
-                      className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98]"
+                      className="w-full py-3.5 rounded-xl text-sm font-semibold text-white inline-flex items-center justify-center gap-2 transition-all hover:brightness-105 hover:shadow-lg active:scale-[0.98]"
                       style={{ backgroundColor: a.backgroundColor }}
                     >
                       {a.linkText}
+                      <ArrowRight size={14} />
                     </Link>
                   )}
                   {a.dismissible && (
@@ -207,7 +275,7 @@ export function AnnouncementBanner() {
                       onClick={() => handleDismiss(a._id)}
                       className="w-full py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
                     >
-                      Dismiss
+                      Maybe later
                     </button>
                   )}
                 </div>
@@ -275,9 +343,10 @@ export function AnnouncementBanner() {
                           {a.title}
                         </p>
                       )}
-                      <p className="text-xs text-gray-400 mt-0.5 leading-relaxed line-clamp-2">
-                        {a.message}
-                      </p>
+                      <p
+                        className="text-xs text-gray-400 mt-0.5 leading-relaxed line-clamp-3"
+                        dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }}
+                      />
 
                       {a.linkUrl && a.linkText && (
                         <Link

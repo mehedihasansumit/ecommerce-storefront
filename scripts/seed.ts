@@ -12,7 +12,7 @@ async function seed() {
   const db = mongoose.connection.db!;
 
   // Clear existing data
-  const collections = ["stores", "products", "categories", "adminusers", "users", "carts", "orders", "reviews"];
+  const collections = ["stores", "products", "categories", "adminusers", "users", "carts", "orders", "reviews", "roles"];
   for (const col of collections) {
     try {
       await db.collection(col).drop();
@@ -22,6 +22,20 @@ async function seed() {
   }
   console.log("Cleared existing data.");
 
+  // ── Roles ────────────────────────────────────────────────────
+  const rolesResult = await db.collection("roles").insertMany([
+    {
+      name: "Super Admin",
+      description: "Unrestricted access to everything",
+      permissions: [],
+      isSuperAdmin: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ]);
+  const superAdminRoleId = rolesResult.insertedIds[0];
+  console.log("Created role: Super Admin");
+
   // ── Admin User ──────────────────────────────────────────────
   const passwordHash = await bcrypt.hash("admin123", 12);
   const adminResult = await db.collection("adminusers").insertMany([
@@ -29,7 +43,7 @@ async function seed() {
       name: "Super Admin",
       email: "admin@example.com",
       passwordHash,
-      role: "superadmin",
+      roleId: superAdminRoleId,
       assignedStores: [],
       createdAt: new Date(),
       updatedAt: new Date(),

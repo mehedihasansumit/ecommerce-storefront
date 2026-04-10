@@ -22,20 +22,16 @@ export const createAdminSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["superadmin", "manager"]).default("manager"),
-  permissions: z.array(z.string()).default([]),
+  roleId: z.string().min(1, "Role is required"),
   assignedStores: z.array(z.string()).default([]),
-  roleId: z.string().transform((v) => v || null).nullable().optional(),
 });
 
 export const updateAdminSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
-  role: z.enum(["superadmin", "manager"]).optional(),
-  permissions: z.array(z.string()).optional(),
+  roleId: z.string().min(1).optional(),
   assignedStores: z.array(z.string()).optional(),
-  roleId: z.string().transform((v) => v || null).nullable().optional(),
 });
 
 export type CreateAdminInput = z.infer<typeof createAdminSchema>;

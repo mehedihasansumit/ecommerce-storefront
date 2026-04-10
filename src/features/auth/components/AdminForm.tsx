@@ -7,7 +7,7 @@ import {
   PERMISSION_LABELS,
   type Permission,
 } from "@/shared/lib/permissions";
-import type { IAdminUser } from "@/features/auth/types";
+import type { IAdminUserWithRole } from "@/features/auth/types";
 import type { IRole } from "@/features/roles/types";
 
 interface Store {
@@ -16,7 +16,7 @@ interface Store {
 }
 
 interface AdminFormProps {
-  admin?: Omit<IAdminUser, "passwordHash">;
+  admin?: Omit<IAdminUserWithRole, "passwordHash">;
   stores: Store[];
   roles: IRole[];
 }
@@ -28,14 +28,8 @@ export function AdminForm({ admin, stores, roles }: AdminFormProps) {
   const [name, setName] = useState(admin?.name ?? "");
   const [email, setEmail] = useState(admin?.email ?? "");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"superadmin" | "manager">(
-    admin?.role ?? "manager"
-  );
   const [selectedRoleId, setSelectedRoleId] = useState<string>(
     admin?.roleId ?? ""
-  );
-  const [permissions, setPermissions] = useState<Permission[]>(
-    (admin?.permissions as Permission[]) ?? []
   );
   const [assignedStores, setAssignedStores] = useState<string[]>(
     admin?.assignedStores ?? []
@@ -43,25 +37,8 @@ export function AdminForm({ admin, stores, roles }: AdminFormProps) {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  function applyRoleTemplate(roleId: string) {
-    setSelectedRoleId(roleId);
-    if (!roleId) return;
-    const found = roles.find((r) => r._id === roleId);
-    if (found) {
-      // Merge role permissions with existing admin permissions
-      const combined = new Set([
-        ...permissions,
-        ...(found.permissions as Permission[]),
-      ]);
-      setPermissions(Array.from(combined));
-    }
-  }
-
-  function togglePermission(perm: Permission) {
-    setPermissions((prev) =>
-      prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
-    );
-  }
+  const selectedRole = roles.find((r) => r._id === selectedRoleId);
+  const isSuperAdminRole = selectedRole?.isSuperAdmin ?? false;
 
   function toggleStore(storeId: string) {
     setAssignedStores((prev) =>
@@ -82,13 +59,17 @@ export function AdminForm({ admin, stores, roles }: AdminFormProps) {
       return;
     }
 
+    if (!selectedRoleId) {
+      setError("Please select a role");
+      setSaving(false);
+      return;
+    }
+
     const body: Record<string, unknown> = {
       name,
       email,
-      role,
-      permissions: role === "superadmin" ? [] : permissions,
-      assignedStores: role === "superadmin" ? [] : assignedStores,
-      roleId: role === "superadmin" ? null : selectedRoleId || null,
+      roleId: selectedRoleId,
+      assignedStores: isSuperAdminRole ? [] : assignedStores,
     };
     if (password) body.password = password;
 
@@ -166,129 +147,93 @@ export function AdminForm({ admin, stores, roles }: AdminFormProps) {
             required={!isEditing}
           />
         </div>
-        <div>
-          <label className={labelClass}>System Role</label>
-          <select
-            className={inputClass}
-            value={role}
-            onChange={(e) =>
-              setRole(e.target.value as "superadmin" | "manager")
-            }
-          >
-            <option value="manager">Manager</option>
-            <option value="superadmin">Superadmin</option>
-          </select>
-          <p className="text-xs text-gray-400 mt-1">
-            Superadmin has unrestricted access to everything.
-          </p>
-        </div>
       </div>
 
-      {/* Manager-only: Role template + Permissions + Stores */}
-      {role === "manager" && (
-        <>
-          {/* Role Template */}
-          {roles.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
-              <div>
-                <h2 className="text-sm font-semibold text-gray-900">
-                  Role Template
-                </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Apply a preset permission template. You can still customise
-                  permissions below after applying.
-                </p>
-              </div>
-              <select
-                className={inputClass}
-                value={selectedRoleId}
-                onChange={(e) => applyRoleTemplate(e.target.value)}
-              >
-                <option value="">— No template —</option>
-                {roles.map((r) => (
-                  <option key={r._id} value={r._id}>
-                    {r.name}
-                    {r.description ? ` — ${r.description}` : ""}
-                  </option>
-                ))}
-              </select>
-              {selectedRoleId && (
-                <p className="text-xs text-blue-600">
-                  Template applied. Permissions below include role permissions +
-                  any extra you add.
-                </p>
-              )}
-            </div>
-          )}
+      {/* Role Selection */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-900">Role</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            The role determines what this admin can access and do.
+          </p>
+        </div>
+        <select
+          className={inputClass}
+          value={selectedRoleId}
+          onChange={(e) => setSelectedRoleId(e.target.value)}
+          required
+        >
+          <option value="">— Select a role —</option>
+          {roles.map((r) => (
+            <option key={r._id} value={r._id}>
+              {r.name}
+              {r.isSuperAdmin ? " (Super Admin)" : ""}
+              {r.description ? ` — ${r.description}` : ""}
+            </option>
+          ))}
+        </select>
 
-          {/* Permissions */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900">
-                Permissions
-              </h2>
-              <span className="text-xs text-gray-400">
-                {permissions.length} selected
-              </span>
-            </div>
-            {PERMISSION_GROUPS.map((group) => (
-              <div key={group.label}>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {group.label}
+        {/* Show the role's permissions as read-only preview */}
+        {selectedRole && (
+          <div className="mt-3">
+            {selectedRole.isSuperAdmin ? (
+              <p className="text-xs text-purple-600 font-medium">
+                This role has unrestricted access to everything.
+              </p>
+            ) : selectedRole.permissions.length > 0 ? (
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-2">
+                  Permissions included in this role:
                 </p>
-                <div className="space-y-2">
-                  {group.permissions.map((perm) => (
-                    <label
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedRole.permissions.map((perm) => (
+                    <span
                       key={perm}
-                      className="flex items-center gap-3 cursor-pointer"
+                      className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-md"
                     >
-                      <input
-                        type="checkbox"
-                        checked={permissions.includes(perm)}
-                        onChange={() => togglePermission(perm)}
-                        className="w-4 h-4 rounded border-gray-300 accent-gray-900"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {PERMISSION_LABELS[perm]}
-                      </span>
-                    </label>
+                      {PERMISSION_LABELS[perm as Permission] ?? perm}
+                    </span>
                   ))}
                 </div>
               </div>
+            ) : (
+              <p className="text-xs text-gray-400">
+                This role has no permissions assigned.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Assigned Stores — only for non-superadmin roles */}
+      {!isSuperAdminRole && stores.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">
+              Assigned Stores
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              This admin can only access products, orders, and payments for
+              these stores. Leave empty to allow access to all stores.
+            </p>
+          </div>
+          <div className="space-y-2">
+            {stores.map((store) => (
+              <label
+                key={store._id}
+                className="flex items-center gap-3 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={assignedStores.includes(store._id)}
+                  onChange={() => toggleStore(store._id)}
+                  className="w-4 h-4 rounded border-gray-300 accent-gray-900"
+                />
+                <span className="text-sm text-gray-700">{store.name}</span>
+              </label>
             ))}
           </div>
-
-          {/* Assigned Stores */}
-          {stores.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-              <div>
-                <h2 className="text-sm font-semibold text-gray-900">
-                  Assigned Stores
-                </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Manager can only access products, orders, and payments for
-                  these stores.
-                </p>
-              </div>
-              <div className="space-y-2">
-                {stores.map((store) => (
-                  <label
-                    key={store._id}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={assignedStores.includes(store._id)}
-                      onChange={() => toggleStore(store._id)}
-                      className="w-4 h-4 rounded border-gray-300 accent-gray-900"
-                    />
-                    <span className="text-sm text-gray-700">{store.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
+        </div>
       )}
 
       <div className="flex items-center gap-3">
@@ -297,7 +242,7 @@ export function AdminForm({ admin, stores, roles }: AdminFormProps) {
           disabled={saving}
           className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
         >
-          {saving ? "Saving…" : isEditing ? "Save Changes" : "Create Admin"}
+          {saving ? "Saving..." : isEditing ? "Save Changes" : "Create Admin"}
         </button>
         <button
           type="button"

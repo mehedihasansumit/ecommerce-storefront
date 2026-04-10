@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getAdminDbUser } from "@/shared/lib/auth";
-import { AuthRepository } from "@/features/auth/repository";
+import { AuthService } from "@/features/auth/service";
 import { StoreService } from "@/features/stores/service";
 import { RoleService } from "@/features/roles/service";
 import { AdminForm } from "@/features/auth/components/AdminForm";
@@ -15,11 +15,11 @@ export default async function EditAdminPage({
   params: Promise<{ adminId: string }>;
 }) {
   const adminUser = await getAdminDbUser();
-  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
+  if (!adminUser || !adminUser.role.isSuperAdmin) redirect("/admin");
 
   const { adminId } = await params;
   const [admin, stores, roles] = await Promise.all([
-    AuthRepository.findAdminById(adminId),
+    AuthService.getAdminWithRole(adminId),
     StoreService.getAll(),
     RoleService.list(),
   ]);

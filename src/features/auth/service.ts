@@ -3,19 +3,14 @@ import { AuthRepository } from "./repository";
 import { signToken } from "@/shared/lib/auth";
 import { RoleRepository } from "@/features/roles/repository";
 import type { Permission } from "@/shared/lib/permissions";
-import type { IUser, IAdminUser, IAddress, JwtCustomerPayload, JwtAdminPayload } from "./types";
+import type { IUser, IAdminUser, IAdminUserWithRole, IAddress, JwtCustomerPayload, JwtAdminPayload } from "./types";
 import type { AddressInput, CreateAdminInput, UpdateAdminInput } from "./schemas";
 
-/** Merge role permissions + own permissions, returning deduplicated effective set */
-async function resolvePermissions(
-  roleId: string | null,
-  ownPermissions: Permission[]
-): Promise<Permission[]> {
-  if (!roleId) return ownPermissions;
-  const role = await RoleRepository.findById(roleId);
-  if (!role) return ownPermissions;
-  const combined = new Set([...(role.permissions as Permission[]), ...ownPermissions]);
-  return Array.from(combined);
+/** Populate the admin's role, returning IAdminUserWithRole */
+async function populateRole(admin: IAdminUser): Promise<IAdminUserWithRole> {
+  const role = await RoleRepository.findById(admin.roleId);
+  if (!role) throw new Error("Admin's assigned role not found");
+  return { ...admin, role };
 }
 
 export const AuthService = {
@@ -89,7 +84,7 @@ export const AuthService = {
   async loginAdmin(
     email: string,
     password: string
-  ): Promise<{ admin: Omit<IAdminUser, "passwordHash">; token: string }> {
+  ): Promise<{ admin: Omit<IAdminUserWithRole, "passwordHash">; token: string }> {
     const admin = await AuthRepository.findAdminByEmail(email);
     if (!admin) {
       throw new Error("Invalid email or password");
@@ -100,71 +95,78 @@ export const AuthService = {
       throw new Error("Invalid email or password");
     }
 
-    // Permissions are already fully resolved and stored in DB at create/update time
+    const adminWithRole = await populateRole(admin);
+
     const payload: JwtAdminPayload = {
       adminId: admin._id,
-      role: admin.role,
-      permissions: admin.permissions ?? [],
+      roleId: admin.roleId,
+      isSuperAdmin: adminWithRole.role.isSuperAdmin,
+      permissions: adminWithRole.role.permissions as Permission[],
       assignedStores: admin.assignedStores ?? [],
       type: "admin",
     };
     const token = await signToken(payload);
 
-    const { passwordHash: _, ...safeAdmin } = admin;
+    const { passwordHash: _, ...safeAdmin } = adminWithRole;
     return { admin: safeAdmin, token };
   },
 
   async createAdmin(data: CreateAdminInput): Promise<IAdminUser> {
     const existing = await AuthRepository.findAdminByEmail(data.email);
     if (existing) throw new Error("Email already in use");
-    const passwordHash = await bcrypt.hash(data.password, 12);
 
-    // Resolve effective permissions: role template + own permissions, stored in DB
-    const effectivePermissions = await resolvePermissions(
-      data.roleId ?? null,
-      (data.permissions ?? []) as Permission[]
-    );
+    // Verify role exists
+    const role = await RoleRepository.findById(data.roleId);
+    if (!role) throw new Error("Selected role does not exist");
+
+    const passwordHash = await bcrypt.hash(data.password, 12);
 
     return AuthRepository.createAdmin({
       name: data.name,
       email: data.email,
       passwordHash,
-      role: data.role || "manager",
-      permissions: effectivePermissions,
-      assignedStores: data.assignedStores ?? [],
-      roleId: data.roleId ?? null,
+      roleId: data.roleId,
+      assignedStores: role.isSuperAdmin ? [] : (data.assignedStores ?? []),
     });
   },
 
-  async listAdmins(): Promise<Omit<IAdminUser, "passwordHash">[]> {
+  async listAdmins(): Promise<Omit<IAdminUserWithRole, "passwordHash">[]> {
     const admins = await AuthRepository.findAllAdmins();
-    return admins.map(({ passwordHash: _, ...a }) => a);
+    const results: Omit<IAdminUserWithRole, "passwordHash">[] = [];
+    for (const admin of admins) {
+      const withRole = await populateRole(admin);
+      const { passwordHash: _, ...safe } = withRole;
+      results.push(safe);
+    }
+    return results;
   },
 
-  async updateAdmin(id: string, data: UpdateAdminInput): Promise<Omit<IAdminUser, "passwordHash">> {
+  async getAdminWithRole(id: string): Promise<IAdminUserWithRole | null> {
+    const admin = await AuthRepository.findAdminById(id);
+    if (!admin) return null;
+    return populateRole(admin);
+  },
+
+  async updateAdmin(id: string, data: UpdateAdminInput): Promise<Omit<IAdminUserWithRole, "passwordHash">> {
     const updateData: Partial<IAdminUser> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.email !== undefined) updateData.email = data.email;
-    if (data.role !== undefined) updateData.role = data.role;
+    if (data.roleId !== undefined) {
+      const role = await RoleRepository.findById(data.roleId);
+      if (!role) throw new Error("Selected role does not exist");
+      updateData.roleId = data.roleId;
+      // Clear assignedStores if switching to a superadmin role
+      if (role.isSuperAdmin) updateData.assignedStores = [];
+    }
     if (data.assignedStores !== undefined) updateData.assignedStores = data.assignedStores;
-    if ("roleId" in data) updateData.roleId = data.roleId ?? null;
     if (data.password) {
       updateData.passwordHash = await bcrypt.hash(data.password, 12);
     }
 
-    // Re-resolve effective permissions when role or permissions change
-    if (data.permissions !== undefined || "roleId" in data) {
-      const current = await AuthRepository.findAdminById(id);
-      const roleId = "roleId" in data ? (data.roleId ?? null) : (current?.roleId ?? null);
-      const ownPerms = data.permissions !== undefined
-        ? (data.permissions as Permission[])
-        : (current?.permissions ?? []);
-      updateData.permissions = await resolvePermissions(roleId, ownPerms);
-    }
-
     const updated = await AuthRepository.updateAdmin(id, updateData);
     if (!updated) throw new Error("Admin not found");
-    const { passwordHash: _, ...safe } = updated;
+    const withRole = await populateRole(updated);
+    const { passwordHash: _, ...safe } = withRole;
     return safe;
   },
 

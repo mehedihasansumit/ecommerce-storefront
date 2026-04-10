@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
           _id: admin._id,
           name: admin.name,
           email: admin.email,
-          role: admin.role,
+          role: admin.role.name,
         },
       },
       { status: 200 }

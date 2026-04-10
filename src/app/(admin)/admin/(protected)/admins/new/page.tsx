@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "New Admin" };
 
 export default async function NewAdminPage() {
   const adminUser = await getAdminDbUser();
-  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
+  if (!adminUser || !adminUser.role.isSuperAdmin) redirect("/admin");
 
   const [stores, roles] = await Promise.all([
     StoreService.getAll(),

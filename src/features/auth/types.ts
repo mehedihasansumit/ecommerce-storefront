@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import type { Permission } from "@/shared/lib/permissions";
+import type { IRole } from "@/features/roles/types";
 
 export type { Permission };
 
@@ -37,18 +38,21 @@ export interface IAdminUser {
   name: string;
   email: string;
   passwordHash: string;
-  role: "superadmin" | "manager";
+  roleId: string;
   assignedStores: string[];
-  permissions: Permission[];
-  roleId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
+/** AdminUser with its Role populated (returned by service layer) */
+export interface IAdminUserWithRole extends IAdminUser {
+  role: IRole;
+}
+
 export interface IAdminUserDocument extends Omit<IAdminUser, "_id" | "assignedStores" | "roleId"> {
   _id: Types.ObjectId;
+  roleId: Types.ObjectId;
   assignedStores: Types.ObjectId[];
-  roleId: Types.ObjectId | null;
 }
 
 export interface JwtCustomerPayload {
@@ -60,7 +64,8 @@ export interface JwtCustomerPayload {
 
 export interface JwtAdminPayload {
   adminId: string;
-  role: "superadmin" | "manager";
+  roleId: string;
+  isSuperAdmin: boolean;
   permissions: Permission[];
   assignedStores: string[];
   type: "admin";

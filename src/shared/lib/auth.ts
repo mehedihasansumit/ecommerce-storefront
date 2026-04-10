@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import type { JwtPayload, JwtAdminPayload, IAdminUser } from "@/features/auth/types";
+import type { JwtPayload, JwtAdminPayload, IAdminUserWithRole } from "@/features/auth/types";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d";
@@ -37,13 +37,13 @@ export async function getAdminToken(): Promise<JwtPayload | null> {
 }
 
 /**
- * Returns the full admin record from the database.
+ * Returns the full admin record from the database with role populated.
  * Use this instead of relying on JWT payload for permission checks,
- * since the JWT can be stale after a permission update.
+ * since the JWT can be stale after a permission/role update.
  */
-export async function getAdminDbUser(): Promise<IAdminUser | null> {
+export async function getAdminDbUser(): Promise<IAdminUserWithRole | null> {
   const payload = (await getAdminToken()) as JwtAdminPayload | null;
   if (!payload?.adminId) return null;
-  const { AuthRepository } = await import("@/features/auth/repository");
-  return AuthRepository.findAdminById(payload.adminId);
+  const { AuthService } = await import("@/features/auth/service");
+  return AuthService.getAdminWithRole(payload.adminId);
 }

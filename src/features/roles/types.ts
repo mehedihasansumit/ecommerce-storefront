@@ -6,6 +6,7 @@ export interface IRole {
   name: string;
   description: string;
   permissions: Permission[];
+  isSuperAdmin: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

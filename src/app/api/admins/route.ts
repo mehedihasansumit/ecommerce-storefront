@@ -14,7 +14,7 @@ export async function GET() {
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
-    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    if (!admin.role.isSuperAdmin) return forbiddenResponse("Superadmin only");
 
     const admins = await AuthService.listAdmins();
     return successResponse(admins);
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
-    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    if (!admin.role.isSuperAdmin) return forbiddenResponse("Superadmin only");
 
     const body = await request.json();
     const validated = createAdminSchema.parse(body);

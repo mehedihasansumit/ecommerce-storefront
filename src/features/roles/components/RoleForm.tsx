@@ -19,6 +19,7 @@ export function RoleForm({ role }: RoleFormProps) {
 
   const [name, setName] = useState(role?.name ?? "");
   const [description, setDescription] = useState(role?.description ?? "");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(role?.isSuperAdmin ?? false);
   const [permissions, setPermissions] = useState<Permission[]>(
     (role?.permissions as Permission[]) ?? []
   );
@@ -55,7 +56,7 @@ export function RoleForm({ role }: RoleFormProps) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, permissions }),
+        body: JSON.stringify({ name, description, permissions: isSuperAdmin ? [] : permissions, isSuperAdmin }),
       });
 
       if (!res.ok) {
@@ -106,7 +107,26 @@ export function RoleForm({ role }: RoleFormProps) {
         </div>
       </div>
 
+      {/* Super Admin Toggle */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isSuperAdmin}
+            onChange={(e) => setIsSuperAdmin(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 accent-gray-900"
+          />
+          <div>
+            <span className="text-sm font-medium text-gray-900">Super Admin</span>
+            <p className="text-xs text-gray-500">
+              Grants unrestricted access to everything. Permissions below are ignored.
+            </p>
+          </div>
+        </label>
+      </div>
+
       {/* Permissions */}
+      {!isSuperAdmin && (
       <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Permissions</h2>
@@ -156,6 +176,7 @@ export function RoleForm({ role }: RoleFormProps) {
           );
         })}
       </div>
+      )}
 
       <div className="flex items-center gap-3">
         <button

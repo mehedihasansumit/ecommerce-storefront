@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Manage Roles" };
 
 export default async function RolesPage() {
   const adminUser = await getAdminDbUser();
-  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
+  if (!adminUser || !adminUser.role.isSuperAdmin) redirect("/admin");
 
   const roles = await RoleService.list();
 
@@ -68,7 +68,11 @@ export default async function RolesPage() {
                     <p className="text-xs text-gray-500 mb-3">{role.description}</p>
                   )}
                   <div className="flex flex-wrap gap-1.5">
-                    {role.permissions.length === 0 ? (
+                    {role.isSuperAdmin ? (
+                      <span className="inline-flex items-center px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-md">
+                        All permissions (Super Admin)
+                      </span>
+                    ) : role.permissions.length === 0 ? (
                       <span className="text-xs text-gray-400">No permissions</span>
                     ) : (
                       role.permissions.map((perm) => (

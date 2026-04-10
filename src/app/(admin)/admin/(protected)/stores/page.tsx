@@ -12,9 +12,16 @@ export default async function StoresPage() {
   const adminUser = await getAdminDbUser();
   if (!adminUser) redirect("/admin");
 
-  // Allow access if manager has any store-scoped permission
+  const isSuperAdmin = adminUser.role.isSuperAdmin;
+  const permCtx = {
+    isSuperAdmin,
+    permissions: adminUser.role.permissions ?? [],
+    assignedStores: adminUser.assignedStores ?? [],
+  };
+
+  // Allow access if admin has any store-scoped permission
   const hasAnyStoreAccess =
-    adminUser.role === "superadmin" ||
+    isSuperAdmin ||
     [
       PERMISSIONS.STORES_CREATE,
       PERMISSIONS.STORES_EDIT,
@@ -27,16 +34,16 @@ export default async function StoresPage() {
       PERMISSIONS.PAYMENTS_VIEW,
       PERMISSIONS.PAYMENTS_UPDATE_STATUS,
       PERMISSIONS.PAYMENTS_DISCOUNT,
-    ].some((p) => hasPermission(adminUser, p));
+    ].some((p) => hasPermission(permCtx, p));
 
   if (!hasAnyStoreAccess) redirect("/admin");
 
-  const canCreateStore = hasPermission(adminUser, PERMISSIONS.STORES_CREATE);
+  const canCreateStore = hasPermission(permCtx, PERMISSIONS.STORES_CREATE);
 
-  // Superadmin sees all stores; managers only see their assigned stores
-  // (empty assignedStores for managers means all stores — no restriction)
+  // Superadmin sees all stores; others only see their assigned stores
+  // (empty assignedStores means all stores — no restriction)
   const stores =
-    adminUser.role === "superadmin" || (adminUser.assignedStores ?? []).length === 0
+    isSuperAdmin || (adminUser.assignedStores ?? []).length === 0
       ? await StoreService.getAll()
       : await StoreService.getByIds(adminUser.assignedStores);
 

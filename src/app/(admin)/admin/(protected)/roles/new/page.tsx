@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "New Role" };
 
 export default async function NewRolePage() {
   const adminUser = await getAdminDbUser();
-  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
+  if (!adminUser || !adminUser.role.isSuperAdmin) redirect("/admin");
 
   return (
     <div>

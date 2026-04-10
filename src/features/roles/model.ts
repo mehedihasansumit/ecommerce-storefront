@@ -6,6 +6,7 @@ const RoleSchema = new Schema<IRoleDocument>(
     name: { type: String, required: true, unique: true, trim: true },
     description: { type: String, default: "" },
     permissions: { type: [String], default: [] },
+    isSuperAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

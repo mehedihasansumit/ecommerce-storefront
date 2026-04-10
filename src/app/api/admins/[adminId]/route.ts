@@ -18,7 +18,7 @@ export async function GET(
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
-    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    if (!admin.role.isSuperAdmin) return forbiddenResponse("Superadmin only");
 
     const { adminId } = await params;
     const { AuthRepository } = await import("@/features/auth/repository");
@@ -38,7 +38,7 @@ export async function PUT(
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
-    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    if (!admin.role.isSuperAdmin) return forbiddenResponse("Superadmin only");
 
     const { adminId } = await params;
     const body = await request.json();
@@ -63,7 +63,7 @@ export async function DELETE(
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
-    if (admin.role !== "superadmin") return forbiddenResponse("Superadmin only");
+    if (!admin.role.isSuperAdmin) return forbiddenResponse("Superadmin only");
 
     const { adminId } = await params;
     // Prevent self-deletion

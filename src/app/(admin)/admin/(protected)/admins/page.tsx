@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { AuthService } from "@/features/auth/service";
-import { RoleService } from "@/features/roles/service";
 
 import type { Metadata } from "next";
 import { UserCog, Plus, Shield, ShieldCheck } from "lucide-react";
@@ -11,13 +10,9 @@ export const metadata: Metadata = { title: "Manage Admins" };
 
 export default async function AdminsPage() {
   const adminUser = await getAdminDbUser();
-  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
+  if (!adminUser || !adminUser.role.isSuperAdmin) redirect("/admin");
 
-  const [admins, roles] = await Promise.all([
-    AuthService.listAdmins(),
-    RoleService.list(),
-  ]);
-  const roleMap = Object.fromEntries(roles.map((r) => [r._id, r.name]));
+  const admins = await AuthService.listAdmins();
 
   return (
     <div>
@@ -81,32 +76,25 @@ export default async function AdminsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    {admin.role === "superadmin" ? (
+                    {admin.role.isSuperAdmin ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                         <ShieldCheck className="w-3.5 h-3.5" />
-                        Superadmin
+                        {admin.role.name}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                         <Shield className="w-3.5 h-3.5" />
-                        Manager
+                        {admin.role.name}
                       </span>
                     )}
                   </td>
                   <td className="px-5 py-4">
-                    {admin.role === "superadmin" ? (
+                    {admin.role.isSuperAdmin ? (
                       <span className="text-xs text-gray-500">All permissions</span>
                     ) : (
-                      <div>
-                        {admin.roleId && roleMap[admin.roleId] && (
-                          <p className="text-xs font-medium text-blue-600 mb-0.5">
-                            {roleMap[admin.roleId]}
-                          </p>
-                        )}
-                        <span className="text-xs text-gray-500">
-                          {admin.permissions.length} permission{admin.permissions.length !== 1 ? "s" : ""}
-                        </span>
-                      </div>
+                      <span className="text-xs text-gray-500">
+                        {admin.role.permissions.length} permission{admin.role.permissions.length !== 1 ? "s" : ""}
+                      </span>
                     )}
                   </td>
                   <td className="px-5 py-4">

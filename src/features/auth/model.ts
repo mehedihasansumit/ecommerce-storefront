@@ -36,14 +36,8 @@ const AdminUserSchema = new Schema<IAdminUserDocument>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
-    role: {
-      type: String,
-      enum: ["superadmin", "manager"],
-      default: "manager",
-    },
+    roleId: { type: Schema.Types.ObjectId, ref: "Role", required: true },
     assignedStores: [{ type: Schema.Types.ObjectId, ref: "Store" }],
-    permissions: { type: [String], default: [] },
-    roleId: { type: Schema.Types.ObjectId, ref: "Role", default: null },
   },
   { timestamps: true }
 );

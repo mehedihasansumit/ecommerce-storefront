@@ -13,7 +13,7 @@ export default async function EditRolePage({
   params: Promise<{ roleId: string }>;
 }) {
   const adminUser = await getAdminDbUser();
-  if (!adminUser || adminUser.role !== "superadmin") redirect("/admin");
+  if (!adminUser || !adminUser.role.isSuperAdmin) redirect("/admin");
 
   const { roleId } = await params;
   const role = await RoleService.getById(roleId);

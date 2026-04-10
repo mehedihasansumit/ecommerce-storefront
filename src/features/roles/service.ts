@@ -19,6 +19,7 @@ export const RoleService = {
       name: data.name,
       description: data.description,
       permissions: data.permissions as Permission[],
+      isSuperAdmin: data.isSuperAdmin ?? false,
     });
   },
 
@@ -35,60 +36,25 @@ export const RoleService = {
       ...(data.permissions !== undefined && {
         permissions: data.permissions as Permission[],
       }),
+      ...(data.isSuperAdmin !== undefined && { isSuperAdmin: data.isSuperAdmin }),
     });
     if (!updated) throw new Error("Role not found");
-
-    // Re-sync permissions for all admins assigned to this role
-    if (data.permissions !== undefined) {
-      await syncAdminPermissionsForRole(id, updated.permissions);
-    }
-
     return updated;
   },
 
   async delete(id: string): Promise<void> {
+    // Block deletion if any admins are assigned to this role
+    const { AdminUserModel } = await import("@/features/auth/model");
+    const { default: dbConnect } = await import("@/shared/lib/db");
+    await dbConnect();
+    const count = await AdminUserModel.countDocuments({ roleId: id });
+    if (count > 0) {
+      throw new Error(
+        `Cannot delete this role — ${count} admin${count > 1 ? "s are" : " is"} still assigned to it. Reassign them first.`
+      );
+    }
+
     const deleted = await RoleRepository.delete(id);
     if (!deleted) throw new Error("Role not found");
-    // Detach role from admins (set roleId to null, keep their own permissions)
-    await detachRoleFromAdmins(id);
   },
 };
-
-/**
- * When a role's permissions are updated, re-resolve effective permissions
- * for all admins that have this role assigned.
- */
-async function syncAdminPermissionsForRole(
-  roleId: string,
-  newRolePermissions: Permission[]
-) {
-  // Import dynamically to avoid circular dependency
-  const { AdminUserModel } = await import("@/features/auth/model");
-  const { default: dbConnect } = await import("@/shared/lib/db");
-  await dbConnect();
-
-  const admins = await AdminUserModel.find({ roleId }).lean();
-  for (const admin of admins) {
-    // Admins may have their own extra permissions beyond the role
-    // We store: rolePermissions ∪ ownPermissions (those NOT in the old role set)
-    // Since we can't easily separate own vs role perms, rebuild from scratch:
-    // Treat admin's current permissions that aren't in ANY role as "own" perms.
-    const ownPerms = (admin.permissions as string[]).filter(
-      (p) => !newRolePermissions.includes(p as Permission)
-    );
-    const effective = Array.from(
-      new Set([...newRolePermissions, ...ownPerms])
-    );
-    await AdminUserModel.updateOne(
-      { _id: admin._id },
-      { permissions: effective }
-    );
-  }
-}
-
-async function detachRoleFromAdmins(roleId: string) {
-  const { AdminUserModel } = await import("@/features/auth/model");
-  const { default: dbConnect } = await import("@/shared/lib/db");
-  await dbConnect();
-  await AdminUserModel.updateMany({ roleId }, { roleId: null });
-}

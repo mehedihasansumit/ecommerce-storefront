@@ -1,22 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminToken } from "@/shared/lib/auth";
-import { AuthRepository } from "@/features/auth/repository";
-import type { JwtAdminPayload } from "@/features/auth/types";
+import { getAdminDbUser } from "@/shared/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const payload = await getAdminToken();
-
-    if (!payload || payload.type !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Fetch fresh admin data
-    const adminPayload = payload as JwtAdminPayload;
-    const admin = await AuthRepository.findAdminById(adminPayload.adminId);
+    const admin = await getAdminDbUser();
 
     if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     return NextResponse.json(
@@ -25,7 +15,7 @@ export async function GET(request: NextRequest) {
           _id: admin._id,
           name: admin.name,
           email: admin.email,
-          role: admin.role,
+          role: admin.role.name,
         },
       },
       { status: 200 }

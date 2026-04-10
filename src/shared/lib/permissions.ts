@@ -65,26 +65,40 @@ export const PERMISSION_GROUPS = [
   },
 ] as const;
 
-export function hasPermission(
-  admin: { role: string; permissions?: string[] | null },
-  permission: Permission
-): boolean {
-  if (admin.role === "superadmin") return true;
-  return (admin.permissions ?? []).includes(permission);
+/**
+ * Admin permission context — accepts either:
+ * - A flat shape: `{ isSuperAdmin, permissions?, assignedStores? }`
+ * - An IAdminUserWithRole: `{ role: { isSuperAdmin, permissions }, assignedStores? }`
+ */
+type AdminCtx = {
+  isSuperAdmin?: boolean;
+  permissions?: string[] | null;
+  assignedStores?: string[] | null;
+  role?: { isSuperAdmin: boolean; permissions?: string[] | null };
+};
+
+function resolveCtx(admin: AdminCtx) {
+  const isSuperAdmin = admin.role?.isSuperAdmin ?? admin.isSuperAdmin ?? false;
+  const permissions = admin.role?.permissions ?? admin.permissions ?? [];
+  const assignedStores = admin.assignedStores ?? [];
+  return { isSuperAdmin, permissions, assignedStores };
+}
+
+export function hasPermission(admin: AdminCtx, permission: Permission): boolean {
+  const { isSuperAdmin, permissions } = resolveCtx(admin);
+  if (isSuperAdmin) return true;
+  return permissions.includes(permission);
 }
 
 /**
  * Check if an admin can access a specific store.
- * - Superadmin: always true
- * - Manager with empty assignedStores: access all stores (no restriction)
- * - Manager with specific assignedStores: only those stores
+ * - SuperAdmin: always true
+ * - Admin with empty assignedStores: access all stores (no restriction)
+ * - Admin with specific assignedStores: only those stores
  */
-export function canAccessStore(
-  admin: { role: string; assignedStores?: string[] | null },
-  storeId: string
-): boolean {
-  if (admin.role === "superadmin") return true;
-  const stores = admin.assignedStores ?? [];
-  if (stores.length === 0) return true; // no restriction = all stores
-  return stores.includes(storeId);
+export function canAccessStore(admin: AdminCtx, storeId: string): boolean {
+  const { isSuperAdmin, assignedStores } = resolveCtx(admin);
+  if (isSuperAdmin) return true;
+  if (assignedStores.length === 0) return true;
+  return assignedStores.includes(storeId);
 }

@@ -75,7 +75,7 @@ export default function CartPage() {
 
           {/* Order summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7 sticky top-24">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-5 sticky top-24">
               <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
               {/* Coupon input */}
@@ -88,28 +88,27 @@ export default function CartPage() {
               />
 
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-gray-600">
-                  <span>
-                    {t("subtotal")} ( {items.length}{" "}
-                    {t("items", { count: items.length })} )
+                <div className="flex items-start justify-between gap-3 text-gray-600">
+                  <span className="min-w-0">
+                    {t("subtotal")} ({items.length}&nbsp;{t("items", { count: items.length })})
                   </span>
-                  <span>৳{subtotal.toLocaleString()}</span>
+                  <span className="shrink-0 font-medium">৳{subtotal.toLocaleString()}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex items-center justify-between gap-3 text-green-600">
                     <span>Discount</span>
-                    <span>-৳{discount.toLocaleString()}</span>
+                    <span className="shrink-0">-৳{discount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-gray-600">
+                <div className="flex items-center justify-between gap-3 text-gray-600">
                   <span>{t("shipping")}</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="shrink-0 text-green-600">Free</span>
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between font-bold text-base">
+              <div className="border-t border-gray-100 mt-4 pt-4 flex items-center justify-between gap-3 font-bold text-base">
                 <span>{t("total")}</span>
-                <span>৳{total.toLocaleString()}</span>
+                <span className="shrink-0">৳{total.toLocaleString()}</span>
               </div>
 
               <Link
@@ -178,12 +177,12 @@ function CouponInput({
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Coupon code"
-          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+          className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
         />
         <button
           type="submit"
           disabled={couponLoading || !code.trim()}
-          className="px-4 py-2 text-sm font-medium border rounded-lg transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0 w-16 flex items-center justify-center py-2 text-sm font-medium border rounded-lg transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
         >
           {couponLoading ? <Loader2 size={14} className="animate-spin" /> : "Apply"}

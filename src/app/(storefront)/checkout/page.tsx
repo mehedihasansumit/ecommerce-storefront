@@ -486,25 +486,25 @@ export default function CheckoutPage() {
               </div>
 
               <div className="border-t border-gray-100 pt-3 space-y-2 text-sm">
-                <div className="flex justify-between text-gray-600">
+                <div className="flex items-center justify-between gap-3 text-gray-600">
                   <span>{t("subtotal")}</span>
-                  <span>৳{subtotal.toLocaleString()}</span>
+                  <span className="shrink-0">৳{subtotal.toLocaleString()}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount ({coupon?.code})</span>
-                    <span>-৳{discount.toLocaleString()}</span>
+                  <div className="flex items-center justify-between gap-3 text-green-600">
+                    <span className="truncate">Discount ({coupon?.code})</span>
+                    <span className="shrink-0">-৳{discount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-gray-600">
+                <div className="flex items-center justify-between gap-3 text-gray-600">
                   <span>{t("shipping")}</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="shrink-0 text-green-600">Free</span>
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 mt-3 pt-3 flex justify-between font-bold">
+              <div className="border-t border-gray-100 mt-3 pt-3 flex items-center justify-between gap-3 font-bold">
                 <span>{t("total")}</span>
-                <span>৳{total.toLocaleString()}</span>
+                <span className="shrink-0">৳{total.toLocaleString()}</span>
               </div>
 
               {serverError && (

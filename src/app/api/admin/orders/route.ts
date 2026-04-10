@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import { permissionDeniedResponse, storeAccessDeniedResponse } from "@/shared/lib/api-response";
 import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
 import { ZodError } from "zod";
@@ -11,14 +12,14 @@ export async function POST(request: NextRequest) {
     if (!admin)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!hasPermission(admin, PERMISSIONS.ORDERS_UPDATE_STATUS))
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return permissionDeniedResponse(PERMISSIONS.ORDERS_UPDATE_STATUS);
 
     const body = await request.json();
     const { storeId, ...rest } = body;
     if (!storeId)
       return NextResponse.json({ error: "storeId required" }, { status: 400 });
     if (!canAccessStore(admin, storeId))
-      return NextResponse.json({ error: "No access to this store" }, { status: 403 });
+      return storeAccessDeniedResponse();
 
     const validated = createOrderSchema.parse(rest);
     const order = await OrderService.create(storeId, validated);

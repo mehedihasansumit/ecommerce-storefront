@@ -1,7 +1,17 @@
 import { StoreService } from "@/features/stores/service";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Package, Tag, ShoppingBag, Users, CreditCard, Ticket, Megaphone } from "lucide-react";
+import {
+  Package,
+  Tag,
+  ShoppingBag,
+  Users,
+  CreditCard,
+  Ticket,
+  Megaphone,
+  ArrowRight,
+  Globe,
+} from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
@@ -17,7 +27,6 @@ export default async function StoreDetailPage({
   const { storeId } = await params;
   if (!canAccessStore(adminUser, storeId)) redirect("/admin");
 
-  // Must have at least one store-scoped permission to see this page
   const hasAnyAccess = [
     PERMISSIONS.STORES_EDIT,
     PERMISSIONS.PRODUCTS_CREATE,
@@ -52,133 +61,220 @@ export default async function StoreDetailPage({
   const canViewCoupons = hasPermission(adminUser, PERMISSIONS.COUPONS_VIEW);
   const canViewAnnouncements = hasPermission(adminUser, PERMISSIONS.ANNOUNCEMENTS_VIEW);
 
+  const modules = [
+    canViewProducts && {
+      href: `/admin/stores/${storeId}/products`,
+      icon: Package,
+      label: "Products",
+      description: "Manage your catalog",
+      color: "bg-blue-500",
+      lightColor: "bg-blue-50",
+      textColor: "text-blue-600",
+    },
+    canEditStore && {
+      href: `/admin/stores/${storeId}/categories`,
+      icon: Tag,
+      label: "Categories",
+      description: "Organise product groups",
+      color: "bg-amber-500",
+      lightColor: "bg-amber-50",
+      textColor: "text-amber-600",
+    },
+    canViewOrders && {
+      href: `/admin/stores/${storeId}/orders`,
+      icon: ShoppingBag,
+      label: "Orders",
+      description: "Track & fulfil orders",
+      color: "bg-emerald-500",
+      lightColor: "bg-emerald-50",
+      textColor: "text-emerald-600",
+    },
+    canViewCustomers && {
+      href: `/admin/stores/${storeId}/customers`,
+      icon: Users,
+      label: "Customers",
+      description: "View customer accounts",
+      color: "bg-violet-500",
+      lightColor: "bg-violet-50",
+      textColor: "text-violet-600",
+    },
+    canViewPayments && {
+      href: `/admin/stores/${storeId}/payments`,
+      icon: CreditCard,
+      label: "Payments",
+      description: "Revenue & transactions",
+      color: "bg-teal-500",
+      lightColor: "bg-teal-50",
+      textColor: "text-teal-600",
+    },
+    canViewCoupons && {
+      href: `/admin/stores/${storeId}/coupons`,
+      icon: Ticket,
+      label: "Coupons",
+      description: "Discounts & promo codes",
+      color: "bg-rose-500",
+      lightColor: "bg-rose-50",
+      textColor: "text-rose-600",
+    },
+    canViewAnnouncements && {
+      href: `/admin/stores/${storeId}/announcements`,
+      icon: Megaphone,
+      label: "Announcements",
+      description: "Site-wide banners",
+      color: "bg-orange-500",
+      lightColor: "bg-orange-50",
+      textColor: "text-orange-600",
+    },
+  ].filter(Boolean) as {
+    href: string;
+    icon: React.ElementType;
+    label: string;
+    description: string;
+    color: string;
+    lightColor: string;
+    textColor: string;
+  }[];
+
+  const themeColors = [
+    store.theme.primaryColor,
+    store.theme.secondaryColor,
+    store.theme.accentColor,
+    store.theme.headerBg,
+    store.theme.backgroundColor,
+  ];
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{store.name}</h1>
-          <p className="text-sm text-gray-500">
-            {store.domains.join(", ")}
-          </p>
-        </div>
-        <span
-          className={`px-3 py-1 text-sm rounded-full ${
-            store.isActive
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {store.isActive ? "Active" : "Inactive"}
-        </span>
-      </div>
-
-      {/* Quick Links — only show sections the manager can access */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {canViewProducts && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/products`}
-            icon={<Package size={24} />}
-            label="Products"
-          />
-        )}
-        {canEditStore && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/categories`}
-            icon={<Tag size={24} />}
-            label="Categories"
-          />
-        )}
-        {canViewOrders && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/orders`}
-            icon={<ShoppingBag size={24} />}
-            label="Orders"
-          />
-        )}
-        {canViewCustomers && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/customers`}
-            icon={<Users size={24} />}
-            label="Customers"
-          />
-        )}
-        {canViewPayments && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/payments`}
-            icon={<CreditCard size={24} />}
-            label="Payments"
-          />
-        )}
-        {canViewCoupons && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/coupons`}
-            icon={<Ticket size={24} />}
-            label="Coupons"
-          />
-        )}
-        {canViewAnnouncements && (
-          <QuickLink
-            href={`/admin/stores/${storeId}/announcements`}
-            icon={<Megaphone size={24} />}
-            label="Announcements"
-          />
-        )}
-      </div>
-
-      {/* Theme Preview + Edit — only for managers with stores.edit */}
-      {canEditStore && (
-        <>
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
-            <h2 className="text-lg font-semibold mb-4">Current Theme</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <ColorSwatch label="Primary" color={store.theme.primaryColor} />
-              <ColorSwatch label="Secondary" color={store.theme.secondaryColor} />
-              <ColorSwatch label="Accent" color={store.theme.accentColor} />
-              <ColorSwatch label="Header BG" color={store.theme.headerBg} />
+    <div className="space-y-6">
+      {/* Store Header */}
+      <div className="relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm">
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            background: `linear-gradient(135deg, ${store.theme.primaryColor} 0%, ${store.theme.accentColor} 100%)`,
+          }}
+        />
+        <div
+          className="absolute top-0 left-0 w-1 h-full"
+          style={{ backgroundColor: store.theme.primaryColor }}
+        />
+        <div className="relative p-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-sm flex-shrink-0 select-none"
+                style={{ backgroundColor: store.theme.primaryColor }}
+              >
+                {store.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 leading-tight">{store.name}</h1>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  <Globe size={12} className="text-gray-400" />
+                  {store.domains.map((domain) => (
+                    <span
+                      key={domain}
+                      className="text-xs px-2 py-0.5 bg-gray-100 rounded-md text-gray-500 font-mono border border-gray-200"
+                    >
+                      {domain}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-            <p className="mt-4 text-sm text-gray-500">
-              Font: {store.theme.fontFamily} | Layout: {store.theme.layoutStyle} |
-              Radius: {store.theme.borderRadius}
-            </p>
+
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Theme palette */}
+              {canEditStore && (
+                <div className="hidden sm:flex items-center gap-1">
+                  {themeColors.map((color, i) => (
+                    <div
+                      key={i}
+                      className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                  store.isActive
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-gray-100 text-gray-500 border border-gray-200"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    store.isActive ? "bg-emerald-500" : "bg-gray-400"
+                  }`}
+                />
+                {store.isActive ? "Active" : "Inactive"}
+              </span>
+            </div>
           </div>
-          <StoreEditForm store={store} />
-        </>
-      )}
-    </div>
-  );
-}
 
-function QuickLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex flex-col items-center gap-2 p-6 bg-white rounded-lg border border-gray-200 hover:border-gray-400 transition-colors"
-    >
-      <span className="text-gray-600">{icon}</span>
-      <span className="text-sm font-medium">{label}</span>
-    </Link>
-  );
-}
-
-function ColorSwatch({ label, color }: { label: string; color: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div
-        className="w-8 h-8 rounded-md border border-gray-200"
-        style={{ backgroundColor: color }}
-      />
-      <div>
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="text-sm font-mono">{color}</p>
+          {canEditStore && (
+            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3 text-xs text-gray-400">
+              <span className="font-medium">Theme:</span>
+              <span>{store.theme.fontFamily}</span>
+              <span className="text-gray-300">·</span>
+              <span className="capitalize">{store.theme.layoutStyle} layout</span>
+              <span className="text-gray-300">·</span>
+              <span>
+                {store.theme.borderRadius === "0rem"
+                  ? "No radius"
+                  : `${store.theme.borderRadius} radius`}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Module Navigation */}
+      {modules.length > 0 && (
+        <div>
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
+            Store Modules
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {modules.map((mod) => {
+              const Icon = mod.icon;
+              return (
+                <Link
+                  key={mod.href}
+                  href={mod.href}
+                  className="group flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
+                >
+                  <div
+                    className={`w-9 h-9 rounded-lg ${mod.lightColor} ${mod.textColor} flex items-center justify-center flex-shrink-0 transition-colors group-hover:${mod.color} group-hover:text-white`}
+                  >
+                    <Icon size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{mod.label}</p>
+                    <p className="text-xs text-gray-400 truncate">{mod.description}</p>
+                  </div>
+                  <ArrowRight
+                    size={14}
+                    className="text-gray-300 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0"
+                  />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Store Settings Form */}
+      {canEditStore && (
+        <div>
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
+            Store Settings
+          </h2>
+          <StoreEditForm store={store} />
+        </div>
+      )}
     </div>
   );
 }

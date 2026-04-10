@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import { permissionDeniedResponse, storeAccessDeniedResponse } from "@/shared/lib/api-response";
 import { OrderService } from "@/features/orders/service";
 import { z } from "zod";
 
@@ -54,7 +55,7 @@ export async function PUT(
     if (!admin)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!hasPermission(admin, PERMISSIONS.ORDERS_UPDATE_STATUS))
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return permissionDeniedResponse(PERMISSIONS.ORDERS_UPDATE_STATUS);
 
     // Admin passes storeId in body since middleware skips /api
     const body = await request.json();
@@ -62,7 +63,7 @@ export async function PUT(
     if (!storeId)
       return NextResponse.json({ error: "storeId required" }, { status: 400 });
     if (!canAccessStore(admin, storeId))
-      return NextResponse.json({ error: "No access to this store" }, { status: 403 });
+      return storeAccessDeniedResponse();
 
     const { status, note } = updateStatusSchema.parse(rest);
     const { orderId } = await params;
@@ -96,13 +97,13 @@ export async function PATCH(
     const { storeId, paymentStatus, discount } = updatePaymentSchema.parse(body);
 
     if (!canAccessStore(admin, storeId))
-      return NextResponse.json({ error: "No access to this store" }, { status: 403 });
+      return storeAccessDeniedResponse();
 
     // Check specific payment permissions
     if (paymentStatus !== undefined && !hasPermission(admin, PERMISSIONS.PAYMENTS_UPDATE_STATUS))
-      return NextResponse.json({ error: "Forbidden: missing payments.updateStatus" }, { status: 403 });
+      return permissionDeniedResponse(PERMISSIONS.PAYMENTS_UPDATE_STATUS);
     if (discount !== undefined && !hasPermission(admin, PERMISSIONS.PAYMENTS_DISCOUNT))
-      return NextResponse.json({ error: "Forbidden: missing payments.discount" }, { status: 403 });
+      return permissionDeniedResponse(PERMISSIONS.PAYMENTS_DISCOUNT);
     const { orderId } = await params;
 
     let order = null;

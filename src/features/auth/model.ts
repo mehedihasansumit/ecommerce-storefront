@@ -25,6 +25,11 @@ const UserSchema = new Schema<IUserDocument>(
       },
     ],
     isActive: { type: Boolean, default: true },
+    notificationPreferences: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      inApp: { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 );

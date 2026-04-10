@@ -51,6 +51,8 @@ export default async function ProtectedAdminLayout({
         PERMISSIONS.PAYMENTS_VIEW,
         PERMISSIONS.PAYMENTS_UPDATE_STATUS,
         PERMISSIONS.PAYMENTS_DISCOUNT,
+        PERMISSIONS.COUPONS_VIEW,
+        PERMISSIONS.ANNOUNCEMENTS_VIEW,
       ].some((p) => hasPermission(permCtx, p)));
 
   const canViewOrders =

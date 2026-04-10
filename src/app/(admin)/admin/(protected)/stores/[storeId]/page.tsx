@@ -1,7 +1,7 @@
 import { StoreService } from "@/features/stores/service";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Package, Tag, ShoppingBag, Users, CreditCard } from "lucide-react";
+import { Package, Tag, ShoppingBag, Users, CreditCard, Ticket, Megaphone } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
@@ -28,6 +28,8 @@ export default async function StoreDetailPage({
     PERMISSIONS.PAYMENTS_VIEW,
     PERMISSIONS.PAYMENTS_UPDATE_STATUS,
     PERMISSIONS.PAYMENTS_DISCOUNT,
+    PERMISSIONS.COUPONS_VIEW,
+    PERMISSIONS.ANNOUNCEMENTS_VIEW,
   ].some((p) => hasPermission(adminUser, p));
   if (!hasAnyAccess) redirect("/admin");
 
@@ -47,6 +49,8 @@ export default async function StoreDetailPage({
     hasPermission(adminUser, PERMISSIONS.PAYMENTS_UPDATE_STATUS) ||
     hasPermission(adminUser, PERMISSIONS.PAYMENTS_DISCOUNT);
   const canViewCustomers = hasPermission(adminUser, PERMISSIONS.CUSTOMERS_VIEW);
+  const canViewCoupons = hasPermission(adminUser, PERMISSIONS.COUPONS_VIEW);
+  const canViewAnnouncements = hasPermission(adminUser, PERMISSIONS.ANNOUNCEMENTS_VIEW);
 
   return (
     <div>
@@ -103,6 +107,20 @@ export default async function StoreDetailPage({
             href={`/admin/stores/${storeId}/payments`}
             icon={<CreditCard size={24} />}
             label="Payments"
+          />
+        )}
+        {canViewCoupons && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/coupons`}
+            icon={<Ticket size={24} />}
+            label="Coupons"
+          />
+        )}
+        {canViewAnnouncements && (
+          <QuickLink
+            href={`/admin/stores/${storeId}/announcements`}
+            icon={<Megaphone size={24} />}
+            label="Announcements"
           />
         )}
       </div>

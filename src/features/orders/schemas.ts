@@ -25,6 +25,7 @@ export const createOrderSchema = z.object({
   guestEmail: z.string().email("Invalid email").optional().or(z.literal("")),
   paymentMethod: z.string().default("cod"),
   notes: z.string().optional().default(""),
+  couponCode: z.string().optional().default(""),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

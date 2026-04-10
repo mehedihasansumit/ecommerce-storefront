@@ -36,7 +36,7 @@ const initialForm: FormData = {
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const router = useRouter();
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, coupon, discount, total, clearCart } = useCart();
   const tenant = useTenant();
 
   useEffect(() => {
@@ -191,6 +191,7 @@ export default function CheckoutPage() {
           },
           paymentMethod: "cod",
           notes: form.notes,
+          couponCode: coupon?.code || "",
         }),
       });
 
@@ -489,6 +490,12 @@ export default function CheckoutPage() {
                   <span>{t("subtotal")}</span>
                   <span>৳{subtotal.toLocaleString()}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount ({coupon?.code})</span>
+                    <span>-৳{discount.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-600">
                   <span>{t("shipping")}</span>
                   <span className="text-green-600">Free</span>
@@ -497,7 +504,7 @@ export default function CheckoutPage() {
 
               <div className="border-t border-gray-100 mt-3 pt-3 flex justify-between font-bold">
                 <span>{t("total")}</span>
-                <span>৳{subtotal.toLocaleString()}</span>
+                <span>৳{total.toLocaleString()}</span>
               </div>
 
               {serverError && (

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreId } from "@/shared/lib/tenant";
+import { getCustomerToken } from "@/shared/lib/auth";
+import type { JwtCustomerPayload } from "@/features/auth/types";
 import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
 import { ZodError } from "zod";
@@ -13,7 +15,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createOrderSchema.parse(body);
 
-    const order = await OrderService.create(storeId, validated);
+    // Get userId if logged in (for coupon tracking)
+    let userId: string | undefined;
+    const payload = await getCustomerToken();
+    if (payload && payload.type === "customer") {
+      userId = (payload as JwtCustomerPayload).userId;
+    }
+
+    const order = await OrderService.create(storeId, validated, userId);
 
     return NextResponse.json(
       { orderNumber: order.orderNumber, orderId: order._id },

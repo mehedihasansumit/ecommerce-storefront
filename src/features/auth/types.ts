@@ -15,6 +15,12 @@ export interface IAddress {
   isDefault: boolean;
 }
 
+export interface INotificationPreferences {
+  email: boolean;
+  sms: boolean;
+  inApp: boolean;
+}
+
 export interface IUser {
   _id: string;
   storeId: string;
@@ -24,6 +30,7 @@ export interface IUser {
   phone: string;
   addresses: IAddress[];
   isActive: boolean;
+  notificationPreferences: INotificationPreferences;
   createdAt: Date;
   updatedAt: Date;
 }

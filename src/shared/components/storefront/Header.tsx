@@ -11,7 +11,9 @@ import {
   LogOut,
   Package,
   MapPin,
+  Bell,
 } from "lucide-react";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { useCart } from "@/shared/context/CartContext";
 import { useState, useEffect, useRef } from "react";
@@ -164,6 +166,9 @@ export function Header() {
               >
                 <Search size={18} />
               </button>
+
+              {/* Notifications (logged in only) */}
+              {userEmail && <NotificationBell />}
 
               {/* Cart */}
               <Link

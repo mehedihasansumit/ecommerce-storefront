@@ -46,6 +46,7 @@ export interface IOrder {
   shippingCost: number;
   tax: number;
   discount: number;
+  couponCode: string;
   total: number;
   shippingAddress: IShippingAddress;
   paymentMethod: string;

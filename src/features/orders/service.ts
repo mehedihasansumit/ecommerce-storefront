@@ -1,5 +1,7 @@
 import { OrderRepository } from "./repository";
 import { ProductRepository } from "@/features/products/repository";
+import { CouponService } from "@/features/coupons/service";
+import { NotificationService } from "@/features/notifications/service";
 import type { IOrder, IOrderItem } from "./types";
 import type { CreateOrderInput } from "./schemas";
 import { tAdmin } from "@/shared/lib/i18n";
@@ -14,10 +16,12 @@ function generateOrderNumber(): string {
 }
 
 export const OrderService = {
-  async create(storeId: string, input: CreateOrderInput): Promise<IOrder> {
+  async create(storeId: string, input: CreateOrderInput, userId?: string): Promise<IOrder> {
     // Validate products and build order items using server-side prices
     const orderItems: IOrderItem[] = [];
     let subtotal = 0;
+
+    const productDetails: { productId: string; quantity: number; price: number; categoryId?: string }[] = [];
 
     for (const lineItem of input.items) {
       const product = await ProductRepository.findById(lineItem.productId);
@@ -38,22 +42,49 @@ export const OrderService = {
         totalPrice,
       });
       subtotal += totalPrice;
+      productDetails.push({
+        productId: product._id,
+        quantity: lineItem.quantity,
+        price: product.price,
+        categoryId: product.categoryId?.toString(),
+      });
     }
 
-    const total = subtotal; // shippingCost = 0, tax = 0
+    // Validate and apply coupon if provided
+    let discount = 0;
+    let couponCode = "";
+    let couponId: string | undefined;
+
+    if (input.couponCode) {
+      const validation = await CouponService.validate(
+        storeId,
+        input.couponCode,
+        productDetails,
+        userId
+      );
+      if (!validation.valid) {
+        throw new Error(validation.reason || "Invalid coupon");
+      }
+      discount = validation.discount;
+      couponCode = input.couponCode.toUpperCase();
+      couponId = validation.couponId;
+    }
+
+    const total = Math.max(0, subtotal - discount);
     const orderNumber = generateOrderNumber();
 
     const order = await OrderRepository.create({
       storeId,
       orderNumber,
-      userId: null,
+      userId: userId || null,
       guestPhone: input.shippingAddress.phone,
       guestEmail: input.guestEmail || undefined,
       items: orderItems,
       subtotal,
       shippingCost: 0,
       tax: 0,
-      discount: 0,
+      discount,
+      couponCode,
       total,
       shippingAddress: input.shippingAddress,
       paymentMethod: input.paymentMethod,
@@ -62,6 +93,22 @@ export const OrderService = {
       status: "pending",
       notes: input.notes ?? "",
     });
+
+    // Record coupon usage after order is created
+    if (couponId) {
+      await CouponService.apply(couponId, userId || "", order._id, storeId);
+    }
+
+    // Send order confirmation notification
+    if (userId) {
+      NotificationService.notify(storeId, userId, {
+        type: "order_update",
+        title: "Order Confirmed",
+        message: `Your order ${orderNumber} has been placed successfully.`,
+        channel: "all",
+        metadata: { orderId: order._id, orderNumber, isNewOrder: true },
+      }).catch(() => {}); // fire-and-forget
+    }
 
     return order;
   },
@@ -133,6 +180,24 @@ export const OrderService = {
   ): Promise<IOrder | null> {
     const order = await OrderRepository.findById(orderId);
     if (!order || order.storeId !== storeId) return null;
-    return OrderRepository.updateStatus(orderId, status, note);
+
+    const updated = await OrderRepository.updateStatus(orderId, status, note);
+
+    // Send status update notification
+    if (updated && order.userId) {
+      NotificationService.notify(storeId, order.userId, {
+        type: "order_update",
+        title: "Order Status Updated",
+        message: `Your order ${order.orderNumber} is now ${status}.`,
+        channel: "all",
+        metadata: {
+          orderId,
+          orderNumber: order.orderNumber,
+          status,
+        },
+      }).catch(() => {}); // fire-and-forget
+    }
+
+    return updated;
   },
 };

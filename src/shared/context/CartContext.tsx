@@ -25,10 +25,21 @@ interface LocalCart {
   items: LocalCartItem[];
 }
 
+interface CouponDetails {
+  code: string;
+  discount: number;
+  couponId: string;
+}
+
 interface CartContextValue {
   items: LocalCartItem[];
   itemCount: number;
   subtotal: number;
+  coupon: CouponDetails | null;
+  discount: number;
+  total: number;
+  couponLoading: boolean;
+  couponError: string;
   addItem: (item: LocalCartItem) => void;
   updateQuantity: (
     productId: string,
@@ -40,6 +51,8 @@ interface CartContextValue {
     variantSelections: Record<string, string>
   ) => void;
   clearCart: () => void;
+  applyCoupon: (code: string) => Promise<boolean>;
+  removeCoupon: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -60,6 +73,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const tenant = useTenant();
   const [items, setItems] = useState<LocalCartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [coupon, setCoupon] = useState<CouponDetails | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -136,7 +152,63 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
+    setCoupon(null);
+    setCouponError("");
     localStorage.removeItem(CART_KEY);
+  }, []);
+
+  const applyCoupon = useCallback(
+    async (code: string): Promise<boolean> => {
+      if (items.length === 0) {
+        setCouponError("Cart is empty");
+        return false;
+      }
+      setCouponLoading(true);
+      setCouponError("");
+      try {
+        const res = await fetch("/api/coupons/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            items: items.map((i) => ({
+              productId: i.productId,
+              quantity: i.quantity,
+              price: i.priceAtAdd,
+            })),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setCouponError(data.error || "Invalid coupon");
+          setCoupon(null);
+          return false;
+        }
+        if (!data.valid) {
+          setCouponError(data.reason || "Invalid coupon");
+          setCoupon(null);
+          return false;
+        }
+        setCoupon({
+          code: code.toUpperCase(),
+          discount: data.discount,
+          couponId: data.couponId,
+        });
+        return true;
+      } catch {
+        setCouponError("Failed to validate coupon");
+        setCoupon(null);
+        return false;
+      } finally {
+        setCouponLoading(false);
+      }
+    },
+    [items]
+  );
+
+  const removeCoupon = useCallback(() => {
+    setCoupon(null);
+    setCouponError("");
   }, []);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -144,6 +216,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (sum, i) => sum + i.priceAtAdd * i.quantity,
     0
   );
+  const discount = coupon?.discount ?? 0;
+  const total = Math.max(0, subtotal - discount);
 
   return (
     <CartContext.Provider
@@ -151,10 +225,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
         items,
         itemCount,
         subtotal,
+        coupon,
+        discount,
+        total,
+        couponLoading,
+        couponError,
         addItem,
         updateQuantity,
         removeItem,
         clearCart,
+        applyCoupon,
+        removeCoupon,
       }}
     >
       {children}

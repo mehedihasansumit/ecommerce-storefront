@@ -11,6 +11,13 @@ export const PERMISSIONS = {
   PAYMENTS_VIEW: "payments.view",
   PAYMENTS_UPDATE_STATUS: "payments.updateStatus",
   PAYMENTS_DISCOUNT: "payments.discount",
+  COUPONS_VIEW: "coupons.view",
+  COUPONS_CREATE: "coupons.create",
+  COUPONS_EDIT: "coupons.edit",
+  COUPONS_DELETE: "coupons.delete",
+  ANNOUNCEMENTS_VIEW: "announcements.view",
+  ANNOUNCEMENTS_CREATE: "announcements.create",
+  ANNOUNCEMENTS_SEND: "announcements.send",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -28,6 +35,13 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "payments.view": "View Payments",
   "payments.updateStatus": "Update Payment Status",
   "payments.discount": "Apply Payment Discounts",
+  "coupons.view": "View Coupons",
+  "coupons.create": "Create Coupons",
+  "coupons.edit": "Edit Coupons",
+  "coupons.delete": "Delete Coupons",
+  "announcements.view": "View Announcements",
+  "announcements.create": "Create Announcements",
+  "announcements.send": "Send Announcements",
 };
 
 export const PERMISSION_GROUPS = [
@@ -61,6 +75,23 @@ export const PERMISSION_GROUPS = [
       PERMISSIONS.PAYMENTS_VIEW,
       PERMISSIONS.PAYMENTS_UPDATE_STATUS,
       PERMISSIONS.PAYMENTS_DISCOUNT,
+    ],
+  },
+  {
+    label: "Coupons",
+    permissions: [
+      PERMISSIONS.COUPONS_VIEW,
+      PERMISSIONS.COUPONS_CREATE,
+      PERMISSIONS.COUPONS_EDIT,
+      PERMISSIONS.COUPONS_DELETE,
+    ],
+  },
+  {
+    label: "Announcements",
+    permissions: [
+      PERMISSIONS.ANNOUNCEMENTS_VIEW,
+      PERMISSIONS.ANNOUNCEMENTS_CREATE,
+      PERMISSIONS.ANNOUNCEMENTS_SEND,
     ],
   },
 ] as const;

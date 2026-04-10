@@ -76,6 +76,15 @@ export const ProductRepository = {
     return products.map(serialize);
   },
 
+  async findNewArrivals(storeId: string, limit = 8): Promise<IProduct[]> {
+    await dbConnect();
+    const products = await ProductModel.find({ storeId, isActive: true })
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
+    return products.map(serialize);
+  },
+
   async create(data: Partial<IProduct>): Promise<IProduct> {
     await dbConnect();
     const product = await ProductModel.create(data);

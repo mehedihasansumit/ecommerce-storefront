@@ -54,7 +54,9 @@
     "newsletterTitle": "Stay in the Loop",
     "newsletterDesc": "Subscribe to get special offers, free giveaways, and new arrivals.",
     "emailPlaceholder": "Enter your email",
-    "subscribe": "Subscribe"
+    "subscribe": "Subscribe",
+    "newArrivals": "New Arrivals",
+    "newArrivalsDesc": "Our latest additions"
   },
   "products": {
     "allProducts": "All Products",

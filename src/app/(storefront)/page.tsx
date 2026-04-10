@@ -40,8 +40,9 @@ export default async function HomePage() {
     );
   }
 
-  const [featuredProducts, categories] = await Promise.all([
+  const [featuredProducts, newArrivals, categories] = await Promise.all([
     ProductService.getFeatured(tenant._id, 8),
+    ProductService.getNewArrivals(tenant._id, 8),
     CategoryService.getByStore(tenant._id),
   ]);
 
@@ -142,6 +143,46 @@ export default async function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* New Arrivals */}
+      {newArrivals.length > 0 && (
+        <section className="py-20 md:py-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <h2 className="text-3xl font-semibold tracking-tight mb-2">
+                  {tr("newArrivals")}
+                </h2>
+                <p className="text-gray-500">
+                  {tr("newArrivalsDesc")}
+                </p>
+              </div>
+              <Link
+                href="/products"
+                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                style={{ borderRadius: "var(--border-radius)" }}
+              >
+                {tr("viewAll")}
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+            <ProductGrid products={newArrivals} />
+            <div className="text-center mt-10 sm:hidden">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-lg"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  borderRadius: "var(--border-radius)",
+                }}
+              >
+                {tr("viewAll")}
+                <ArrowRight size={16} />
+              </Link>
+            </div>
           </div>
         </section>
       )}

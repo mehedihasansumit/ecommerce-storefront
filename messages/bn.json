@@ -54,7 +54,9 @@
     "newsletterTitle": "আপডেট থাকুন",
     "newsletterDesc": "বিশেষ অফার, বিনামূল্যে উপহার এবং নতুন পণ্যের খবর পেতে সাবস্ক্রাইব করুন।",
     "emailPlaceholder": "আপনার ইমেইল লিখুন",
-    "subscribe": "সাবস্ক্রাইব"
+    "subscribe": "সাবস্ক্রাইব",
+    "newArrivals": "নতুন আগমন",
+    "newArrivalsDesc": "আমাদের সর্বশেষ সংযোজন"
   },
   "products": {
     "allProducts": "সমস্ত পণ্য",

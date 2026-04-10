@@ -29,6 +29,10 @@ export const ProductService = {
     return ProductRepository.findFeatured(storeId, limit);
   },
 
+  async getNewArrivals(storeId: string, limit = 8): Promise<IProduct[]> {
+    return ProductRepository.findNewArrivals(storeId, limit);
+  },
+
   async create(
     storeId: string,
     data: Omit<IProduct, "_id" | "storeId" | "slug" | "averageRating" | "reviewCount" | "createdAt" | "updatedAt">

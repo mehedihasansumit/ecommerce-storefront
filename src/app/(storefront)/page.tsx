@@ -14,6 +14,8 @@ import {
   Shield,
   RotateCcw,
   Headphones,
+  Mail,
+  Sparkles,
 } from "lucide-react";
 import { NewsletterForm } from "@/shared/components/storefront/NewsletterForm";
 
@@ -227,31 +229,107 @@ export default async function HomePage() {
       </section>
 
       {/* Newsletter / CTA */}
-      <section className="py-12 md:py-16">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="relative overflow-hidden px-8 py-20 md:px-20 text-center text-white"
+            className="relative overflow-hidden"
             style={{
               backgroundColor: "var(--color-primary)",
-              borderRadius: "calc(var(--border-radius) * 2)",
+              borderRadius: "calc(var(--border-radius) * 3)",
             }}
           >
-            {/* Decorative circles */}
-            <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10" />
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/10" />
-
-            <div className="relative">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                {tr("newsletterTitle") || "Stay in the Loop"}
-              </h2>
-              <p className="text-white/80 max-w-md mx-auto mb-8">
-                {tr("newsletterDesc") ||
-                  "Subscribe to get special offers, free giveaways, and new arrivals."}
-              </p>
-              <NewsletterForm
-                emailPlaceholder={tr("emailPlaceholder")}
-                subscribeLabel={tr("subscribe")}
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Large blurred circles */}
+              <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-12 -left-12 w-56 h-56 rounded-full bg-white/10 blur-2xl" />
+              {/* Hard circles */}
+              <div className="absolute top-6 right-24 w-6 h-6 rounded-full bg-white/20" />
+              <div className="absolute bottom-8 left-1/3 w-4 h-4 rounded-full bg-white/20" />
+              <div className="absolute top-1/2 right-8 w-3 h-3 rounded-full bg-white/30" />
+              {/* Grid pattern overlay */}
+              <div
+                className="absolute inset-0 opacity-[0.04]"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(0deg, white 0px, white 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, white 0px, white 1px, transparent 1px, transparent 40px)",
+                }}
               />
+            </div>
+
+            <div className="relative px-8 py-16 md:px-16 md:py-20 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+              {/* Left: icon + copy */}
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-white/90 text-xs font-semibold uppercase tracking-widest mb-5">
+                  <Sparkles size={13} />
+                  {tr("exclusiveOffers") || "Exclusive Offers"}
+                </div>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                  {tr("newsletterTitle") || (
+                    <>
+                      Stay in the{" "}
+                      <span className="relative">
+                        Loop
+                        <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-white/40 rounded-full" />
+                      </span>
+                    </>
+                  )}
+                </h2>
+                <p className="text-white/70 text-base md:text-lg max-w-sm md:max-w-none">
+                  {tr("newsletterDesc") ||
+                    "Subscribe to get special offers, free giveaways, and new arrivals straight to your inbox."}
+                </p>
+
+                {/* Social proof */}
+                <div className="flex items-center gap-3 mt-6 justify-center md:justify-start">
+                  <div className="flex -space-x-2">
+                    {["bg-pink-300", "bg-yellow-300", "bg-green-300", "bg-blue-300"].map(
+                      (color, i) => (
+                        <div
+                          key={i}
+                          className={`w-7 h-7 rounded-full ${color} border-2 border-white/30`}
+                        />
+                      )
+                    )}
+                  </div>
+                  <p className="text-white/60 text-sm">
+                    {tr("subscriberCount") || "Join 2,000+ subscribers"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right: form card */}
+              <div className="shrink-0 w-full md:w-auto md:min-w-95">
+                <div
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 md:p-8"
+                  style={{ borderRadius: "calc(var(--border-radius) * 2)" }}
+                >
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                      <Mail size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold text-sm leading-tight">
+                        {tr("getNotified") || "Get Notified First"}
+                      </p>
+                      <p className="text-white/55 text-xs">
+                        {tr("noSpam") || "No spam, unsubscribe anytime"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <NewsletterForm
+                    storeId={tenant._id}
+                    emailPlaceholder={tr("emailPlaceholder") || "you@example.com"}
+                    subscribeLabel={tr("subscribe") || "Subscribe"}
+                  />
+
+                  <p className="text-white/40 text-xs text-center mt-4">
+                    {tr("privacyNote") ||
+                      "By subscribing you agree to our Privacy Policy."}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

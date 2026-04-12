@@ -201,12 +201,13 @@ export const AuthService = {
   },
 
   async getAllCustomers(
-    { page = 1, limit = 20, storeId }: { page?: number; limit?: number; storeId?: string } = {}
+    { page = 1, limit = 20, storeId, status }: { page?: number; limit?: number; storeId?: string; status?: "active" | "inactive" } = {}
   ): Promise<{ customers: Omit<IUser, "passwordHash">[]; total: number }> {
     const skip = (page - 1) * limit;
+    const isActive = status === "active" ? true : status === "inactive" ? false : undefined;
     const [users, total] = await Promise.all([
-      AuthRepository.findAllCustomers({ skip, limit, storeId }),
-      AuthRepository.countAllCustomers(storeId),
+      AuthRepository.findAllCustomers({ skip, limit, storeId, isActive }),
+      AuthRepository.countAllCustomers(storeId, isActive),
     ]);
     return {
       customers: users.map(({ passwordHash: _, ...u }) => u),

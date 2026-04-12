@@ -131,7 +131,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           {adminUser && (
@@ -144,19 +144,19 @@ export default async function AdminDashboardPage() {
           {canCreateStore && (
             <Link
               href="/admin/stores/new"
-              className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               <Plus size={15} />
-              New Store
+              <span className="hidden sm:inline">New Store</span>
             </Link>
           )}
           {canViewOrders && (
             <Link
               href="/admin/orders"
-              className="flex items-center gap-1.5 px-4 py-2 text-sm border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ShoppingBag size={15} />
-              All Orders
+              <span className="hidden sm:inline">All Orders</span>
             </Link>
           )}
         </div>
@@ -330,103 +330,138 @@ export default async function AdminDashboardPage() {
               View all →
             </Link>
           </div>
-          <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
-            {recentOrders.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-10">
-                No orders yet
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                        Order
-                      </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                        Store
-                      </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                        Customer
-                      </th>
-                      {canViewPayments && (
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                          Total
-                        </th>
-                      )}
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                        Status
-                      </th>
-                      <th className="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentOrders.map(
-                      (order: {
-                        _id: string;
-                        orderNumber: string;
-                        storeId: string;
-                        shippingAddress?: { name?: string };
-                        guestPhone?: string;
-                        guestEmail?: string;
-                        items: { length: number };
-                        total: number;
-                        status: OrderStatus;
-                        createdAt: string;
-                      }) => (
-                        <tr
-                          key={order._id}
-                          className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+
+          {recentOrders.length === 0 ? (
+            <div className="bg-white border border-gray-100 rounded-xl shadow-sm">
+              <p className="text-sm text-gray-400 text-center py-10">No orders yet</p>
+            </div>
+          ) : (
+            <>
+              {/* Mobile cards */}
+              <div className="flex flex-col gap-3 sm:hidden">
+                {recentOrders.map(
+                  (order: {
+                    _id: string;
+                    orderNumber: string;
+                    storeId: string;
+                    shippingAddress?: { name?: string };
+                    guestPhone?: string;
+                    guestEmail?: string;
+                    items: { length: number };
+                    total: number;
+                    status: OrderStatus;
+                    createdAt: string;
+                  }) => (
+                    <div key={order._id} className="bg-white border border-gray-100 rounded-xl shadow-sm p-4">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div>
+                          <p className="font-mono text-xs font-semibold text-gray-800">
+                            #{order.orderNumber}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {storeNameMap[order.storeId] ?? "—"}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize shrink-0 ${
+                            STATUS_STYLES[order.status] ?? "bg-gray-100 text-gray-600"
+                          }`}
                         >
-                          <td className="px-4 py-3">
-                            <Link
-                              href={`/admin/orders/${order._id}`}
-                              className="font-mono text-xs font-semibold text-gray-700 hover:text-gray-900"
-                            >
-                              #{order.orderNumber}
-                            </Link>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="text-xs text-gray-600">
-                              {storeNameMap[order.storeId] ?? "—"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="text-xs text-gray-600 truncate max-w-[120px] block">
-                              {order.shippingAddress?.name ||
-                                order.guestPhone ||
-                                order.guestEmail ||
-                                "Guest"}
-                            </span>
-                          </td>
+                          {order.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-gray-600 truncate max-w-40">
+                          {order.shippingAddress?.name || order.guestPhone || order.guestEmail || "Guest"}
+                        </p>
+                        <div className="text-right shrink-0">
                           {canViewPayments && (
-                            <td className="px-4 py-3 text-right font-semibold text-gray-700 text-xs">
-                              {formatCurrency(order.total)}
-                            </td>
+                            <p className="text-xs font-semibold text-gray-800">{formatCurrency(order.total)}</p>
                           )}
-                          <td className="px-4 py-3">
-                            <span
-                              className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
-                                STATUS_STYLES[order.status] ??
-                                "bg-gray-100 text-gray-600"
-                              }`}
-                            >
-                              {order.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-right text-xs text-gray-400 whitespace-nowrap">
-                            {formatDate(order.createdAt)}
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
+                          <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
-            )}
-          </div>
+
+              {/* Desktop table */}
+              <div className="hidden sm:block bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 bg-gray-50">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Order</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Store</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Customer</th>
+                        {canViewPayments && (
+                          <th className="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
+                        )}
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentOrders.map(
+                        (order: {
+                          _id: string;
+                          orderNumber: string;
+                          storeId: string;
+                          shippingAddress?: { name?: string };
+                          guestPhone?: string;
+                          guestEmail?: string;
+                          items: { length: number };
+                          total: number;
+                          status: OrderStatus;
+                          createdAt: string;
+                        }) => (
+                          <tr
+                            key={order._id}
+                            className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-4 py-3">
+                              <Link
+                                href={`/admin/stores/${order.storeId}/orders/${order._id}`}
+                                className="font-mono text-xs font-semibold text-gray-700 hover:text-gray-900"
+                              >
+                                #{order.orderNumber}
+                              </Link>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-xs text-gray-600">{storeNameMap[order.storeId] ?? "—"}</span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-xs text-gray-600 truncate max-w-30 block">
+                                {order.shippingAddress?.name || order.guestPhone || order.guestEmail || "Guest"}
+                              </span>
+                            </td>
+                            {canViewPayments && (
+                              <td className="px-4 py-3 text-right font-semibold text-gray-700 text-xs">
+                                {formatCurrency(order.total)}
+                              </td>
+                            )}
+                            <td className="px-4 py-3">
+                              <span
+                                className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
+                                  STATUS_STYLES[order.status] ?? "bg-gray-100 text-gray-600"
+                                }`}
+                              >
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right text-xs text-gray-400 whitespace-nowrap">
+                              {formatDate(order.createdAt)}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

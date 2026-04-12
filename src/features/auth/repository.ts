@@ -121,10 +121,12 @@ export const AuthRepository = {
   },
 
   async findAllCustomers(
-    { skip = 0, limit = 20, storeId }: { skip?: number; limit?: number; storeId?: string } = {}
+    { skip = 0, limit = 20, storeId, isActive }: { skip?: number; limit?: number; storeId?: string; isActive?: boolean } = {}
   ): Promise<IUser[]> {
     await dbConnect();
-    const filter = storeId ? { storeId } : {};
+    const filter: Record<string, unknown> = {};
+    if (storeId) filter.storeId = storeId;
+    if (isActive !== undefined) filter.isActive = isActive;
     const users = await UserModel.find(filter)
       .select("-passwordHash")
       .sort({ createdAt: -1 })
@@ -134,9 +136,11 @@ export const AuthRepository = {
     return users.map(serializeUser);
   },
 
-  async countAllCustomers(storeId?: string): Promise<number> {
+  async countAllCustomers(storeId?: string, isActive?: boolean): Promise<number> {
     await dbConnect();
-    const filter = storeId ? { storeId } : {};
+    const filter: Record<string, unknown> = {};
+    if (storeId) filter.storeId = storeId;
+    if (isActive !== undefined) filter.isActive = isActive;
     return UserModel.countDocuments(filter);
   },
 

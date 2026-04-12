@@ -50,7 +50,7 @@ export default async function StoresPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Stores</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -87,125 +87,224 @@ export default async function StoresPage() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full min-w-[600px]">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Store
-                </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Domains
-                </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Status
-                </th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {stores.map((store) => {
-                const primary = store.theme?.primaryColor || "#111827";
-                const initials = store.name
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((w) => w[0])
-                  .join("")
-                  .toUpperCase();
+        <>
+          {/* Mobile card list */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {stores.map((store) => {
+              const primary = store.theme?.primaryColor || "#111827";
+              const initials = store.name
+                .split(" ")
+                .slice(0, 2)
+                .map((w) => w[0])
+                .join("")
+                .toUpperCase();
 
-                return (
-                  <tr key={store._id} className="hover:bg-gray-50/60 transition-colors">
-                    {/* Store name + avatar */}
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                          style={{ backgroundColor: primary }}
+              return (
+                <div
+                  key={store._id}
+                  className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col gap-3"
+                >
+                  {/* Top row: avatar + name + status */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                        style={{ backgroundColor: primary }}
+                      >
+                        {store.logo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={store.logo}
+                            alt={store.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          initials
+                        )}
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 truncate">{store.name}</span>
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${
+                        store.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          store.isActive ? "bg-green-500" : "bg-gray-400"
+                        }`}
+                      />
+                      {store.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  {/* Domains */}
+                  {store.domains.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {store.domains.slice(0, 2).map((domain) => (
+                        <span
+                          key={domain}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md"
                         >
-                          {store.logo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={store.logo}
-                              alt={store.name}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            initials
+                          <Globe className="w-3 h-3 shrink-0" />
+                          {domain}
+                        </span>
+                      ))}
+                      {store.domains.length > 2 && (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-md">
+                          +{store.domains.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+                    {store.domains[0] && (
+                      <a
+                        href={`http://${store.domains[0]}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Visit
+                      </a>
+                    )}
+                    <Link
+                      href={`/admin/stores/${store._id}`}
+                      className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                      Manage
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Store
+                  </th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Domains
+                  </th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {stores.map((store) => {
+                  const primary = store.theme?.primaryColor || "#111827";
+                  const initials = store.name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((w) => w[0])
+                    .join("")
+                    .toUpperCase();
+
+                  return (
+                    <tr key={store._id} className="hover:bg-gray-50/60 transition-colors">
+                      {/* Store name + avatar */}
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                            style={{ backgroundColor: primary }}
+                          >
+                            {store.logo ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={store.logo}
+                                alt={store.name}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            ) : (
+                              initials
+                            )}
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{store.name}</span>
+                        </div>
+                      </td>
+
+                      {/* Domains */}
+                      <td className="px-5 py-4">
+                        <div className="flex flex-wrap gap-1.5">
+                          {store.domains.slice(0, 2).map((domain) => (
+                            <span
+                              key={domain}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md"
+                            >
+                              <Globe className="w-3 h-3 shrink-0" />
+                              {domain}
+                            </span>
+                          ))}
+                          {store.domains.length > 2 && (
+                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-md">
+                              +{store.domains.length - 2}
+                            </span>
                           )}
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{store.name}</span>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Domains */}
-                    <td className="px-5 py-4">
-                      <div className="flex flex-wrap gap-1.5">
-                        {store.domains.slice(0, 2).map((domain) => (
-                          <span
-                            key={domain}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md"
-                          >
-                            <Globe className="w-3 h-3 shrink-0" />
-                            {domain}
-                          </span>
-                        ))}
-                        {store.domains.length > 2 && (
-                          <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-md">
-                            +{store.domains.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                          store.isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-500"
-                        }`}
-                      >
+                      {/* Status */}
+                      <td className="px-5 py-4">
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            store.isActive ? "bg-green-500" : "bg-gray-400"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                            store.isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-500"
                           }`}
-                        />
-                        {store.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-3">
-                        {store.domains[0] && (
-                          <a
-                            href={`http://${store.domains[0]}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            Visit
-                          </a>
-                        )}
-                        <Link
-                          href={`/admin/stores/${store._id}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
                         >
-                          <Settings className="w-3.5 h-3.5" />
-                          Manage
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              store.isActive ? "bg-green-500" : "bg-gray-400"
+                            }`}
+                          />
+                          {store.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-5 py-4">
+                        <div className="flex items-center justify-end gap-3">
+                          {store.domains[0] && (
+                            <a
+                              href={`http://${store.domains[0]}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              Visit
+                            </a>
+                          )}
+                          <Link
+                            href={`/admin/stores/${store._id}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
+                          >
+                            <Settings className="w-3.5 h-3.5" />
+                            Manage
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

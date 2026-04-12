@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { IProduct, IProductVariant } from "../types";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { AddToCartSection } from "./AddToCartSection";
 import { t } from "@/shared/lib/i18n";
+import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
 
 interface ProductDetailClientProps {
   product: IProduct;
@@ -16,6 +17,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
   const [activeVariant, setActiveVariant] = useState<IProductVariant | null>(null);
+  const track = useTrackEvent();
+
+  useEffect(() => {
+    track({
+      eventType: "product_view",
+      productId: product._id,
+      productName: t(product.name, locale) || product._id,
+      categoryId: product.categoryId ?? undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const galleryImages =
     activeVariant?.images && activeVariant.images.length > 0
@@ -131,6 +143,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             addToCartLabel={tr("addToCart")}
             outOfStockLabel={tr("outOfStock")}
             onVariantChange={setActiveVariant}
+            categoryId={product.categoryId ?? undefined}
           />
         </div>
       </div>

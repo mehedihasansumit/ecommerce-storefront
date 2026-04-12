@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/shared/context/CartContext";
 import type { IProductOption, IProductVariant } from "../types";
+import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
 
 interface AddToCartSectionProps {
   productId: string;
@@ -17,6 +18,7 @@ interface AddToCartSectionProps {
   addToCartLabel: string;
   outOfStockLabel: string;
   onVariantChange?: (variant: IProductVariant | null) => void;
+  categoryId?: string;
 }
 
 export function AddToCartSection({
@@ -31,8 +33,10 @@ export function AddToCartSection({
   addToCartLabel,
   outOfStockLabel,
   onVariantChange,
+  categoryId,
 }: AddToCartSectionProps) {
   const { addItem } = useCart();
+  const track = useTrackEvent();
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
     () => Object.fromEntries(options.map((o) => [o.name, o.values[0] ?? ""]))
@@ -79,6 +83,12 @@ export function AddToCartSection({
       variantSelections: selectedOptions,
       quantity,
       priceAtAdd: displayPrice,
+    });
+    track({
+      eventType: "add_to_cart",
+      productId,
+      productName,
+      categoryId,
     });
     setMessage({ type: "success", text: "Added to cart!" });
     setTimeout(() => setMessage(null), 3000);

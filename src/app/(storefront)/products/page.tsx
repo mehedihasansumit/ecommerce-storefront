@@ -7,7 +7,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
 import { getTranslations, getLocale } from "next-intl/server";
-import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { SearchFormWithTracking } from "@/features/products/components/SearchFormWithTracking";
 import { t as tl } from "@/shared/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -91,22 +92,10 @@ export default async function ProductsPage({
               </div>
 
               {/* Search input */}
-              <form method="get" action="/products" className="mb-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="search"
-                    defaultValue={search || ""}
-                    placeholder={t("searchPlaceholder") || "Search..."}
-                    className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    style={{ borderRadius: "var(--border-radius)" }}
-                  />
-                  <Search
-                    size={14}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                </div>
-              </form>
+              <SearchFormWithTracking
+                defaultValue={search || ""}
+                placeholder={t("searchPlaceholder") || "Search..."}
+              />
 
               <ul className="space-y-1">
                 <li>

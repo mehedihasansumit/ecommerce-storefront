@@ -18,6 +18,7 @@ export const PERMISSIONS = {
   ANNOUNCEMENTS_VIEW: "announcements.view",
   ANNOUNCEMENTS_CREATE: "announcements.create",
   ANNOUNCEMENTS_SEND: "announcements.send",
+  ANALYTICS_VIEW: "analytics.view",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -42,6 +43,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "announcements.view": "View Announcements",
   "announcements.create": "Create Announcements",
   "announcements.send": "Send Announcements",
+  "analytics.view": "View Analytics",
 };
 
 export const PERMISSION_GROUPS = [
@@ -93,6 +95,10 @@ export const PERMISSION_GROUPS = [
       PERMISSIONS.ANNOUNCEMENTS_CREATE,
       PERMISSIONS.ANNOUNCEMENTS_SEND,
     ],
+  },
+  {
+    label: "Analytics",
+    permissions: [PERMISSIONS.ANALYTICS_VIEW],
   },
 ] as const;
 

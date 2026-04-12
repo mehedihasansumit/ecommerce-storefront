@@ -9,6 +9,7 @@ import {
   CreditCard,
   Ticket,
   Megaphone,
+  BarChart2,
   ArrowRight,
   Globe,
 } from "lucide-react";
@@ -39,6 +40,7 @@ export default async function StoreDetailPage({
     PERMISSIONS.PAYMENTS_DISCOUNT,
     PERMISSIONS.COUPONS_VIEW,
     PERMISSIONS.ANNOUNCEMENTS_VIEW,
+    PERMISSIONS.ANALYTICS_VIEW,
   ].some((p) => hasPermission(adminUser, p));
   if (!hasAnyAccess) redirect("/admin");
 
@@ -60,6 +62,7 @@ export default async function StoreDetailPage({
   const canViewCustomers = hasPermission(adminUser, PERMISSIONS.CUSTOMERS_VIEW);
   const canViewCoupons = hasPermission(adminUser, PERMISSIONS.COUPONS_VIEW);
   const canViewAnnouncements = hasPermission(adminUser, PERMISSIONS.ANNOUNCEMENTS_VIEW);
+  const canViewAnalytics = hasPermission(adminUser, PERMISSIONS.ANALYTICS_VIEW);
 
   const modules = [
     canViewProducts && {
@@ -124,6 +127,15 @@ export default async function StoreDetailPage({
       color: "bg-orange-500",
       lightColor: "bg-orange-50",
       textColor: "text-orange-600",
+    },
+    canViewAnalytics && {
+      href: `/admin/stores/${storeId}/analytics`,
+      icon: BarChart2,
+      label: "Analytics",
+      description: "Traffic & revenue insights",
+      color: "bg-cyan-500",
+      lightColor: "bg-cyan-50",
+      textColor: "text-cyan-600",
     },
   ].filter(Boolean) as {
     href: string;
@@ -247,7 +259,7 @@ export default async function StoreDetailPage({
                   className="group flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
                 >
                   <div
-                    className={`w-9 h-9 rounded-lg ${mod.lightColor} ${mod.textColor} flex items-center justify-center flex-shrink-0 transition-colors group-hover:${mod.color} group-hover:text-white`}
+                    className={`w-9 h-9 rounded-lg ${mod.lightColor} ${mod.textColor} flex items-center justify-center flex-shrink-0 transition-colors group-hover:${mod.color}`}
                   >
                     <Icon size={18} />
                   </div>

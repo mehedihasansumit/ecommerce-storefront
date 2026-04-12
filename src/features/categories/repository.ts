@@ -7,9 +7,16 @@ function serialize(doc: unknown): ICategory {
 }
 
 export const CategoryRepository = {
-  async findByStore(storeId: string): Promise<ICategory[]> {
+  async findByStore(
+    storeId: string,
+    status?: "active" | "inactive" | "all"
+  ): Promise<ICategory[]> {
     await dbConnect();
-    const categories = await CategoryModel.find({ storeId, isActive: true })
+    const filter: Record<string, unknown> = { storeId };
+    if (status === "inactive") filter.isActive = false;
+    else if (status === "all") { /* no isActive filter */ }
+    else filter.isActive = true; // default: active only
+    const categories = await CategoryModel.find(filter)
       .sort({ sortOrder: 1, name: 1 })
       .lean();
     return categories.map(serialize);

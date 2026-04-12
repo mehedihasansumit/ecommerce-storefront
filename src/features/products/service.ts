@@ -12,7 +12,7 @@ function nameToSlug(name: string | LocalizedString): string {
 export const ProductService = {
   async getByStore(
     storeId: string,
-    params: SearchParams & { categoryId?: string; featured?: boolean }
+    params: SearchParams & { categoryId?: string; featured?: boolean; status?: "active" | "inactive" | "all" }
   ): Promise<PaginatedResponse<IProduct>> {
     return ProductRepository.findByStore(storeId, params);
   },
@@ -56,5 +56,12 @@ export const ProductService = {
 
   async delete(id: string): Promise<boolean> {
     return ProductRepository.delete(id);
+  },
+
+  async getCountsByCategoryIds(
+    storeId: string,
+    categoryIds: string[]
+  ): Promise<Record<string, number>> {
+    return ProductRepository.countByCategoryIds(storeId, categoryIds);
   },
 };

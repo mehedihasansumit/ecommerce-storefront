@@ -121,8 +121,14 @@ export const OrderService = {
 
   async getByStore(
     storeId: string,
-    options: { status?: string } = {}
-  ): Promise<IOrder[]> {
+    options: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      paymentStatus?: string;
+      search?: string;
+    } = {}
+  ): Promise<{ orders: IOrder[]; total: number }> {
     return OrderRepository.findByStore(storeId, options);
   },
 
@@ -147,6 +153,16 @@ export const OrderService = {
     storeId: string
   ): Promise<{ userId: string; orderCount: number; totalSpent: number; lastOrderAt: string }[]> {
     return OrderRepository.getCustomerOrderStats(storeId);
+  },
+
+  async getPaymentStats(storeId: string): Promise<{
+    paid: number;
+    pending: number;
+    failed: number;
+    refunded: number;
+    totalRevenue: number;
+  }> {
+    return OrderRepository.getPaymentStats(storeId);
   },
 
   async updatePaymentStatus(

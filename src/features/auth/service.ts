@@ -177,12 +177,22 @@ export const AuthService = {
 
   async getCustomersByStore(
     storeId: string,
-    { page = 1, limit = 20 }: { page?: number; limit?: number } = {}
+    {
+      page = 1,
+      limit = 20,
+      search,
+      status,
+    }: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      status?: "active" | "inactive" | "all";
+    } = {}
   ): Promise<{ customers: Omit<IUser, "passwordHash">[]; total: number }> {
     const skip = (page - 1) * limit;
     const [users, total] = await Promise.all([
-      AuthRepository.findCustomersByStore(storeId, { skip, limit }),
-      AuthRepository.countCustomersByStore(storeId),
+      AuthRepository.findCustomersByStore(storeId, { skip, limit, search, status }),
+      AuthRepository.countCustomersByStore(storeId, { search, status }),
     ]);
     return {
       customers: users.map(({ passwordHash: _, ...u }) => u),

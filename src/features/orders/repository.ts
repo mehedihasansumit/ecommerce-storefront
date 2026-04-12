@@ -37,16 +37,40 @@ export const OrderRepository = {
 
   async findByStore(
     storeId: string,
-    { limit = 50, status }: { limit?: number; status?: string } = {}
-  ): Promise<IOrder[]> {
+    {
+      page = 1,
+      limit = 20,
+      status,
+      paymentStatus,
+      search,
+    }: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      paymentStatus?: string;
+      search?: string;
+    } = {}
+  ): Promise<{ orders: IOrder[]; total: number }> {
     await dbConnect();
     const filter: Record<string, unknown> = { storeId };
     if (status) filter.status = status;
-    const orders = await OrderModel.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
-    return orders.map(serialize);
+    if (paymentStatus) filter.paymentStatus = paymentStatus;
+    if (search) {
+      const re = { $regex: search, $options: "i" };
+      filter.$or = [
+        { orderNumber: re },
+        { "shippingAddress.name": re },
+        { "shippingAddress.phone": re },
+        { guestPhone: re },
+        { guestEmail: re },
+      ];
+    }
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+      OrderModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      OrderModel.countDocuments(filter),
+    ]);
+    return { orders: orders.map(serialize), total };
   },
 
   async findAll({
@@ -115,6 +139,35 @@ export const OrderRepository = {
   async countByStore(storeId: string): Promise<number> {
     await dbConnect();
     return OrderModel.countDocuments({ storeId });
+  },
+
+  async getPaymentStats(storeId: string): Promise<{
+    paid: number;
+    pending: number;
+    failed: number;
+    refunded: number;
+    totalRevenue: number;
+  }> {
+    await dbConnect();
+    const result = await OrderModel.aggregate([
+      { $match: { storeId } },
+      {
+        $group: {
+          _id: "$paymentStatus",
+          count: { $sum: 1 },
+          amount: { $sum: "$total" },
+        },
+      },
+    ]);
+    const stats = { paid: 0, pending: 0, failed: 0, refunded: 0, totalRevenue: 0 };
+    for (const r of result) {
+      const key = r._id as keyof typeof stats;
+      if (key in stats && key !== "totalRevenue") {
+        stats[key] = r.count as number;
+      }
+      if (r._id === "paid") stats.totalRevenue = r.amount as number;
+    }
+    return stats;
   },
 
   async getCustomerOrderStats(

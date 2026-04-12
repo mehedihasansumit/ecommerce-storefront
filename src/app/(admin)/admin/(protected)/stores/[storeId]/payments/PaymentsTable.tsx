@@ -4,7 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { IOrder, PaymentStatus } from "@/features/orders/types";
-import { Loader2, Check, Tag } from "lucide-react";
+import { Loader2, Check, Tag, ExternalLink } from "lucide-react";
+import type { OrderStatus } from "@/features/orders/types";
+
+const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
+  pending:    "bg-yellow-50 text-yellow-700 border-yellow-200",
+  confirmed:  "bg-blue-50 text-blue-700 border-blue-200",
+  processing: "bg-purple-50 text-purple-700 border-purple-200",
+  shipped:    "bg-indigo-50 text-indigo-700 border-indigo-200",
+  delivered:  "bg-green-50 text-green-700 border-green-200",
+  cancelled:  "bg-red-50 text-red-700 border-red-200",
+};
 
 const PAYMENT_STATUSES: PaymentStatus[] = ["pending", "paid", "failed", "refunded"];
 
@@ -114,16 +124,17 @@ export function PaymentsTable({ orders, storeId }: Props) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-225">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
               <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Customer</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Method</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order Status</th>
               <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Subtotal</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Discount</th>
               <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment Status</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
             </tr>
           </thead>
@@ -140,10 +151,16 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   <td className="px-5 py-4">
                     <Link
                       href={`/admin/stores/${storeId}/orders/${order._id}`}
-                      className="font-mono text-sm font-semibold text-blue-600 hover:text-blue-800"
+                      className="inline-flex items-center gap-1 font-mono text-sm font-semibold text-blue-600 hover:text-blue-800"
                     >
                       {order.orderNumber}
+                      <ExternalLink className="w-3 h-3" />
                     </Link>
+                    {order.couponCode && (
+                      <span className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        {order.couponCode}
+                      </span>
+                    )}
                   </td>
 
                   {/* Customer */}
@@ -155,6 +172,17 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   {/* Method */}
                   <td className="px-5 py-4 text-sm text-gray-600 capitalize">
                     {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
+                  </td>
+
+                  {/* Order status */}
+                  <td className="px-5 py-4">
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-xs font-medium border capitalize ${
+                        ORDER_STATUS_STYLES[order.status] ?? "bg-gray-50 text-gray-600 border-gray-200"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
                   </td>
 
                   {/* Subtotal */}

@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import dbConnect from "@/shared/lib/db";
 import { ProductModel } from "./model";
 import type { IProduct } from "./types";
@@ -10,11 +11,14 @@ function serialize(doc: unknown): IProduct {
 export const ProductRepository = {
   async findByStore(
     storeId: string,
-    params: SearchParams & { categoryId?: string; featured?: boolean }
+    params: SearchParams & { categoryId?: string; featured?: boolean; status?: "active" | "inactive" | "all" }
   ): Promise<PaginatedResponse<IProduct>> {
     await dbConnect();
 
-    const filter: Record<string, unknown> = { storeId, isActive: true };
+    const filter: Record<string, unknown> = { storeId };
+    if (params.status === "inactive") filter.isActive = false;
+    else if (params.status === "all") { /* no isActive filter */ }
+    else filter.isActive = true; // default: active only (storefront-safe)
     if (params.categoryId) filter.categoryId = params.categoryId;
     if (params.featured) filter.isFeatured = true;
     if (params.search) {
@@ -115,5 +119,24 @@ export const ProductRepository = {
   async countByStore(storeId: string): Promise<number> {
     await dbConnect();
     return ProductModel.countDocuments({ storeId });
+  },
+
+  async countByCategoryIds(
+    storeId: string,
+    categoryIds: string[]
+  ): Promise<Record<string, number>> {
+    await dbConnect();
+    const results = await ProductModel.aggregate([
+      {
+        $match: {
+          storeId: new Types.ObjectId(storeId),
+          categoryId: { $in: categoryIds.map((id) => new Types.ObjectId(id)) },
+        },
+      },
+      { $group: { _id: "$categoryId", count: { $sum: 1 } } },
+    ]);
+    return Object.fromEntries(
+      results.map((r) => [String(r._id), r.count as number])
+    );
   },
 };

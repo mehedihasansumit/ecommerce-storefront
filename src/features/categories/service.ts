@@ -9,8 +9,11 @@ function nameToSlug(name: string | LocalizedString): string {
 }
 
 export const CategoryService = {
-  async getByStore(storeId: string): Promise<ICategory[]> {
-    return CategoryRepository.findByStore(storeId);
+  async getByStore(
+    storeId: string,
+    status?: "active" | "inactive" | "all"
+  ): Promise<ICategory[]> {
+    return CategoryRepository.findByStore(storeId, status);
   },
 
   async getBySlug(storeId: string, slug: string): Promise<ICategory | null> {

@@ -1,12 +1,15 @@
-import { AuthService } from "@/features/auth/service";
-import { OrderService } from "@/features/orders/service";
-import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { AuthService } from "@/features/auth/service";
+import { OrderService } from "@/features/orders/service";
+import { CustomersSearch } from "./CustomersSearch";
 
 export const metadata: Metadata = { title: "Customers" };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 15;
+
+type Status = "all" | "active" | "inactive";
 
 function getInitials(name: string) {
   return name
@@ -17,19 +20,39 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
+function buildHref(
+  storeId: string,
+  overrides: { q?: string; status?: string; page?: number }
+) {
+  const p = new URLSearchParams();
+  if (overrides.q) p.set("q", overrides.q);
+  if (overrides.status && overrides.status !== "all") p.set("status", overrides.status);
+  if (overrides.page && overrides.page > 1) p.set("page", String(overrides.page));
+  const qs = p.toString();
+  return `/admin/stores/${storeId}/customers${qs ? `?${qs}` : ""}`;
+}
+
 export default async function StoreCustomersPage({
   params,
   searchParams,
 }: {
   params: Promise<{ storeId: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
   const { storeId } = await params;
-  const { page: pageStr } = await searchParams;
+  const { q, status: rawStatus, page: pageStr } = await searchParams;
+
+  const status: Status =
+    rawStatus === "active" || rawStatus === "inactive" ? rawStatus : "all";
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
   const [{ customers, total }, orderStats] = await Promise.all([
-    AuthService.getCustomersByStore(storeId, { page, limit: PAGE_SIZE }),
+    AuthService.getCustomersByStore(storeId, {
+      page,
+      limit: PAGE_SIZE,
+      search: q || undefined,
+      status,
+    }),
     OrderService.getCustomerOrderStats(storeId),
   ]);
 
@@ -37,18 +60,36 @@ export default async function StoreCustomersPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
-  function buildHref(p: number) {
-    return `?page=${p}`;
-  }
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {total} {total === 1 ? "customer" : "customers"} registered
+          <p className="text-sm text-gray-500 mt-0.5">
+            {total} {total === 1 ? "customer" : "customers"}
           </p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <CustomersSearch storeId={storeId} defaultValue={q} />
+
+        <div className="flex items-center gap-1 ml-auto">
+          {(["all", "active", "inactive"] as Status[]).map((s) => (
+            <Link
+              key={s}
+              href={buildHref(storeId, { q, status: s })}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
+                status === s
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              {s}
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -57,26 +98,33 @@ export default async function StoreCustomersPage({
           <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="w-7 h-7 text-gray-400" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No customers yet</h3>
-          <p className="text-sm text-gray-500">Customers will appear here once they register.</p>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">No customers found</h3>
+          <p className="text-sm text-gray-500">
+            {q
+              ? `No customers match "${q}".`
+              : status !== "all"
+              ? `No ${status} customers yet.`
+              : "Customers will appear here once they register."}
+          </p>
         </div>
       ) : (
         <>
-          {/* Pagination */}
+          {/* Pagination info */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <p className="text-sm text-gray-500">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
               <div className="flex items-center gap-1">
                 <Link
-                  href={buildHref(Math.max(1, currentPage - 1))}
+                  href={buildHref(storeId, { q, status, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${currentPage <= 1
-                    ? "opacity-30 pointer-events-none border-gray-200"
-                    : "border-gray-200 hover:bg-gray-100"
-                    }`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                    currentPage <= 1
+                      ? "opacity-30 pointer-events-none border-gray-200"
+                      : "border-gray-200 hover:bg-gray-100"
+                  }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
@@ -93,7 +141,7 @@ export default async function StoreCustomersPage({
                   .map((item, idx) =>
                     item === "..." ? (
                       <span
-                        key={`ellipsis-${idx}`}
+                        key={`e-${idx}`}
                         className="w-8 h-8 flex items-center justify-center text-xs text-gray-400"
                       >
                         …
@@ -101,11 +149,12 @@ export default async function StoreCustomersPage({
                     ) : (
                       <Link
                         key={item}
-                        href={buildHref(item as number)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
-                          ? "bg-gray-900 text-white"
-                          : "border border-gray-200 text-gray-600 hover:bg-gray-100"
-                          }`}
+                        href={buildHref(storeId, { q, status, page: item as number })}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                          currentPage === item
+                            ? "bg-gray-900 text-white"
+                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                        }`}
                       >
                         {item}
                       </Link>
@@ -113,12 +162,13 @@ export default async function StoreCustomersPage({
                   )}
 
                 <Link
-                  href={buildHref(Math.min(totalPages, currentPage + 1))}
+                  href={buildHref(storeId, { q, status, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${currentPage >= totalPages
-                    ? "opacity-30 pointer-events-none border-gray-200"
-                    : "border-gray-200 hover:bg-gray-100"
-                    }`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                    currentPage >= totalPages
+                      ? "opacity-30 pointer-events-none border-gray-200"
+                      : "border-gray-200 hover:bg-gray-100"
+                  }`}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -144,7 +194,7 @@ export default async function StoreCustomersPage({
                       Orders
                     </th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Total Spent
+                      Spent
                     </th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Status
@@ -152,6 +202,7 @@ export default async function StoreCustomersPage({
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Joined
                     </th>
+                    <th className="px-5 py-3" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -162,7 +213,10 @@ export default async function StoreCustomersPage({
                       customer.addresses?.[0];
 
                     return (
-                      <tr key={customer._id} className="hover:bg-gray-50/60 transition-colors">
+                      <tr
+                        key={customer._id}
+                        className="hover:bg-gray-50/60 transition-colors group"
+                      >
                         {/* Customer */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
@@ -212,46 +266,71 @@ export default async function StoreCustomersPage({
 
                         {/* Orders */}
                         <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-sm">
+                          <div className="flex items-center gap-1.5">
                             <ShoppingBag className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="font-medium text-gray-900">
+                            <span className="text-sm font-medium text-gray-900">
                               {stats?.orderCount ?? 0}
                             </span>
                           </div>
+                          {stats?.lastOrderAt && (
+                            <p className="text-[10px] text-gray-400 mt-0.5">
+                              Last:{" "}
+                              {new Date(stats.lastOrderAt).toLocaleDateString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                              })}
+                            </p>
+                          )}
                         </td>
 
                         {/* Total spent */}
-                        <td className="px-5 py-4 text-sm font-semibold text-gray-900">
+                        <td className="px-5 py-4">
                           {stats ? (
-                            <>৳{stats.totalSpent.toLocaleString()}</>
+                            <span className="text-sm font-semibold text-gray-900">
+                              ৳{stats.totalSpent.toLocaleString()}
+                            </span>
                           ) : (
-                            <span className="text-gray-400 font-normal">—</span>
+                            <span className="text-sm text-gray-400">—</span>
                           )}
                         </td>
 
                         {/* Status */}
                         <td className="px-5 py-4">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${customer.isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                              }`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                              customer.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
+                            }`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${customer.isActive ? "bg-green-500" : "bg-gray-400"
-                                }`}
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                customer.isActive ? "bg-green-500" : "bg-gray-400"
+                              }`}
                             />
                             {customer.isActive ? "Active" : "Inactive"}
                           </span>
                         </td>
 
                         {/* Joined */}
-                        <td className="px-5 py-4 text-xs text-gray-500 whitespace-nowrap">
+                        <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
                           {new Date(customer.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                           })}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-5 py-4">
+                          {(stats?.orderCount ?? 0) > 0 && (
+                            <Link
+                              href={`/admin/stores/${storeId}/orders?q=${encodeURIComponent(customer.phone || customer.email || customer.name)}`}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg whitespace-nowrap"
+                            >
+                              Orders
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     );

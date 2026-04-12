@@ -73,10 +73,27 @@ export const AuthRepository = {
 
   async findCustomersByStore(
     storeId: string,
-    { skip = 0, limit = 20 }: { skip?: number; limit?: number } = {}
+    {
+      skip = 0,
+      limit = 20,
+      search,
+      status,
+    }: {
+      skip?: number;
+      limit?: number;
+      search?: string;
+      status?: "active" | "inactive" | "all";
+    } = {}
   ): Promise<IUser[]> {
     await dbConnect();
-    const users = await UserModel.find({ storeId })
+    const filter: Record<string, unknown> = { storeId };
+    if (status === "active") filter.isActive = true;
+    else if (status === "inactive") filter.isActive = false;
+    if (search) {
+      const re = { $regex: search, $options: "i" };
+      filter.$or = [{ name: re }, { email: re }, { phone: re }];
+    }
+    const users = await UserModel.find(filter)
       .select("-passwordHash")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -85,9 +102,22 @@ export const AuthRepository = {
     return users.map(serializeUser);
   },
 
-  async countCustomersByStore(storeId: string): Promise<number> {
+  async countCustomersByStore(
+    storeId: string,
+    {
+      search,
+      status,
+    }: { search?: string; status?: "active" | "inactive" | "all" } = {}
+  ): Promise<number> {
     await dbConnect();
-    return UserModel.countDocuments({ storeId });
+    const filter: Record<string, unknown> = { storeId };
+    if (status === "active") filter.isActive = true;
+    else if (status === "inactive") filter.isActive = false;
+    if (search) {
+      const re = { $regex: search, $options: "i" };
+      filter.$or = [{ name: re }, { email: re }, { phone: re }];
+    }
+    return UserModel.countDocuments(filter);
   },
 
   async findAllCustomers(

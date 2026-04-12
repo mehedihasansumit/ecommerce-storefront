@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { OrderRepository } from "@/features/orders/repository";
-import { StoreService } from "@/features/stores/service";
+import { redirect } from "next/navigation";
+import { OrderService } from "@/features/orders/service";
 import { PaymentsTable } from "./PaymentsTable";
-import { CreditCard, ChevronLeft, ChevronRight } from "lucide-react";
+import { PaymentsSearch } from "./PaymentsSearch";
+import { CreditCard, ChevronLeft, ChevronRight, TrendingUp, Clock, XCircle, RotateCcw } from "lucide-react";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import type { Metadata } from "next";
 import type { PaymentStatus } from "@/features/orders/types";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Payments" };
 
@@ -26,7 +26,7 @@ export default async function PaymentsPage({
   searchParams,
 }: {
   params: Promise<{ storeId: string }>;
-  searchParams: Promise<{ page?: string; status?: string }>;
+  searchParams: Promise<{ page?: string; status?: string; q?: string }>;
 }) {
   const adminUser = await getAdminDbUser();
   if (!adminUser || !hasPermission(adminUser, PERMISSIONS.PAYMENTS_VIEW)) redirect("/admin");
@@ -34,75 +34,114 @@ export default async function PaymentsPage({
   const { storeId } = await params;
   if (!canAccessStore(adminUser, storeId)) redirect("/admin");
 
-  const { page: pageStr, status } = await searchParams;
+  const { page: pageStr, status, q } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
-  const store = await StoreService.getById(storeId);
-  if (!store) notFound();
-
-  const { orders, total } = await OrderRepository.findAll({
-    storeId,
-    paymentStatus: status || undefined,
-    page,
-    limit: PAGE_SIZE,
-  });
+  const [{ orders, total }, stats] = await Promise.all([
+    OrderService.getByStore(storeId, {
+      paymentStatus: status || undefined,
+      search: q || undefined,
+      page,
+      limit: PAGE_SIZE,
+    }),
+    OrderService.getPaymentStats(storeId),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
   const paymentStatuses: PaymentStatus[] = ["pending", "paid", "failed", "refunded"];
 
-  function buildHref(p: number, s?: string) {
+  function buildHref(p: number, s?: string, query?: string) {
     const sp = new URLSearchParams();
-    sp.set("page", String(p));
+    if (p > 1) sp.set("page", String(p));
     if (s) sp.set("status", s);
-    return `?${sp.toString()}`;
+    if (query) sp.set("q", query);
+    const qs = sp.toString();
+    return `?${qs}`;
   }
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <Link
-            href={`/admin/stores/${storeId}`}
-            className="text-sm text-gray-500 hover:text-gray-800 mb-1 inline-block"
-          >
-            ← {store.name}
-          </Link>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-gray-400" />
             Payments
           </h1>
-          <p className="text-sm text-gray-500 mt-1">{total} orders</p>
+          <p className="text-sm text-gray-500 mt-0.5">{total} orders</p>
         </div>
       </div>
 
-      {/* Status filter */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        <Link
-          href={buildHref(1)}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-            !status
-              ? "bg-gray-900 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-          }`}
-        >
-          All
-        </Link>
-        {paymentStatuses.map((s) => (
+      {/* Stats cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp className="w-4 h-4 text-green-500" />
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Revenue</span>
+          </div>
+          <p className="text-xl font-bold text-gray-900">৳{stats.totalRevenue.toLocaleString()}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{stats.paid} paid orders</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Clock className="w-4 h-4 text-yellow-500" />
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pending</span>
+          </div>
+          <p className="text-xl font-bold text-gray-900">{stats.pending}</p>
+          <p className="text-xs text-gray-400 mt-0.5">awaiting payment</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <XCircle className="w-4 h-4 text-red-500" />
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Failed</span>
+          </div>
+          <p className="text-xl font-bold text-gray-900">{stats.failed}</p>
+          <p className="text-xs text-gray-400 mt-0.5">failed transactions</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <RotateCcw className="w-4 h-4 text-gray-500" />
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Refunded</span>
+          </div>
+          <p className="text-xl font-bold text-gray-900">{stats.refunded}</p>
+          <p className="text-xs text-gray-400 mt-0.5">orders refunded</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <PaymentsSearch storeId={storeId} defaultValue={q} />
+
+        <div className="flex flex-wrap gap-1.5 ml-auto">
           <Link
-            key={s}
-            href={buildHref(1, s)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
-              status === s
-                ? PAYMENT_FILTER_STYLES[s]
+            href={buildHref(1, undefined, q)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              !status
+                ? "bg-gray-900 text-white border-gray-900"
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
             }`}
           >
-            {s}
+            All
           </Link>
-        ))}
+          {paymentStatuses.map((s) => (
+            <Link
+              key={s}
+              href={buildHref(1, s, q)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
+                status === s
+                  ? PAYMENT_FILTER_STYLES[s]
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              {s}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Empty state */}
@@ -113,7 +152,11 @@ export default async function PaymentsPage({
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">No orders found</h3>
           <p className="text-sm text-gray-500">
-            {status ? `No orders with payment status "${status}".` : "No orders yet."}
+            {q
+              ? `No orders match "${q}".`
+              : status
+              ? `No orders with payment status "${status}".`
+              : "No orders yet."}
           </p>
         </div>
       ) : (
@@ -129,7 +172,7 @@ export default async function PaymentsPage({
               </p>
               <div className="flex items-center gap-1">
                 <Link
-                  href={buildHref(Math.max(1, currentPage - 1), status)}
+                  href={buildHref(Math.max(1, currentPage - 1), status, q)}
                   aria-disabled={currentPage <= 1}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
                     currentPage <= 1
@@ -153,7 +196,7 @@ export default async function PaymentsPage({
                     ) : (
                       <Link
                         key={item}
-                        href={buildHref(item as number, status)}
+                        href={buildHref(item as number, status, q)}
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                           currentPage === item
                             ? "bg-gray-900 text-white"
@@ -166,7 +209,7 @@ export default async function PaymentsPage({
                   )}
 
                 <Link
-                  href={buildHref(Math.min(totalPages, currentPage + 1), status)}
+                  href={buildHref(Math.min(totalPages, currentPage + 1), status, q)}
                   aria-disabled={currentPage >= totalPages}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
                     currentPage >= totalPages

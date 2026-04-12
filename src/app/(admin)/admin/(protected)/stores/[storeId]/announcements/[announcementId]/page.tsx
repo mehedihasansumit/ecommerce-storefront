@@ -22,7 +22,7 @@ export default async function EditAnnouncementPage({
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Edit Announcement</h1>
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 overflow-visible">
         <AnnouncementForm
           storeId={storeId}
           announcement={JSON.parse(JSON.stringify(announcement))}

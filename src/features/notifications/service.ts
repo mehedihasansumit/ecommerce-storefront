@@ -6,7 +6,8 @@ import type {
   NotificationChannel,
 } from "./types";
 import type { CreateAnnouncementInput } from "./schemas";
-import { sendEmail, orderConfirmationEmail, orderStatusEmail } from "@/shared/lib/email";
+import { sendEmail, orderConfirmationEmail, orderStatusEmail, announcementEmail } from "@/shared/lib/email";
+import { SubscriberService } from "@/features/subscribers/service";
 import { sendSms } from "@/shared/lib/sms";
 import { UserModel } from "@/features/auth/model";
 import { StoreModel } from "@/features/stores/model";
@@ -200,5 +201,39 @@ export const NotificationService = {
   /** Get currently active announcements for the storefront */
   async getActiveAnnouncements(storeId: string): Promise<IAnnouncement[]> {
     return AnnouncementRepository.findActive(storeId);
+  },
+
+  /** Broadcast an announcement via email to all email subscribers of the store */
+  async broadcastAnnouncement(
+    storeId: string,
+    announcementId: string
+  ): Promise<{ sent: number }> {
+    const announcement = await AnnouncementRepository.findById(announcementId);
+    if (!announcement || announcement.storeId !== storeId) {
+      throw new Error("Announcement not found");
+    }
+
+    const subscribers = await SubscriberService.getEmailSubscribers(storeId);
+    if (subscribers.length === 0) {
+      throw new Error("No email subscribers found");
+    }
+
+    const storeName = await getStoreName(storeId);
+    const html = announcementEmail(announcement.title, announcement.message, storeName);
+
+    const results = await Promise.all(
+      subscribers.map((s) =>
+        sendEmail({ to: s.email!, subject: announcement.title, html })
+      )
+    );
+
+    const sent = results.filter(Boolean).length;
+
+    await AnnouncementRepository.update(announcementId, {
+      broadcastSentAt: new Date(),
+      broadcastCount: sent,
+    });
+
+    return { sent };
   },
 };

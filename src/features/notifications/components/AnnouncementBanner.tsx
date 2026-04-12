@@ -24,14 +24,28 @@ function addDismissed(id: string) {
   }
 }
 
-function applyInline(text: string): string {
-  return text
+function applyInline(text: string, bgColor?: string): string {
+  let out = text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+  if (bgColor) {
+    out = out.replace(
+      /==(.+?)==/g,
+      `<span style="background-color:${bgColor};color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;font-size:0.9em;">$1</span>`
+    );
+  } else {
+    out = out.replace(
+      /==(.+?)==/g,
+      `<mark style="padding:1px 5px;border-radius:4px;font-weight:700;">$1</mark>`
+    );
+  }
+
+  return out;
 }
 
-/** Converts **bold**, *italic*, - list items, and newlines to safe HTML. */
-function renderMessage(text: string): string {
+/** Converts **bold**, *italic*, ==highlight==, - list items, and newlines to safe HTML. */
+function renderMessage(text: string, bgColor?: string): string {
   const esc = text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -48,13 +62,13 @@ function renderMessage(text: string): string {
         html += `<ul style="list-style-type:disc;padding-left:1.25rem;margin:0.4rem 0;text-align:left;">`;
         inList = true;
       }
-      html += `<li style="margin:0.4rem 0">${applyInline(li[1])}</li>`;
+      html += `<li style="margin:0.4rem 0">${applyInline(li[1], bgColor)}</li>`;
     } else {
       if (inList) { html += `</ul>`; inList = false; }
       if (line.trim() === "") {
         html += `<br/>`;
       } else {
-        html += applyInline(line) + `<br/>`;
+        html += applyInline(line, bgColor) + `<br/>`;
       }
     }
   }
@@ -140,7 +154,7 @@ export function AnnouncementBanner() {
             {a.title}
           </span>
           {a.title && <span className="opacity-30">|</span>}
-          <span dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }} />
+          <span dangerouslySetInnerHTML={{ __html: renderMessage(a.message, a.backgroundColor) }} />
           {a.linkUrl && a.linkText && (
             <Link
               href={a.linkUrl}
@@ -179,7 +193,7 @@ export function AnnouncementBanner() {
               {a.title && (
                 <p className="font-semibold text-sm tracking-tight">{a.title}</p>
               )}
-              <p className="text-sm opacity-80 leading-snug" dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }} />
+              <p className="text-sm opacity-80 leading-snug" dangerouslySetInnerHTML={{ __html: renderMessage(a.message, a.backgroundColor) }} />
             </div>
             {a.linkUrl && a.linkText && (
               <Link
@@ -256,7 +270,7 @@ export function AnnouncementBanner() {
               <div className="px-8 py-7 text-center">
                 <p
                   className="text-gray-500 text-[15px] leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }}
+                  dangerouslySetInnerHTML={{ __html: renderMessage(a.message, a.backgroundColor) }}
                 />
                 <div className="mt-7 flex flex-col gap-2.5">
                   {a.linkUrl && a.linkText && (
@@ -345,7 +359,7 @@ export function AnnouncementBanner() {
                       )}
                       <p
                         className="text-xs text-gray-400 mt-0.5 leading-relaxed line-clamp-3"
-                        dangerouslySetInnerHTML={{ __html: renderMessage(a.message) }}
+                        dangerouslySetInnerHTML={{ __html: renderMessage(a.message, a.backgroundColor) }}
                       />
 
                       {a.linkUrl && a.linkText && (

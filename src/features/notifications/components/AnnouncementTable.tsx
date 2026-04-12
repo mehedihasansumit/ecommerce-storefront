@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Trash2, Pencil } from "lucide-react";
+import { BroadcastButton } from "./BroadcastButton";
 import type { IAnnouncement } from "../types";
 
 interface AnnouncementTableProps {
@@ -97,6 +98,12 @@ export function AnnouncementTable({
                 </td>
                 <td className="py-3 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    <BroadcastButton
+                      announcementId={a._id}
+                      storeId={storeId}
+                      initialSentAt={a.broadcastSentAt}
+                      initialCount={a.broadcastCount ?? 0}
+                    />
                     <Link
                       href={`/admin/stores/${storeId}/announcements/${a._id}`}
                       className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"

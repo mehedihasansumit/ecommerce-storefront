@@ -17,24 +17,37 @@ export function NewsletterForm({
   subscribeLabel,
 }: NewsletterFormProps) {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email && !phone) {
+      setErrorMsg("Please enter your email or phone number.");
+      setStatus("error");
+      return;
+    }
+
     setStatus("loading");
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/newsletters", {
+      const res = await fetch("/api/subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, storeId }),
+        body: JSON.stringify({
+          storeId,
+          email: email || undefined,
+          phone: phone || undefined,
+        }),
       });
 
       if (res.status === 201) {
         setStatus("success");
         setEmail("");
+        setPhone("");
         return;
       }
 
@@ -63,25 +76,40 @@ export function NewsletterForm({
     );
   }
 
+  const inputClass =
+    "w-full px-5 py-3 rounded-full bg-white/10 border border-white/25 text-white placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all disabled:opacity-60 text-sm";
+
   return (
-    <div>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto"
-      >
+    <div className="max-w-sm mx-auto">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={emailPlaceholder}
-          required
           disabled={status === "loading"}
-          className="flex-1 px-5 py-3.5 rounded-full bg-white/10 border border-white/25 text-white placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all disabled:opacity-60"
+          className={inputClass}
         />
+
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-white/20" />
+          <span className="text-white/40 text-xs uppercase tracking-widest">or</span>
+          <div className="flex-1 h-px bg-white/20" />
+        </div>
+
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+880 1XXX XXXXXX"
+          disabled={status === "loading"}
+          className={inputClass}
+        />
+
         <button
           type="submit"
           disabled={status === "loading"}
-          className="px-8 py-3.5 bg-white font-semibold rounded-full transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
+          className="w-full px-8 py-3.5 bg-white font-semibold rounded-full transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2 mt-1"
           style={{ color: "var(--color-primary)" }}
         >
           {status === "loading" ? (
@@ -96,7 +124,7 @@ export function NewsletterForm({
       </form>
 
       {status === "error" && errorMsg && (
-        <p className="mt-3 text-white/80 text-sm text-center bg-white/10 rounded-full px-4 py-1.5 max-w-sm mx-auto">
+        <p className="mt-3 text-white/80 text-sm text-center bg-white/10 rounded-full px-4 py-1.5">
           {errorMsg}
         </p>
       )}

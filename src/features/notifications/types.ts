@@ -49,6 +49,8 @@ export interface IAnnouncement {
   dismissible: boolean;
   priority: number;
   createdBy: string;
+  broadcastSentAt?: Date | null;
+  broadcastCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,6 +71,8 @@ export interface IAnnouncementDocument {
   dismissible: boolean;
   priority: number;
   createdBy: import("mongoose").Types.ObjectId;
+  broadcastSentAt?: Date | null;
+  broadcastCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }

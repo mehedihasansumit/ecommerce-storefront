@@ -71,6 +71,8 @@ const AnnouncementSchema = new Schema<IAnnouncementDocument>(
       ref: "AdminUser",
       required: true,
     },
+    broadcastSentAt: { type: Date, default: null },
+    broadcastCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

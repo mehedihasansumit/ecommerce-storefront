@@ -149,18 +149,20 @@ export function PaymentsTable({ orders, storeId }: Props) {
                 <tr key={order._id} className="hover:bg-gray-50/60 transition-colors align-top">
                   {/* Order */}
                   <td className="px-5 py-4">
-                    <Link
-                      href={`/admin/stores/${storeId}/orders/${order._id}`}
-                      className="inline-flex items-center gap-1 font-mono text-sm font-semibold text-blue-600 hover:text-blue-800"
-                    >
-                      {order.orderNumber}
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
-                    {order.couponCode && (
-                      <span className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                        {order.couponCode}
-                      </span>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      <Link
+                        href={`/admin/stores/${storeId}/orders/${order._id}`}
+                        className="inline-flex items-center gap-1 font-mono text-sm font-semibold text-blue-600 hover:text-blue-800"
+                      >
+                        {order.orderNumber}
+                        <ExternalLink className="w-3 h-3" />
+                      </Link>
+                      {order.couponCode && (
+                        <span className="self-start px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                          {order.couponCode}
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Customer */}

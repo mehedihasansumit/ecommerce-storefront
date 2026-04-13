@@ -246,6 +246,11 @@ export const AuthRepository = {
     return serializeUser(user);
   },
 
+  async incrementPoints(userId: string, storeId: string, amount: number): Promise<void> {
+    await dbConnect();
+    await UserModel.findOneAndUpdate({ _id: userId, storeId }, { $inc: { points: amount } });
+  },
+
   async setDefaultAddress(
     storeId: string,
     userId: string,

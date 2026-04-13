@@ -434,6 +434,15 @@ export default function OrderDetailPage({
                   <p className="text-xs text-gray-400 mt-1">
                     {t("qty", { count: item.quantity })}
                   </p>
+                  {item.productSlug && (
+                    <Link
+                      href={`/products/${item.productSlug}`}
+                      className="inline-flex items-center gap-1 mt-2 text-xs font-medium hover:underline"
+                      style={{ color: "var(--color-primary)" }}
+                    >
+                      View Product →
+                    </Link>
+                  )}
                 </div>
                 <p className="font-bold text-sm text-gray-800 shrink-0">
                   ৳{item.totalPrice.toLocaleString()}

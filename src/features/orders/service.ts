@@ -36,6 +36,7 @@ export const OrderService = {
       orderItems.push({
         productId: product._id,
         productName: tAdmin(product.name),
+        productSlug: product.slug,
         variantSelections: lineItem.variantSelections,
         quantity: lineItem.quantity,
         unitPrice: product.price,

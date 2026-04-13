@@ -12,6 +12,7 @@ import {
   BarChart2,
   ArrowRight,
   Globe,
+  Star,
 } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -41,6 +42,8 @@ export default async function StoreDetailPage({
     PERMISSIONS.COUPONS_VIEW,
     PERMISSIONS.ANNOUNCEMENTS_VIEW,
     PERMISSIONS.ANALYTICS_VIEW,
+    PERMISSIONS.REVIEWS_VIEW,
+    PERMISSIONS.REVIEWS_MODERATE,
   ].some((p) => hasPermission(adminUser, p));
   if (!hasAnyAccess) redirect("/admin");
 
@@ -63,6 +66,9 @@ export default async function StoreDetailPage({
   const canViewCoupons = hasPermission(adminUser, PERMISSIONS.COUPONS_VIEW);
   const canViewAnnouncements = hasPermission(adminUser, PERMISSIONS.ANNOUNCEMENTS_VIEW);
   const canViewAnalytics = hasPermission(adminUser, PERMISSIONS.ANALYTICS_VIEW);
+  const canViewReviews =
+    hasPermission(adminUser, PERMISSIONS.REVIEWS_VIEW) ||
+    hasPermission(adminUser, PERMISSIONS.REVIEWS_MODERATE);
 
   const modules = [
     canViewProducts && {
@@ -136,6 +142,15 @@ export default async function StoreDetailPage({
       color: "bg-cyan-500",
       lightColor: "bg-cyan-50",
       textColor: "text-cyan-600",
+    },
+    canViewReviews && {
+      href: `/admin/stores/${storeId}/reviews`,
+      icon: Star,
+      label: "Reviews",
+      description: "Moderate customer reviews",
+      color: "bg-yellow-500",
+      lightColor: "bg-yellow-50",
+      textColor: "text-yellow-600",
     },
   ].filter(Boolean) as {
     href: string;

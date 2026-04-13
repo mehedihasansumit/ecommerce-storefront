@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 export interface IOrderItem {
   productId: string;
   productName: string;
+  productSlug: string;
   variantSelections: Record<string, string>;
   quantity: number;
   unitPrice: number;
@@ -62,6 +63,7 @@ export interface IOrder {
 export interface IOrderItemDocument {
   productId: Types.ObjectId;
   productName: string;
+  productSlug: string;
   variantSelections: Map<string, string>;
   quantity: number;
   unitPrice: number;

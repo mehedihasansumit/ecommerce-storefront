@@ -18,6 +18,7 @@ const OrderSchema = new Schema<IOrderDocument>(
       {
         productId: { type: Schema.Types.ObjectId, ref: "Product" },
         productName: String,
+        productSlug: { type: String, default: "" },
         variantSelections: { type: Map, of: String },
         quantity: Number,
         unitPrice: Number,

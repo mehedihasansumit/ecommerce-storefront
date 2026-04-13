@@ -2,39 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
-import { ReviewService } from "@/features/reviews/service";
-import { createReviewSchema, getReviewsQuerySchema } from "@/features/reviews/schemas";
-import { AuthRepository } from "@/features/auth/repository";
+import { PointService } from "@/features/points/service";
+import { redeemPointsSchema } from "@/features/reviews/schemas";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const storeId = await getStoreId();
     if (!storeId)
       return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
-    const { searchParams } = request.nextUrl;
-    const query = getReviewsQuerySchema.parse(Object.fromEntries(searchParams));
-
-    if (!query.productId) {
-      return NextResponse.json({ error: "productId is required" }, { status: 400 });
+    const payload = await getCustomerToken();
+    if (!payload || payload.type !== "customer") {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const result = await ReviewService.getApprovedForProduct(
-      storeId,
-      query.productId,
-      query.page,
-      query.limit
-    );
+    const customerPayload = payload as JwtCustomerPayload;
+    const balance = await PointService.getBalance(storeId, customerPayload.userId);
 
-    return NextResponse.json(result);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: error.issues[0]?.message ?? "Invalid input" },
-        { status: 400 }
-      );
-    }
+    return NextResponse.json(balance);
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -51,22 +38,16 @@ export async function POST(request: NextRequest) {
     }
 
     const customerPayload = payload as JwtCustomerPayload;
-    const user = await AuthRepository.findUserById(customerPayload.userId);
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
-    }
-
     const body = await request.json();
-    const validated = createReviewSchema.parse(body);
+    const validated = redeemPointsSchema.parse(body);
 
-    const review = await ReviewService.create(
+    const result = await PointService.redeem(
       storeId,
       customerPayload.userId,
-      user.name,
-      validated
+      validated.points
     );
 
-    return NextResponse.json({ review }, { status: 201 });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(

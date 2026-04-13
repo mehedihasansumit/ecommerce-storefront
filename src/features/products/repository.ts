@@ -121,6 +121,15 @@ export const ProductRepository = {
     return ProductModel.countDocuments({ storeId });
   },
 
+  async updateRatingStats(
+    id: string,
+    averageRating: number,
+    reviewCount: number
+  ): Promise<void> {
+    await dbConnect();
+    await ProductModel.findByIdAndUpdate(id, { averageRating, reviewCount });
+  },
+
   async countByCategoryIds(
     storeId: string,
     categoryIds: string[]

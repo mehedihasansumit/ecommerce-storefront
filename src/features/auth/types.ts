@@ -30,6 +30,7 @@ export interface IUser {
   phone: string;
   addresses: IAddress[];
   isActive: boolean;
+  points: number;
   notificationPreferences: INotificationPreferences;
   createdAt: Date;
   updatedAt: Date;

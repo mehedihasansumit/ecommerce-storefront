@@ -7,6 +7,7 @@ import {
   Users,
   UserCog,
   Shield,
+  Star,
 } from "lucide-react";
 import { MobileAdminNav } from "../_components/MobileAdminNav";
 import { AdminLogoutButton } from "../_components/AdminLogoutButton";
@@ -53,6 +54,8 @@ export default async function ProtectedAdminLayout({
         PERMISSIONS.PAYMENTS_DISCOUNT,
         PERMISSIONS.COUPONS_VIEW,
         PERMISSIONS.ANNOUNCEMENTS_VIEW,
+        PERMISSIONS.REVIEWS_VIEW,
+        PERMISSIONS.REVIEWS_MODERATE,
       ].some((p) => hasPermission(permCtx, p)));
 
   const canViewOrders =

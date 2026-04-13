@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
 import { ChevronRight, Truck, RotateCcw, Shield } from "lucide-react";
 import { ProductDetailClient } from "@/features/products/components/ProductDetailClient";
+import { ReviewSection } from "@/features/reviews/components/ReviewSection";
 import { t } from "@/shared/lib/i18n";
 
 export async function generateMetadata({
@@ -126,6 +127,16 @@ export default async function ProductDetailPage({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-16 border-t border-gray-200 pt-14">
+          <ReviewSection
+            productId={product._id}
+            storeId={tenant._id}
+            averageRating={product.averageRating}
+            reviewCount={product.reviewCount}
+          />
         </div>
       </div>
     </>

@@ -8,6 +8,7 @@ export interface IReview {
   rating: number;
   title: string;
   comment: string;
+  reviewerName: string;
   isApproved: boolean;
   createdAt: Date;
   updatedAt: Date;

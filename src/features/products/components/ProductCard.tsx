@@ -6,6 +6,8 @@ import type { IProduct } from "../types";
 import { useTranslations, useLocale } from "next-intl";
 import { t } from "@/shared/lib/i18n";
 
+const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+
 export function ProductCard({ product }: { product: IProduct }) {
   const tr = useTranslations("productCard");
   const locale = useLocale();
@@ -19,6 +21,11 @@ export function ProductCard({ product }: { product: IProduct }) {
           100
       )
     : 0;
+
+  const isNew =
+    product.createdAt &&
+    Date.now() - new Date(product.createdAt).getTime() < FOURTEEN_DAYS_MS;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <Link
@@ -43,13 +50,33 @@ export function ProductCard({ product }: { product: IProduct }) {
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
 
-        {/* Discount badge */}
-        {hasDiscount && (
+        {/* Badges row - top left */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+          {hasDiscount && (
+            <span
+              className="px-2 py-0.5 text-[11px] font-bold text-white rounded-md leading-tight"
+              style={{ backgroundColor: "var(--color-accent)" }}
+            >
+              -{discountPercent}%
+            </span>
+          )}
+          {isNew && !hasDiscount && (
+            <span className="px-2 py-0.5 text-[11px] font-bold text-white rounded-md leading-tight bg-emerald-500">
+              New
+            </span>
+          )}
+        </div>
+
+        {/* Featured badge - top right */}
+        {product.isFeatured && (
           <span
-            className="absolute top-3 left-3 px-2 py-0.5 text-[11px] font-bold text-white rounded-md"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="absolute top-3 right-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-md leading-tight"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--color-primary) 12%, transparent)",
+              color: "var(--color-primary)",
+            }}
           >
-            -{discountPercent}%
+            ★ Featured
           </span>
         )}
 
@@ -65,7 +92,7 @@ export function ProductCard({ product }: { product: IProduct }) {
         {/* Quick view indicator */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           <span
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-semibold text-white shadow-lg backdrop-blur-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-semibold text-white shadow-lg backdrop-blur-sm whitespace-nowrap"
             style={{
               backgroundColor: "color-mix(in srgb, var(--color-primary) 90%, transparent)",
               borderRadius: "var(--border-radius)",
@@ -105,17 +132,24 @@ export function ProductCard({ product }: { product: IProduct }) {
           </div>
         )}
 
-        {/* Price */}
-        <div className="flex items-baseline gap-2">
-          <span
-            className="text-base font-bold"
-            style={{ color: "var(--color-primary)" }}
-          >
-            ৳{product.price.toLocaleString()}
-          </span>
-          {hasDiscount && (
-            <span className="text-xs text-gray-400 line-through">
-              ৳{product.compareAtPrice.toLocaleString()}
+        {/* Price + low stock */}
+        <div className="flex items-end justify-between gap-2">
+          <div className="flex items-baseline gap-2">
+            <span
+              className="text-base font-bold"
+              style={{ color: "var(--color-primary)" }}
+            >
+              ৳{product.price.toLocaleString()}
+            </span>
+            {hasDiscount && (
+              <span className="text-xs text-gray-400 line-through">
+                ৳{product.compareAtPrice.toLocaleString()}
+              </span>
+            )}
+          </div>
+          {isLowStock && (
+            <span className="text-[10px] font-semibold text-orange-500 whitespace-nowrap">
+              Only {product.stock} left
             </span>
           )}
         </div>

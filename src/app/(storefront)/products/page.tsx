@@ -2,6 +2,8 @@ import { getTenant } from "@/shared/lib/tenant";
 import { ProductService } from "@/features/products/service";
 import { CategoryService } from "@/features/categories/service";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
+import { SortDropdown } from "@/features/products/components/SortDropdown";
+import { ActiveFilters } from "@/features/products/components/ActiveFilters";
 import { createStoreMetadata } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -25,7 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; category?: string; search?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    category?: string;
+    search?: string;
+    sort?: string;
+    order?: string;
+  }>;
 }) {
   const tenant = await getTenant();
   const t = await getTranslations("products");
@@ -36,44 +44,82 @@ export default async function ProductsPage({
   const page = parseInt(params.page || "1", 10);
   const categorySlug = params.category;
   const search = params.search;
+  const sort = params.sort;
+  const order = (params.order === "asc" || params.order === "desc") ? params.order : undefined;
 
   let categoryId: string | undefined;
+  let categoryName: string | undefined;
   if (categorySlug) {
     const category = await CategoryService.getBySlug(tenant._id, categorySlug);
-    if (category) categoryId = category._id;
+    if (category) {
+      categoryId = category._id;
+      categoryName = tl(category.name, locale);
+    }
   }
 
-  const [result, categories] = await Promise.all([
+  const [result, categories, allCount] = await Promise.all([
     ProductService.getByStore(tenant._id, {
       page,
       limit: ITEMS_PER_PAGE,
       categoryId,
       search,
+      sort,
+      order,
     }),
     CategoryService.getByStore(tenant._id),
+    // Get the true store-wide total regardless of active filters
+    ProductService.getByStore(tenant._id, { page: 1, limit: 1 }).then((r) => r.total),
   ]);
+
+  // Fetch product counts per category for the sidebar
+  const categoryCounts = categories.length > 0
+    ? await ProductService.getCountsByCategoryIds(
+        tenant._id,
+        categories.map((c) => c._id)
+      )
+    : {};
 
   const buildUrl = (p: number) => {
     const parts = [`/products?page=${p}`];
     if (categorySlug) parts.push(`category=${categorySlug}`);
-    if (search) parts.push(`search=${search}`);
+    if (search) parts.push(`search=${encodeURIComponent(search)}`);
+    if (sort) parts.push(`sort=${sort}`);
+    if (order) parts.push(`order=${order}`);
     return parts.join("&");
   };
+
+  // Pagination range: show at most 5 page numbers with ellipsis logic
+  const pageNumbers: (number | "...")[] = [];
+  if (result.totalPages <= 7) {
+    for (let i = 1; i <= result.totalPages; i++) pageNumbers.push(i);
+  } else {
+    pageNumbers.push(1);
+    if (page > 3) pageNumbers.push("...");
+    for (let i = Math.max(2, page - 1); i <= Math.min(result.totalPages - 1, page + 1); i++) {
+      pageNumbers.push(i);
+    }
+    if (page < result.totalPages - 2) pageNumbers.push("...");
+    pageNumbers.push(result.totalPages);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2">
-          {categorySlug
-            ? t("categoryFilter", { category: categorySlug })
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-1">
+          {categoryName
+            ? categoryName
             : t("allProducts")}
         </h1>
-        {search && (
-          <p className="text-gray-500">
-            {t("searchResults") || "Search results for"}: &ldquo;{search}&rdquo;
-          </p>
-        )}
+        <p className="text-sm text-gray-500">
+          {result.total}{" "}
+          {result.total === 1
+            ? (t("productsLabel") || "product")
+            : (t("productsLabel") || "products")}
+          {search && (
+            <> for &ldquo;<span className="text-gray-700 font-medium">{search}</span>&rdquo;</>
+          )}
+        </p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-10">
@@ -97,11 +143,11 @@ export default async function ProductsPage({
                 placeholder={t("searchPlaceholder") || "Search..."}
               />
 
-              <ul className="space-y-1">
+              <ul className="space-y-0.5">
                 <li>
                   <Link
                     href="/products"
-                    className={`block px-3 py-2 text-sm rounded-lg transition-all ${
+                    className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
                       !categorySlug
                         ? "font-semibold"
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -116,67 +162,89 @@ export default async function ProductsPage({
                         : { borderRadius: "var(--border-radius)" }
                     }
                   >
-                    {t("all")}
+                    <span>{t("all")}</span>
+                    <span className="text-xs text-gray-400 tabular-nums">
+                      {allCount}
+                    </span>
                   </Link>
                 </li>
-                {categories.map((cat) => (
-                  <li key={cat._id}>
-                    <Link
-                      href={`/products?category=${cat.slug}`}
-                      className={`block px-3 py-2 text-sm rounded-lg transition-all ${
-                        categorySlug === cat.slug
-                          ? "font-semibold"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
-                      style={
-                        categorySlug === cat.slug
-                          ? {
-                              backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                              color: "var(--color-primary)",
-                              borderRadius: "var(--border-radius)",
-                            }
-                          : { borderRadius: "var(--border-radius)" }
-                      }
-                    >
-                      {tl(cat.name, locale)}
-                    </Link>
-                  </li>
-                ))}
+                {categories.map((cat) => {
+                  const count = categoryCounts[cat._id] ?? 0;
+                  return (
+                    <li key={cat._id}>
+                      <Link
+                        href={`/products?category=${cat.slug}`}
+                        className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
+                          categorySlug === cat.slug
+                            ? "font-semibold"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        }`}
+                        style={
+                          categorySlug === cat.slug
+                            ? {
+                                backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                                color: "var(--color-primary)",
+                                borderRadius: "var(--border-radius)",
+                              }
+                            : { borderRadius: "var(--border-radius)" }
+                        }
+                      >
+                        <span>{tl(cat.name, locale)}</span>
+                        {count > 0 && (
+                          <span className="text-xs text-gray-400 tabular-nums">{count}</span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </aside>
         )}
 
         {/* Product Grid */}
-        <div className="flex-1">
-          {/* Results count */}
-          <p className="text-xs text-gray-400 mb-6">
-            {t("showing") || "Showing"}{" "}
-            <span className="font-medium text-gray-900">
-              {result.data.length}
-            </span>{" "}
-            {t("of") || "of"}{" "}
-            <span className="font-medium text-gray-900">{result.total}</span>{" "}
-            {t("productsLabel") || "products"}
-          </p>
+        <div className="flex-1 min-w-0">
+          {/* Results bar */}
+          <div className="flex items-center justify-between mb-4 gap-4">
+            <p className="text-xs text-gray-400 shrink-0">
+              {t("showing") || "Showing"}{" "}
+              <span className="font-medium text-gray-700">
+                {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, result.total)}
+              </span>{" "}
+              {t("of") || "of"}{" "}
+              <span className="font-medium text-gray-700">{result.total}</span>
+            </p>
+            <SortDropdown currentSort={sort} currentOrder={order} />
+          </div>
+
+          {/* Active filter chips */}
+          <ActiveFilters
+            search={search}
+            categorySlug={categorySlug}
+            categoryName={categoryName}
+          />
 
           <ProductGrid products={result.data} />
 
           {/* Pagination */}
           {result.totalPages > 1 && (
             <div className="flex items-center justify-center gap-1.5 mt-10">
-              {/* Previous */}
               {page > 1 && (
                 <Link
                   href={buildUrl(page - 1)}
                   className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft size={16} />
                 </Link>
               )}
 
-              {Array.from({ length: result.totalPages }, (_, i) => i + 1).map(
-                (p) => (
+              {pageNumbers.map((p, i) =>
+                p === "..." ? (
+                  <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-sm text-gray-400">
+                    …
+                  </span>
+                ) : (
                   <Link
                     key={p}
                     href={buildUrl(p)}
@@ -187,22 +255,21 @@ export default async function ProductsPage({
                     }`}
                     style={
                       p === page
-                        ? {
-                            backgroundColor: "var(--color-primary)",
-                          }
+                        ? { backgroundColor: "var(--color-primary)" }
                         : undefined
                     }
+                    aria-current={p === page ? "page" : undefined}
                   >
                     {p}
                   </Link>
                 )
               )}
 
-              {/* Next */}
               {page < result.totalPages && (
                 <Link
                   href={buildUrl(page + 1)}
                   className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  aria-label="Next page"
                 >
                   <ChevronRight size={16} />
                 </Link>

@@ -11,7 +11,6 @@ import {
   LogOut,
   Package,
   MapPin,
-  Bell,
 } from "lucide-react";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { useTenant } from "@/shared/hooks/useTenant";
@@ -82,6 +81,12 @@ export function Header() {
     }
   }, [searchOpen]);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setSearchOpen(false);
+  }, [pathname]);
+
   // Close mobile menu on escape
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -137,19 +142,31 @@ export function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-0.5">
+            <nav className="hidden md:flex items-center gap-1">
               {[
                 { href: "/", label: t("home") },
                 { href: "/products", label: t("products") },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative px-4 py-2 font-medium transition-colors hover:bg-white/8 rounded-lg ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              ].map((link) => {
+                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`relative px-4 py-2 font-medium transition-all duration-200 rounded-sm ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"} ${isActive ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
+                  >
+                    {link.label}
+                    <span
+                      className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full transition-all duration-200"
+                      style={{
+                        backgroundColor: "var(--color-accent)",
+                        opacity: isActive ? 1 : 0,
+                        transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                        transformOrigin: "center",
+                      }}
+                    />
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Actions */}
@@ -197,6 +214,7 @@ export function Header() {
                       onClick={() => setUserMenuOpen((v) => !v)}
                       className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                       aria-label="Account menu"
+                      aria-expanded={userMenuOpen}
                     >
                       <span
                         className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white select-none"
@@ -266,6 +284,7 @@ export function Header() {
                 className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Menu"
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -320,22 +339,41 @@ export function Header() {
                 <X size={20} />
               </button>
             </div>
-            <div className="flex-1 py-4 flex flex-col">
+            <div className="flex-1 py-4 flex flex-col overflow-y-auto">
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch} className="mx-4 mb-3 relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("searchPlaceholder") || "Search products..."}
+                  className="w-full px-4 py-2.5 pr-10 rounded-lg bg-white/12 border border-white/15 text-inherit placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all text-sm"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
+                >
+                  <Search size={16} />
+                </button>
+              </form>
               {[
                 { href: "/", label: t("home") },
                 { href: "/products", label: t("products") },
                 { href: "/cart", label: t("cart") || "Cart" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="font-medium">{link.label}</span>
-                  <ChevronRight size={16} className="opacity-50" />
-                </Link>
-              ))}
+              ].map((link) => {
+                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center justify-between px-6 py-4 transition-colors ${isActive ? "bg-white/15 font-semibold" : "hover:bg-white/10 font-medium"}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>{link.label}</span>
+                    <ChevronRight size={16} className={isActive ? "opacity-80" : "opacity-50"} />
+                  </Link>
+                );
+              })}
               {userEmail ? (
                 <>
                   <div className="px-6 py-3 border-b border-white/10">

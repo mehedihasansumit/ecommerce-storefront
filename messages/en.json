@@ -169,7 +169,9 @@
     "viewOrders": "View My Orders",
     "manageAddresses": "Manage Addresses",
     "defaultAddress": "Default Address",
-    "notProvided": "Not provided"
+    "notProvided": "Not provided",
+    "totalOrders": "Total Orders",
+    "totalSpent": "Total Spent"
   },
   "addresses": {
     "title": "My Addresses",

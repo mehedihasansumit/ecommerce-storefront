@@ -169,7 +169,9 @@
     "viewOrders": "আমার অর্ডার দেখুন",
     "manageAddresses": "ঠিকানা পরিচালনা",
     "defaultAddress": "ডিফল্ট ঠিকানা",
-    "notProvided": "প্রদান করা হয়নি"
+    "notProvided": "প্রদান করা হয়নি",
+    "totalOrders": "মোট অর্ডার",
+    "totalSpent": "মোট ব্যয়"
   },
   "addresses": {
     "title": "আমার ঠিকানাসমূহ",

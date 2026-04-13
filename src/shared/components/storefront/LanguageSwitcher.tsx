@@ -3,56 +3,45 @@
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useTenant } from "@/shared/hooks/useTenant";
-import { useTransition } from "react";
 
 const languageNames: Record<string, string> = {
-  en: "English",
-  bn: "বাংলা",
+  en: "EN",
+  bn: "বাং",
 };
 
 export function LanguageSwitcher() {
   const tenant = useTenant();
   const locale = useLocale();
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
-  // Only show if tenant has more than one language
   if (!tenant || !tenant.supportedLanguages || tenant.supportedLanguages.length <= 1) {
     return null;
   }
 
   const handleLanguageChange = (newLocale: string) => {
     if (newLocale === locale) return;
-
-    startTransition(() => {
-      // Set the cookie via API call
-      fetch("/api/locale", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: newLocale }),
-      }).then(() => {
-        // Refresh the page to apply the new locale
-        router.refresh();
-      });
-    });
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+    router.refresh();
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {tenant.supportedLanguages.map((lang) => (
-        <button
-          key={lang}
-          onClick={() => handleLanguageChange(lang)}
-          disabled={isPending}
-          className={`px-2.5 py-1 rounded text-sm font-medium transition-colors whitespace-nowrap ${
-            locale === lang
-              ? "bg-primary text-white"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-          } ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          {languageNames[lang] || lang.toUpperCase()}
-        </button>
-      ))}
+    <div className="flex items-center gap-0.5 rounded-lg overflow-hidden border border-white/15 text-xs font-semibold">
+      {tenant.supportedLanguages.map((lang) => {
+        const isActive = locale === lang;
+        return (
+          <button
+            key={lang}
+            onClick={() => handleLanguageChange(lang)}
+            className={`px-2.5 py-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+              isActive
+                ? "bg-white/20 opacity-100"
+                : "opacity-50 hover:opacity-80 hover:bg-white/10"
+            }`}
+          >
+            {languageNames[lang] || lang.toUpperCase()}
+          </button>
+        );
+      })}
     </div>
   );
 }

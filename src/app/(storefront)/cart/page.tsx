@@ -90,7 +90,7 @@ export default function CartPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-start justify-between gap-3 text-gray-600">
                   <span className="min-w-0">
-                    {t("subtotal")} ({items.length}&nbsp;{t("items", { count: items.length })})
+                    {t("subtotal")} ({t("items", { count: items.length })})
                   </span>
                   <span className="shrink-0 font-medium">৳{subtotal.toLocaleString()}</span>
                 </div>

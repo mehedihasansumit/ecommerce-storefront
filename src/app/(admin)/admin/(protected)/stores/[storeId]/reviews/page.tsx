@@ -142,7 +142,7 @@ export default async function AdminReviewsPage({
                   <Link
                     key={p}
                     href={`/admin/stores/${storeId}/reviews?page=${p}${filter ? `&filter=${filter}` : ""}`}
-                    className={`min-w-[2rem] px-2.5 py-1.5 rounded-lg border text-center transition-colors ${
+                    className={`min-w-8 px-2.5 py-1.5 rounded-lg border text-center transition-colors ${
                       p === page
                         ? "border-gray-900 bg-gray-900 text-white font-medium"
                         : "border-gray-200 bg-white hover:bg-gray-50 text-gray-600"

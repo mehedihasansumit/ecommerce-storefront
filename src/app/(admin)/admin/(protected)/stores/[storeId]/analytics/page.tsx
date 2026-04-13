@@ -310,6 +310,12 @@ export default async function AnalyticsPage({
                     <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Uniq
                     </th>
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Guest
+                    </th>
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Members
+                    </th>
                     <th className="px-5 py-3 w-8" />
                   </tr>
                 </thead>
@@ -333,6 +339,12 @@ export default async function AnalyticsPage({
                       </td>
                       <td className="px-5 py-3 text-right text-cyan-600 text-xs">
                         {p.uniqueViews.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3 text-right text-gray-400 text-xs">
+                        {p.anonymousViews.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3 text-right text-violet-600 text-xs">
+                        {p.loggedInViews.toLocaleString()}
                       </td>
                       <td className="px-5 py-3">
                         <Link

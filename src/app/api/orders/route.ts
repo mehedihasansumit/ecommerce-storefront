@@ -22,7 +22,12 @@ export async function POST(request: NextRequest) {
       userId = (payload as JwtCustomerPayload).userId;
     }
 
-    const order = await OrderService.create(storeId, validated, userId);
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      request.headers.get("x-real-ip") ||
+      "";
+
+    const order = await OrderService.create(storeId, validated, userId, clientIp);
 
     return NextResponse.json(
       { orderNumber: order.orderNumber, orderId: order._id },

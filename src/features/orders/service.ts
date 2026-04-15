@@ -16,7 +16,7 @@ function generateOrderNumber(): string {
 }
 
 export const OrderService = {
-  async create(storeId: string, input: CreateOrderInput, userId?: string): Promise<IOrder> {
+  async create(storeId: string, input: CreateOrderInput, userId?: string, clientIp?: string): Promise<IOrder> {
     // Validate products and build order items using server-side prices
     const orderItems: IOrderItem[] = [];
     let subtotal = 0;
@@ -93,6 +93,7 @@ export const OrderService = {
       paymentIntentId: "",
       status: "pending",
       notes: input.notes ?? "",
+      clientIp: clientIp || "",
     });
 
     // Record coupon usage after order is created
@@ -135,6 +136,11 @@ export const OrderService = {
 
   async getByUser(storeId: string, userId: string): Promise<IOrder[]> {
     return OrderRepository.findByUser(storeId, userId);
+  },
+
+  async getByIp(storeId: string, clientIp: string, excludeOrderId?: string): Promise<IOrder[]> {
+    if (!clientIp) return [];
+    return OrderRepository.findByIp(storeId, clientIp, excludeOrderId);
   },
 
   async getByPhone(storeId: string, phone: string): Promise<IOrder[]> {

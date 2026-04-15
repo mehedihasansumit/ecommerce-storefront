@@ -12,6 +12,10 @@ export default async function OrderDetailPage({
   const order = await OrderService.getById(storeId, orderId);
   if (!order) notFound();
 
+  const sameIpOrders = order.clientIp
+    ? await OrderService.getByIp(storeId, order.clientIp, order._id)
+    : [];
+
   return (
     <div className="max-w-3xl">
       {/* Header */}
@@ -170,6 +174,72 @@ export default async function OrderDetailPage({
             <p className="text-sm text-gray-600">{order.notes}</p>
           </div>
         )}
+
+        {/* IP Tracking */}
+        <div className="bg-white rounded-lg border border-gray-200 px-5 py-4">
+          <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide mb-3">
+            IP Tracking
+          </h2>
+          {order.clientIp ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">Client IP</span>
+                <code className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-800">
+                  {order.clientIp}
+                </code>
+                {sameIpOrders.length > 0 && (
+                  <span className="text-xs font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                    {sameIpOrders.length} other order{sameIpOrders.length > 1 ? "s" : ""} from same IP
+                  </span>
+                )}
+              </div>
+
+              {sameIpOrders.length > 0 && (
+                <div className="border border-red-100 rounded-lg overflow-hidden">
+                  <div className="bg-red-50 px-4 py-2 text-xs font-medium text-red-700">
+                    Orders from {order.clientIp}
+                  </div>
+                  <div className="divide-y divide-gray-100">
+                    {sameIpOrders.map((o) => (
+                      <Link
+                        key={o._id}
+                        href={`/admin/stores/${storeId}/orders/${o._id}`}
+                        className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        <div>
+                          <span className="font-mono font-medium text-gray-800">
+                            {o.orderNumber}
+                          </span>
+                          <span className="ml-2 text-gray-500 text-xs">
+                            {o.shippingAddress.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-right shrink-0">
+                          <span className="text-gray-600">
+                            ৳{o.total.toLocaleString()}
+                          </span>
+                          <span
+                            className={`text-xs px-1.5 py-0.5 rounded-full capitalize ${
+                              o.status === "delivered"
+                                ? "bg-green-100 text-green-700"
+                                : o.status === "cancelled"
+                                ? "bg-gray-100 text-gray-600"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {o.status}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400">No IP recorded for this order.</p>
+          )}
+        </div>
       </div>
     </div>
   );

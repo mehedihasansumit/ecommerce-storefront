@@ -136,6 +136,21 @@ export const OrderRepository = {
     return { orders: orders.map(serialize), total };
   },
 
+  async findByIp(
+    storeId: string,
+    clientIp: string,
+    excludeOrderId?: string
+  ): Promise<IOrder[]> {
+    await dbConnect();
+    const filter: Record<string, unknown> = { storeId, clientIp };
+    if (excludeOrderId) filter._id = { $ne: excludeOrderId };
+    const orders = await OrderModel.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+    return orders.map(serialize);
+  },
+
   async countByStore(storeId: string): Promise<number> {
     await dbConnect();
     return OrderModel.countDocuments({ storeId });

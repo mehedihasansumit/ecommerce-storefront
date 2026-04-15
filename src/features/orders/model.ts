@@ -73,6 +73,7 @@ const OrderSchema = new Schema<IOrderDocument>(
     ],
 
     notes: { type: String, default: "" },
+    clientIp: { type: String, default: "" },
   },
   { timestamps: true }
 );
@@ -81,6 +82,7 @@ OrderSchema.index({ storeId: 1, userId: 1, createdAt: -1 });
 OrderSchema.index({ storeId: 1, guestPhone: 1, createdAt: -1 });
 OrderSchema.index({ storeId: 1, orderNumber: 1 }, { unique: true });
 OrderSchema.index({ storeId: 1, status: 1 });
+OrderSchema.index({ storeId: 1, clientIp: 1, createdAt: -1 });
 
 export const OrderModel: Model<IOrderDocument> =
   mongoose.models.Order ||

@@ -56,6 +56,7 @@ export interface IOrder {
   status: OrderStatus;
   statusHistory: IStatusHistoryEntry[];
   notes: string;
+  clientIp?: string;
   createdAt: Date;
   updatedAt: Date;
 }

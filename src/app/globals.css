@@ -185,46 +185,16 @@ a {
   -webkit-backdrop-filter: blur(12px) saturate(180%);
 }
 
-/* Button utilities */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  color: white;
-  font-weight: 600;
-  font-size: 0.875rem;
+/* Focus ring — used by all interactive primitives.
+   Keyboard-only (focus-visible) so mouse clicks don't show the ring. */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
   border-radius: var(--border-radius);
-  transition: all 0.2s ease;
 }
-.btn-primary:hover {
-  filter: brightness(1.05);
-  box-shadow: var(--shadow-md);
-}
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid #e5e7eb;
-  color: #374151;
-  font-weight: 500;
-  font-size: 0.875rem;
-  border-radius: var(--border-radius);
-  transition: all 0.2s ease;
-}
-.btn-secondary:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
-}
-.btn-secondary:active {
-  transform: scale(0.98);
+.focus-ring-inset:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
 }
 
 /* Custom scrollbar */

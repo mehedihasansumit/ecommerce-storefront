@@ -284,16 +284,23 @@ ecommerce-website/
 │   │
 │   ├── shared/                               # Cross-cutting concerns
 │   │   ├── components/
-│   │   │   ├── ui/                           # Reusable primitives
-│   │   │   │   ├── Button.tsx
+│   │   │   ├── ui/                           # Reusable primitives (use these everywhere)
+│   │   │   │   ├── Button.tsx                # variants: primary/brand/secondary/ghost/danger/danger-outline
 │   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Textarea.tsx
 │   │   │   │   ├── Select.tsx
-│   │   │   │   ├── Modal.tsx
-│   │   │   │   ├── Table.tsx
-│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Field.tsx                 # label + input + hint + error wrapper (auto-wires a11y)
+│   │   │   │   ├── Card.tsx                  # Card + CardHeader
+│   │   │   │   ├── Alert.tsx                 # info/success/warning/error
 │   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── ConfirmDialog.tsx         # replaces native confirm()
+│   │   │   │   ├── EmptyState.tsx
 │   │   │   │   ├── Spinner.tsx
-│   │   │   │   └── index.ts                  # Barrel export
+│   │   │   │   ├── PageHeader.tsx            # PageHeader + SectionHeader
+│   │   │   │   ├── LangTabs.tsx              # language-tab pattern for i18n forms
+│   │   │   │   ├── Price.tsx                 # currency formatter (BDT ৳ + Intl)
+│   │   │   │   └── index.ts                  # Barrel export — import from here
 │   │   │   ├── storefront/                   # Shared storefront layout components
 │   │   │   │   ├── Header.tsx
 │   │   │   │   ├── Footer.tsx
@@ -474,6 +481,152 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Translation bundles live in `messages/{locale}.json`.
 - Server-side locale resolution: `src/i18n/request.ts`. Routing config: `src/i18n/routing.ts`.
 - One-off migration script: `npx tsx scripts/migrate-i18n.ts`.
+
+## UI / UX Design Spec (enforce on every page)
+
+**The goal: every page looks like it came from the same product.** If a pattern isn't covered here, match the closest existing primitive rather than inventing a new look.
+
+### Rule 0 — Use primitives, never inline styling
+
+Import from `@/shared/components/ui`. Never hand-roll buttons, inputs, modals, or error banners with raw Tailwind utility stacks. If a primitive is missing a variant you need, **extend the primitive** — don't work around it.
+
+```tsx
+import { Button, Input, Field, Card, Alert, Modal, ConfirmDialog,
+         EmptyState, Spinner, PageHeader, SectionHeader, LangTabs,
+         Badge, Price } from "@/shared/components/ui";
+```
+
+### Design tokens (defined in `globals.css`)
+
+| Token | Value | Use for |
+|---|---|---|
+| `--color-primary` | tenant brand | storefront CTAs, brand accents, focus rings |
+| `--color-secondary` | tenant | secondary storefront accents |
+| `--color-accent` | tenant | discount badges, cart badge, alerts |
+| `--color-bg` | tenant | page background |
+| `--color-text` | tenant | body text |
+| `--color-header-bg` / `--color-header-text` | tenant | storefront header |
+| `--color-surface` | `#FAFAFA` | subtle panel backgrounds |
+| `--color-border-subtle` | `#F3F4F6` | hairline dividers |
+| `--color-text-secondary` | `#6B7280` | muted body |
+| `--color-text-tertiary` | `#9CA3AF` | placeholders, captions |
+| `--border-radius` | `0.5rem` | themed radius |
+| `--shadow-{xs,sm,md,lg}` | — | Tailwind `shadow-xs`/`sm`/`md`/`lg` |
+| `--ease-out-expo` | — | all meaningful transitions |
+
+**Reference tokens as Tailwind classes (`bg-primary`, `shadow-md`) when possible.** Use inline `style={{ color: "var(--color-primary)" }}` only when a theme-tenant color is needed and Tailwind doesn't resolve it in that context (e.g., arbitrary values with `color-mix`).
+
+### Storefront vs Admin tone
+
+| | Storefront | Admin |
+|---|---|---|
+| Primary action | `<Button variant="brand">` — uses tenant `--color-primary` | `<Button variant="primary">` — gray-900, brand-neutral |
+| Background | `var(--color-bg)` | `bg-gray-50` |
+| Density | Airy — `py-8`/`py-10` sections | Dense — `p-4 md:p-8` page frame |
+| Fonts | `--font-family` (tenant) or Hind Siliguri for `bn` | Same |
+| Hero / decorative animations | Yes — `stagger-children`, `animate-hero-zoom` | No — admin is a tool, not a showcase |
+
+**Admin must not read tenant theme colors** — it's cross-store. Admin uses neutral grays and the `primary` button variant.
+
+### Layout
+
+- **Page container:** `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`. Do not invent alternate widths.
+- **Form width:** `max-w-2xl` for simple forms, `max-w-3xl` for complex (product, store).
+- **Section spacing:** `space-y-6` between `<Card>`s; `py-8 md:py-10` between storefront hero sections.
+- **Every page starts with `<PageHeader>`** (admin) or a hero section (storefront landing pages).
+
+### Radius rules
+
+- **Small interactive elements** (buttons, inputs, badges, chips): `rounded-lg`
+- **Cards / panels:** `rounded-lg`
+- **Modals / dropdowns / menus:** `rounded-xl`
+- **Pills / tags / count bubbles:** `rounded-full`
+- **Product cards, hero images, themed surfaces:** inline `style={{ borderRadius: "var(--border-radius)" }}` (follows tenant theme)
+
+### Typography
+
+- **Page title (`<PageHeader>`):** `text-2xl font-bold tracking-tight`
+- **Section title (`<SectionHeader>`):** `text-lg font-semibold`
+- **Card title:** `text-base font-semibold`
+- **Body:** default (`text-sm` in admin, default in storefront)
+- **Muted:** `text-gray-500`; Tertiary: `text-gray-400`
+- **Labels:** `text-sm font-medium text-gray-700` (handled by `<Field>`)
+- Body gets `letter-spacing: -0.01em` globally — don't override.
+
+### Buttons
+
+| Variant | When |
+|---|---|
+| `primary` | Default CTA in admin, brand-neutral. Gray-900. |
+| `brand` | Storefront CTAs that should adopt tenant color (Add to Cart, Checkout). Uses `var(--color-primary)`. |
+| `secondary` | Low-emphasis action alongside a primary (Cancel, Back). |
+| `ghost` | Toolbar buttons, in-row actions. |
+| `danger` | Destructive confirm button (inside `ConfirmDialog`). |
+| `danger-outline` | Destructive trigger button on a form page (Delete Category). |
+
+**Rules:**
+- Exactly **one primary/brand button per form or dialog.** Pair with `secondary` (Cancel), never two primaries.
+- `loading={true}` shows spinner and disables automatically. Use this, not a separate "Saving…" label.
+- Icons: pass as `leftIcon={<Plus size={16} />}` — don't stuff them into children.
+- Sizes: `md` (default), `sm` for inline/toolbar, `lg` for prominent storefront CTAs, `icon` for icon-only.
+
+### Forms
+
+- Always wrap inputs in `<Field label="…" hint="…" error="…" required>`. `Field` auto-wires `htmlFor`, `aria-describedby`, and `aria-invalid`.
+- Use `<Input>`, `<Textarea>`, `<Select>` — never raw `<input>`/`<textarea>`/`<select>`.
+- Error summary at top of form: `<Alert tone="error">`.
+- Language-aware forms: use `<LangTabs languages={...} active={...} onChange={...} />`.
+- Delete actions: **never** use browser `confirm()`. Use `<ConfirmDialog tone="danger" />`.
+- Form actions row: `flex flex-wrap items-start justify-between gap-4` — primary + secondary on the left, destructive (if any) on the right.
+
+### Feedback & async
+
+- **Success / error toasts:** `react-hot-toast` (`toast.success(...)`, `toast.error(...)`). Single `<Toaster position="top-right" />` in root layout — don't add more.
+- **Inline errors:** `<Alert tone="error">` at the top of a form or section.
+- **Loading states:** `<Spinner>` for small, `<Button loading>` for buttons. For full-page or section loads, return a skeleton grid using the `shimmer` animation — don't just show a spinner in the center.
+- **Empty states:** always use `<EmptyState icon={...} title="..." description="..." action={...} />`. Never show a blank area.
+
+### Cards & surfaces
+
+- Use `<Card padding="lg">` for primary content blocks. `<Card padding="md">` for denser lists.
+- Never stack `rounded-lg border` divs manually — that's a Card.
+- Card title: use `<CardHeader title="..." description="..." action={...} />`.
+
+### Animation rules
+
+- All meaningful transitions use `--ease-out-expo`. Durations: `150ms` (button/input), `200–300ms` (dropdown/drawer), `500ms` (image zoom).
+- Enter animations: `animate-fade-in-up`, `animate-scale-in`, `animate-slide-down`, `animate-slide-in-right`. Exit animations only when a component actually unmounts on a delay.
+- Lists use `stagger-children` for up to 8 items. Beyond that, drop the stagger.
+- **Never animate on every state change.** Hover/focus = `transition-colors`; mount = one-shot animation.
+
+### Accessibility (non-negotiable)
+
+- Focus must be visible. Use `focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]` or the `.focus-ring` utility. **Never `focus:outline-none` without a replacement.** The primitives already do this correctly — just use them.
+- Every icon-only button has `aria-label`.
+- Modals set `role="dialog" aria-modal="true"`, trap focus, restore body scroll, close on Escape.
+- Color is never the only signal (add icon/text to status).
+- Minimum touch target: 40×40px (`p-2.5` on icon buttons).
+- Form errors: `<Field error="…">` wires `aria-invalid` and `aria-describedby` — use it.
+
+### Internationalization
+
+- **No hardcoded UI strings.** Every user-visible string goes through `useTranslations()` / `getTranslations()` from `next-intl`.
+- Localized content fields (product name, category name, etc.) use `LocalizedString` and the `t()` helper from `@/shared/lib/i18n`.
+- Currency: use `<Price amount={...} currency={...} locale={...} />` — never hardcode `৳` or `$`.
+- Bengali (`bn`) gets `Hind Siliguri` font (handled in root layout). Header nav switches from uppercase-tracked to natural `text-[15px]` for `bn`.
+- RTL: not currently supported; avoid left/right-specific classes where `start`/`end` equivalents exist if you can.
+
+### When building a new page
+
+1. Start with `<PageHeader title="..." actions={...} />` (admin) or hero (storefront).
+2. Wrap sections in `<Card>`.
+3. Forms: `<Field>` + primitive inputs + `<Alert tone="error">` for form-level errors + `<Button variant="primary|brand">` + `<Button variant="secondary">`.
+4. Destructive actions: `<Button variant="danger-outline">` trigger + `<ConfirmDialog tone="danger">`.
+5. Empty results: `<EmptyState>`.
+6. Loading: `<Button loading>` / `<Spinner>` / skeleton with `shimmer`.
+7. Success/error: `toast.success()` / `toast.error()`.
+
+**If a design need doesn't fit these rules, extend the primitive or propose a spec change — don't fork the look.**
 
 ## Coding Conventions
 - Use TypeScript strict mode

@@ -4,19 +4,25 @@ import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { IProduct, IProductVariant } from "../types";
+import type { IStoreSocialOrdering } from "@/features/stores/types";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { AddToCartSection } from "./AddToCartSection";
+import { SocialOrderButtons } from "./SocialOrderButtons";
 import { t } from "@/shared/lib/i18n";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
 
 interface ProductDetailClientProps {
   product: IProduct;
+  socialOrdering?: IStoreSocialOrdering;
+  productUrl?: string;
 }
 
-export function ProductDetailClient({ product }: ProductDetailClientProps) {
+export function ProductDetailClient({ product, socialOrdering, productUrl }: ProductDetailClientProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
   const [activeVariant, setActiveVariant] = useState<IProductVariant | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const track = useTrackEvent();
 
   useEffect(() => {
@@ -143,8 +149,21 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             addToCartLabel={tr("addToCart")}
             outOfStockLabel={tr("outOfStock")}
             onVariantChange={setActiveVariant}
+            onQuantityChange={setQuantity}
+            onSelectedOptionsChange={setSelectedOptions}
             categoryId={product.categoryId ?? undefined}
           />
+
+          {socialOrdering && productUrl && (
+            <SocialOrderButtons
+              socialOrdering={socialOrdering}
+              productName={t(product.name, locale)}
+              productPrice={displayPrice}
+              productUrl={productUrl}
+              quantity={quantity}
+              selectedOptions={selectedOptions}
+            />
+          )}
         </div>
       </div>
     </div>

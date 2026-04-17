@@ -1,7 +1,72 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  User,
+  MapPin,
+  CreditCard,
+  StickyNote,
+  ShieldAlert,
+  Package,
+  History,
+  Phone,
+  Mail,
+  Tag,
+  Truck,
+} from "lucide-react";
 import { OrderService } from "@/features/orders/service";
 import { OrderStatusUpdater } from "./OrderStatusUpdater";
+import type { OrderStatus, PaymentStatus } from "@/features/orders/types";
+
+const STATUS_STYLES: Record<OrderStatus, string> = {
+  pending:    "bg-yellow-100 text-yellow-700",
+  confirmed:  "bg-blue-100 text-blue-700",
+  processing: "bg-purple-100 text-purple-700",
+  shipped:    "bg-indigo-100 text-indigo-700",
+  delivered:  "bg-green-100 text-green-700",
+  cancelled:  "bg-red-100 text-red-700",
+};
+
+const PAYMENT_STYLES: Record<PaymentStatus, string> = {
+  pending:  "bg-yellow-100 text-yellow-700",
+  paid:     "bg-green-100 text-green-700",
+  failed:   "bg-red-100 text-red-700",
+  refunded: "bg-gray-100 text-gray-600",
+};
+
+const HISTORY_DOT: Record<OrderStatus, string> = {
+  pending:    "bg-yellow-400",
+  confirmed:  "bg-blue-400",
+  processing: "bg-purple-400",
+  shipped:    "bg-indigo-400",
+  delivered:  "bg-green-500",
+  cancelled:  "bg-red-400",
+};
+
+function SectionCard({
+  icon: Icon,
+  title,
+  children,
+  headerRight,
+}: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+  headerRight?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <Icon className="w-4 h-4 text-gray-400" />
+          <h2 className="font-semibold text-sm text-gray-700">{title}</h2>
+        </div>
+        {headerRight}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default async function OrderDetailPage({
   params,
@@ -16,229 +81,361 @@ export default async function OrderDetailPage({
     ? await OrderService.getByIp(storeId, order.clientIp, order._id)
     : [];
 
-  return (
-    <div className="max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <Link
-            href={`/admin/stores/${storeId}/orders`}
-            className="text-sm text-gray-500 hover:text-gray-800 mb-1 inline-block"
-          >
-            ← Orders
-          </Link>
-          <h1 className="text-2xl font-bold font-mono">{order.orderNumber}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {new Date(order.createdAt).toLocaleString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
-        </div>
+  const totalItems = order.items.reduce((s, i) => s + i.quantity, 0);
 
-        {/* Status updater */}
-        <OrderStatusUpdater
-          orderId={order._id}
-          storeId={storeId}
-          currentStatus={order.status}
-        />
+  return (
+    <div className="space-y-5">
+      {/* ── Header ── */}
+      <div>
+        <Link
+          href={`/admin/stores/${storeId}/orders`}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors mb-3"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Orders
+        </Link>
+
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold font-mono tracking-tight text-gray-900">
+                {order.orderNumber}
+              </h1>
+              <span
+                className={`px-2.5 py-1 text-xs font-semibold rounded-full capitalize ${STATUS_STYLES[order.status]}`}
+              >
+                {order.status}
+              </span>
+              <span
+                className={`px-2.5 py-1 text-xs font-semibold rounded-full capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}
+              >
+                {order.paymentStatus}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-500 flex-wrap">
+              <span>
+                {new Date(order.createdAt).toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+              <span className="text-gray-300">·</span>
+              <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span>
+              <span className="text-gray-300">·</span>
+              <span className="font-semibold text-gray-800">
+                ৳{order.total.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-5">
-        {/* Items */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-5 py-3 border-b border-gray-100">
-            <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
-              Items
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {order.items.map((item, idx) => (
-              <div
-                key={idx}
-                className="px-5 py-3 flex items-center justify-between gap-4"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{item.productName}</p>
-                  {Object.entries(item.variantSelections || {}).map(
-                    ([k, v]) => (
-                      <p key={k} className="text-xs text-gray-500">
-                        {k}: {v}
-                      </p>
-                    )
-                  )}
-                </div>
-                <div className="text-right text-sm shrink-0">
-                  <p className="text-gray-500">
-                    ৳{item.unitPrice.toLocaleString()} × {item.quantity}
-                  </p>
-                  <p className="font-semibold">
-                    ৳{item.totalPrice.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="px-5 py-3 border-t border-gray-100 space-y-1 text-sm">
-            <div className="flex justify-between text-gray-600">
-              <span>Subtotal</span>
-              <span>৳{order.subtotal.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Shipping</span>
-              <span>{order.shippingCost === 0 ? "Free" : `৳${order.shippingCost}`}</span>
-            </div>
-            <div className="flex justify-between font-bold text-base pt-1 border-t border-gray-100 mt-1">
-              <span>Total</span>
-              <span>৳{order.total.toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
+      {/* ── Status updater (full width) ── */}
+      <OrderStatusUpdater
+        orderId={order._id}
+        storeId={storeId}
+        currentStatus={order.status}
+      />
 
-        {/* Customer */}
-        <div className="bg-white rounded-lg border border-gray-200 px-5 py-4">
-          <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide mb-3">
-            Customer
-          </h2>
-          <div className="text-sm space-y-1">
-            <p className="font-medium">{order.shippingAddress.name}</p>
-            <p className="text-gray-600">{order.shippingAddress.phone}</p>
-            {order.guestEmail && (
-              <p className="text-gray-600">{order.guestEmail}</p>
-            )}
-          </div>
-        </div>
+      {/* ── Two-column grid ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
-        {/* Shipping address */}
-        <div className="bg-white rounded-lg border border-gray-200 px-5 py-4">
-          <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide mb-3">
-            Delivery Address
-          </h2>
-          <div className="text-sm text-gray-700 space-y-0.5">
-            <p>{order.shippingAddress.street}</p>
-            <p>
-              {order.shippingAddress.city}
-              {order.shippingAddress.postalCode
-                ? `, ${order.shippingAddress.postalCode}`
-                : ""}
-            </p>
-            <p>{order.shippingAddress.country}</p>
-          </div>
-        </div>
+        {/* ── Left: Items + History + Notes + IP ── */}
+        <div className="lg:col-span-2 space-y-5">
 
-        {/* Payment */}
-        <div className="bg-white rounded-lg border border-gray-200 px-5 py-4">
-          <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide mb-3">
-            Payment
-          </h2>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 capitalize">
-              {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
-            </span>
-            <span
-              className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${
-                order.paymentStatus === "paid"
-                  ? "bg-green-100 text-green-800"
-                  : order.paymentStatus === "failed"
-                  ? "bg-red-100 text-red-800"
-                  : order.paymentStatus === "refunded"
-                  ? "bg-gray-100 text-gray-700"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
-              {order.paymentStatus}
-            </span>
-          </div>
-          {order.discount > 0 && (
-            <p className="text-xs text-gray-500 mt-2">
-              Discount: ৳{order.discount.toLocaleString()}
-            </p>
-          )}
-          <Link
-            href={`/admin/stores/${storeId}/payments`}
-            className="mt-3 inline-block text-xs text-blue-600 hover:text-blue-800 font-medium"
+          {/* Items */}
+          <SectionCard
+            icon={Package}
+            title="Order Items"
+            headerRight={
+              <span className="text-xs text-gray-400 font-medium">
+                {order.items.length} line{order.items.length !== 1 ? "s" : ""}
+              </span>
+            }
           >
-            Manage payment →
-          </Link>
-        </div>
+            <div className="divide-y divide-gray-100">
+              {order.items.map((item, idx) => (
+                <div key={idx} className="px-5 py-3.5 flex items-start gap-4">
+                  {/* Qty badge */}
+                  <span className="mt-0.5 shrink-0 w-7 h-7 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center">
+                    {item.quantity}
+                  </span>
 
-        {/* Notes */}
-        {order.notes && (
-          <div className="bg-white rounded-lg border border-gray-200 px-5 py-4">
-            <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide mb-2">
-              Notes
-            </h2>
-            <p className="text-sm text-gray-600">{order.notes}</p>
-          </div>
-        )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 leading-snug">
+                      {item.productName}
+                    </p>
+                    {Object.keys(item.variantSelections || {}).length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {Object.entries(item.variantSelections).map(([k, v]) => (
+                          <span
+                            key={k}
+                            className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
+                          >
+                            {k}: {v}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-        {/* IP Tracking */}
-        <div className="bg-white rounded-lg border border-gray-200 px-5 py-4">
-          <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide mb-3">
-            IP Tracking
-          </h2>
-          {order.clientIp ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">Client IP</span>
-                <code className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-800">
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold text-gray-900">
+                      ৳{item.totalPrice.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      ৳{item.unitPrice.toLocaleString()} each
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Totals */}
+            <div className="px-5 py-3.5 bg-gray-50 border-t border-gray-100 space-y-1.5 text-sm">
+              <div className="flex justify-between text-gray-500">
+                <span>Subtotal</span>
+                <span>৳{order.subtotal.toLocaleString()}</span>
+              </div>
+              {order.discount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span className="flex items-center gap-1">
+                    <Tag className="w-3.5 h-3.5" />
+                    Discount{order.couponCode ? ` (${order.couponCode})` : ""}
+                  </span>
+                  <span>−৳{order.discount.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-gray-500">
+                <span className="flex items-center gap-1">
+                  <Truck className="w-3.5 h-3.5" />
+                  Shipping
+                </span>
+                <span>
+                  {order.shippingCost === 0 ? (
+                    <span className="text-green-600 font-medium">Free</span>
+                  ) : (
+                    `৳${order.shippingCost.toLocaleString()}`
+                  )}
+                </span>
+              </div>
+              {order.tax > 0 && (
+                <div className="flex justify-between text-gray-500">
+                  <span>Tax</span>
+                  <span>৳{order.tax.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200 text-gray-900">
+                <span>Total</span>
+                <span>৳{order.total.toLocaleString()}</span>
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* Status History */}
+          {order.statusHistory && order.statusHistory.length > 0 && (
+            <SectionCard icon={History} title="Status History">
+              <div className="px-5 py-4">
+                <ol className="relative border-l border-gray-200 space-y-4 ml-2">
+                  {[...order.statusHistory].reverse().map((entry, idx) => (
+                    <li key={idx} className="ml-4">
+                      <span
+                        className={`absolute -left-1.5 w-3 h-3 rounded-full border-2 border-white ${
+                          HISTORY_DOT[entry.status] ?? "bg-gray-400"
+                        }`}
+                      />
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium capitalize text-gray-800">
+                            {entry.status}
+                          </p>
+                          {entry.note && (
+                            <p className="text-xs text-gray-500 mt-0.5">{entry.note}</p>
+                          )}
+                        </div>
+                        <time className="text-xs text-gray-400 shrink-0">
+                          {new Date(entry.changedAt).toLocaleString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </time>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* Notes */}
+          {order.notes && (
+            <SectionCard icon={StickyNote} title="Notes">
+              <p className="px-5 py-4 text-sm text-gray-600 leading-relaxed">
+                {order.notes}
+              </p>
+            </SectionCard>
+          )}
+
+          {/* IP Tracking */}
+          <SectionCard
+            icon={ShieldAlert}
+            title="IP Tracking"
+            headerRight={
+              order.clientIp ? (
+                <code className="text-xs font-mono bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
                   {order.clientIp}
                 </code>
-                {sameIpOrders.length > 0 && (
-                  <span className="text-xs font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-                    {sameIpOrders.length} other order{sameIpOrders.length > 1 ? "s" : ""} from same IP
-                  </span>
+              ) : undefined
+            }
+          >
+            <div className="px-5 py-4">
+              {order.clientIp ? (
+                sameIpOrders.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-red-100 text-red-700 px-2.5 py-1 rounded-full">
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        {sameIpOrders.length} other order{sameIpOrders.length > 1 ? "s" : ""} from this IP
+                      </span>
+                    </div>
+                    <div className="rounded-lg border border-red-100 overflow-hidden">
+                      <div className="bg-red-50 px-4 py-2 text-xs font-semibold text-red-700">
+                        Related orders — {order.clientIp}
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {sameIpOrders.map((o) => (
+                          <Link
+                            key={o._id}
+                            href={`/admin/stores/${storeId}/orders/${o._id}`}
+                            className="flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50 transition-colors group"
+                          >
+                            <div>
+                              <span className="font-mono font-semibold text-gray-800 group-hover:text-gray-900">
+                                {o.orderNumber}
+                              </span>
+                              <span className="ml-2 text-gray-400 text-xs">
+                                {o.shippingAddress.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-gray-700 font-medium">
+                                ৳{o.total.toLocaleString()}
+                              </span>
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded-full capitalize font-medium ${
+                                  STATUS_STYLES[o.status] ?? "bg-gray-100 text-gray-600"
+                                }`}
+                              >
+                                {o.status}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No other orders from this IP address.
+                  </p>
+                )
+              ) : (
+                <p className="text-sm text-gray-400">No IP recorded for this order.</p>
+              )}
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* ── Right: Customer + Address + Payment ── */}
+        <div className="space-y-5">
+
+          {/* Customer */}
+          <SectionCard icon={User} title="Customer">
+            <div className="px-5 py-4 space-y-3">
+              <p className="font-semibold text-gray-900">{order.shippingAddress.name}</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  <span>{order.shippingAddress.phone}</span>
+                </div>
+                {order.guestEmail && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <span className="truncate">{order.guestEmail}</span>
+                  </div>
+                )}
+              </div>
+              {!order.userId && (
+                <span className="inline-block text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                  Guest
+                </span>
+              )}
+            </div>
+          </SectionCard>
+
+          {/* Delivery Address */}
+          <SectionCard icon={MapPin} title="Delivery Address">
+            <div className="px-5 py-4">
+              <address className="not-italic text-sm text-gray-700 space-y-0.5 leading-relaxed">
+                <p className="font-medium">{order.shippingAddress.street}</p>
+                <p>
+                  {order.shippingAddress.city}
+                  {order.shippingAddress.state ? `, ${order.shippingAddress.state}` : ""}
+                  {order.shippingAddress.postalCode ? ` ${order.shippingAddress.postalCode}` : ""}
+                </p>
+                <p className="text-gray-500">{order.shippingAddress.country}</p>
+              </address>
+            </div>
+          </SectionCard>
+
+          {/* Payment */}
+          <SectionCard icon={CreditCard} title="Payment">
+            <div className="px-5 py-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 capitalize">
+                  {order.paymentMethod === "cod"
+                    ? "Cash on Delivery"
+                    : order.paymentMethod}
+                </span>
+                <span
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-full capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}
+                >
+                  {order.paymentStatus}
+                </span>
+              </div>
+
+              <div className="rounded-lg bg-gray-50 border border-gray-100 px-4 py-3 space-y-1.5 text-sm">
+                <div className="flex justify-between text-gray-500">
+                  <span>Order total</span>
+                  <span className="font-semibold text-gray-800">৳{order.total.toLocaleString()}</span>
+                </div>
+                {order.discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount</span>
+                    <span>−৳{order.discount.toLocaleString()}</span>
+                  </div>
                 )}
               </div>
 
-              {sameIpOrders.length > 0 && (
-                <div className="border border-red-100 rounded-lg overflow-hidden">
-                  <div className="bg-red-50 px-4 py-2 text-xs font-medium text-red-700">
-                    Orders from {order.clientIp}
-                  </div>
-                  <div className="divide-y divide-gray-100">
-                    {sameIpOrders.map((o) => (
-                      <Link
-                        key={o._id}
-                        href={`/admin/stores/${storeId}/orders/${o._id}`}
-                        className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
-                      >
-                        <div>
-                          <span className="font-mono font-medium text-gray-800">
-                            {o.orderNumber}
-                          </span>
-                          <span className="ml-2 text-gray-500 text-xs">
-                            {o.shippingAddress.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-right shrink-0">
-                          <span className="text-gray-600">
-                            ৳{o.total.toLocaleString()}
-                          </span>
-                          <span
-                            className={`text-xs px-1.5 py-0.5 rounded-full capitalize ${
-                              o.status === "delivered"
-                                ? "bg-green-100 text-green-700"
-                                : o.status === "cancelled"
-                                ? "bg-gray-100 text-gray-600"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {o.status}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+              {order.paymentIntentId && (
+                <p className="text-xs text-gray-400 font-mono truncate">
+                  {order.paymentIntentId}
+                </p>
               )}
+
+              <Link
+                href={`/admin/stores/${storeId}/payments`}
+                className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                Manage payment →
+              </Link>
             </div>
-          ) : (
-            <p className="text-xs text-gray-400">No IP recorded for this order.</p>
-          )}
+          </SectionCard>
         </div>
       </div>
     </div>

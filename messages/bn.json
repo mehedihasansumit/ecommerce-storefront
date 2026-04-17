@@ -91,7 +91,10 @@
     "save": "সেভ",
     "freeShipping": "বিনামূল্যে শিপিং",
     "easyReturns": "সহজ রিটার্ন",
-    "secureCheckout": "নিরাপদ চেকআউট"
+    "secureCheckout": "নিরাপদ চেকআউট",
+    "orderViaWhatsApp": "হোয়াটসঅ্যাপে অর্ডার করুন",
+    "orderViaFacebook": "ফেসবুকে অর্ডার করুন",
+    "orderDetailsCopied": "অর্ডার বিবরণ কপি হয়েছে — মেসেঞ্জারে পেস্ট করুন।"
   },
   "productCard": {
     "noImage": "কোন ছবি নেই",

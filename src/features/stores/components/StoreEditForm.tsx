@@ -17,6 +17,7 @@ import {
   Globe,
   ChevronDown,
   ChevronUp,
+  MessageCircle,
 } from "lucide-react";
 import type { IStore } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
@@ -25,6 +26,24 @@ import { toLocalized } from "@/shared/lib/i18n";
 interface StoreEditFormProps {
   store: IStore;
 }
+
+const WHATSAPP_TEMPLATE_PLACEHOLDERS = [
+  "{{productName}}",
+  "{{variant}}",
+  "{{quantity}}",
+  "{{productPrice}}",
+  "{{total}}",
+  "{{productUrl}}",
+] as const;
+
+const WHATSAPP_EXAMPLE_TEMPLATE =
+  "Hi, I'd like to order:\n" +
+  "• {{productName}}\n" +
+  "• Variant: {{variant}}\n" +
+  "• Quantity: {{quantity}}\n" +
+  "• Unit price: {{productPrice}}\n" +
+  "• Total: {{total}}\n" +
+  "{{productUrl}}";
 
 const LANGUAGE_LABELS: Record<string, string> = {
   en: "English",
@@ -39,13 +58,14 @@ interface BannerState {
   linkText: string;
 }
 
-type Tab = "general" | "theme" | "banners" | "contact" | "seo";
+type Tab = "general" | "theme" | "banners" | "contact" | "socialOrdering" | "seo";
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "general", label: "General", icon: Settings },
   { id: "theme", label: "Theme", icon: Palette },
   { id: "banners", label: "Banners", icon: ImageIcon },
   { id: "contact", label: "Contact", icon: Phone },
+  { id: "socialOrdering", label: "Social Ordering", icon: MessageCircle },
   { id: "seo", label: "SEO", icon: Search },
 ];
 
@@ -76,6 +96,17 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
       title: toLocalized(store.seo?.title),
       description: toLocalized(store.seo?.description),
       keywords: store.seo?.keywords?.join(", ") || "",
+    },
+    socialOrdering: {
+      whatsapp: {
+        enabled: store.socialOrdering?.whatsapp?.enabled ?? false,
+        phoneNumber: store.socialOrdering?.whatsapp?.phoneNumber ?? "",
+        messageTemplate: store.socialOrdering?.whatsapp?.messageTemplate ?? "",
+      },
+      facebook: {
+        enabled: store.socialOrdering?.facebook?.enabled ?? false,
+        pageUrl: store.socialOrdering?.facebook?.pageUrl ?? "",
+      },
     },
     supportedLanguages: supportedLangs,
     defaultLanguage: store.defaultLanguage || "en",
@@ -205,6 +236,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           isActive: formData.isActive,
           heroBanners,
           contact: formData.contact,
+          socialOrdering: formData.socialOrdering,
           seo: {
             title: formData.seo.title,
             description: formData.seo.description,
@@ -915,6 +947,233 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
                 <p className="text-sm font-medium">Contact info</p>
                 <p className="text-xs text-center px-4">Fill in your store&apos;s contact details on the left.</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── SOCIAL ORDERING TAB ── */}
+        {activeTab === "socialOrdering" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* WhatsApp */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-green-500 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.12 1.523 5.855L.058 23.675l5.97-1.525A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82a9.796 9.796 0 01-5.244-1.517l-.376-.224-3.898.997 1.04-3.8-.246-.39A9.773 9.773 0 012.18 12c0-5.414 4.406-9.82 9.82-9.82 5.414 0 9.82 4.406 9.82 9.82 0 5.414-4.406 9.82-9.82 9.82z" />
+                  </svg>
+                </div>
+                <div>
+                  <SectionTitle>WhatsApp Ordering</SectionTitle>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Let customers order directly via WhatsApp message.
+                  </p>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={formData.socialOrdering.whatsapp.enabled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      socialOrdering: {
+                        ...prev.socialOrdering,
+                        whatsapp: {
+                          ...prev.socialOrdering.whatsapp,
+                          enabled: e.target.checked,
+                        },
+                      },
+                    }))
+                  }
+                  disabled={loading}
+                  className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Enable WhatsApp order button on product pages
+                </span>
+              </label>
+
+              {formData.socialOrdering.whatsapp.enabled && (
+                <div className="space-y-4 pl-8 border-l-2 border-green-200">
+                  <Field
+                    label="WhatsApp Phone Number"
+                    hint="International format with country code, e.g. +8801712345678"
+                    required
+                  >
+                    <input
+                      type="tel"
+                      value={formData.socialOrdering.whatsapp.phoneNumber}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          socialOrdering: {
+                            ...prev.socialOrdering,
+                            whatsapp: {
+                              ...prev.socialOrdering.whatsapp,
+                              phoneNumber: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                      placeholder="+8801712345678"
+                    />
+                  </Field>
+
+                  <Field
+                    label="Message Template"
+                    hint="Use the placeholders below. Each list item on its own line will render as a bullet on WhatsApp."
+                  >
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {WHATSAPP_TEMPLATE_PLACEHOLDERS.map((token) => (
+                          <button
+                            key={token}
+                            type="button"
+                            disabled={loading}
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                socialOrdering: {
+                                  ...prev.socialOrdering,
+                                  whatsapp: {
+                                    ...prev.socialOrdering.whatsapp,
+                                    messageTemplate:
+                                      (prev.socialOrdering.whatsapp.messageTemplate || "") +
+                                      token,
+                                  },
+                                },
+                              }))
+                            }
+                            className="px-2 py-0.5 text-[11px] font-mono rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50"
+                          >
+                            {token}
+                          </button>
+                        ))}
+                        <span className="flex-1" />
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              socialOrdering: {
+                                ...prev.socialOrdering,
+                                whatsapp: {
+                                  ...prev.socialOrdering.whatsapp,
+                                  messageTemplate: WHATSAPP_EXAMPLE_TEMPLATE,
+                                },
+                              },
+                            }))
+                          }
+                          className="px-2.5 py-0.5 text-[11px] font-medium rounded-md bg-green-50 hover:bg-green-100 text-green-700 transition-colors disabled:opacity-50"
+                        >
+                          Insert example
+                        </button>
+                      </div>
+
+                      <textarea
+                        value={formData.socialOrdering.whatsapp.messageTemplate}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            socialOrdering: {
+                              ...prev.socialOrdering,
+                              whatsapp: {
+                                ...prev.socialOrdering.whatsapp,
+                                messageTemplate: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                        className={`${inputCls} font-mono text-xs leading-relaxed`}
+                        rows={8}
+                        disabled={loading}
+                        placeholder={WHATSAPP_EXAMPLE_TEMPLATE}
+                      />
+
+                      <p className="text-[11px] text-gray-400">
+                        Leave blank to use the default bulleted template. The same message is
+                        copied to the clipboard when customers tap the Facebook button.
+                      </p>
+                    </div>
+                  </Field>
+                </div>
+              )}
+            </div>
+
+            {/* Facebook */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                </div>
+                <div>
+                  <SectionTitle>Facebook Ordering</SectionTitle>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Let customers reach your Facebook page to place orders.
+                  </p>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={formData.socialOrdering.facebook.enabled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      socialOrdering: {
+                        ...prev.socialOrdering,
+                        facebook: {
+                          ...prev.socialOrdering.facebook,
+                          enabled: e.target.checked,
+                        },
+                      },
+                    }))
+                  }
+                  disabled={loading}
+                  className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Enable Facebook order button on product pages
+                </span>
+              </label>
+
+              {formData.socialOrdering.facebook.enabled && (
+                <div className="space-y-4 pl-8 border-l-2 border-blue-200">
+                  <Field
+                    label="Facebook Page URL"
+                    hint="Your Facebook page or Messenger link, e.g. https://m.me/yourpage"
+                    required
+                  >
+                    <input
+                      type="url"
+                      value={formData.socialOrdering.facebook.pageUrl}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          socialOrdering: {
+                            ...prev.socialOrdering,
+                            facebook: {
+                              ...prev.socialOrdering.facebook,
+                              pageUrl: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                      placeholder="https://m.me/yourpage"
+                    />
+                  </Field>
+                </div>
+              )}
             </div>
           </div>
         )}

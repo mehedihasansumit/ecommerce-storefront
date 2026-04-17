@@ -50,6 +50,18 @@ export interface IStoreSocialLinks {
   twitter: string;
 }
 
+export interface IStoreSocialOrdering {
+  whatsapp: {
+    enabled: boolean;
+    phoneNumber: string;
+    messageTemplate: string;
+  };
+  facebook: {
+    enabled: boolean;
+    pageUrl: string;
+  };
+}
+
 export interface IStore {
   _id: string;
   name: string;
@@ -64,6 +76,7 @@ export interface IStore {
   payment: IStorePayment;
   contact: IStoreContact;
   socialLinks: IStoreSocialLinks;
+  socialOrdering: IStoreSocialOrdering;
   supportedLanguages: string[];
   defaultLanguage: string;
   createdAt: Date;

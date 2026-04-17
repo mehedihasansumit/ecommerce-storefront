@@ -13,8 +13,21 @@ export async function GET(request: NextRequest) {
 
     const page = parseInt(request.nextUrl.searchParams.get("page") || "1");
     const limit = parseInt(request.nextUrl.searchParams.get("limit") || "20");
+    const search = request.nextUrl.searchParams.get("search") || undefined;
+    const categoryId = request.nextUrl.searchParams.get("categoryId") || undefined;
+    const statusParam = request.nextUrl.searchParams.get("status");
+    const status =
+      statusParam === "active" || statusParam === "inactive" || statusParam === "all"
+        ? statusParam
+        : undefined;
 
-    const result = await ProductService.getByStore(storeId, { page, limit });
+    const result = await ProductService.getByStore(storeId, {
+      page,
+      limit,
+      search,
+      categoryId,
+      status,
+    });
     return successResponse(result);
   } catch {
     return errorResponse("Internal server error", 500);

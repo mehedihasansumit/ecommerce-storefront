@@ -87,7 +87,11 @@ export default async function ProductDetailPage({
         </nav>
 
         {/* Interactive product section (gallery + options + cart) */}
-        <ProductDetailClient product={product} />
+        <ProductDetailClient
+          product={product}
+          socialOrdering={tenant.socialOrdering}
+          productUrl={`${storeUrl}/products/${product.slug}`}
+        />
 
         {/* Trust signals */}
         <div className="mt-8 flex items-center gap-8 pt-6 border-t border-gray-100">

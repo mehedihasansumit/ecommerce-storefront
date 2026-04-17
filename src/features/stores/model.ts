@@ -70,6 +70,21 @@ const StoreSchema = new Schema<IStoreDocument>(
       twitter: { type: String, default: "" },
     },
 
+    socialOrdering: {
+      whatsapp: {
+        enabled: { type: Boolean, default: false },
+        phoneNumber: { type: String, default: "" },
+        messageTemplate: {
+          type: String,
+          default: "Hi, I'd like to order {{productName}} ({{productUrl}})",
+        },
+      },
+      facebook: {
+        enabled: { type: Boolean, default: false },
+        pageUrl: { type: String, default: "" },
+      },
+    },
+
     supportedLanguages: {
       type: [String],
       default: ["en"],

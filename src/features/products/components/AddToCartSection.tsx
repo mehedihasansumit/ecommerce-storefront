@@ -18,6 +18,8 @@ interface AddToCartSectionProps {
   addToCartLabel: string;
   outOfStockLabel: string;
   onVariantChange?: (variant: IProductVariant | null) => void;
+  onQuantityChange?: (quantity: number) => void;
+  onSelectedOptionsChange?: (options: Record<string, string>) => void;
   categoryId?: string;
 }
 
@@ -33,6 +35,8 @@ export function AddToCartSection({
   addToCartLabel,
   outOfStockLabel,
   onVariantChange,
+  onQuantityChange,
+  onSelectedOptionsChange,
   categoryId,
 }: AddToCartSectionProps) {
   const { addItem } = useCart();
@@ -60,6 +64,14 @@ export function AddToCartSection({
   useEffect(() => {
     onVariantChange?.(activeVariant);
   }, [activeVariant]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    onQuantityChange?.(quantity);
+  }, [quantity]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    onSelectedOptionsChange?.(selectedOptions);
+  }, [selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function isValueAvailable(optionName: string, value: string): boolean {
     if (variants.length === 0) return true;

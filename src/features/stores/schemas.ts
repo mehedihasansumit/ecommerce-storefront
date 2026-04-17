@@ -94,6 +94,23 @@ export const updateStoreSchema = z.object({
       twitter: z.string().optional(),
     })
     .optional(),
+  socialOrdering: z
+    .object({
+      whatsapp: z
+        .object({
+          enabled: z.boolean().optional(),
+          phoneNumber: z.string().optional(),
+          messageTemplate: z.string().optional(),
+        })
+        .optional(),
+      facebook: z
+        .object({
+          enabled: z.boolean().optional(),
+          pageUrl: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),
 });

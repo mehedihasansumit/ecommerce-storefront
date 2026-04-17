@@ -4,9 +4,26 @@ import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
 import slugify from "slugify";
 
-function nameToSlug(name: string | LocalizedString): string {
+function baseSlug(name: string | LocalizedString): string {
   const raw = typeof name === "string" ? name : (name.en ?? Object.values(name)[0] ?? "product");
   return slugify(raw, { lower: true, strict: true });
+}
+
+async function uniqueSlug(
+  storeId: string,
+  name: string | LocalizedString,
+  excludeProductId?: string
+): Promise<string> {
+  const slug = baseSlug(name);
+  let candidate = slug;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await ProductRepository.findBySlugIncludingInactive(storeId, candidate);
+    if (!existing || existing._id === excludeProductId) return candidate;
+    candidate = `${slug}-${suffix}`;
+    suffix++;
+  }
 }
 
 export const ProductService = {
@@ -37,7 +54,7 @@ export const ProductService = {
     storeId: string,
     data: Omit<IProduct, "_id" | "storeId" | "slug" | "averageRating" | "reviewCount" | "createdAt" | "updatedAt">
   ): Promise<IProduct> {
-    const slug = nameToSlug(data.name);
+    const slug = await uniqueSlug(storeId, data.name);
     return ProductRepository.create({
       ...data,
       storeId,
@@ -49,7 +66,10 @@ export const ProductService = {
 
   async update(id: string, data: Partial<IProduct>): Promise<IProduct | null> {
     if (data.name) {
-      data.slug = nameToSlug(data.name);
+      const existing = await ProductRepository.findById(id);
+      if (existing) {
+        data.slug = await uniqueSlug(existing.storeId, data.name, id);
+      }
     }
     return ProductRepository.update(id, data);
   },

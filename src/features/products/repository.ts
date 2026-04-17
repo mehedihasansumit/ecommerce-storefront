@@ -61,6 +61,12 @@ export const ProductRepository = {
     return product ? serialize(product) : null;
   },
 
+  async findBySlugIncludingInactive(storeId: string, slug: string): Promise<IProduct | null> {
+    await dbConnect();
+    const product = await ProductModel.findOne({ storeId, slug }).lean();
+    return product ? serialize(product) : null;
+  },
+
   async findById(id: string): Promise<IProduct | null> {
     await dbConnect();
     const product = await ProductModel.findById(id).lean();

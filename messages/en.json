@@ -91,7 +91,10 @@
     "save": "Save",
     "freeShipping": "Free Shipping",
     "easyReturns": "Easy Returns",
-    "secureCheckout": "Secure Checkout"
+    "secureCheckout": "Secure Checkout",
+    "orderViaWhatsApp": "Order via WhatsApp",
+    "orderViaFacebook": "Order via Facebook",
+    "orderDetailsCopied": "Order details copied — paste them in Messenger."
   },
   "productCard": {
     "noImage": "No Image",

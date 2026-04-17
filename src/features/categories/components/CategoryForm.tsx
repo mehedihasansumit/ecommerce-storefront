@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ICategory } from "../types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
+import { ImageInput } from "@/shared/components/ui";
 
 interface CategoryFormProps {
   storeId: string;
@@ -156,15 +157,14 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Image URL</label>
-          <input
-            type="text"
-            value={form.image}
-            onChange={(e) => set("image", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
+        <ImageInput
+          label="Image"
+          value={form.image}
+          onChange={(url) => set("image", url)}
+          storeId={storeId}
+          folder="categories"
+          aspect="16/9"
+        />
 
         <div>
           <label className="block text-sm font-medium mb-1">Sort Order</label>

@@ -19,3 +19,9 @@ export { Spinner } from "./Spinner";
 export { PageHeader, SectionHeader } from "./PageHeader";
 export { LangTabs } from "./LangTabs";
 export { Price } from "./Price";
+
+export { ImageInput } from "./ImageInput";
+export type { UploadedImage } from "./ImageInput";
+export { ImageGalleryInput } from "./ImageGalleryInput";
+export type { GalleryImage } from "./ImageGalleryInput";
+export { StoreImage } from "./StoreImage";

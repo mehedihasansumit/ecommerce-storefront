@@ -19,6 +19,10 @@ export interface IProductVariant {
 export interface IProductImage {
   url: string;
   alt: string;
+  key?: string;
+  width?: number;
+  height?: number;
+  variants?: Record<string, string>;
 }
 
 export interface IProductSeo {

@@ -3,6 +3,10 @@ import { z } from "zod";
 const productImageSchema = z.object({
   url: z.string(),
   alt: z.string().optional().default(""),
+  key: z.string().optional(),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
+  variants: z.record(z.string(), z.string()).optional(),
 });
 
 const productOptionSchema = z.object({

@@ -22,6 +22,7 @@ import {
 import type { IStore } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
+import { ImageInput } from "@/shared/components/ui";
 
 interface StoreEditFormProps {
   store: IStore;
@@ -87,6 +88,8 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
     domains: store.domains.join(", "),
     theme: { ...store.theme },
     isActive: store.isActive,
+    logo: store.logo || "",
+    favicon: store.favicon || "",
     contact: {
       email: store.contact?.email || "",
       phone: store.contact?.phone || "",
@@ -96,6 +99,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
       title: toLocalized(store.seo?.title),
       description: toLocalized(store.seo?.description),
       keywords: store.seo?.keywords?.join(", ") || "",
+      ogImage: store.seo?.ogImage || "",
     },
     socialOrdering: {
       whatsapp: {
@@ -234,6 +238,8 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
           domains: domainsArray,
           theme: formData.theme,
           isActive: formData.isActive,
+          logo: formData.logo,
+          favicon: formData.favicon,
           heroBanners,
           contact: formData.contact,
           socialOrdering: formData.socialOrdering,
@@ -241,6 +247,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
             title: formData.seo.title,
             description: formData.seo.description,
             keywords,
+            ogImage: formData.seo.ogImage,
           },
           supportedLanguages: formData.supportedLanguages,
           defaultLanguage: formData.defaultLanguage,
@@ -360,6 +367,36 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
                   placeholder="mystore.com, www.mystore.com"
                 />
               </Field>
+
+              <div className="pt-1 space-y-3">
+                <SectionTitle>Branding</SectionTitle>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ImageInput
+                    label="Logo"
+                    value={formData.logo}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, logo: url }))
+                    }
+                    storeId={store._id}
+                    folder="stores"
+                    aspect="auto"
+                    hint="Shown in storefront header."
+                    disabled={loading}
+                  />
+                  <ImageInput
+                    label="Favicon"
+                    value={formData.favicon}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, favicon: url }))
+                    }
+                    storeId={store._id}
+                    folder="stores"
+                    aspect="square"
+                    hint="Browser tab icon. Square PNG/ICO."
+                    disabled={loading}
+                  />
+                </div>
+              </div>
 
               <div className="pt-1 space-y-3">
                 <SectionTitle>Languages</SectionTitle>
@@ -798,23 +835,17 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
                       {/* Banner fields */}
                       {isExpanded && (
                         <div className="p-4 space-y-3 border-t border-gray-200">
-                          <Field label="Image URL" required>
-                            <input
-                              type="text"
-                              value={banner.image}
-                              onChange={(e) =>
-                                handleBannerField(
-                                  index,
-                                  "image",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="https://example.com/banner.jpg"
-                              className={inputCls}
-                              disabled={loading}
-                              required
-                            />
-                          </Field>
+                          <ImageInput
+                            label="Banner image"
+                            value={banner.image}
+                            onChange={(url) =>
+                              handleBannerField(index, "image", url)
+                            }
+                            storeId={store._id}
+                            folder="banners"
+                            aspect="16/9"
+                            disabled={loading}
+                          />
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <Field
@@ -1255,6 +1286,22 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
                   placeholder="clothing, fashion, shirts, bangladeshi store"
                 />
               </Field>
+
+              <ImageInput
+                label="Social share image (Open Graph)"
+                value={formData.seo.ogImage}
+                onChange={(url) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    seo: { ...prev.seo, ogImage: url },
+                  }))
+                }
+                storeId={store._id}
+                folder="stores"
+                aspect="16/9"
+                hint="Shown when your store is shared on Facebook, Twitter, Slack, etc. 1200×630 recommended."
+                disabled={loading}
+              />
             </div>
 
             {/* Right — SERP Preview (always visible) */}

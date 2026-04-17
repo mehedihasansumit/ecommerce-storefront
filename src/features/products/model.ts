@@ -12,7 +12,16 @@ const ProductVariantSchema = new Schema({
   compareAtPrice: { type: Number, default: 0 },
   stock: { type: Number, default: 0 },
   sku: { type: String, default: "" },
-  images: [{ url: String, alt: String }],
+  images: [
+      {
+        url: String,
+        alt: String,
+        key: String,
+        width: Number,
+        height: Number,
+        variants: { type: Schema.Types.Mixed },
+      },
+    ],
 });
 
 const ProductSchema = new Schema<IProductDocument>(
@@ -37,7 +46,16 @@ const ProductSchema = new Schema<IProductDocument>(
     stock: { type: Number, default: 0 },
     trackInventory: { type: Boolean, default: true },
 
-    images: [{ url: String, alt: String }],
+    images: [
+      {
+        url: String,
+        alt: String,
+        key: String,
+        width: Number,
+        height: Number,
+        variants: { type: Schema.Types.Mixed },
+      },
+    ],
     thumbnail: { type: String, default: "" },
 
     categoryId: {

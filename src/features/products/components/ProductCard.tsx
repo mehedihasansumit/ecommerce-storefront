@@ -5,6 +5,7 @@ import { Star, Eye } from "lucide-react";
 import type { IProduct } from "../types";
 import { useTranslations, useLocale } from "next-intl";
 import { t } from "@/shared/lib/i18n";
+import { StoreImage } from "@/shared/components/ui";
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -36,10 +37,13 @@ export function ProductCard({ product }: { product: IProduct }) {
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         {product.thumbnail || product.images[0]?.url ? (
-          <img
+          <StoreImage
             src={product.thumbnail || product.images[0].url}
+            variants={product.images[0]?.variants}
             alt={product.images[0]?.alt || productName}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">

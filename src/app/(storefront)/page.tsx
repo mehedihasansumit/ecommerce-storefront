@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { NewsletterForm } from "@/shared/components/storefront/NewsletterForm";
+import { StoreImage } from "@/shared/components/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -124,10 +125,12 @@ export default async function HomePage() {
                 style={{ borderRadius: "var(--border-radius)" }}
               >
                 {category.image && (
-                  <img
+                  <StoreImage
                     src={category.image}
                     alt={t(category.name, locale)}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    fill
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="absolute inset-0 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-300" />

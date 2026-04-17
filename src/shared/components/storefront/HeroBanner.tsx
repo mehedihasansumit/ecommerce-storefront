@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { t } from "@/shared/lib/i18n";
+import { StoreImage } from "@/shared/components/ui";
 
 const AUTO_ADVANCE_MS = 7000;
 const SWIPE_THRESHOLD = 50;
@@ -140,10 +141,13 @@ export function HeroBanner({ banners }: { banners: IHeroBanner[] }) {
           }}
         >
           {b.image && (
-            <img
+            <StoreImage
               src={b.image}
               alt={t(b.title, locale)}
-              className={`w-full h-full object-cover transition-transform duration-[20s] ease-out ${
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              className={`object-cover transition-transform duration-[20s] ease-out ${
                 i === current ? "scale-110" : "scale-100"
               }`}
             />

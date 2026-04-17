@@ -7,6 +7,7 @@ import type { IProduct, IProductOption, IProductVariant, IProductImage } from ".
 import type { ICategory } from "@/features/categories/types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
+import { ImageInput, ImageGalleryInput } from "@/shared/components/ui";
 
 interface ProductFormProps {
   storeId: string;
@@ -120,7 +121,6 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
 
   const [newOptionName, setNewOptionName] = useState("");
   const [newOptionValues, setNewOptionValues] = useState<Record<number, string>>({});
-  const [newImageUrls, setNewImageUrls] = useState<Record<string, string>>({});
 
   const setLocalized = (
     setter: React.Dispatch<React.SetStateAction<LocalizedString>>,
@@ -175,21 +175,8 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
 
   const colorOption = options.find((o) => o.name.toLowerCase() === "color");
 
-  const addColorImage = (color: string) => {
-    const url = (newImageUrls[color] ?? "").trim();
-    if (!url) return;
-    setColorImages((prev) => ({
-      ...prev,
-      [color]: [...(prev[color] ?? []), { url, alt: color }],
-    }));
-    setNewImageUrls((prev) => ({ ...prev, [color]: "" }));
-  };
-
-  const removeColorImage = (color: string, imgIdx: number) => {
-    setColorImages((prev) => ({
-      ...prev,
-      [color]: (prev[color] ?? []).filter((_, i) => i !== imgIdx),
-    }));
+  const setColorGallery = (color: string, images: IProductImage[]) => {
+    setColorImages((prev) => ({ ...prev, [color]: images }));
   };
 
   const updateVariant = (idx: number, field: keyof IProductVariant, value: unknown) => {
@@ -468,15 +455,15 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Thumbnail URL</label>
-          <input
-            type="text"
-            value={form.thumbnail}
-            onChange={(e) => set("thumbnail", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
+        <ImageInput
+          label="Thumbnail"
+          value={form.thumbnail}
+          onChange={(url) => set("thumbnail", url)}
+          storeId={storeId}
+          folder="products"
+          aspect="square"
+          hint="Main image shown in product listings."
+        />
 
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -600,52 +587,16 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
           {colorOption.values.map((color) => (
             <div key={color} className="border border-gray-200 rounded-lg p-4 space-y-3">
               <h3 className="font-medium text-sm text-gray-900">{color}</h3>
-
-              {(colorImages[color] ?? []).length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {(colorImages[color] ?? []).map((img, imgIdx) => (
-                    <div key={imgIdx} className="relative group w-20 h-20">
-                      <img
-                        src={img.url}
-                        alt={img.alt}
-                        className="w-full h-full object-cover rounded border border-gray-200"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeColorImage(color, imgIdx)}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newImageUrls[color] ?? ""}
-                  onChange={(e) =>
-                    setNewImageUrls((prev) => ({ ...prev, [color]: e.target.value }))
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addColorImage(color);
-                    }
-                  }}
-                  placeholder="Image URL..."
-                  className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => addColorImage(color)}
-                  className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
+              <ImageGalleryInput
+                value={(colorImages[color] ?? []).map((img) => ({
+                  ...img,
+                  alt: img.alt || color,
+                }))}
+                onChange={(images) => setColorGallery(color, images)}
+                storeId={storeId}
+                folder="products"
+                defaultAlt={color}
+              />
             </div>
           ))}
         </div>

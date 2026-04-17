@@ -4,18 +4,39 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { randomBytes } from "crypto";
+
+const ENDPOINT =
+  process.env.S3_ENDPOINT ||
+  process.env.RUSTFS_ENDPOINT ||
+  "http://localhost:3900";
+
+const ACCESS_KEY =
+  process.env.S3_ACCESS_KEY || process.env.RUSTFS_ACCESS_KEY || "";
+
+const SECRET_KEY =
+  process.env.S3_SECRET_KEY || process.env.RUSTFS_SECRET_KEY || "";
+
+const REGION = process.env.S3_REGION || "garage";
+
+export const BUCKET =
+  process.env.S3_BUCKET || process.env.RUSTFS_BUCKET || "ecommerce-uploads";
+
+const PUBLIC_URL = (process.env.S3_PUBLIC_URL || ENDPOINT).replace(/\/$/, "");
 
 const s3Client = new S3Client({
-  endpoint: process.env.RUSTFS_ENDPOINT || "http://localhost:9000",
-  region: "us-east-1",
+  endpoint: ENDPOINT,
+  region: REGION,
   credentials: {
-    accessKeyId: process.env.RUSTFS_ACCESS_KEY || "",
-    secretAccessKey: process.env.RUSTFS_SECRET_KEY || "",
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_KEY,
   },
   forcePathStyle: true,
 });
 
-const BUCKET = process.env.RUSTFS_BUCKET || "ecommerce-uploads";
+export function publicUrlFor(key: string): string {
+  return `${PUBLIC_URL}/${BUCKET}/${key}`;
+}
 
 export async function uploadFile(
   key: string,
@@ -28,11 +49,10 @@ export async function uploadFile(
       Key: key,
       Body: body,
       ContentType: contentType,
+      CacheControl: "public, max-age=31536000, immutable",
     })
   );
-
-  const endpoint = process.env.RUSTFS_ENDPOINT || "http://localhost:9000";
-  return `${endpoint}/${BUCKET}/${key}`;
+  return publicUrlFor(key);
 }
 
 export async function deleteFile(key: string): Promise<void> {
@@ -59,7 +79,15 @@ export function generateFileKey(
   folder: string,
   filename: string
 ): string {
-  const timestamp = Date.now();
-  const sanitized = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
-  return `${storeId}/${folder}/${timestamp}-${sanitized}`;
+  const id = randomBytes(8).toString("hex");
+  const dot = filename.lastIndexOf(".");
+  const ext = dot >= 0 ? filename.slice(dot + 1).toLowerCase() : "";
+  const safeExt = ext.replace(/[^a-z0-9]/g, "").slice(0, 8) || "bin";
+  return `${storeId}/${folder}/${id}.${safeExt}`;
+}
+
+export function variantKey(originalKey: string, suffix: string): string {
+  const dot = originalKey.lastIndexOf(".");
+  const base = dot >= 0 ? originalKey.slice(0, dot) : originalKey;
+  return `${base}-${suffix}.webp`;
 }

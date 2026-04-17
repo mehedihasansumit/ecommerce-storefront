@@ -13,6 +13,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import { StoreImage } from "@/shared/components/ui";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { useCart } from "@/shared/context/CartContext";
 import { useState, useEffect, useRef } from "react";
@@ -129,9 +130,13 @@ export function Header() {
               className="flex items-center gap-2 shrink-0 min-w-0 group"
             >
               {tenant?.logo ? (
-                <img
+                <StoreImage
                   src={tenant.logo}
                   alt={tenant.name}
+                  width={160}
+                  height={40}
+                  priority
+                  sizes="160px"
                   className="h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
                 />
               ) : (

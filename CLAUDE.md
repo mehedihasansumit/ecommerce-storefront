@@ -4,13 +4,17 @@
 A single Next.js application serving multiple e-commerce websites dynamically based on domain name. Each domain gets its own theme, branding, product catalog, and storefront - managed from one admin dashboard and one MongoDB database.
 
 ## Tech Stack
-- **Framework:** Next.js 15 (App Router, TypeScript strict mode)
+- **Framework:** Next.js 16 (App Router, TypeScript strict mode, React 19)
 - **Database:** MongoDB with Mongoose ODM
 - **Styling:** Tailwind CSS v4 + CSS custom properties for dynamic theming
 - **Auth:** JWT via `jose` (Edge-compatible) + `bcryptjs` for password hashing
-- **Payment:** Stripe + SSLCommerz (per-store configuration)
-- **File Storage:** RustFS (S3-compatible, accessed via @aws-sdk/client-s3)
+- **Payment:** Stripe + SSLCommerz (per-store configuration); WhatsApp / Messenger order handoff
+- **File Storage:** RustFS (S3-compatible, accessed via @aws-sdk/client-s3); `sharp` for image processing
 - **Validation:** Zod for all API input validation
+- **i18n:** `next-intl` (locales: `en`, `bn`; default `en`; `localeDetection: false`)
+- **Email / SMS:** `nodemailer` for transactional email; SMS helper in `src/shared/lib/sms.ts`
+- **Slugs:** `slugify`
+- **Client UX:** `react-hot-toast`
 - **Icons:** lucide-react
 - **SEO:** generateMetadata, JSON-LD structured data, dynamic sitemap/robots
 
@@ -41,16 +45,26 @@ ecommerce-website/
 ├── tailwind.config.ts
 ├── .env.local
 ├── .env.example
+├── AGENTS.md                                 # Agent/automation notes
+├── messages/                                 # next-intl translation bundles
+│   ├── en.json
+│   └── bn.json
 ├── scripts/
-│   └── seed.ts                               # Seed demo stores, products, admin user
+│   ├── seed.ts                               # Seed demo stores, products, admin user
+│   └── migrate-i18n.ts                       # One-off migration to localized content
 │
 ├── src/
+│   ├── i18n/                                 # next-intl configuration
+│   │   ├── routing.ts                        # Locales + defaultLocale (en, bn)
+│   │   └── request.ts                        # Server-side locale resolver
+│   │
 │   ├── app/                                  # ONLY routing + page shells. Minimal logic.
 │   │   ├── layout.tsx                        # Root layout - reads tenant, injects CSS theme vars
 │   │   ├── globals.css
+│   │   ├── error.tsx                         # Global error boundary
 │   │   ├── sitemap.ts                        # Dynamic sitemap per store
 │   │   ├── robots.ts                         # Dynamic robots.txt per store
-│   │   │
+│   │
 │   │   ├── (storefront)/                     # Route group: customer-facing pages
 │   │   │   ├── layout.tsx                    # Storefront layout (Header + Footer)
 │   │   │   ├── page.tsx                      # Homepage (hero, featured products)
@@ -109,34 +123,26 @@ ecommerce-website/
 │   │   │                   └── page.tsx
 │   │   │
 │   │   └── api/                              # API routes (thin handlers)
-│   │       ├── auth/
-│   │       │   ├── login/route.ts
-│   │       │   ├── register/route.ts
-│   │       │   ├── admin-login/route.ts
-│   │       │   └── me/route.ts
-│   │       ├── stores/
-│   │       │   ├── route.ts                  # GET all, POST new
-│   │       │   ├── resolve/route.ts          # GET resolve domain → store
-│   │       │   └── [storeId]/route.ts        # GET, PUT, DELETE
-│   │       ├── products/
-│   │       │   ├── route.ts                  # GET (by store), POST
-│   │       │   └── [productId]/route.ts      # GET, PUT, DELETE
-│   │       ├── categories/
-│   │       │   ├── route.ts
-│   │       │   └── [categoryId]/route.ts
+│   │       ├── auth/                         # login, register, admin-login, me
+│   │       ├── addresses/                    # Customer address book
+│   │       ├── admin/                        # Admin-only endpoints
+│   │       ├── admins/                       # Admin user CRUD (superadmin only)
+│   │       ├── announcements/                # Store announcements / banners
 │   │       ├── cart/
-│   │       │   ├── route.ts
-│   │       │   └── [itemId]/route.ts
+│   │       ├── categories/
+│   │       ├── coupons/                      # Coupon codes + redemption
+│   │       ├── locale/                       # Get/set user locale preference
+│   │       ├── notifications/                # In-app / transactional notifications
 │   │       ├── orders/
-│   │       │   ├── route.ts
-│   │       │   └── [orderId]/route.ts
+│   │       ├── payment/                      # create-intent, webhook
+│   │       ├── points/                       # Loyalty points balance + ledger
+│   │       ├── products/
 │   │       ├── reviews/
-│   │       │   └── route.ts
-│   │       ├── payment/
-│   │       │   ├── create-intent/route.ts
-│   │       │   └── webhook/route.ts
-│   │       └── upload/
-│   │           └── route.ts
+│   │       ├── roles/                        # Role CRUD (superadmin only)
+│   │       ├── stores/                       # CRUD + resolve (domain → store)
+│   │       ├── subscribers/                  # Newsletter subscribers
+│   │       ├── track/                        # Order tracking (public)
+│   │       └── upload/                       # Presigned / direct file upload
 │   │
 │   ├── features/                             # Feature-based modules (core business logic)
 │   │   │
@@ -232,10 +238,47 @@ ecommerce-website/
 │   │   │       ├── ReviewList.tsx
 │   │   │       └── ReviewStars.tsx
 │   │   │
-│   │   └── payment/
-│   │       ├── service.ts                    # createPaymentSession, handleWebhook
-│   │       ├── stripe.ts                     # Stripe-specific logic
-│   │       ├── sslcommerz.ts                 # SSLCommerz-specific logic
+│   │   ├── payment/
+│   │   │   ├── service.ts                    # createPaymentSession, handleWebhook
+│   │   │   ├── stripe.ts                     # Stripe-specific logic
+│   │   │   ├── sslcommerz.ts                 # SSLCommerz-specific logic
+│   │   │   ├── schemas.ts
+│   │   │   └── types.ts
+│   │   │
+│   │   ├── analytics/                        # Store analytics (visits, conversions, revenue)
+│   │   │   ├── model.ts
+│   │   │   ├── repository.ts
+│   │   │   ├── service.ts
+│   │   │   ├── schemas.ts
+│   │   │   ├── types.ts
+│   │   │   └── hooks/
+│   │   │
+│   │   ├── coupons/                          # Coupon codes + redemption tracking
+│   │   │   ├── model.ts
+│   │   │   ├── repository.ts
+│   │   │   ├── service.ts
+│   │   │   ├── schemas.ts
+│   │   │   ├── types.ts
+│   │   │   └── components/
+│   │   │
+│   │   ├── notifications/                    # In-app / email / SMS notifications
+│   │   │   ├── model.ts
+│   │   │   ├── repository.ts
+│   │   │   ├── service.ts
+│   │   │   ├── schemas.ts
+│   │   │   ├── types.ts
+│   │   │   └── components/
+│   │   │
+│   │   ├── points/                           # Loyalty points (earn, redeem, ledger)
+│   │   │   ├── model.ts
+│   │   │   ├── repository.ts
+│   │   │   ├── service.ts
+│   │   │   └── types.ts
+│   │   │
+│   │   └── subscribers/                      # Newsletter subscribers
+│   │       ├── model.ts
+│   │       ├── repository.ts
+│   │       ├── service.ts
 │   │       ├── schemas.ts
 │   │       └── types.ts
 │   │
@@ -276,7 +319,12 @@ ecommerce-website/
 │   │   │   ├── db.ts                         # MongoDB connection singleton
 │   │   │   ├── tenant.ts                     # getTenant() - reads store from request headers
 │   │   │   ├── auth.ts                       # JWT sign/verify helpers
+│   │   │   ├── permissions.ts                # hasPermission / canAccessStore helpers
 │   │   │   ├── storage.ts                    # RustFS upload/delete helpers
+│   │   │   ├── email.ts                      # nodemailer transport + transactional email
+│   │   │   ├── sms.ts                        # SMS sender helper
+│   │   │   ├── phone.ts                      # Phone number parsing / normalization
+│   │   │   ├── i18n.ts                       # Shared i18n helpers
 │   │   │   ├── seo.ts                        # SEO helpers (generateMetadata factory, JSON-LD builders)
 │   │   │   ├── api-response.ts               # Standardized API response helpers
 │   │   │   └── constants.ts
@@ -420,6 +468,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 4. Run `npx tsx scripts/seed.ts` to create demo stores
 5. Run `npm run dev`
 6. Visit `http://shirts.localhost:3000` and `http://punjabi.localhost:3000` to see different stores
+
+## Internationalization (i18n)
+- Configured via `next-intl`. Locales: `en` (default), `bn`. `localeDetection` is disabled — locale is explicit (cookie / `/api/locale`).
+- Translation bundles live in `messages/{locale}.json`.
+- Server-side locale resolution: `src/i18n/request.ts`. Routing config: `src/i18n/routing.ts`.
+- One-off migration script: `npx tsx scripts/migrate-i18n.ts`.
 
 ## Coding Conventions
 - Use TypeScript strict mode

@@ -22,7 +22,7 @@ const PAYMENT_STYLES: Record<PaymentStatus, string> = {
   pending:  "bg-yellow-100 text-yellow-800 border-yellow-200",
   paid:     "bg-green-100 text-green-800 border-green-200",
   failed:   "bg-red-100 text-red-800 border-red-200",
-  refunded: "bg-gray-100 text-gray-700 border-gray-200",
+  refunded: "bg-admin-chip text-admin-text-secondary border-admin-border",
 };
 
 interface RowState {
@@ -122,23 +122,23 @@ export function PaymentsTable({ orders, storeId }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-225">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Customer</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Method</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order Status</th>
-              <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Subtotal</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Discount</th>
-              <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+            <tr className="border-b border-admin-border bg-admin-surface-raised">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Customer</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Method</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order Status</th>
+              <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Subtotal</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Discount</th>
+              <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Total</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Payment</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-admin-border">
             {orders.map((order) => {
               const row = rows[order._id];
               if (!row) return null;
@@ -146,7 +146,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
               const newTotal = Math.max(0, order.subtotal + order.shippingCost + order.tax - discountNum);
 
               return (
-                <tr key={order._id} className="hover:bg-gray-50/60 transition-colors align-top">
+                <tr key={order._id} className="hover:bg-admin-surface-hover/60 transition-colors align-top">
                   {/* Order */}
                   <td className="px-5 py-4">
                     <div className="flex flex-col gap-1">
@@ -168,11 +168,11 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   {/* Customer */}
                   <td className="px-5 py-4">
                     <p className="text-sm font-medium text-gray-900">{order.shippingAddress.name}</p>
-                    <p className="text-xs text-gray-400">{order.shippingAddress.phone}</p>
+                    <p className="text-xs text-admin-text-subtle">{order.shippingAddress.phone}</p>
                   </td>
 
                   {/* Method */}
-                  <td className="px-5 py-4 text-sm text-gray-600 capitalize">
+                  <td className="px-5 py-4 text-sm text-admin-text-secondary capitalize">
                     {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
                   </td>
 
@@ -180,7 +180,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   <td className="px-5 py-4">
                     <span
                       className={`px-2 py-0.5 rounded-md text-xs font-medium border capitalize ${
-                        ORDER_STATUS_STYLES[order.status] ?? "bg-gray-50 text-gray-600 border-gray-200"
+                        ORDER_STATUS_STYLES[order.status] ?? "bg-admin-surface-raised text-admin-text-secondary border-admin-border"
                       }`}
                     >
                       {order.status}
@@ -188,7 +188,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   </td>
 
                   {/* Subtotal */}
-                  <td className="px-5 py-4 text-sm text-right text-gray-700">
+                  <td className="px-5 py-4 text-sm text-right text-admin-text-secondary">
                     ৳{order.subtotal.toLocaleString()}
                   </td>
 
@@ -196,14 +196,14 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5">
                       <div className="relative w-28">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">৳</span>
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-admin-text-subtle">৳</span>
                         <input
                           type="number"
                           min="0"
                           step="0.01"
                           value={row.discount}
                           onChange={(e) => setRow(order._id, { discount: e.target.value, discountError: "" })}
-                          className="w-full pl-6 pr-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
+                          className="w-full pl-6 pr-2 py-1.5 text-xs border border-admin-border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                         />
                       </div>
                       <button
@@ -225,7 +225,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                       <p className="text-xs text-red-500 mt-1">{row.discountError}</p>
                     )}
                     {discountNum > 0 && (
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-admin-text-subtle mt-1">
                         New: ৳{newTotal.toLocaleString()}
                       </p>
                     )}
@@ -247,7 +247,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                           className={`px-2 py-0.5 rounded-md text-xs font-medium border capitalize transition-all disabled:opacity-50 ${
                             row.paymentStatus === s
                               ? PAYMENT_STYLES[s]
-                              : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                              : "bg-admin-surface text-admin-text-muted border-admin-border hover:border-gray-400"
                           }`}
                         >
                           {s}
@@ -256,7 +256,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                     </div>
                     <div className="mt-1 h-4">
                       {row.savingStatus && (
-                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                        <p className="text-xs text-admin-text-subtle flex items-center gap-1">
                           <Loader2 className="w-3 h-3 animate-spin" /> Saving…
                         </p>
                       )}
@@ -272,7 +272,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   </td>
 
                   {/* Date */}
-                  <td className="px-5 py-4 text-xs text-gray-500 whitespace-nowrap">
+                  <td className="px-5 py-4 text-xs text-admin-text-muted whitespace-nowrap">
                     {new Date(order.createdAt).toLocaleDateString("en-GB", {
                       day: "2-digit",
                       month: "short",

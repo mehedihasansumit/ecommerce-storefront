@@ -83,7 +83,7 @@ export function ReviewModerationTable({
 
   if (reviews.length === 0) {
     return (
-      <div className="text-center py-16 text-gray-400 text-sm">
+      <div className="text-center py-16 text-admin-text-subtle text-sm">
         No reviews found.
       </div>
     );
@@ -97,35 +97,35 @@ export function ReviewModerationTable({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-admin-border bg-admin-surface">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-admin-surface-raised border-b border-admin-border">
             <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
+              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
                 Reviewer
               </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
+              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
                 Rating
               </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
+              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
                 Review
               </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
+              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
                 Date
               </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
+              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
                 Status
               </th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">
+              <th className="text-right px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-admin-border">
             {reviews.map((review) => {
               const isLoading = loading === review._id;
               return (
-                <tr key={review._id} className="hover:bg-gray-50 transition-colors">
+                <tr key={review._id} className="hover:bg-admin-surface-hover transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900 text-sm">
                       {review.reviewerName || "Customer"}
@@ -139,10 +139,10 @@ export function ReviewModerationTable({
                       <p className="font-medium text-gray-800 truncate">{review.title}</p>
                     )}
                     {review.comment && (
-                      <p className="text-gray-500 text-xs truncate mt-0.5">{review.comment}</p>
+                      <p className="text-admin-text-muted text-xs truncate mt-0.5">{review.comment}</p>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+                  <td className="px-4 py-3 text-admin-text-muted text-xs whitespace-nowrap">
                     {new Date(review.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",

@@ -22,7 +22,7 @@ export default async function EditCouponPage({
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Edit Coupon</h1>
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6">
         <CouponForm
           storeId={storeId}
           coupon={JSON.parse(JSON.stringify(coupon))}

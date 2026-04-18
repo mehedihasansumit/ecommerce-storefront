@@ -48,15 +48,15 @@ export function DateRangeFilter({ storeId, from, to }: Props) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
       {/* Presets */}
-      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 self-start sm:self-auto">
+      <div className="flex items-center gap-1 bg-admin-chip rounded-lg p-1 self-start sm:self-auto">
         {PRESETS.map(({ label, days }) => (
           <button
             key={label}
             onClick={() => applyPreset(days)}
             className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
               isPresetActive(from, to, days)
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-admin-surface text-gray-900 shadow-sm"
+                : "text-admin-text-muted hover:text-admin-text-secondary"
             }`}
           >
             {label}
@@ -66,19 +66,19 @@ export function DateRangeFilter({ storeId, from, to }: Props) {
 
       {/* Custom range */}
       <form onSubmit={applyCustom} className="flex flex-wrap items-center gap-1.5">
-        <CalendarDays className="w-4 h-4 text-gray-400 shrink-0" />
+        <CalendarDays className="w-4 h-4 text-admin-text-subtle shrink-0" />
         <input
           type="date"
           value={localFrom}
           onChange={(e) => setLocalFrom(e.target.value)}
-          className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-200 text-gray-700 min-w-0"
+          className="text-xs border border-admin-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
         />
         <span className="text-gray-300 text-sm">—</span>
         <input
           type="date"
           value={localTo}
           onChange={(e) => setLocalTo(e.target.value)}
-          className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-200 text-gray-700 min-w-0"
+          className="text-xs border border-admin-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
         />
         <button
           type="submit"

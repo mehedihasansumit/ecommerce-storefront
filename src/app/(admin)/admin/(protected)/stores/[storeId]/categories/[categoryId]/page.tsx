@@ -22,7 +22,7 @@ export default async function EditCategoryPage({
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+      <div className="flex items-center gap-2 text-sm text-admin-text-muted mb-6">
         <Link href={`/admin/stores/${storeId}/categories`} className="hover:text-gray-900">
           Categories
         </Link>

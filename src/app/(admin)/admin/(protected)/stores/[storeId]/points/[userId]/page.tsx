@@ -76,7 +76,7 @@ export default async function CustomerPointsPage({
       <div className="mb-4">
         <Link
           href={`/admin/stores/${storeId}/points`}
-          className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-admin-text-muted hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to loyalty points
@@ -84,11 +84,11 @@ export default async function CustomerPointsPage({
       </div>
 
       {/* Customer header */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="bg-admin-surface rounded-xl border border-admin-border p-6 mb-6">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{user.name}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+            <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-admin-text-muted">
               {user.email && (
                 <span className="inline-flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5" />
@@ -106,18 +106,18 @@ export default async function CustomerPointsPage({
 
           <div className="flex items-center gap-8">
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
+              <p className="text-xs text-admin-text-subtle uppercase tracking-wide mb-1">
                 Balance
               </p>
               <p className="text-2xl font-bold text-gray-900">
                 {balance.points.toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-admin-text-muted mt-0.5">
                 ≈ ৳{balance.equivalentBDT.toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
+              <p className="text-xs text-admin-text-subtle uppercase tracking-wide mb-1">
                 To redeem
               </p>
               <p className="text-2xl font-bold text-gray-900">
@@ -125,7 +125,7 @@ export default async function CustomerPointsPage({
                   ? balance.pointsNeeded.toLocaleString()
                   : "—"}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-admin-text-muted mt-0.5">
                 {balance.pointsNeeded > 0
                   ? `${config.minRedemptionPoints} min`
                   : "eligible now"}
@@ -136,26 +136,26 @@ export default async function CustomerPointsPage({
       </div>
 
       {/* Ledger */}
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
+      <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 px-0.5">
         Transaction History
       </h2>
 
       {ledger.total === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Coins className="w-6 h-6 text-gray-400" />
+        <div className="text-center py-16 bg-admin-surface rounded-xl border border-admin-border">
+          <div className="w-12 h-12 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-3">
+            <Coins className="w-6 h-6 text-admin-text-subtle" />
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">
             No transactions yet
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-admin-text-muted">
             Points earned or redeemed will appear here.
           </p>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-            <div className="divide-y divide-gray-100">
+          <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden mb-6">
+            <div className="divide-y divide-admin-border">
               {ledger.transactions.map((t) => {
                 const Icon = reasonIcon(t.reason);
                 const positive = t.amount > 0;
@@ -177,7 +177,7 @@ export default async function CustomerPointsPage({
                       <p className="text-sm font-medium text-gray-900">
                         {reasonLabel(t.reason)}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-admin-text-subtle">
                         {formatDateTime(t.createdAt)}
                       </p>
                     </div>
@@ -197,7 +197,7 @@ export default async function CustomerPointsPage({
 
           {ledger.totalPages > 1 && (
             <div className="flex items-center justify-between mb-8">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-admin-text-subtle">
                 Page {currentPage} of {ledger.totalPages} · {ledger.total}{" "}
                 {ledger.total === 1 ? "transaction" : "transactions"}
               </p>
@@ -205,10 +205,10 @@ export default async function CustomerPointsPage({
                 <Link
                   href={buildHref(storeId, userId, currentPage - 1)}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border"
+                      : "border-admin-border hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -216,10 +216,10 @@ export default async function CustomerPointsPage({
                 <Link
                   href={buildHref(storeId, userId, currentPage + 1)}
                   aria-disabled={currentPage >= ledger.totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage >= ledger.totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border"
+                      : "border-admin-border hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

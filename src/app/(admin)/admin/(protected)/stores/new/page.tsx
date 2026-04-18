@@ -104,7 +104,7 @@ export default function NewStorePage() {
       <div className="mb-6 flex items-center gap-2">
         <Link
           href="/admin/stores"
-          className="p-2 hover:bg-gray-200 rounded-lg transition"
+          className="p-2 hover:bg-admin-surface-hover rounded-lg transition"
         >
           <ChevronLeft size={20} />
         </Link>
@@ -118,7 +118,7 @@ export default function NewStorePage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-admin-surface p-6 rounded-lg">
         {/* Store Name */}
         <div>
           <label className="block text-sm font-medium mb-2">Store Name</label>
@@ -128,7 +128,7 @@ export default function NewStorePage() {
             value={formData.name}
             onChange={handleInputChange}
             placeholder="e.g., Shirts Hub"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             required
             disabled={loading}
           />
@@ -145,11 +145,11 @@ export default function NewStorePage() {
             value={formData.domains}
             onChange={handleInputChange}
             placeholder="e.g., store.com, www.store.com"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             required
             disabled={loading}
           />
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-admin-text-secondary mt-1">
             Enter multiple domains separated by commas
           </p>
         </div>
@@ -157,7 +157,7 @@ export default function NewStorePage() {
         {/* Languages Section */}
         <div className="border-t pt-6">
           <h2 className="text-lg font-semibold mb-4">Languages</h2>
-          <p className="text-sm text-gray-600 mb-4">Select which languages this store should support</p>
+          <p className="text-sm text-admin-text-secondary mb-4">Select which languages this store should support</p>
 
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export default function NewStorePage() {
                   defaultLanguage: e.target.value,
                 }))
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
               disabled={loading}
             >
               {formData.supportedLanguages.includes("en") && <option value="en">English</option>}
@@ -279,7 +279,7 @@ export default function NewStorePage() {
               onChange={(e) =>
                 handleColorChange("fontFamily", e.target.value as any)
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
               disabled={loading}
             >
               <option>Inter</option>
@@ -298,7 +298,7 @@ export default function NewStorePage() {
               onChange={(e) =>
                 handleColorChange("borderRadius", e.target.value as any)
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
               disabled={loading}
             >
               <option value="0rem">None</option>
@@ -314,7 +314,7 @@ export default function NewStorePage() {
         <div className="flex gap-3 pt-6 border-t">
           <Link
             href="/admin/stores"
-            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            className="px-6 py-2 border border-admin-border-md rounded-lg hover:bg-admin-surface-hover transition"
           >
             Cancel
           </Link>

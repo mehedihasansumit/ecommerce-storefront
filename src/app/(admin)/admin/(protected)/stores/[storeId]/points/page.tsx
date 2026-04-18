@@ -92,7 +92,7 @@ export default async function StorePointsPage({
             <Sparkles className="w-5 h-5 text-amber-500" />
             Loyalty Points
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-admin-text-muted mt-0.5">
             {config.enabled ? (
               <>
                 {config.pointsPerReview} pts per review · {config.minRedemptionPoints} pts min redemption · {config.pointsPerBdt} pts = ৳1
@@ -115,81 +115,81 @@ export default async function StorePointsPage({
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <Coins className="w-4 h-4 text-amber-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Outstanding
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {stats.outstanding.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-admin-text-subtle mt-0.5">
             ≈ ৳{Math.floor(stats.outstanding / config.pointsPerBdt).toLocaleString()} liability
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <Star className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Earned
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {stats.totalEarned.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">lifetime</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">lifetime</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <TrendingDown className="w-4 h-4 text-rose-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Redeemed
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {stats.totalRedeemed.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-admin-text-subtle mt-0.5">
             {stats.transactionCount} transactions
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <Users className="w-4 h-4 text-violet-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Holders
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {stats.activeHolders.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">with balance {">"} 0</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">with balance {">"} 0</p>
         </div>
       </div>
 
       {/* Search */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <PointsCustomerSearch storeId={storeId} defaultValue={q} />
-        <p className="text-xs text-gray-400 ml-auto">
+        <p className="text-xs text-admin-text-subtle ml-auto">
           {total} {total === 1 ? "customer" : "customers"}
         </p>
       </div>
 
       {/* Top customers table */}
       {total === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Coins className="w-6 h-6 text-gray-400" />
+        <div className="text-center py-16 bg-admin-surface rounded-xl border border-admin-border">
+          <div className="w-12 h-12 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-3">
+            <Coins className="w-6 h-6 text-admin-text-subtle" />
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">
             No customers yet
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-admin-text-muted">
             {q
               ? `No customers match "${q}".`
               : "Customer points will appear here once they earn or redeem."}
@@ -197,27 +197,27 @@ export default async function StorePointsPage({
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+          <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden mb-6">
             <div className="overflow-x-auto">
               <table className="w-full min-w-150">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <tr className="border-b border-admin-border bg-admin-surface-raised">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Customer
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Contact
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Points
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       ≈ BDT
                     </th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {customers.map((c) => {
                     const equivalentBdt = Math.floor(
                       (c.points ?? 0) / config.pointsPerBdt
@@ -225,14 +225,14 @@ export default async function StorePointsPage({
                     return (
                       <tr
                         key={c._id}
-                        className="hover:bg-gray-50/60 transition-colors group"
+                        className="hover:bg-admin-surface-hover/60 transition-colors group"
                       >
                         <td className="px-5 py-4">
                           <p className="text-sm font-medium text-gray-900">
                             {c.name}
                           </p>
                         </td>
-                        <td className="px-5 py-4 text-xs text-gray-500">
+                        <td className="px-5 py-4 text-xs text-admin-text-muted">
                           {c.email || c.phone || "—"}
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -240,13 +240,13 @@ export default async function StorePointsPage({
                             {(c.points ?? 0).toLocaleString()}
                           </span>
                         </td>
-                        <td className="px-5 py-4 text-right text-sm text-gray-600">
+                        <td className="px-5 py-4 text-right text-sm text-admin-text-secondary">
                           ৳{equivalentBdt.toLocaleString()}
                         </td>
                         <td className="px-5 py-4 text-right">
                           <Link
                             href={`/admin/stores/${storeId}/points/${c._id}`}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg whitespace-nowrap"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
                           >
                             View ledger
                           </Link>
@@ -261,17 +261,17 @@ export default async function StorePointsPage({
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between mb-8">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-admin-text-subtle">
                 Page {currentPage} of {totalPages}
               </p>
               <div className="flex items-center gap-1">
                 <Link
                   href={buildHref(storeId, { q, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border"
+                      : "border-admin-border hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -279,10 +279,10 @@ export default async function StorePointsPage({
                 <Link
                   href={buildHref(storeId, { q, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border"
+                      : "border-admin-border hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -296,11 +296,11 @@ export default async function StorePointsPage({
       {/* Recent ledger */}
       {ledger.transactions.length > 0 && (
         <div>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
+          <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 px-0.5">
             Recent Transactions
           </h2>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="divide-y divide-gray-100">
+          <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden">
+            <div className="divide-y divide-admin-border">
               {ledger.transactions.map((t) => {
                 const Icon = reasonIcon(t.reason);
                 const user = ledger.users[t.userId];
@@ -309,7 +309,7 @@ export default async function StorePointsPage({
                   <Link
                     key={t._id}
                     href={`/admin/stores/${storeId}/points/${t.userId}`}
-                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-admin-surface-hover transition-colors"
                   >
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
@@ -324,7 +324,7 @@ export default async function StorePointsPage({
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {user?.name ?? "Unknown customer"}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-admin-text-subtle">
                         {reasonLabel(t.reason)} · {formatDate(t.createdAt)}
                       </p>
                     </div>

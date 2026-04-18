@@ -11,7 +11,7 @@ const PAYMENT_STYLES: Record<PaymentStatus, string> = {
   pending:  "bg-yellow-100 text-yellow-800",
   paid:     "bg-green-100 text-green-800",
   failed:   "bg-red-100 text-red-800",
-  refunded: "bg-gray-100 text-gray-700",
+  refunded: "bg-admin-chip text-admin-text-secondary",
 };
 
 interface Props {
@@ -108,14 +108,14 @@ export function PaymentUpdater({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 px-5 py-4 space-y-5">
-      <h2 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
+    <div className="bg-admin-surface rounded-lg border border-admin-border px-5 py-4 space-y-5">
+      <h2 className="font-semibold text-sm text-admin-text-secondary uppercase tracking-wide">
         Payment
       </h2>
 
       {/* Payment status */}
       <div>
-        <label className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-2">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-admin-text-muted mb-2">
           <CreditCard className="w-3.5 h-3.5" />
           Payment Status
         </label>
@@ -133,7 +133,7 @@ export function PaymentUpdater({
                       : s === "failed" ? "ring-red-400"
                       : "ring-gray-400"
                     }`
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border hover:border-gray-400"
               }`}
             >
               {s}
@@ -142,7 +142,7 @@ export function PaymentUpdater({
         </div>
         <div className="mt-1.5 h-4">
           {savingPayment && (
-            <p className="text-xs text-gray-400 flex items-center gap-1">
+            <p className="text-xs text-admin-text-subtle flex items-center gap-1">
               <Loader2 className="w-3 h-3 animate-spin" /> Saving…
             </p>
           )}
@@ -157,13 +157,13 @@ export function PaymentUpdater({
 
       {/* Discount */}
       <form onSubmit={handleDiscountSubmit}>
-        <label className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-2">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-admin-text-muted mb-2">
           <Tag className="w-3.5 h-3.5" />
           Discount
         </label>
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-admin-text-subtle font-medium">
               ৳
             </span>
             <input
@@ -173,7 +173,7 @@ export function PaymentUpdater({
               step="0.01"
               value={discount}
               onChange={(e) => setDiscount(e.target.value)}
-              className="w-full pl-7 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="w-full pl-7 pr-3 py-1.5 text-sm border border-admin-border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
               placeholder="0"
             />
           </div>
@@ -192,9 +192,9 @@ export function PaymentUpdater({
         </div>
 
         {discountNum > 0 && (
-          <p className="mt-1.5 text-xs text-gray-500">
+          <p className="mt-1.5 text-xs text-admin-text-muted">
             New total: <span className="font-semibold text-gray-900">৳{newTotal.toLocaleString()}</span>
-            <span className="ml-1 text-gray-400">(was ৳{maxDiscount.toLocaleString()})</span>
+            <span className="ml-1 text-admin-text-subtle">(was ৳{maxDiscount.toLocaleString()})</span>
           </p>
         )}
 

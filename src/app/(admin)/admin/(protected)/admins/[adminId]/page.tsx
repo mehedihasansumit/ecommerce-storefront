@@ -32,7 +32,7 @@ export default async function EditAdminPage({
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Edit Admin</h1>
-        <p className="text-sm text-gray-500 mt-1">{admin.email}</p>
+        <p className="text-sm text-admin-text-muted mt-1">{admin.email}</p>
       </div>
       <AdminForm admin={safeAdmin} stores={storeOptions} roles={roles} />
     </div>

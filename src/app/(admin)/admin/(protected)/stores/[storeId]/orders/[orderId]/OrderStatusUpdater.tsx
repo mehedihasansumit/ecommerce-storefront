@@ -61,7 +61,7 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
   const currentIdx = FLOW.indexOf(status);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-5 py-4">
+    <div className="bg-admin-surface rounded-xl border border-admin-border px-5 py-4">
       {isCancelled ? (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -70,13 +70,13 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
             </span>
             <div>
               <p className="text-sm font-semibold text-red-600">Order Cancelled</p>
-              <p className="text-xs text-gray-400 mt-0.5">This order has been cancelled</p>
+              <p className="text-xs text-admin-text-subtle mt-0.5">This order has been cancelled</p>
             </div>
           </div>
           <button
             onClick={() => handleChange("pending")}
             disabled={saving}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
             Reopen
@@ -103,7 +103,7 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
                           ? "bg-green-500 text-white"
                           : isCurrent
                           ? "bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-2"
-                          : "bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-600"
+                          : "bg-admin-chip text-admin-text-subtle group-hover:bg-admin-surface-hover group-hover:text-admin-text-secondary"
                       }`}
                     >
                       {isCompleted ? (
@@ -118,7 +118,7 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
                           ? "font-semibold text-gray-900"
                           : isCompleted
                           ? "text-green-600 font-medium"
-                          : "text-gray-400 group-hover:text-gray-500"
+                          : "text-admin-text-subtle group-hover:text-admin-text-muted"
                       }`}
                     >
                       {STEP_LABELS[step]}
@@ -138,10 +138,10 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
           </div>
 
           {/* Footer row */}
-          <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-            <span className="text-xs text-gray-400">
+          <div className="flex items-center justify-between pt-1 border-t border-admin-border">
+            <span className="text-xs text-admin-text-subtle">
               {saving ? (
-                <span className="flex items-center gap-1 text-gray-500">
+                <span className="flex items-center gap-1 text-admin-text-muted">
                   <Loader2 className="w-3 h-3 animate-spin" /> Saving…
                 </span>
               ) : (

@@ -18,7 +18,7 @@ export default async function NewAnnouncementPage({
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Create Announcement</h1>
-      <div className="bg-white rounded-lg border border-gray-200 p-6 overflow-visible">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 overflow-visible">
         <AnnouncementForm storeId={storeId} />
       </div>
     </div>

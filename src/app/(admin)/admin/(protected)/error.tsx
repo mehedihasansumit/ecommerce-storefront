@@ -24,7 +24,7 @@ export default function AdminError({
         <h2 className="text-xl font-bold mb-2">
           {isDbError ? "Database Unavailable" : "Something went wrong"}
         </h2>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-admin-text-muted text-sm mb-6">
           {isDbError
             ? "Could not connect to the database. Make sure MongoDB is running."
             : error.message}

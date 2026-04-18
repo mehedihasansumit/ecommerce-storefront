@@ -96,7 +96,7 @@ export function MobileAdminNav({
         </Link>
         <button
           onClick={() => setIsOpen(true)}
-          className="p-2 rounded-lg hover:bg-white/[0.07] transition-colors"
+          className="p-2 rounded-lg hover:bg-admin-surface/[0.07] transition-colors"
           aria-label="Open menu"
         >
           <Menu size={20} />
@@ -138,12 +138,12 @@ export function MobileAdminNav({
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-white leading-none">Admin Panel</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5">Management Console</p>
+                  <p className="text-[10px] text-admin-text-muted mt-0.5">Management Console</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-white/[0.07] transition-colors text-gray-400 hover:text-white"
+                className="p-1.5 rounded-lg hover:bg-admin-surface/[0.07] transition-colors text-admin-text-subtle hover:text-white"
                 aria-label="Close menu"
               >
                 <X size={18} />
@@ -152,7 +152,7 @@ export function MobileAdminNav({
 
             {/* Nav links */}
             <div className="relative flex-1 overflow-y-auto px-3 py-4">
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600">
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-admin-text-secondary">
                 Overview
               </p>
               <div className="space-y-0.5 mb-5">
@@ -165,8 +165,8 @@ export function MobileAdminNav({
                       onClick={() => setIsOpen(false)}
                       className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group ${
                         active
-                          ? "bg-white/[0.08] text-white"
-                          : "text-gray-400 hover:text-gray-100 hover:bg-white/[0.05]"
+                          ? "bg-admin-surface/[0.08] text-white"
+                          : "text-admin-text-subtle hover:text-gray-100 hover:bg-admin-surface/[0.05]"
                       }`}
                     >
                       {active && (
@@ -174,7 +174,7 @@ export function MobileAdminNav({
                       )}
                       <Icon
                         size={16}
-                        className={active ? "text-indigo-400" : "text-gray-600 group-hover:text-gray-400 transition-colors"}
+                        className={active ? "text-indigo-400" : "text-admin-text-secondary group-hover:text-admin-text-subtle transition-colors"}
                       />
                       <span>{label}</span>
                       {active && (
@@ -187,7 +187,7 @@ export function MobileAdminNav({
 
               {superItems.length > 0 && (
                 <>
-                  <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600">
+                  <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-admin-text-secondary">
                     Administration
                   </p>
                   <div className="space-y-0.5">
@@ -200,8 +200,8 @@ export function MobileAdminNav({
                           onClick={() => setIsOpen(false)}
                           className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group ${
                             active
-                              ? "bg-white/[0.08] text-white"
-                              : "text-gray-400 hover:text-gray-100 hover:bg-white/[0.05]"
+                              ? "bg-admin-surface/[0.08] text-white"
+                              : "text-admin-text-subtle hover:text-gray-100 hover:bg-admin-surface/[0.05]"
                           }`}
                         >
                           {active && (
@@ -209,7 +209,7 @@ export function MobileAdminNav({
                           )}
                           <Icon
                             size={16}
-                            className={active ? "text-violet-400" : "text-gray-600 group-hover:text-gray-400 transition-colors"}
+                            className={active ? "text-violet-400" : "text-admin-text-secondary group-hover:text-admin-text-subtle transition-colors"}
                           />
                           <span>{label}</span>
                           {active && (
@@ -225,7 +225,7 @@ export function MobileAdminNav({
 
             {/* User footer */}
             <div className="relative px-3 pb-4 pt-3 border-t border-white/[0.06]">
-              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.04] mb-1">
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-admin-surface/[0.04] mb-1">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
                   {initials}
                 </div>
@@ -236,7 +236,7 @@ export function MobileAdminNav({
                     </p>
                   )}
                   {adminRole && (
-                    <p className="text-[10px] text-gray-500 capitalize truncate leading-tight mt-0.5">
+                    <p className="text-[10px] text-admin-text-muted capitalize truncate leading-tight mt-0.5">
                       {adminRole}
                     </p>
                   )}
@@ -246,7 +246,7 @@ export function MobileAdminNav({
                 <ThemeToggle variant="sidebar" />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2.5 flex-1 px-3 py-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-950/30 transition-all text-[13px] font-medium"
+                  className="flex items-center gap-2.5 flex-1 px-3 py-2 rounded-lg text-admin-text-subtle hover:text-red-400 hover:bg-red-950/30 transition-all text-[13px] font-medium"
                 >
                   <LogOut size={15} />
                   <span>Sign out</span>

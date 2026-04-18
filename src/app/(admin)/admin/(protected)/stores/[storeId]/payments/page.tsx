@@ -18,7 +18,7 @@ const PAYMENT_FILTER_STYLES: Record<PaymentStatus | "all", string> = {
   pending:  "bg-yellow-100 text-yellow-800 border-yellow-200",
   paid:     "bg-green-100 text-green-800 border-green-200",
   failed:   "bg-red-100 text-red-800 border-red-200",
-  refunded: "bg-gray-100 text-gray-700 border-gray-200",
+  refunded: "bg-admin-chip text-admin-text-secondary border-admin-border",
 };
 
 export default async function PaymentsPage({
@@ -67,49 +67,49 @@ export default async function PaymentsPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-gray-400" />
+            <CreditCard className="w-6 h-6 text-admin-text-subtle" />
             Payments
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">{total} orders</p>
+          <p className="text-sm text-admin-text-muted mt-0.5">{total} orders</p>
         </div>
       </div>
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Revenue</span>
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Revenue</span>
           </div>
           <p className="text-xl font-bold text-gray-900">৳{stats.totalRevenue.toLocaleString()}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{stats.paid} paid orders</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">{stats.paid} paid orders</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-yellow-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pending</span>
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Pending</span>
           </div>
           <p className="text-xl font-bold text-gray-900">{stats.pending}</p>
-          <p className="text-xs text-gray-400 mt-0.5">awaiting payment</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">awaiting payment</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <XCircle className="w-4 h-4 text-red-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Failed</span>
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Failed</span>
           </div>
           <p className="text-xl font-bold text-gray-900">{stats.failed}</p>
-          <p className="text-xs text-gray-400 mt-0.5">failed transactions</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">failed transactions</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
-            <RotateCcw className="w-4 h-4 text-gray-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Refunded</span>
+            <RotateCcw className="w-4 h-4 text-admin-text-muted" />
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Refunded</span>
           </div>
           <p className="text-xl font-bold text-gray-900">{stats.refunded}</p>
-          <p className="text-xs text-gray-400 mt-0.5">orders refunded</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">orders refunded</p>
         </div>
       </div>
 
@@ -123,7 +123,7 @@ export default async function PaymentsPage({
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               !status
                 ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border hover:border-gray-400"
             }`}
           >
             All
@@ -135,7 +135,7 @@ export default async function PaymentsPage({
               className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
                 status === s
                   ? PAYMENT_FILTER_STYLES[s]
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border hover:border-gray-400"
               }`}
             >
               {s}
@@ -146,12 +146,12 @@ export default async function PaymentsPage({
 
       {/* Empty state */}
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="w-7 h-7 text-gray-400" />
+        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border">
+          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+            <CreditCard className="w-7 h-7 text-admin-text-subtle" />
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">No orders found</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-admin-text-muted">
             {q
               ? `No orders match "${q}".`
               : status
@@ -166,7 +166,7 @@ export default async function PaymentsPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
@@ -174,10 +174,10 @@ export default async function PaymentsPage({
                 <Link
                   href={buildHref(Math.max(1, currentPage - 1), status, q)}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border"
+                      : "border-admin-border hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -192,7 +192,7 @@ export default async function PaymentsPage({
                   }, [])
                   .map((item, idx) =>
                     item === "..." ? (
-                      <span key={`e-${idx}`} className="w-8 h-8 flex items-center justify-center text-xs text-gray-400">…</span>
+                      <span key={`e-${idx}`} className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle">…</span>
                     ) : (
                       <Link
                         key={item}
@@ -200,7 +200,7 @@ export default async function PaymentsPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                           currentPage === item
                             ? "bg-gray-900 text-white"
-                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                            : "border border-admin-border text-admin-text-secondary hover:bg-admin-chip"
                         }`}
                       >
                         {item}
@@ -211,10 +211,10 @@ export default async function PaymentsPage({
                 <Link
                   href={buildHref(Math.min(totalPages, currentPage + 1), status, q)}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border"
+                      : "border-admin-border hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

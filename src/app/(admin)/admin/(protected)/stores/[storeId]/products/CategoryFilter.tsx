@@ -24,7 +24,7 @@ export function CategoryFilter({ storeId, categories, defaultCategory }: Props) 
     <select
       defaultValue={defaultCategory ?? ""}
       onChange={handleChange}
-      className="pl-3 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 cursor-pointer"
+      className="pl-3 pr-8 py-2 text-sm border border-admin-border rounded-lg bg-admin-surface text-admin-text-secondary focus:outline-none focus:ring-2 focus:ring-gray-900 cursor-pointer"
     >
       <option value="">All Categories</option>
       {categories.map((c) => (

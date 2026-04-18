@@ -33,7 +33,7 @@ export function DeleteProductButton({ productId, productName }: Props) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
+      className="p-1.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
       title="Delete product"
     >
       <Trash2 className="w-4 h-4" />

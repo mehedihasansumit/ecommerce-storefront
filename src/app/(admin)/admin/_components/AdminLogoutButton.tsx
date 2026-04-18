@@ -15,7 +15,7 @@ export function AdminLogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-950/30 transition-all text-[13px] font-medium"
+      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-admin-text-subtle hover:text-red-400 hover:bg-red-950/30 transition-all text-[13px] font-medium"
     >
       <LogOut size={15} />
       <span>Sign out</span>

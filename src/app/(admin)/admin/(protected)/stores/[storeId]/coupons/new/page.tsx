@@ -18,7 +18,7 @@ export default async function NewCouponPage({
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Create Coupon</h1>
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6">
         <CouponForm storeId={storeId} />
       </div>
     </div>

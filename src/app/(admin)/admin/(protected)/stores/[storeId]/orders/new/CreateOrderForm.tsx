@@ -249,12 +249,12 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
         {/* LEFT COLUMN — main form */}
         <div className="lg:col-span-2 space-y-6">
           {/* Products */}
-          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-              <Package className="w-4 h-4 text-gray-500" />
+          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
+            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
+              <Package className="w-4 h-4 text-admin-text-muted" />
               <h2 className="font-semibold text-sm text-gray-800">Products</h2>
               {items.length > 0 && (
-                <span className="ml-auto text-xs text-gray-500">
+                <span className="ml-auto text-xs text-admin-text-muted">
                   {itemCount} {itemCount === 1 ? "item" : "items"}
                 </span>
               )}
@@ -262,25 +262,25 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
 
             <div className="p-5">
               <div className="relative" ref={searchBoxRef}>
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-4 h-4 text-admin-text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onFocus={() => query.trim() && setShowResults(true)}
                   placeholder="Search products by name or tag…"
-                  className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  className="w-full border border-admin-border-md rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                 />
                 {showResults && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-72 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-admin-surface border border-admin-border rounded-lg shadow-lg z-20 max-h-72 overflow-y-auto">
                     {searching && (
-                      <div className="px-3 py-3 flex items-center gap-2 text-sm text-gray-500">
+                      <div className="px-3 py-3 flex items-center gap-2 text-sm text-admin-text-muted">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Searching…
                       </div>
                     )}
                     {!searching && searchResults.length === 0 && (
-                      <p className="px-3 py-3 text-sm text-gray-400">
+                      <p className="px-3 py-3 text-sm text-admin-text-subtle">
                         No products found.
                       </p>
                     )}
@@ -295,9 +295,9 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                             type="button"
                             onClick={() => handlePickProduct(p)}
                             disabled={out}
-                            className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed border-b border-gray-50 last:border-0"
+                            className="w-full text-left px-3 py-2 hover:bg-admin-surface-hover flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed border-b border-gray-50 last:border-0"
                           >
-                            <div className="w-10 h-10 rounded-md bg-gray-100 overflow-hidden shrink-0 relative">
+                            <div className="w-10 h-10 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
                               {p.thumbnail ? (
                                 <Image
                                   src={p.thumbnail}
@@ -307,17 +307,17 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                                   sizes="40px"
                                 />
                               ) : (
-                                <Package className="w-4 h-4 text-gray-400 absolute inset-0 m-auto" />
+                                <Package className="w-4 h-4 text-admin-text-subtle absolute inset-0 m-auto" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate text-gray-900">
                                 {pName}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-admin-text-muted">
                                 ৳{p.price.toLocaleString()} ·{" "}
                                 {hasOptions ? (
-                                  <span className="text-gray-500">
+                                  <span className="text-admin-text-muted">
                                     {p.options.length}{" "}
                                     {p.options.length === 1 ? "option" : "options"}
                                   </span>
@@ -326,7 +326,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                                     className={
                                       out
                                         ? "text-red-500 font-medium"
-                                        : "text-gray-500"
+                                        : "text-admin-text-muted"
                                     }
                                   >
                                     {out ? "Out of stock" : `${p.stock} in stock`}
@@ -335,7 +335,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                               </p>
                             </div>
                             {!out && (
-                              <Plus className="w-4 h-4 text-gray-400 shrink-0" />
+                              <Plus className="w-4 h-4 text-admin-text-subtle shrink-0" />
                             )}
                           </button>
                         );
@@ -349,18 +349,18 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                 {items.length === 0 ? (
                   <div className="py-10 text-center">
                     <ShoppingBag className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-admin-text-muted">
                       No products added yet. Search above to add items.
                     </p>
                   </div>
                 ) : (
-                  <ul className="divide-y divide-gray-100">
+                  <ul className="divide-y divide-admin-border">
                     {items.map((item) => (
                       <li
                         key={item.key}
                         className="flex items-center gap-3 py-3"
                       >
-                        <div className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden shrink-0 relative">
+                        <div className="w-12 h-12 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
                           {item.thumbnail ? (
                             <Image
                               src={item.thumbnail}
@@ -370,7 +370,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                               sizes="48px"
                             />
                           ) : (
-                            <Package className="w-5 h-5 text-gray-400 absolute inset-0 m-auto" />
+                            <Package className="w-5 h-5 text-admin-text-subtle absolute inset-0 m-auto" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -383,7 +383,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                                 ([k, v]) => (
                                   <span
                                     key={k}
-                                    className="inline-flex items-center text-[10px] font-medium text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded"
+                                    className="inline-flex items-center text-[10px] font-medium text-admin-text-secondary bg-admin-chip px-1.5 py-0.5 rounded"
                                   >
                                     {k}: {v}
                                   </span>
@@ -391,18 +391,18 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                               )}
                             </div>
                           )}
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-admin-text-muted mt-0.5">
                             ৳{item.price.toLocaleString()} each · {item.stock}{" "}
                             in stock
                           </p>
                         </div>
-                        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <div className="flex items-center border border-admin-border rounded-lg overflow-hidden shrink-0">
                           <button
                             type="button"
                             onClick={() =>
                               updateQty(item.key, item.quantity - 1)
                             }
-                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition"
+                            className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover active:bg-admin-chip transition"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="w-3.5 h-3.5" />
@@ -416,7 +416,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                               updateQty(item.key, item.quantity + 1)
                             }
                             disabled={item.quantity >= item.stock}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                            className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover active:bg-admin-chip disabled:opacity-40 disabled:cursor-not-allowed transition"
                             aria-label="Increase quantity"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -428,7 +428,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                         <button
                           type="button"
                           onClick={() => removeItem(item.key)}
-                          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition shrink-0"
+                          className="w-8 h-8 flex items-center justify-center text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded-md transition shrink-0"
                           aria-label="Remove item"
                         >
                           <X className="w-4 h-4" />
@@ -442,14 +442,14 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
           </section>
 
           {/* Customer */}
-          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-              <User className="w-4 h-4 text-gray-500" />
+          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
+            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
+              <User className="w-4 h-4 text-admin-text-muted" />
               <h2 className="font-semibold text-sm text-gray-800">Customer</h2>
             </header>
             <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -457,39 +457,39 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Rahim Uddin"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   Phone <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Phone className="w-4 h-4 text-admin-text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="01XXXXXXXXX"
-                    className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                    className="w-full border border-admin-border-md rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                   />
                 </div>
-                <p className="text-[11px] text-gray-400 mt-1">
+                <p className="text-[11px] text-admin-text-subtle mt-1">
                   Bangladesh format, e.g. 017XXXXXXXX
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Mail className="w-4 h-4 text-admin-text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="optional@example.com"
-                    className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                    className="w-full border border-admin-border-md rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                   />
                 </div>
               </div>
@@ -497,16 +497,16 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
           </section>
 
           {/* Delivery */}
-          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-500" />
+          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
+            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-admin-text-muted" />
               <h2 className="font-semibold text-sm text-gray-800">
                 Delivery Address
               </h2>
             </header>
             <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   Street Address <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -514,11 +514,11 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
                   placeholder="House, road, area"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   City <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -526,40 +526,40 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Dhaka"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   Postal Code
                 </label>
                 <input
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                   placeholder="e.g. 1207"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
                 />
               </div>
             </div>
           </section>
 
           {/* Payment & notes */}
-          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-gray-500" />
+          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
+            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-admin-text-muted" />
               <h2 className="font-semibold text-sm text-gray-800">
                 Payment &amp; Notes
               </h2>
             </header>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                   Payment Method
                 </label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition bg-white"
+                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition bg-admin-surface"
                 >
                   <option value="cod">Cash on Delivery</option>
                   <option value="bkash">bKash</option>
@@ -568,7 +568,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
+                <label className="text-xs font-medium text-admin-text-secondary mb-1.5 flex items-center gap-1.5">
                   <StickyNote className="w-3.5 h-3.5" />
                   Notes
                 </label>
@@ -577,7 +577,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Internal notes about this order (optional)"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition resize-none"
+                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition resize-none"
                 />
               </div>
             </div>
@@ -587,15 +587,15 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
         {/* RIGHT COLUMN — sticky summary */}
         <aside className="lg:col-span-1">
           <div className="lg:sticky lg:top-6 space-y-4">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <header className="px-5 py-4 border-b border-gray-100">
+            <div className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
+              <header className="px-5 py-4 border-b border-admin-border">
                 <h2 className="font-semibold text-sm text-gray-800">
                   Order Summary
                 </h2>
               </header>
               <div className="p-5 space-y-4">
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs font-medium text-admin-text-secondary mb-1.5 flex items-center gap-1.5">
                     <Tag className="w-3.5 h-3.5" />
                     Coupon Code
                   </label>
@@ -603,16 +603,16 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Optional"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition uppercase"
+                    className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition uppercase"
                   />
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-admin-text-subtle mt-1">
                     Validated on submit.
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-gray-100">
+                <div className="space-y-2 pt-2 border-t border-admin-border">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">
+                    <span className="text-admin-text-secondary">
                       Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
                     </span>
                     <span className="font-medium text-gray-900">
@@ -620,10 +620,10 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="text-gray-400">Calculated later</span>
+                    <span className="text-admin-text-secondary">Shipping</span>
+                    <span className="text-admin-text-subtle">Calculated later</span>
                   </div>
-                  <div className="flex justify-between pt-3 mt-1 border-t border-gray-100 text-base font-semibold">
+                  <div className="flex justify-between pt-3 mt-1 border-t border-admin-border text-base font-semibold">
                     <span>Total</span>
                     <span>৳{subtotal.toLocaleString()}</span>
                   </div>
@@ -654,7 +654,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                   <button
                     type="button"
                     onClick={() => router.back()}
-                    className="w-full px-5 py-2.5 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full px-5 py-2.5 bg-admin-surface border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover transition-colors"
                   >
                     Cancel
                   </button>
@@ -734,15 +734,15 @@ function VariantPickerModal({
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
+        className="bg-admin-surface rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <header className="px-5 py-4 border-b border-admin-border flex items-center justify-between">
           <h3 className="font-semibold text-sm text-gray-900">Select Variant</h3>
           <button
             type="button"
             onClick={onCancel}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
+            className="w-8 h-8 flex items-center justify-center text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded-md transition"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -750,7 +750,7 @@ function VariantPickerModal({
         </header>
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-md bg-gray-100 overflow-hidden shrink-0 relative">
+            <div className="w-14 h-14 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
               {thumb ? (
                 <Image
                   src={thumb}
@@ -760,14 +760,14 @@ function VariantPickerModal({
                   sizes="56px"
                 />
               ) : (
-                <Package className="w-5 h-5 text-gray-400 absolute inset-0 m-auto" />
+                <Package className="w-5 h-5 text-admin-text-subtle absolute inset-0 m-auto" />
               )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
                 {productName}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-admin-text-muted">
                 ৳{displayPrice.toLocaleString()} ·{" "}
                 <span
                   className={outOfStock ? "text-red-500 font-medium" : ""}
@@ -780,10 +780,10 @@ function VariantPickerModal({
 
           {options.map((option) => (
             <div key={option.name}>
-              <label className="block text-xs font-semibold uppercase tracking-wide mb-2 text-gray-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide mb-2 text-admin-text-muted">
                 {option.name}
                 {selections[option.name] && (
-                  <span className="font-normal text-gray-700 ml-1 normal-case">
+                  <span className="font-normal text-admin-text-secondary ml-1 normal-case">
                     — {selections[option.name]}
                   </span>
                 )}
@@ -807,8 +807,8 @@ function VariantPickerModal({
                         selected
                           ? "border-gray-900 bg-gray-900 text-white"
                           : available
-                          ? "border-gray-300 text-gray-700 hover:border-gray-500"
-                          : "border-gray-200 text-gray-300 cursor-not-allowed line-through"
+                          ? "border-admin-border-md text-admin-text-secondary hover:border-gray-500"
+                          : "border-admin-border text-gray-300 cursor-not-allowed line-through"
                       }`}
                     >
                       {value}
@@ -820,13 +820,13 @@ function VariantPickerModal({
           ))}
 
           <div className="flex items-center gap-3 pt-2">
-            <label className="text-xs font-medium text-gray-600">Qty</label>
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+            <label className="text-xs font-medium text-admin-text-secondary">Qty</label>
+            <div className="flex items-center border border-admin-border rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
                 disabled={qty <= 1}
-                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 transition"
+                className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover disabled:opacity-40 transition"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -837,18 +837,18 @@ function VariantPickerModal({
                 type="button"
                 onClick={() => setQty((q) => Math.min(displayStock, q + 1))}
                 disabled={qty >= displayStock || outOfStock}
-                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 transition"
+                className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover disabled:opacity-40 transition"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
-        <footer className="px-5 py-4 border-t border-gray-100 flex gap-2 justify-end bg-gray-50">
+        <footer className="px-5 py-4 border-t border-admin-border flex gap-2 justify-end bg-admin-surface-raised">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition"
+            className="px-4 py-2 bg-admin-surface border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover transition"
           >
             Cancel
           </button>

@@ -66,7 +66,7 @@ export default async function ProtectedAdminLayout({
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-w-0">
+      <div className="flex-1 flex flex-col bg-admin-surface-raised dark:bg-gray-900 min-w-0">
         <MobileAdminNav
           isSuperAdmin={isSuperAdmin}
           canViewStores={!!canViewStores}

@@ -34,19 +34,19 @@ export function PaymentsSearch({ storeId, defaultValue }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="relative w-64">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-text-subtle pointer-events-none" />
       <input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Order #, name, phone…"
-        className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent placeholder:text-gray-400"
+        className="w-full pl-9 pr-8 py-2 text-sm border border-admin-border rounded-lg bg-admin-surface focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent placeholder:text-admin-text-subtle"
       />
       {value && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-admin-text-subtle hover:text-admin-text-secondary"
         >
           <X className="w-3.5 h-3.5" />
         </button>

@@ -70,7 +70,7 @@ export default async function AnalyticsPage({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-admin-text-muted mt-0.5">
             {store.name} · {from} to {to}
           </p>
         </div>
@@ -79,75 +79,75 @@ export default async function AnalyticsPage({
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <Eye className="w-4 h-4 text-cyan-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Views
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {summary.totalViews.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">product views</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">product views</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <ShoppingCart className="w-4 h-4 text-amber-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Cart Adds
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {summary.totalCartAdds.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">added to cart</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">added to cart</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <ShoppingBag className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Orders
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {summary.totalOrders.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">completed</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">completed</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Revenue
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {formatCurrency(summary.totalRevenue)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">total earned</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">total earned</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 col-span-2 sm:col-span-1">
+        <div className="bg-admin-surface rounded-xl border border-admin-border p-4 col-span-2 sm:col-span-1">
           <div className="flex items-center gap-2 mb-1">
             <Receipt className="w-4 h-4 text-violet-500" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Avg. Order
             </span>
           </div>
           <p className="text-xl font-bold text-gray-900">
             {formatCurrency(avgOrderValue)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">per order</p>
+          <p className="text-xs text-admin-text-subtle mt-0.5">per order</p>
         </div>
       </div>
 
       {/* Conversion Funnel */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">
+      <div className="bg-admin-surface border border-admin-border rounded-xl p-6">
+        <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide mb-5">
           Conversion Funnel
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-4">
@@ -156,16 +156,16 @@ export default async function AnalyticsPage({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-cyan-500" />
-                <span className="text-xs font-medium text-gray-600">Product Views</span>
+                <span className="text-xs font-medium text-admin-text-secondary">Product Views</span>
               </div>
               <span className="text-xs font-bold text-gray-900">
                 {summary.conversionFunnel.views.toLocaleString()}
               </span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-admin-chip rounded-full overflow-hidden">
               <div className="h-full bg-cyan-400 rounded-full w-full" />
             </div>
-            <p className="text-[11px] text-gray-400 mt-1.5">
+            <p className="text-[11px] text-admin-text-subtle mt-1.5">
               <span className="sm:hidden">↓ </span>
               <span className="hidden sm:inline">→ </span>
               {summary.conversionFunnel.viewToCartRate}% added to cart
@@ -177,13 +177,13 @@ export default async function AnalyticsPage({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <ShoppingCart className="w-3.5 h-3.5 text-amber-500" />
-                <span className="text-xs font-medium text-gray-600">Cart Adds</span>
+                <span className="text-xs font-medium text-admin-text-secondary">Cart Adds</span>
               </div>
               <span className="text-xs font-bold text-gray-900">
                 {summary.conversionFunnel.cartAdds.toLocaleString()}
               </span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-admin-chip rounded-full overflow-hidden">
               <div
                 className="h-full bg-amber-400 rounded-full"
                 style={{
@@ -191,7 +191,7 @@ export default async function AnalyticsPage({
                 }}
               />
             </div>
-            <p className="text-[11px] text-gray-400 mt-1.5">
+            <p className="text-[11px] text-admin-text-subtle mt-1.5">
               <span className="sm:hidden">↓ </span>
               <span className="hidden sm:inline">→ </span>
               {summary.conversionFunnel.cartToPurchaseRate}% purchased
@@ -203,13 +203,13 @@ export default async function AnalyticsPage({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-xs font-medium text-gray-600">Purchases</span>
+                <span className="text-xs font-medium text-admin-text-secondary">Purchases</span>
               </div>
               <span className="text-xs font-bold text-gray-900">
                 {summary.conversionFunnel.purchases.toLocaleString()}
               </span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-admin-chip rounded-full overflow-hidden">
               <div
                 className="h-full bg-emerald-400 rounded-full"
                 style={{
@@ -217,7 +217,7 @@ export default async function AnalyticsPage({
                 }}
               />
             </div>
-            <p className="text-[11px] text-gray-400 mt-1.5">
+            <p className="text-[11px] text-admin-text-subtle mt-1.5">
               {summary.conversionFunnel.viewToPurchaseRate}% view-to-purchase
             </p>
           </div>
@@ -226,19 +226,19 @@ export default async function AnalyticsPage({
 
       {/* Daily Trend Chart */}
       {summary.dailyTrend.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
               Daily Trend
             </h2>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 bg-blue-400 rounded-sm" />
-                <span className="text-xs text-gray-500">Revenue</span>
+                <span className="text-xs text-admin-text-muted">Revenue</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 bg-violet-300 rounded-sm" />
-                <span className="text-xs text-gray-500">Views</span>
+                <span className="text-xs text-admin-text-muted">Views</span>
               </div>
             </div>
           </div>
@@ -269,7 +269,7 @@ export default async function AnalyticsPage({
                       }}
                     />
                   </div>
-                  <span className="text-[9px] text-gray-400 whitespace-nowrap rotate-45 origin-left mt-1 block">
+                  <span className="text-[9px] text-admin-text-subtle whitespace-nowrap rotate-45 origin-left mt-1 block">
                     {formatDate(day.date)}
                   </span>
                 </div>
@@ -282,47 +282,47 @@ export default async function AnalyticsPage({
       {/* Top Products — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Viewed */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-admin-border">
+            <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
               Top Viewed Products
             </h2>
           </div>
           {summary.topViewedProducts.length === 0 ? (
             <div className="py-12 text-center">
               <Eye className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">No view data for this period</p>
+              <p className="text-sm text-admin-text-subtle">No view data for this period</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50">
+                <thead className="bg-admin-surface-raised">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-6">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide w-6">
                       #
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Product
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Views
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Uniq
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Guest
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Members
                     </th>
                     <th className="px-5 py-3 w-8" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {summary.topViewedProducts.map((p, i) => (
-                    <tr key={p.productId} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="px-5 py-3 text-xs text-gray-400">{i + 1}</td>
+                    <tr key={p.productId} className="hover:bg-admin-surface-hover/60 transition-colors">
+                      <td className="px-5 py-3 text-xs text-admin-text-subtle">{i + 1}</td>
                       <td className="px-5 py-3">
                         <p className="text-sm font-medium text-gray-800 truncate max-w-40">
                           {p.productName || "Unknown"}
@@ -334,13 +334,13 @@ export default async function AnalyticsPage({
                           />
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-right font-semibold text-gray-700">
+                      <td className="px-5 py-3 text-right font-semibold text-admin-text-secondary">
                         {p.count.toLocaleString()}
                       </td>
                       <td className="px-5 py-3 text-right text-cyan-600 text-xs">
                         {p.uniqueViews.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-right text-gray-400 text-xs">
+                      <td className="px-5 py-3 text-right text-admin-text-subtle text-xs">
                         {p.anonymousViews.toLocaleString()}
                       </td>
                       <td className="px-5 py-3 text-right text-violet-600 text-xs">
@@ -349,7 +349,7 @@ export default async function AnalyticsPage({
                       <td className="px-5 py-3">
                         <Link
                           href={`/admin/stores/${storeId}/products/${p.productId}`}
-                          className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors inline-flex"
+                          className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors inline-flex"
                           title="Open product"
                         >
                           <ExternalLink size={13} />
@@ -364,38 +364,38 @@ export default async function AnalyticsPage({
         </div>
 
         {/* Top Purchased */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-admin-border">
+            <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
               Top Purchased Products
             </h2>
           </div>
           {summary.topPurchasedProducts.length === 0 ? (
             <div className="py-12 text-center">
               <ShoppingBag className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">No orders for this period</p>
+              <p className="text-sm text-admin-text-subtle">No orders for this period</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50">
+                <thead className="bg-admin-surface-raised">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-6">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide w-6">
                       #
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Product
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Units
                     </th>
                     <th className="px-5 py-3 w-8" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {summary.topPurchasedProducts.map((p, i) => (
-                    <tr key={p.productId} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="px-5 py-3 text-xs text-gray-400">{i + 1}</td>
+                    <tr key={p.productId} className="hover:bg-admin-surface-hover/60 transition-colors">
+                      <td className="px-5 py-3 text-xs text-admin-text-subtle">{i + 1}</td>
                       <td className="px-5 py-3">
                         <p className="text-sm font-medium text-gray-800 truncate max-w-44">
                           {p.productName || "Unknown"}
@@ -407,13 +407,13 @@ export default async function AnalyticsPage({
                           />
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-right font-semibold text-gray-700">
+                      <td className="px-5 py-3 text-right font-semibold text-admin-text-secondary">
                         {p.count.toLocaleString()}
                       </td>
                       <td className="px-5 py-3">
                         <Link
                           href={`/admin/stores/${storeId}/products/${p.productId}`}
-                          className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors inline-flex"
+                          className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors inline-flex"
                           title="Open product"
                         >
                           <ExternalLink size={13} />
@@ -432,17 +432,17 @@ export default async function AnalyticsPage({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Category */}
         {summary.revenueByCategory.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-admin-border">
+              <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Revenue by Category
               </h2>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-admin-border">
               {summary.revenueByCategory.map((cat) => (
                 <div
                   key={cat.categoryId ?? "uncategorised"}
-                  className="px-5 py-3 hover:bg-gray-50/60 transition-colors"
+                  className="px-5 py-3 hover:bg-admin-surface-hover/60 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium text-gray-800">
@@ -451,15 +451,15 @@ export default async function AnalyticsPage({
                         : tAdmin(cat.categoryName)}
                     </span>
                     <div className="flex items-center gap-3 text-right">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-admin-text-subtle">
                         {cat.orderCount} orders
                       </span>
-                      <span className="text-sm font-semibold text-gray-700 w-24 text-right">
+                      <span className="text-sm font-semibold text-admin-text-secondary w-24 text-right">
                         {formatCurrency(cat.revenue)}
                       </span>
                     </div>
                   </div>
-                  <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-1 bg-admin-chip rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-400 rounded-full"
                       style={{ width: `${Math.round((cat.revenue / maxCatRevenue) * 100)}%` }}
@@ -473,29 +473,29 @@ export default async function AnalyticsPage({
 
         {/* Top Search Queries */}
         {summary.topSearchQueries.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-gray-400" />
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-admin-text-subtle" />
+              <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Top Search Queries
               </h2>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-admin-border">
               {summary.topSearchQueries.map((q, i) => (
                 <div
                   key={q.query}
-                  className="px-5 py-3 hover:bg-gray-50/60 transition-colors"
+                  className="px-5 py-3 hover:bg-admin-surface-hover/60 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-300 w-4">{i + 1}</span>
                       <span className="text-sm font-medium text-gray-800">{q.query}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">
+                    <span className="text-sm font-semibold text-admin-text-secondary">
                       {q.count.toLocaleString()}
                     </span>
                   </div>
-                  <div className="h-1 bg-gray-100 rounded-full overflow-hidden ml-6">
+                  <div className="h-1 bg-admin-chip rounded-full overflow-hidden ml-6">
                     <div
                       className="h-full bg-violet-400 rounded-full"
                       style={{ width: `${Math.round((q.count / maxSearchCount) * 100)}%` }}
@@ -512,14 +512,14 @@ export default async function AnalyticsPage({
       {summary.totalViews === 0 &&
         summary.totalOrders === 0 &&
         summary.totalCartAdds === 0 && (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-            <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BarChart2 className="w-7 h-7 text-gray-400" />
+          <div className="text-center py-16 bg-admin-surface rounded-xl border border-admin-border">
+            <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+              <BarChart2 className="w-7 h-7 text-admin-text-subtle" />
             </div>
             <h3 className="text-base font-semibold text-gray-900 mb-1">
               No data for this period
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-admin-text-muted">
               Try selecting a wider date range or check back after customers visit your store.
             </p>
           </div>

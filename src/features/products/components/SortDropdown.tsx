@@ -33,11 +33,11 @@ export function SortDropdown({ currentSort, currentOrder, label = "Sort" }: Sort
 
   return (
     <div className="flex items-center gap-2">
-      <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
+      <ArrowUpDown size={14} className="text-admin-text-subtle shrink-0" />
       <select
         value={value}
         onChange={handleChange}
-        className="text-sm border border-gray-200 bg-white py-1.5 pl-2 pr-7 focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer text-gray-700"
+        className="text-sm border border-admin-border bg-admin-surface py-1.5 pl-2 pr-7 focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer text-admin-text-secondary"
         style={{
           borderRadius: "var(--border-radius)",
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,

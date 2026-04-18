@@ -113,10 +113,10 @@ export function AddToCartSection({
         <div className="space-y-4">
           {options.map((option) => (
             <div key={option.name}>
-              <label className="block text-xs font-semibold uppercase tracking-wide mb-2.5 text-gray-500">
+              <label className="block text-xs font-semibold uppercase tracking-wide mb-2.5 text-admin-text-muted">
                 {option.name}
                 {selectedOptions[option.name] && (
-                  <span className="font-normal text-gray-500 ml-1">
+                  <span className="font-normal text-admin-text-muted ml-1">
                     — {selectedOptions[option.name]}
                   </span>
                 )}
@@ -136,8 +136,8 @@ export function AddToCartSection({
                         selected
                           ? "border-[var(--color-primary)] text-[var(--color-primary)]"
                           : available
-                          ? "border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-sm"
-                          : "border-gray-100 text-gray-300 cursor-not-allowed line-through"
+                          ? "border-admin-border text-admin-text-secondary hover:border-gray-400 hover:shadow-sm"
+                          : "border-admin-border text-gray-300 cursor-not-allowed line-through"
                       }`}
                       style={{
                         borderRadius: "var(--border-radius)",
@@ -157,23 +157,23 @@ export function AddToCartSection({
       {/* Quantity + Add to Cart */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div
-          className="flex items-center border border-gray-200 shadow-[var(--shadow-xs)] shrink-0"
+          className="flex items-center border border-admin-border shadow-[var(--shadow-xs)] shrink-0"
           style={{ borderRadius: "var(--border-radius)" }}
         >
           <button
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             disabled={quantity <= 1}
-            className="px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-40"
+            className="px-4 py-3 text-admin-text-muted hover:text-admin-text-primary hover:bg-admin-surface-hover transition-colors disabled:opacity-40"
           >
             <Minus size={16} />
           </button>
-          <span className="px-5 py-3 font-semibold text-sm min-w-[3rem] text-center border-x border-gray-200">
+          <span className="px-5 py-3 font-semibold text-sm min-w-[3rem] text-center border-x border-admin-border">
             {quantity}
           </span>
           <button
             onClick={() => setQuantity((q) => Math.min(displayStock, q + 1))}
             disabled={quantity >= displayStock}
-            className="px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-40"
+            className="px-4 py-3 text-admin-text-muted hover:text-admin-text-primary hover:bg-admin-surface-hover transition-colors disabled:opacity-40"
           >
             <Plus size={16} />
           </button>

@@ -31,11 +31,11 @@ export function ProductCard({ product }: { product: IProduct }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative block overflow-hidden bg-white border border-gray-100 transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
+      className="group relative block overflow-hidden bg-admin-surface border border-admin-border transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
       style={{ borderRadius: "var(--border-radius)" }}
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-gray-50">
+      <div className="relative aspect-square overflow-hidden bg-admin-surface-raised">
         {product.thumbnail || product.images[0]?.url ? (
           <StoreImage
             src={product.thumbnail || product.images[0].url}
@@ -86,7 +86,7 @@ export function ProductCard({ product }: { product: IProduct }) {
 
         {/* Out of stock overlay */}
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+          <div className="absolute inset-0 bg-admin-surface/60 flex items-center justify-center">
             <span className="px-3 py-1 bg-gray-900 text-white text-xs font-semibold rounded-full">
               {tr("outOfStock") || "Out of Stock"}
             </span>
@@ -110,7 +110,7 @@ export function ProductCard({ product }: { product: IProduct }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-medium text-sm text-gray-700 leading-snug line-clamp-2 mb-2 group-hover:text-gray-900 transition-colors">
+        <h3 className="font-medium text-sm text-admin-text-secondary leading-snug line-clamp-2 mb-2 group-hover:text-admin-text-primary transition-colors">
           {productName}
         </h3>
 
@@ -130,7 +130,7 @@ export function ProductCard({ product }: { product: IProduct }) {
                 />
               ))}
             </div>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-admin-text-subtle">
               ({product.reviewCount})
             </span>
           </div>
@@ -146,7 +146,7 @@ export function ProductCard({ product }: { product: IProduct }) {
               ৳{product.price.toLocaleString()}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-xs text-admin-text-subtle line-through">
                 ৳{product.compareAtPrice.toLocaleString()}
               </span>
             )}

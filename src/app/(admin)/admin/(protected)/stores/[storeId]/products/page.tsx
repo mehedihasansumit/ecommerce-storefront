@@ -302,7 +302,7 @@ export default async function StoreProductsPage({
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Link
                               href={`/admin/stores/${storeId}/products/${product._id}`}
-                              className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg transition-colors"
+                              className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors"
                             >
                               Edit
                             </Link>

@@ -266,7 +266,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
 
       {/* Language Tabs */}
       {supportedLanguages.length > 1 && (
-        <div className="flex gap-1 border-b border-gray-200">
+        <div className="flex gap-1 border-b border-admin-border">
           {supportedLanguages.map((lang) => (
             <button
               key={lang}
@@ -274,8 +274,8 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               onClick={() => setActiveLang(lang)}
               className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
                 activeLang === lang
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-gray-900 text-admin-text-primary"
+                  : "border-transparent text-admin-text-muted hover:text-admin-text-secondary"
               }`}
             >
               {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
@@ -285,11 +285,11 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
       )}
 
       {/* Basic Info */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
+        <h2 className="font-semibold text-admin-text-primary">
           Basic Information
           {supportedLanguages.length > 1 && (
-            <span className="ml-2 text-xs font-normal text-gray-400">
+            <span className="ml-2 text-xs font-normal text-admin-text-subtle">
               — {LANGUAGE_LABELS[activeLang] || activeLang}
             </span>
           )}
@@ -301,7 +301,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
             type="text"
             value={localizedName[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             required={activeLang === (supportedLanguages[0] ?? "en")}
           />
         </div>
@@ -312,7 +312,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
             type="text"
             value={localizedShortDesc[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedShortDesc, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
 
@@ -322,14 +322,14 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
             value={localizedDesc[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
       </div>
 
       {/* Pricing */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">Pricing</h2>
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
+        <h2 className="font-semibold text-admin-text-primary">Pricing</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Price *</label>
@@ -339,7 +339,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               step="0.01"
               value={form.price}
               onChange={(e) => set("price", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
               required
             />
           </div>
@@ -351,7 +351,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               step="0.01"
               value={form.compareAtPrice}
               onChange={(e) => set("compareAtPrice", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
           </div>
           <div>
@@ -362,15 +362,15 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               step="0.01"
               value={form.costPrice}
               onChange={(e) => set("costPrice", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
           </div>
         </div>
       </div>
 
       {/* Inventory */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">Inventory</h2>
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
+        <h2 className="font-semibold text-admin-text-primary">Inventory</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">SKU</label>
@@ -378,7 +378,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               type="text"
               value={form.sku}
               onChange={(e) => set("sku", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
           </div>
           <div>
@@ -388,18 +388,18 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               min="0"
               value={form.stock}
               onChange={(e) => set("stock", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
           </div>
         </div>
       </div>
 
       {/* SEO */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
+        <h2 className="font-semibold text-admin-text-primary">
           SEO
           {supportedLanguages.length > 1 && (
-            <span className="ml-2 text-xs font-normal text-gray-400">
+            <span className="ml-2 text-xs font-normal text-admin-text-subtle">
               — {LANGUAGE_LABELS[activeLang] || activeLang}
             </span>
           )}
@@ -410,7 +410,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
             type="text"
             value={localizedSeoTitle[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedSeoTitle, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
         <div>
@@ -419,21 +419,21 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
             value={localizedSeoDesc[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedSeoDesc, activeLang, e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
       </div>
 
       {/* Organization */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">Organization</h2>
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
+        <h2 className="font-semibold text-admin-text-primary">Organization</h2>
 
         <div>
           <label className="block text-sm font-medium mb-1">Category</label>
           <select
             value={form.categoryId}
             onChange={(e) => set("categoryId", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           >
             <option value="">No category</option>
             {categories.map((cat) => (
@@ -451,7 +451,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
             value={form.tags}
             onChange={(e) => set("tags", e.target.value)}
             placeholder="casual, summer, sale"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
 
@@ -488,16 +488,16 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
       </div>
 
       {/* Options (variant axes) */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
         <div>
-          <h2 className="font-semibold text-gray-900 mb-1">Product Options</h2>
-          <p className="text-xs text-gray-500">Define variant dimensions like Color and Size. Variant combinations are auto-generated below.</p>
+          <h2 className="font-semibold text-admin-text-primary mb-1">Product Options</h2>
+          <p className="text-xs text-admin-text-muted">Define variant dimensions like Color and Size. Variant combinations are auto-generated below.</p>
         </div>
 
         {options.map((opt, optIdx) => (
-          <div key={optIdx} className="border border-gray-200 rounded-lg p-4 space-y-3">
+          <div key={optIdx} className="border border-admin-border rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-sm text-gray-900">{opt.name}</span>
+              <span className="font-medium text-sm text-admin-text-primary">{opt.name}</span>
               <button
                 type="button"
                 onClick={() => removeOption(optIdx)}
@@ -511,13 +511,13 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               {opt.values.map((val, valIdx) => (
                 <span
                   key={valIdx}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-admin-chip text-admin-text-secondary text-sm rounded-full"
                 >
                   {val}
                   <button
                     type="button"
                     onClick={() => removeValueFromOption(optIdx, valIdx)}
-                    className="text-gray-400 hover:text-gray-700"
+                    className="text-admin-text-subtle hover:text-admin-text-secondary"
                   >
                     <X size={12} />
                   </button>
@@ -539,12 +539,12 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
                   }
                 }}
                 placeholder={`Add ${opt.name} value...`}
-                className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm"
+                className="flex-1 px-3 py-1.5 border border-admin-border-md rounded text-sm"
               />
               <button
                 type="button"
                 onClick={() => addValueToOption(optIdx)}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200"
+                className="px-3 py-1.5 bg-admin-chip text-admin-text-secondary text-sm rounded hover:bg-gray-200"
               >
                 <Plus size={14} />
               </button>
@@ -564,7 +564,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               }
             }}
             placeholder="Option name (e.g., Color, Size, Material)..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
+            className="flex-1 px-3 py-2 border border-admin-border-md rounded text-sm"
           />
           <button
             type="button"
@@ -578,15 +578,15 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
 
       {/* Color Images */}
       {colorOption && colorOption.values.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
           <div>
-            <h2 className="font-semibold text-gray-900 mb-1">Color Images</h2>
-            <p className="text-xs text-gray-500">Add images per color. These will show in the gallery when that color is selected.</p>
+            <h2 className="font-semibold text-admin-text-primary mb-1">Color Images</h2>
+            <p className="text-xs text-admin-text-muted">Add images per color. These will show in the gallery when that color is selected.</p>
           </div>
 
           {colorOption.values.map((color) => (
-            <div key={color} className="border border-gray-200 rounded-lg p-4 space-y-3">
-              <h3 className="font-medium text-sm text-gray-900">{color}</h3>
+            <div key={color} className="border border-admin-border rounded-lg p-4 space-y-3">
+              <h3 className="font-medium text-sm text-admin-text-primary">{color}</h3>
               <ImageGalleryInput
                 value={(colorImages[color] ?? []).map((img) => ({
                   ...img,
@@ -604,31 +604,31 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
 
       {/* Variants Table */}
       {variants.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
           <div>
-            <h2 className="font-semibold text-gray-900 mb-1">Variant Combinations</h2>
-            <p className="text-xs text-gray-500">Auto-generated from your options. Set price, stock, and SKU per combination.</p>
+            <h2 className="font-semibold text-admin-text-primary mb-1">Variant Combinations</h2>
+            <p className="text-xs text-admin-text-muted">Auto-generated from your options. Set price, stock, and SKU per combination.</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
+                <tr className="bg-admin-surface-raised border-b border-admin-border">
                   {options.map((opt) => (
-                    <th key={opt.name} className="px-3 py-2 text-left font-medium text-gray-700">
+                    <th key={opt.name} className="px-3 py-2 text-left font-medium text-admin-text-secondary">
                       {opt.name}
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-left font-medium text-gray-700">Price</th>
-                  <th className="px-3 py-2 text-left font-medium text-gray-700">Stock</th>
-                  <th className="px-3 py-2 text-left font-medium text-gray-700">SKU</th>
+                  <th className="px-3 py-2 text-left font-medium text-admin-text-secondary">Price</th>
+                  <th className="px-3 py-2 text-left font-medium text-admin-text-secondary">Stock</th>
+                  <th className="px-3 py-2 text-left font-medium text-admin-text-secondary">SKU</th>
                 </tr>
               </thead>
               <tbody>
                 {variants.map((variant, idx) => (
-                  <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
+                  <tr key={idx} className="border-b border-admin-border hover:bg-admin-surface-hover">
                     {options.map((opt) => (
-                      <td key={opt.name} className="px-3 py-2 text-gray-700 font-medium">
+                      <td key={opt.name} className="px-3 py-2 text-admin-text-secondary font-medium">
                         {variant.optionValues[opt.name]}
                       </td>
                     ))}
@@ -639,7 +639,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
                         step="0.01"
                         value={variant.price}
                         onChange={(e) => updateVariant(idx, "price", Number(e.target.value))}
-                        className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                        className="w-24 px-2 py-1 border border-admin-border-md rounded text-sm"
                       />
                     </td>
                     <td className="px-3 py-2">
@@ -648,7 +648,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
                         min="0"
                         value={variant.stock}
                         onChange={(e) => updateVariant(idx, "stock", Number(e.target.value))}
-                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                        className="w-20 px-2 py-1 border border-admin-border-md rounded text-sm"
                       />
                     </td>
                     <td className="px-3 py-2">
@@ -657,7 +657,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
                         value={variant.sku}
                         onChange={(e) => updateVariant(idx, "sku", e.target.value)}
                         placeholder="SKU"
-                        className="w-32 px-2 py-1 border border-gray-300 rounded text-sm"
+                        className="w-32 px-2 py-1 border border-admin-border-md rounded text-sm"
                       />
                     </td>
                   </tr>
@@ -681,7 +681,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50"
+            className="px-6 py-2 border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover"
           >
             Cancel
           </button>

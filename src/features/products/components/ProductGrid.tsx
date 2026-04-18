@@ -11,10 +11,10 @@ export function ProductGrid({ products }: { products: IProduct[] }) {
     return (
       <div className="text-center py-20">
         <Package size={40} className="mx-auto text-gray-300 mb-4" />
-        <p className="text-lg text-gray-500 font-medium">
+        <p className="text-lg text-admin-text-muted font-medium">
           {t("noProducts")}
         </p>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-admin-text-subtle mt-1">
           {t("noProductsHint") || "Try adjusting your search or filters"}
         </p>
       </div>

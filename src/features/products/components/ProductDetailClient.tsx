@@ -90,7 +90,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
                 />
               ))}
             </div>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-admin-text-muted">
               ({product.reviewCount} {tr("reviews")})
             </span>
           </div>
@@ -105,19 +105,19 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
             ৳{displayPrice.toLocaleString()}
           </span>
           {hasDiscount && (
-            <span className="text-xl text-gray-400 line-through">
+            <span className="text-xl text-admin-text-subtle line-through">
               ৳{displayCompareAt.toLocaleString()}
             </span>
           )}
         </div>
 
         {t(product.shortDescription, locale) && (
-          <p className="text-gray-600 leading-relaxed mb-6">
+          <p className="text-admin-text-secondary leading-relaxed mb-6">
             {t(product.shortDescription, locale)}
           </p>
         )}
 
-        <div className="border-t border-gray-100 pt-6 space-y-6">
+        <div className="border-t border-admin-border pt-6 space-y-6">
           {/* Stock */}
           <div>
             {displayStock > 0 ? (

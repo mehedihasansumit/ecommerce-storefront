@@ -66,7 +66,7 @@ export default async function PaymentsPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-admin-text-primary flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-admin-text-subtle" />
             Payments
           </h1>
@@ -81,7 +81,7 @@ export default async function PaymentsPage({
             <TrendingUp className="w-4 h-4 text-green-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Revenue</span>
           </div>
-          <p className="text-xl font-bold text-gray-900">৳{stats.totalRevenue.toLocaleString()}</p>
+          <p className="text-xl font-bold text-admin-text-primary">৳{stats.totalRevenue.toLocaleString()}</p>
           <p className="text-xs text-admin-text-subtle mt-0.5">{stats.paid} paid orders</p>
         </div>
 
@@ -90,7 +90,7 @@ export default async function PaymentsPage({
             <Clock className="w-4 h-4 text-yellow-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Pending</span>
           </div>
-          <p className="text-xl font-bold text-gray-900">{stats.pending}</p>
+          <p className="text-xl font-bold text-admin-text-primary">{stats.pending}</p>
           <p className="text-xs text-admin-text-subtle mt-0.5">awaiting payment</p>
         </div>
 
@@ -99,7 +99,7 @@ export default async function PaymentsPage({
             <XCircle className="w-4 h-4 text-red-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Failed</span>
           </div>
-          <p className="text-xl font-bold text-gray-900">{stats.failed}</p>
+          <p className="text-xl font-bold text-admin-text-primary">{stats.failed}</p>
           <p className="text-xs text-admin-text-subtle mt-0.5">failed transactions</p>
         </div>
 
@@ -108,7 +108,7 @@ export default async function PaymentsPage({
             <RotateCcw className="w-4 h-4 text-admin-text-muted" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Refunded</span>
           </div>
-          <p className="text-xl font-bold text-gray-900">{stats.refunded}</p>
+          <p className="text-xl font-bold text-admin-text-primary">{stats.refunded}</p>
           <p className="text-xs text-admin-text-subtle mt-0.5">orders refunded</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ export default async function PaymentsPage({
           <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
             <CreditCard className="w-7 h-7 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No orders found</h3>
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No orders found</h3>
           <p className="text-sm text-admin-text-muted">
             {q
               ? `No orders match "${q}".`

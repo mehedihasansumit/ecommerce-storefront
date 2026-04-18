@@ -76,7 +76,7 @@ export default async function CustomerPointsPage({
       <div className="mb-4">
         <Link
           href={`/admin/stores/${storeId}/points`}
-          className="inline-flex items-center gap-1.5 text-xs text-admin-text-muted hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-admin-text-muted hover:text-admin-text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to loyalty points
@@ -87,7 +87,7 @@ export default async function CustomerPointsPage({
       <div className="bg-admin-surface rounded-xl border border-admin-border p-6 mb-6">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{user.name}</h1>
+            <h1 className="text-xl font-bold text-admin-text-primary">{user.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-admin-text-muted">
               {user.email && (
                 <span className="inline-flex items-center gap-1.5">
@@ -109,7 +109,7 @@ export default async function CustomerPointsPage({
               <p className="text-xs text-admin-text-subtle uppercase tracking-wide mb-1">
                 Balance
               </p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-admin-text-primary">
                 {balance.points.toLocaleString()}
               </p>
               <p className="text-xs text-admin-text-muted mt-0.5">
@@ -120,7 +120,7 @@ export default async function CustomerPointsPage({
               <p className="text-xs text-admin-text-subtle uppercase tracking-wide mb-1">
                 To redeem
               </p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-admin-text-primary">
                 {balance.pointsNeeded > 0
                   ? balance.pointsNeeded.toLocaleString()
                   : "—"}
@@ -145,7 +145,7 @@ export default async function CustomerPointsPage({
           <div className="w-12 h-12 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-3">
             <Coins className="w-6 h-6 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">
             No transactions yet
           </h3>
           <p className="text-sm text-admin-text-muted">
@@ -174,7 +174,7 @@ export default async function CustomerPointsPage({
                       <Icon size={15} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-admin-text-primary">
                         {reasonLabel(t.reason)}
                       </p>
                       <p className="text-xs text-admin-text-subtle">

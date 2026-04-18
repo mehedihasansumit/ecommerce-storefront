@@ -88,7 +88,7 @@ export default async function StorePointsPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-admin-text-primary flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-500" />
             Loyalty Points
           </h1>
@@ -122,7 +122,7 @@ export default async function StorePointsPage({
               Outstanding
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {stats.outstanding.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">
@@ -137,7 +137,7 @@ export default async function StorePointsPage({
               Earned
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {stats.totalEarned.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">lifetime</p>
@@ -150,7 +150,7 @@ export default async function StorePointsPage({
               Redeemed
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {stats.totalRedeemed.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">
@@ -165,7 +165,7 @@ export default async function StorePointsPage({
               Holders
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {stats.activeHolders.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">with balance {">"} 0</p>
@@ -186,7 +186,7 @@ export default async function StorePointsPage({
           <div className="w-12 h-12 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-3">
             <Coins className="w-6 h-6 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">
             No customers yet
           </h3>
           <p className="text-sm text-admin-text-muted">
@@ -228,7 +228,7 @@ export default async function StorePointsPage({
                         className="hover:bg-admin-surface-hover/60 transition-colors group"
                       >
                         <td className="px-5 py-4">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-admin-text-primary">
                             {c.name}
                           </p>
                         </td>
@@ -236,7 +236,7 @@ export default async function StorePointsPage({
                           {c.email || c.phone || "—"}
                         </td>
                         <td className="px-5 py-4 text-right">
-                          <span className="text-sm font-semibold text-gray-900">
+                          <span className="text-sm font-semibold text-admin-text-primary">
                             {(c.points ?? 0).toLocaleString()}
                           </span>
                         </td>
@@ -321,7 +321,7 @@ export default async function StorePointsPage({
                       <Icon size={15} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-admin-text-primary truncate">
                         {user?.name ?? "Unknown customer"}
                       </p>
                       <p className="text-xs text-admin-text-subtle">

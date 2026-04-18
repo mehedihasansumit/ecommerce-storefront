@@ -69,7 +69,7 @@ export default async function AnalyticsPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+          <h1 className="text-2xl font-bold text-admin-text-primary">Analytics</h1>
           <p className="text-sm text-admin-text-muted mt-0.5">
             {store.name} · {from} to {to}
           </p>
@@ -86,7 +86,7 @@ export default async function AnalyticsPage({
               Views
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {summary.totalViews.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">product views</p>
@@ -99,7 +99,7 @@ export default async function AnalyticsPage({
               Cart Adds
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {summary.totalCartAdds.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">added to cart</p>
@@ -112,7 +112,7 @@ export default async function AnalyticsPage({
               Orders
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {summary.totalOrders.toLocaleString()}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">completed</p>
@@ -125,7 +125,7 @@ export default async function AnalyticsPage({
               Revenue
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {formatCurrency(summary.totalRevenue)}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">total earned</p>
@@ -138,7 +138,7 @@ export default async function AnalyticsPage({
               Avg. Order
             </span>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xl font-bold text-admin-text-primary">
             {formatCurrency(avgOrderValue)}
           </p>
           <p className="text-xs text-admin-text-subtle mt-0.5">per order</p>
@@ -158,7 +158,7 @@ export default async function AnalyticsPage({
                 <Eye className="w-3.5 h-3.5 text-cyan-500" />
                 <span className="text-xs font-medium text-admin-text-secondary">Product Views</span>
               </div>
-              <span className="text-xs font-bold text-gray-900">
+              <span className="text-xs font-bold text-admin-text-primary">
                 {summary.conversionFunnel.views.toLocaleString()}
               </span>
             </div>
@@ -179,7 +179,7 @@ export default async function AnalyticsPage({
                 <ShoppingCart className="w-3.5 h-3.5 text-amber-500" />
                 <span className="text-xs font-medium text-admin-text-secondary">Cart Adds</span>
               </div>
-              <span className="text-xs font-bold text-gray-900">
+              <span className="text-xs font-bold text-admin-text-primary">
                 {summary.conversionFunnel.cartAdds.toLocaleString()}
               </span>
             </div>
@@ -205,7 +205,7 @@ export default async function AnalyticsPage({
                 <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
                 <span className="text-xs font-medium text-admin-text-secondary">Purchases</span>
               </div>
-              <span className="text-xs font-bold text-gray-900">
+              <span className="text-xs font-bold text-admin-text-primary">
                 {summary.conversionFunnel.purchases.toLocaleString()}
               </span>
             </div>
@@ -324,7 +324,7 @@ export default async function AnalyticsPage({
                     <tr key={p.productId} className="hover:bg-admin-surface-hover/60 transition-colors">
                       <td className="px-5 py-3 text-xs text-admin-text-subtle">{i + 1}</td>
                       <td className="px-5 py-3">
-                        <p className="text-sm font-medium text-gray-800 truncate max-w-40">
+                        <p className="text-sm font-medium text-admin-text-secondary truncate max-w-40">
                           {p.productName || "Unknown"}
                         </p>
                         <div className="mt-1.5 h-1 bg-cyan-50 rounded-full overflow-hidden w-full">
@@ -397,7 +397,7 @@ export default async function AnalyticsPage({
                     <tr key={p.productId} className="hover:bg-admin-surface-hover/60 transition-colors">
                       <td className="px-5 py-3 text-xs text-admin-text-subtle">{i + 1}</td>
                       <td className="px-5 py-3">
-                        <p className="text-sm font-medium text-gray-800 truncate max-w-44">
+                        <p className="text-sm font-medium text-admin-text-secondary truncate max-w-44">
                           {p.productName || "Unknown"}
                         </p>
                         <div className="mt-1.5 h-1 bg-emerald-50 rounded-full overflow-hidden w-full">
@@ -445,7 +445,7 @@ export default async function AnalyticsPage({
                   className="px-5 py-3 hover:bg-admin-surface-hover/60 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-medium text-gray-800">
+                    <span className="text-sm font-medium text-admin-text-secondary">
                       {typeof cat.categoryName === "string"
                         ? cat.categoryName
                         : tAdmin(cat.categoryName)}
@@ -489,7 +489,7 @@ export default async function AnalyticsPage({
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-300 w-4">{i + 1}</span>
-                      <span className="text-sm font-medium text-gray-800">{q.query}</span>
+                      <span className="text-sm font-medium text-admin-text-secondary">{q.query}</span>
                     </div>
                     <span className="text-sm font-semibold text-admin-text-secondary">
                       {q.count.toLocaleString()}
@@ -516,7 +516,7 @@ export default async function AnalyticsPage({
             <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
               <BarChart2 className="w-7 h-7 text-admin-text-subtle" />
             </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">
+            <h3 className="text-base font-semibold text-admin-text-primary mb-1">
               No data for this period
             </h3>
             <p className="text-sm text-admin-text-muted">

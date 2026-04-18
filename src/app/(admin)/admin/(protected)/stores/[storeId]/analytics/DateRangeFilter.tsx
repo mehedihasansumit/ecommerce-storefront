@@ -55,7 +55,7 @@ export function DateRangeFilter({ storeId, from, to }: Props) {
             onClick={() => applyPreset(days)}
             className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
               isPresetActive(from, to, days)
-                ? "bg-admin-surface text-gray-900 shadow-sm"
+                ? "bg-admin-surface text-admin-text-primary shadow-sm"
                 : "text-admin-text-muted hover:text-admin-text-secondary"
             }`}
           >

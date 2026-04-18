@@ -40,10 +40,10 @@ export function CartItemRow({
   const variantEntries = Object.entries(variantSelections);
 
   return (
-    <div className="flex gap-4 py-6 border-b border-admin-border last:border-0">
+    <div className="flex gap-4 py-6 border-b border-border-subtle last:border-0">
       {/* Thumbnail */}
       <Link href={`/products/${productSlug}`} className="shrink-0">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-admin-chip rounded-lg overflow-hidden relative">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-surface rounded-lg overflow-hidden relative">
           {thumbnail ? (
             <Image
               src={thumbnail}
@@ -52,7 +52,7 @@ export function CartItemRow({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gray-200" />
+            <div className="w-full h-full bg-surface" />
           )}
         </div>
       </Link>
@@ -69,8 +69,8 @@ export function CartItemRow({
         {variantEntries.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-2">
             {variantEntries.map(([key, val]) => (
-              <span key={key} className="text-[11px] text-admin-text-subtle uppercase tracking-wide">
-                {key}: <span className="font-medium text-admin-text-secondary">{val}</span>
+              <span key={key} className="text-[11px] text-text-tertiary uppercase tracking-wide">
+                {key}: <span className="font-medium text-text-secondary">{val}</span>
               </span>
             ))}
           </div>
@@ -88,33 +88,33 @@ export function CartItemRow({
       <div className="flex flex-col items-end justify-between gap-2 shrink-0">
         <button
           onClick={() => handleUpdate(0)}
-          className="p-1.5 rounded-md text-admin-text-subtle hover:text-red-500 hover:bg-red-50 transition-colors"
+          className="p-1.5 rounded-md text-text-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
         >
           <Trash2 size={16} />
         </button>
 
         <div
-          className="flex items-center border border-admin-border shadow-[var(--shadow-xs)]"
+          className="flex items-center border border-border-subtle shadow-[var(--shadow-xs)]"
           style={{ borderRadius: "var(--border-radius)" }}
         >
           <button
             onClick={() => handleUpdate(qty - 1)}
-            className="px-2.5 py-1.5 text-admin-text-muted hover:text-admin-text-primary hover:bg-admin-surface-hover transition-colors"
+            className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
           >
             <Minus size={14} />
           </button>
-          <span className="px-3 py-1.5 text-sm font-semibold min-w-[2rem] text-center border-x border-admin-border">
+          <span className="px-3 py-1.5 text-sm font-semibold min-w-[2rem] text-center border-x border-border-subtle">
             {qty}
           </span>
           <button
             onClick={() => handleUpdate(qty + 1)}
-            className="px-2.5 py-1.5 text-admin-text-muted hover:text-admin-text-primary hover:bg-admin-surface-hover transition-colors"
+            className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
           >
             <Plus size={14} />
           </button>
         </div>
 
-        <p className="text-sm font-semibold text-admin-text-secondary">
+        <p className="text-sm font-semibold text-[var(--color-text)]">
           ৳{(priceAtAdd * qty).toLocaleString()}
         </p>
       </div>

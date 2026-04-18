@@ -111,13 +111,13 @@ export default async function ProductsPage({
             ? categoryName
             : t("allProducts")}
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-secondary">
           {result.total}{" "}
           {result.total === 1
             ? (t("productsLabel") || "product")
             : (t("productsLabel") || "products")}
           {search && (
-            <> for &ldquo;<span className="text-gray-700 font-medium">{search}</span>&rdquo;</>
+            <> for &ldquo;<span className="text-[var(--color-text)] font-medium">{search}</span>&rdquo;</>
           )}
         </p>
       </div>
@@ -127,12 +127,12 @@ export default async function ProductsPage({
         {categories.length > 0 && (
           <aside className="w-full lg:w-60 shrink-0">
             <div
-              className="lg:sticky lg:top-24 p-5 bg-white shadow-[var(--shadow-xs)] border border-gray-100"
+              className="lg:sticky lg:top-24 p-5 bg-bg shadow-[var(--shadow-xs)] border border-border-subtle"
               style={{ borderRadius: "var(--border-radius)" }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <SlidersHorizontal size={16} className="text-gray-500" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-700">
+                <SlidersHorizontal size={16} className="text-text-secondary" />
+                <h3 className="font-semibold text-sm uppercase tracking-wide text-[var(--color-text)]">
                   {t("categories")}
                 </h3>
               </div>
@@ -150,7 +150,7 @@ export default async function ProductsPage({
                     className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
                       !categorySlug
                         ? "font-semibold"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        : "text-text-secondary hover:bg-surface dark:hover:bg-gray-700/50 hover:text-[var(--color-text)]"
                     }`}
                     style={
                       !categorySlug
@@ -163,7 +163,7 @@ export default async function ProductsPage({
                     }
                   >
                     <span>{t("all")}</span>
-                    <span className="text-xs text-gray-400 tabular-nums">
+                    <span className="text-xs text-text-tertiary tabular-nums">
                       {allCount}
                     </span>
                   </Link>
@@ -177,7 +177,7 @@ export default async function ProductsPage({
                         className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
                           categorySlug === cat.slug
                             ? "font-semibold"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                            : "text-text-secondary hover:bg-surface dark:hover:bg-gray-700/50 hover:text-[var(--color-text)]"
                         }`}
                         style={
                           categorySlug === cat.slug
@@ -191,7 +191,7 @@ export default async function ProductsPage({
                       >
                         <span>{tl(cat.name, locale)}</span>
                         {count > 0 && (
-                          <span className="text-xs text-gray-400 tabular-nums">{count}</span>
+                          <span className="text-xs text-text-tertiary tabular-nums">{count}</span>
                         )}
                       </Link>
                     </li>
@@ -206,13 +206,13 @@ export default async function ProductsPage({
         <div className="flex-1 min-w-0">
           {/* Results bar */}
           <div className="flex items-center justify-between mb-4 gap-4">
-            <p className="text-xs text-gray-400 shrink-0">
+            <p className="text-xs text-text-tertiary shrink-0">
               {t("showing") || "Showing"}{" "}
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-[var(--color-text)]">
                 {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, result.total)}
               </span>{" "}
               {t("of") || "of"}{" "}
-              <span className="font-medium text-gray-700">{result.total}</span>
+              <span className="font-medium text-[var(--color-text)]">{result.total}</span>
             </p>
             <SortDropdown currentSort={sort} currentOrder={order} />
           </div>
@@ -232,7 +232,7 @@ export default async function ProductsPage({
               {page > 1 && (
                 <Link
                   href={buildUrl(page - 1)}
-                  className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm border border-border-subtle rounded-lg hover:bg-surface dark:hover:bg-gray-800 transition-colors"
                   aria-label="Previous page"
                 >
                   <ChevronLeft size={16} />
@@ -241,7 +241,7 @@ export default async function ProductsPage({
 
               {pageNumbers.map((p, i) =>
                 p === "..." ? (
-                  <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-sm text-gray-400">
+                  <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-sm text-text-tertiary">
                     …
                   </span>
                 ) : (
@@ -251,7 +251,7 @@ export default async function ProductsPage({
                     className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all ${
                       p === page
                         ? "text-white shadow-sm"
-                        : "border border-gray-200 hover:bg-gray-50 text-gray-600"
+                        : "border border-border-subtle hover:bg-surface dark:hover:bg-gray-800 text-text-secondary"
                     }`}
                     style={
                       p === page
@@ -268,7 +268,7 @@ export default async function ProductsPage({
               {page < result.totalPages && (
                 <Link
                   href={buildUrl(page + 1)}
-                  className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm border border-border-subtle rounded-lg hover:bg-surface dark:hover:bg-gray-800 transition-colors"
                   aria-label="Next page"
                 >
                   <ChevronRight size={16} />

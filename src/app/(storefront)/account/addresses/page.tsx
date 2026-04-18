@@ -90,11 +90,11 @@ export default function AddressesPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gray-200 rounded-lg" />
-            <div className="h-7 bg-gray-200 rounded w-40" />
+            <div className="w-9 h-9 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+            <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-40" />
           </div>
-          <div className="h-28 bg-gray-200 rounded-lg" />
-          <div className="h-28 bg-gray-200 rounded-lg" />
+          <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+          <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-lg" />
         </div>
       </div>
     );
@@ -110,12 +110,12 @@ export default function AddressesPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/account"
-            className="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 transition-colors shrink-0"
+            className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg border border-border-subtle hover:border-primary/40 transition-colors shrink-0"
             aria-label="Back to account"
           >
-            <ArrowLeft size={16} className="text-gray-600" />
+            <ArrowLeft size={16} className="text-text-secondary" />
           </Link>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-xl font-bold text-[var(--color-text)] tracking-tight">
             {t("title")}
           </h1>
         </div>
@@ -192,7 +192,7 @@ export default function AddressesPage() {
       )}
 
       {addresses.length >= 10 && (
-        <p className="text-sm text-amber-600 px-1">{t("maxReached")}</p>
+        <p className="text-sm text-amber-600 dark:text-amber-400 px-1">{t("maxReached")}</p>
       )}
 
       {/* Delete confirm dialog */}

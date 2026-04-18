@@ -62,15 +62,15 @@ export default async function OrdersPage({
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/account"
-          className="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 transition-colors shrink-0"
+          className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg border border-border-subtle hover:border-primary/30 transition-colors shrink-0"
           aria-label="Back to account"
         >
-          <ArrowLeft size={16} className="text-gray-600" />
+          <ArrowLeft size={16} className="text-text-secondary" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">{t("myOrders")}</h1>
+          <h1 className="text-xl font-bold text-[var(--color-text)] tracking-tight">{t("myOrders")}</h1>
           {total > 0 && (
-            <p className="text-xs text-gray-400 mt-0.5">{total} orders total</p>
+            <p className="text-xs text-text-tertiary mt-0.5">{total} orders total</p>
           )}
         </div>
       </div>
@@ -97,20 +97,20 @@ export default async function OrdersPage({
               const moreCount = order.items.length - previewItems.length;
               return (
                 <Card key={order._id} padding="none">
-                  <Link href={`/orders/${order._id}`} className="block hover:bg-gray-50 transition-colors rounded-lg overflow-hidden">
+                  <Link href={`/orders/${order._id}`} className="block hover:bg-surface dark:hover:bg-gray-800 transition-colors rounded-lg overflow-hidden">
                     <div className="px-5 py-4">
                       {/* Top row */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-gray-900">
+                            <span className="text-sm font-semibold text-[var(--color-text)]">
                               #{order.orderNumber}
                             </span>
                             <Badge tone={badge.tone} size="sm">
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </Badge>
                           </div>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-text-tertiary mt-1">
                             {new Date(order.createdAt).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "short",
@@ -127,13 +127,13 @@ export default async function OrdersPage({
 
                       {/* Item preview */}
                       {previewItems.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2">
-                          <Package size={13} className="text-gray-300 shrink-0" />
-                          <p className="text-xs text-gray-500 truncate">
+                        <div className="mt-3 pt-3 border-t border-border-subtle flex items-center gap-2">
+                          <Package size={13} className="text-text-tertiary shrink-0" />
+                          <p className="text-xs text-text-secondary truncate">
                             {previewItems.map((i) => i.productName).join(", ")}
                             {moreCount > 0 && ` +${moreCount} more`}
                           </p>
-                          <ChevronRight size={14} className="text-gray-300 shrink-0 ml-auto" />
+                          <ChevronRight size={14} className="text-text-tertiary shrink-0 ml-auto" />
                         </div>
                       )}
                     </div>
@@ -146,7 +146,7 @@ export default async function OrdersPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-secondary">
                 {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
               <div className="flex items-center gap-1">
@@ -155,8 +155,8 @@ export default async function OrdersPage({
                   aria-disabled={currentPage <= 1}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors ${
                     currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200 text-gray-400"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                      ? "opacity-30 pointer-events-none border-border-subtle text-text-tertiary"
+                      : "border-border-subtle text-text-secondary hover:bg-surface dark:hover:bg-gray-800"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default async function OrdersPage({
                     item === "..." ? (
                       <span
                         key={`ellipsis-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-gray-400"
+                        className="w-8 h-8 flex items-center justify-center text-xs text-text-tertiary"
                       >
                         …
                       </span>
@@ -184,7 +184,7 @@ export default async function OrdersPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium border transition-colors ${
                           currentPage === item
                             ? "border-transparent text-white"
-                            : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                            : "border-border-subtle text-text-secondary hover:bg-surface dark:hover:bg-gray-800"
                         }`}
                         style={
                           currentPage === item
@@ -202,8 +202,8 @@ export default async function OrdersPage({
                   aria-disabled={currentPage >= totalPages}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors ${
                     currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200 text-gray-400"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                      ? "opacity-30 pointer-events-none border-border-subtle text-text-tertiary"
+                      : "border-border-subtle text-text-secondary hover:bg-surface dark:hover:bg-gray-800"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

@@ -50,6 +50,14 @@ html.dark {
   --admin-text-muted:       #9CA3AF;
   --admin-text-subtle:      #6B7280;
   --admin-chip-text:        #9CA3AF;
+
+  /* Storefront tokens — fallbacks if layout.tsx injection doesn't apply */
+  --color-bg:               #111827;
+  --color-text:             #F9FAFB;
+  --color-surface:          #1F2937;
+  --color-border-subtle:    #374151;
+  --color-text-secondary:   #9CA3AF;
+  --color-text-tertiary:    #6B7280;
 }
 
 @theme inline {

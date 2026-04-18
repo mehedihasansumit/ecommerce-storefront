@@ -10,11 +10,11 @@ export function ProductGrid({ products }: { products: IProduct[] }) {
   if (products.length === 0) {
     return (
       <div className="text-center py-20">
-        <Package size={40} className="mx-auto text-gray-300 mb-4" />
-        <p className="text-lg text-admin-text-muted font-medium">
+        <Package size={40} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+        <p className="text-lg text-text-secondary font-medium">
           {t("noProducts")}
         </p>
-        <p className="text-sm text-admin-text-subtle mt-1">
+        <p className="text-sm text-text-tertiary mt-1">
           {t("noProductsHint") || "Try adjusting your search or filters"}
         </p>
       </div>

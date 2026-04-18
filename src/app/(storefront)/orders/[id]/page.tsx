@@ -129,8 +129,8 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                         boxShadow: "0 0 0 4px rgba(239,68,68,0.15)",
                       }
                     : {
-                        background: "#f3f4f6",
-                        border: "2px solid #e5e7eb",
+                        background: "var(--color-surface)",
+                        border: "2px solid var(--color-border-subtle)",
                       }),
                 }}
               >
@@ -141,7 +141,7 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                 ) : hasDate ? (
                   <Check size={16} color="var(--color-primary)" strokeWidth={2.5} />
                 ) : (
-                  <Icon size={16} color="#d1d5db" />
+                  <Icon size={16} style={{ color: "var(--color-text-tertiary)" }} />
                 )}
               </div>
 
@@ -152,8 +152,8 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                     minHeight: 32,
                     width: 2,
                     background: hasDate
-                      ? "color-mix(in srgb, var(--color-primary) 35%, #e5e7eb)"
-                      : "#e5e7eb",
+                      ? "color-mix(in srgb, var(--color-primary) 35%, var(--color-border-subtle))"
+                      : "var(--color-border-subtle)",
                   }}
                 />
               )}
@@ -171,7 +171,7 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                     ? {
                         background: isCancelled
                           ? "rgba(239,68,68,0.06)"
-                          : "color-mix(in srgb, var(--color-primary) 7%, white)",
+                          : "color-mix(in srgb, var(--color-primary) 7%, transparent)",
                         border: isCancelled
                           ? "1px solid rgba(239,68,68,0.15)"
                           : "1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)",
@@ -189,8 +189,8 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                             ? "#ef4444"
                             : "var(--color-primary)"
                           : hasDate
-                          ? "#374151"
-                          : "#9ca3af",
+                          ? "var(--color-text)"
+                          : "var(--color-text-tertiary)",
                       }}
                     >
                       {statusLabel(status, t)}
@@ -208,14 +208,14 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                       </p>
                     )}
                     {entry?.note && !isFirst && (
-                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                      <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
                         {entry.note}
                       </p>
                     )}
                   </div>
 
                   {entry && (
-                    <time className="text-[11px] text-gray-400 whitespace-nowrap shrink-0 mt-0.5 font-medium">
+                    <time className="text-[11px] text-text-tertiary whitespace-nowrap shrink-0 mt-0.5 font-medium">
                       {new Date(entry.changedAt).toLocaleString("en-GB", {
                         day: "2-digit",
                         month: "short",
@@ -249,12 +249,12 @@ function SectionLabel({
       <div
         className="w-7 h-7 rounded-lg flex items-center justify-center"
         style={{
-          background: "color-mix(in srgb, var(--color-primary) 12%, white)",
+          background: "color-mix(in srgb, var(--color-primary) 12%, transparent)",
         }}
       >
         <Icon size={14} style={{ color: "var(--color-primary)" }} />
       </div>
-      <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+      <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
         {label}
       </span>
     </div>
@@ -297,7 +297,7 @@ export default function OrderDetailPage({
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64 py-20">
-        <Loader2 size={32} className="animate-spin text-gray-400" />
+        <Loader2 size={32} className="animate-spin text-text-tertiary" />
       </div>
     );
   }
@@ -305,10 +305,10 @@ export default function OrderDetailPage({
   if (error || !order) {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
-        <p className="text-gray-500 mb-4">{error || t("notFound")}</p>
+        <p className="text-text-secondary mb-4">{error || t("notFound")}</p>
         <Link
           href="/products"
-          className="text-sm underline text-gray-600 hover:text-gray-900"
+          className="text-sm underline text-text-secondary hover:text-[var(--color-text)]"
         >
           {t("continueShopping")}
         </Link>
@@ -326,7 +326,7 @@ export default function OrderDetailPage({
         <div
           className="rounded-2xl p-6 text-center mb-6"
           style={{
-            background: "color-mix(in srgb, var(--color-primary) 8%, white)",
+            background: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
             border:
               "1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)",
           }}
@@ -343,7 +343,7 @@ export default function OrderDetailPage({
           >
             {t("orderPlaced")}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             {t("orderPlacedDesc", { phone: order.shippingAddress.phone })}
           </p>
         </div>
@@ -354,13 +354,13 @@ export default function OrderDetailPage({
         <div className="flex items-center gap-3 mb-6">
           <Link
             href="/orders"
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 transition-colors shadow-sm"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg border border-border-subtle hover:border-primary/40 transition-colors shadow-sm"
           >
-            <ArrowLeft size={16} className="text-gray-600" />
+            <ArrowLeft size={16} className="text-text-secondary" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
-            <p className="text-xs text-gray-500">{order.orderNumber}</p>
+            <h1 className="text-xl font-bold text-[var(--color-text)]">{t("title")}</h1>
+            <p className="text-xs text-text-tertiary">{order.orderNumber}</p>
           </div>
         </div>
       )}
@@ -368,16 +368,16 @@ export default function OrderDetailPage({
       <div className="space-y-4">
 
         {/* ── Order meta card ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-bg rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
           <div className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+              <p className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider mb-0.5">
                 {t("orderNumber")}
               </p>
-              <p className="text-lg font-bold text-gray-900">
+              <p className="text-lg font-bold text-[var(--color-text)]">
                 {order.orderNumber}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-text-tertiary mt-0.5">
                 {new Date(order.createdAt).toLocaleString("en-GB", {
                   day: "2-digit",
                   month: "short",
@@ -389,14 +389,14 @@ export default function OrderDetailPage({
             </div>
             <span
               className="px-3 py-1.5 rounded-full text-xs font-semibold"
-              style={
-                isCancelled
-                  ? { background: "#fee2e2", color: "#ef4444" }
-                  : {
-                      background:
-                        "color-mix(in srgb, var(--color-primary) 12%, white)",
+              className={isCancelled ? "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400" : ""}
+            style={
+                !isCancelled
+                  ? {
+                      background: "color-mix(in srgb, var(--color-primary) 12%, transparent)",
                       color: "var(--color-primary)",
                     }
+                  : undefined
               }
             >
               {statusLabel(order.status, t)}
@@ -405,33 +405,33 @@ export default function OrderDetailPage({
         </div>
 
         {/* ── Status timeline card ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="bg-bg rounded-2xl border border-border-subtle shadow-sm p-5">
           <SectionLabel icon={Truck} label={t("orderTracking")} />
           <StatusTimeline order={order} t={t} />
         </div>
 
         {/* ── Items card ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="bg-bg rounded-2xl border border-border-subtle shadow-sm p-5">
           <SectionLabel icon={Package} label={t("items")} />
           <div className="space-y-4">
             {order.items.map((item, idx) => (
               <div key={idx} className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                  <Package size={18} className="text-gray-300" />
+                <div className="w-12 h-12 rounded-xl bg-surface flex items-center justify-center shrink-0">
+                  <Package size={18} className="text-text-tertiary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-gray-800 leading-tight">
+                  <p className="font-semibold text-sm text-[var(--color-text)] leading-tight">
                     {item.productName}
                   </p>
                   {Object.entries(item.variantSelections || {}).map(([k, v]) => (
                     <span
                       key={k}
-                      className="inline-block text-[11px] text-gray-500 bg-gray-100 rounded-md px-2 py-0.5 mr-1 mt-1"
+                      className="inline-block text-[11px] text-text-secondary bg-surface rounded-md px-2 py-0.5 mr-1 mt-1"
                     >
                       {k}: {v}
                     </span>
                   ))}
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-text-tertiary mt-1">
                     {t("qty", { count: item.quantity })}
                   </p>
                   {item.productSlug && (
@@ -444,7 +444,7 @@ export default function OrderDetailPage({
                     </Link>
                   )}
                 </div>
-                <p className="font-bold text-sm text-gray-800 shrink-0">
+                <p className="font-bold text-sm text-[var(--color-text)] shrink-0">
                   ৳{item.totalPrice.toLocaleString()}
                 </p>
               </div>
@@ -452,17 +452,17 @@ export default function OrderDetailPage({
           </div>
 
           {/* Totals */}
-          <div className="mt-5 pt-4 border-t border-gray-100 space-y-2">
-            <div className="flex justify-between text-sm text-gray-500">
+          <div className="mt-5 pt-4 border-t border-border-subtle space-y-2">
+            <div className="flex justify-between text-sm text-text-secondary">
               <span>{t("subtotal")}</span>
               <span>৳{order.subtotal.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="flex justify-between text-sm text-text-secondary">
               <span>{t("shipping")}</span>
-              <span className="text-green-600 font-medium">{t("shippingFree")}</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">{t("shippingFree")}</span>
             </div>
             <div
-              className="flex justify-between text-base font-bold pt-2 border-t border-gray-100"
+              className="flex justify-between text-base font-bold pt-2 border-t border-border-subtle"
               style={{ color: "var(--color-primary)" }}
             >
               <span>{t("total")}</span>
@@ -474,49 +474,48 @@ export default function OrderDetailPage({
         {/* ── Delivery + Payment ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Delivery address */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-bg rounded-2xl border border-border-subtle shadow-sm p-5">
             <SectionLabel icon={MapPin} label={t("deliveryAddress")} />
             <div className="space-y-0.5 text-sm">
-              <p className="font-semibold text-gray-800">
+              <p className="font-semibold text-[var(--color-text)]">
                 {order.shippingAddress.name}
               </p>
-              <p className="text-gray-500">{order.shippingAddress.phone}</p>
-              <p className="text-gray-500 mt-1">{order.shippingAddress.street}</p>
-              <p className="text-gray-500">
+              <p className="text-text-secondary">{order.shippingAddress.phone}</p>
+              <p className="text-text-secondary mt-1">{order.shippingAddress.street}</p>
+              <p className="text-text-secondary">
                 {order.shippingAddress.city}
                 {order.shippingAddress.postalCode
                   ? `, ${order.shippingAddress.postalCode}`
                   : ""}
               </p>
               {order.shippingAddress.country && (
-                <p className="text-gray-500">{order.shippingAddress.country}</p>
+                <p className="text-text-secondary">{order.shippingAddress.country}</p>
               )}
             </div>
           </div>
 
           {/* Payment */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-bg rounded-2xl border border-border-subtle shadow-sm p-5">
             <SectionLabel icon={CreditCard} label={t("payment")} />
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">{t("paymentMethod")}</span>
-                <span className="font-semibold text-gray-800">
+                <span className="text-text-secondary">{t("paymentMethod")}</span>
+                <span className="font-semibold text-[var(--color-text)]">
                   {order.paymentMethod === "cod"
                     ? t("cod")
                     : order.paymentMethod}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">{t("paymentStatus")}</span>
+                <span className="text-text-secondary">{t("paymentStatus")}</span>
                 <span
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold"
-                  style={
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                     order.paymentStatus === "paid"
-                      ? { background: "#dcfce7", color: "#16a34a" }
+                      ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300"
                       : order.paymentStatus === "failed"
-                      ? { background: "#fee2e2", color: "#ef4444" }
-                      : { background: "#fef9c3", color: "#ca8a04" }
-                  }
+                      ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                      : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                  }`}
                 >
                   {paymentStatusLabel(order.paymentStatus, t)}
                 </span>

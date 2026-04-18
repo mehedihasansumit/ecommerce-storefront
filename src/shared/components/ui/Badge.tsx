@@ -13,9 +13,9 @@ interface BadgeProps {
 const TONES: Record<Tone, string> = {
   neutral: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
   brand: "", // uses inline style var(--color-primary)
-  success: "bg-emerald-100 text-emerald-700",
-  warning: "bg-amber-100 text-amber-700",
-  danger: "bg-red-100 text-red-700",
+  success: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+  warning: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+  danger: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300",
   accent: "", // uses inline style var(--color-accent)
 };
 

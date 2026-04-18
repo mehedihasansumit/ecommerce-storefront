@@ -87,39 +87,39 @@ export default async function AccountPage() {
             </div>
             <div>
               <h1 className="text-xl font-semibold leading-tight">{user.name}</h1>
-              <p className="text-sm text-gray-500 mt-0.5 truncate max-w-50 sm:max-w-none">{user.email || user.phone}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{t("memberSince")}: {memberSince}</p>
+              <p className="text-sm text-text-secondary mt-0.5 truncate max-w-50 sm:max-w-none">{user.email || user.phone}</p>
+              <p className="text-xs text-text-tertiary mt-0.5">{t("memberSince")}: {memberSince}</p>
             </div>
           </div>
           <LogoutButton label={t("logout")} />
         </div>
 
         {/* Info grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-5 border-t border-gray-100 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-5 border-t border-border-subtle text-sm">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("email")}</p>
+            <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("email")}</p>
             <p className="font-medium truncate">{user.email || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("phone")}</p>
+            <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("phone")}</p>
             <p className="font-medium">{user.phone || t("notProvided")}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("memberSince")}</p>
+            <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("memberSince")}</p>
             <p className="font-medium">{memberSince}</p>
           </div>
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="rounded-lg bg-gray-50 px-4 py-3">
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("totalOrders")}</p>
-            <p className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
+          <div className="rounded-lg px-4 py-3">
+            <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("totalOrders")}</p>
+            <p className="text-2xl font-bold" style={{ color: "var(--color-secondary)" }}>
               {orders.length}
             </p>
           </div>
-          <div className="rounded-lg bg-gray-50 px-4 py-3">
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t("totalSpent")}</p>
+          <div className="rounded-lg bg-surface px-4 py-3">
+            <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("totalSpent")}</p>
             <Price amount={totalSpent} size="lg" className="mt-0.5" />
           </div>
         </div>
@@ -132,20 +132,20 @@ export default async function AccountPage() {
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 12%, white)" }}
+                style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 15%, transparent)" }}
               >
                 <Gift className="w-4 h-4" style={{ color: "var(--color-primary)" }} />
               </div>
-              <h2 className="font-semibold text-gray-900">Points &amp; Rewards</h2>
+              <h2 className="font-semibold text-[var(--color-text)]">Points &amp; Rewards</h2>
             </div>
-            <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md">{pointsPerBdt} pts = ৳1</span>
+            <span className="text-xs text-text-tertiary bg-surface px-2 py-1 rounded-md">{pointsPerBdt} pts = ৳1</span>
           </div>
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-4xl font-bold" style={{ color: "var(--color-primary)" }}>
                 {(user.points ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Available points</p>
+              <p className="text-xs text-text-tertiary mt-1">Available points</p>
             </div>
             {(user.points ?? 0) >= minRedemption && (
               <RedeemPointsButton
@@ -156,10 +156,10 @@ export default async function AccountPage() {
             )}
           </div>
           {(user.points ?? 0) < minRedemption && (
-            <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+            <div className="mt-3 p-3 rounded-lg bg-surface border border-border-subtle">
               <div className="flex items-center gap-2">
                 <Star className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-text-secondary">
                   {minRedemption - (user.points ?? 0)} more points needed to redeem &middot; Write a review to earn {pointsPerReview} pts
                 </p>
               </div>
@@ -172,52 +172,52 @@ export default async function AccountPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Link
           href="/orders"
-          className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 sm:p-5 hover:border-gray-300 hover:shadow-sm transition-all group"
+          className="flex items-center justify-between bg-bg border border-border-subtle rounded-lg p-4 sm:p-5 hover:border-primary/30 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 12%, white)" }}
+              style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 15%, transparent)" }}
             >
               <ShoppingBag className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
             </div>
             <div>
-              <p className="font-medium text-gray-900 text-sm">{t("viewOrders")}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="font-medium text-[var(--color-text)] text-sm">{t("viewOrders")}</p>
+              <p className="text-xs text-text-tertiary mt-0.5">
                 {orders.length} {orders.length === 1 ? "order" : "orders"}
               </p>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+          <ChevronRight className="w-4 h-4 text-text-tertiary group-hover:translate-x-0.5 transition-transform shrink-0" />
         </Link>
 
         <Link
           href="/account/addresses"
-          className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 sm:p-5 hover:border-gray-300 hover:shadow-sm transition-all group"
+          className="flex items-center justify-between bg-bg border border-border-subtle rounded-lg p-4 sm:p-5 hover:border-primary/30 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 12%, white)" }}
+              style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 15%, transparent)" }}
             >
               <MapPin className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
             </div>
             <div>
-              <p className="font-medium text-gray-900 text-sm">{t("manageAddresses")}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="font-medium text-[var(--color-text)] text-sm">{t("manageAddresses")}</p>
+              <p className="text-xs text-text-tertiary mt-0.5">
                 {user.addresses?.length ?? 0} saved
               </p>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+          <ChevronRight className="w-4 h-4 text-text-tertiary group-hover:translate-x-0.5 transition-transform shrink-0" />
         </Link>
       </div>
 
       {/* Recent orders */}
       {recentOrders.length > 0 && (
         <Card padding="none">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 text-sm">Recent Orders</h2>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+            <h2 className="font-semibold text-[var(--color-text)] text-sm">Recent Orders</h2>
             <Link
               href="/orders"
               className="text-xs font-medium"
@@ -226,18 +226,18 @@ export default async function AccountPage() {
               View all →
             </Link>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-border-subtle">
             {recentOrders.map((order) => {
               const badge = STATUS_BADGE[order.status] ?? { tone: "neutral" as const, label: order.status };
               return (
                 <Link
                   key={order._id}
                   href={`/orders/${order._id}`}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-surface dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900">#{order.orderNumber}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-sm font-medium text-[var(--color-text)]">#{order.orderNumber}</p>
+                    <p className="text-xs text-text-tertiary mt-0.5">
                       {new Date(order.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -247,10 +247,10 @@ export default async function AccountPage() {
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0 ml-3">
                     <Badge tone={badge.tone} size="sm">{badge.label}</Badge>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-[var(--color-text)]">
                       <Price amount={order.total} />
                     </p>
-                    <ChevronRight className="w-4 h-4 text-gray-300 hidden sm:block" />
+                    <ChevronRight className="w-4 h-4 text-text-tertiary hidden sm:block" />
                   </div>
                 </Link>
               );
@@ -266,11 +266,11 @@ export default async function AccountPage() {
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 12%, white)" }}
+                style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 15%, transparent)" }}
               >
                 <MapPin className="w-4 h-4" style={{ color: "var(--color-primary)" }} />
               </div>
-              <h2 className="font-semibold text-gray-900 text-sm">{t("defaultAddress")}</h2>
+              <h2 className="font-semibold text-[var(--color-text)] text-sm">{t("defaultAddress")}</h2>
             </div>
             <Link
               href="/account/addresses"

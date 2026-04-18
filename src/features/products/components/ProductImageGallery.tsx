@@ -26,7 +26,7 @@ export function ProductImageGallery({
   return (
     <div className="space-y-4 animate-fade-in">
       <div
-        className="relative aspect-square bg-admin-surface-raised overflow-hidden group cursor-crosshair"
+        className="relative aspect-square bg-surface overflow-hidden group cursor-crosshair"
         style={{ borderRadius: "var(--border-radius)" }}
       >
         {currentSrc ? (

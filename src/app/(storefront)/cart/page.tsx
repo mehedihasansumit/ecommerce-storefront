@@ -33,8 +33,8 @@ export default function CartPage() {
 
       {items.length === 0 ? (
         <div className="text-center py-20 flex flex-col items-center gap-4">
-          <ShoppingBag size={48} className="text-gray-300" />
-          <p className="text-lg text-gray-500">{t("empty")}</p>
+          <ShoppingBag size={48} className="text-gray-300 dark:text-gray-600" />
+          <p className="text-lg text-text-secondary">{t("empty")}</p>
           <Link
             href="/products"
             className="inline-block px-6 py-2.5 text-white font-medium transition-opacity hover:opacity-90"
@@ -50,7 +50,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Items list */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] px-4 sm:px-6">
+            <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] px-4 sm:px-6">
               {items.map((item, idx) => (
                 <CartItemRow
                   key={`${item.productId}-${JSON.stringify(item.variantSelections)}-${idx}`}
@@ -67,7 +67,7 @@ export default function CartPage() {
 
             <Link
               href="/products"
-              className="inline-block mt-4 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+              className="inline-block mt-4 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
             >
               ← {t("continueShopping")}
             </Link>
@@ -75,7 +75,7 @@ export default function CartPage() {
 
           {/* Order summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-5 sticky top-24">
+            <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] p-5 sticky top-24">
               <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
               {/* Coupon input */}
@@ -88,7 +88,7 @@ export default function CartPage() {
               />
 
               <div className="space-y-2 text-sm">
-                <div className="flex items-start justify-between gap-3 text-gray-600">
+                <div className="flex items-start justify-between gap-3 text-text-secondary">
                   <span className="min-w-0">
                     {t("subtotal")} ({t("items", { count: items.length })})
                   </span>
@@ -100,13 +100,13 @@ export default function CartPage() {
                     <span className="shrink-0">-৳{discount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between gap-3 text-gray-600">
+                <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span>{t("shipping")}</span>
                   <span className="shrink-0 text-green-600">Free</span>
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 mt-4 pt-4 flex items-center justify-between gap-3 font-bold text-base">
+              <div className="border-t border-border-subtle mt-4 pt-4 flex items-center justify-between gap-3 font-bold text-base">
                 <span>{t("total")}</span>
                 <span className="shrink-0">৳{total.toLocaleString()}</span>
               </div>
@@ -177,12 +177,12 @@ function CouponInput({
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Coupon code"
-          className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+          className="flex-1 min-w-0 px-3 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg"
         />
         <button
           type="submit"
           disabled={couponLoading || !code.trim()}
-          className="shrink-0 w-16 flex items-center justify-center py-2 text-sm font-medium border rounded-lg transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0 w-16 flex items-center justify-center py-2 text-sm font-medium border rounded-lg transition-colors hover:bg-surface dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
         >
           {couponLoading ? <Loader2 size={14} className="animate-spin" /> : "Apply"}

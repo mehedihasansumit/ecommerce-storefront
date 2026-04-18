@@ -55,7 +55,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
   if (success) {
     return (
-      <div className="rounded-lg bg-green-50 border border-green-100 p-4 text-sm text-green-800">
+      <div className="rounded-lg bg-green-50 border border-green-100 p-4 text-sm text-green-800 dark:bg-green-950/30 dark:border-green-900 dark:text-green-300">
         Thank you! Your review has been submitted and is pending approval.
       </div>
     );
@@ -65,11 +65,11 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="font-semibold text-admin-text-primary">Write a Review</h3>
+      <h3 className="font-semibold text-[var(--color-text)]">Write a Review</h3>
 
       {/* Star rating input */}
       <div>
-        <label className="block text-sm text-admin-text-secondary mb-1.5">Your Rating <span className="text-red-500">*</span></label>
+        <label className="block text-sm text-text-secondary mb-1.5">Your Rating <span className="text-red-500">*</span></label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((i) => (
             <button
@@ -84,8 +84,8 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
               <Star
                 className="w-7 h-7 transition-colors"
                 style={{
-                  color: i <= displayRating ? "var(--color-primary)" : "#e5e7eb",
-                  fill: i <= displayRating ? "var(--color-primary)" : "#e5e7eb",
+                  color: i <= displayRating ? "var(--color-primary)" : "var(--color-border-subtle)",
+                  fill: i <= displayRating ? "var(--color-primary)" : "var(--color-border-subtle)",
                 }}
               />
             </button>
@@ -95,7 +95,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
       {/* Title */}
       <div>
-        <label className="block text-sm text-admin-text-secondary mb-1.5" htmlFor="review-title">
+        <label className="block text-sm text-text-secondary mb-1.5" htmlFor="review-title">
           Title <span className="text-red-500">*</span>
         </label>
         <input
@@ -106,15 +106,15 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
           maxLength={100}
           placeholder="Summarize your review"
           required
-          className="w-full border border-admin-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
+          className="w-full bg-bg border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
           style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
         />
       </div>
 
       {/* Comment */}
       <div>
-        <label className="block text-sm text-admin-text-secondary mb-1.5" htmlFor="review-comment">
-          Review <span className="text-admin-text-subtle">(optional)</span>
+        <label className="block text-sm text-text-secondary mb-1.5" htmlFor="review-comment">
+          Review <span className="text-text-tertiary">(optional)</span>
         </label>
         <textarea
           id="review-comment"
@@ -123,13 +123,13 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
           maxLength={2000}
           rows={4}
           placeholder="Share your experience with this product..."
-          className="w-full border border-admin-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:border-transparent"
+          className="w-full bg-bg border border-border-subtle rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:border-transparent"
           style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
         />
       </div>
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
       <button

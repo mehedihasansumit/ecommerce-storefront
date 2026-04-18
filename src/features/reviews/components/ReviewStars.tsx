@@ -25,7 +25,7 @@ export function ReviewStars({ rating, size = "md", showValue = false }: ReviewSt
         return (
           <span key={i} className="relative inline-block">
             {/* Background star (empty) */}
-            <Star className={`${starSize} text-gray-200`} fill="currentColor" />
+            <Star className={`${starSize} text-gray-300 dark:text-gray-600`} fill="currentColor" />
             {/* Foreground star (filled) */}
             {(filled || partial) && (
               <span
@@ -42,7 +42,7 @@ export function ReviewStars({ rating, size = "md", showValue = false }: ReviewSt
         );
       })}
       {showValue && (
-        <span className="ml-1 text-sm text-admin-text-secondary">{rating.toFixed(1)}</span>
+        <span className="ml-1 text-sm text-text-secondary">{rating.toFixed(1)}</span>
       )}
     </div>
   );

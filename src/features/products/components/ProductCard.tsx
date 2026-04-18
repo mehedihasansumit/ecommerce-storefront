@@ -31,11 +31,11 @@ export function ProductCard({ product }: { product: IProduct }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative block overflow-hidden bg-admin-surface border border-admin-border transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
+      className="group relative block overflow-hidden bg-bg border border-border-subtle transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
       style={{ borderRadius: "var(--border-radius)" }}
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-admin-surface-raised">
+      <div className="relative aspect-square overflow-hidden bg-surface">
         {product.thumbnail || product.images[0]?.url ? (
           <StoreImage
             src={product.thumbnail || product.images[0].url}
@@ -86,7 +86,7 @@ export function ProductCard({ product }: { product: IProduct }) {
 
         {/* Out of stock overlay */}
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-admin-surface/60 flex items-center justify-center">
+          <div className="absolute inset-0 bg-bg/60 flex items-center justify-center">
             <span className="px-3 py-1 bg-gray-900 text-white text-xs font-semibold rounded-full">
               {tr("outOfStock") || "Out of Stock"}
             </span>
@@ -110,7 +110,7 @@ export function ProductCard({ product }: { product: IProduct }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-medium text-sm text-admin-text-secondary leading-snug line-clamp-2 mb-2 group-hover:text-admin-text-primary transition-colors">
+        <h3 className="font-medium text-sm text-text-secondary leading-snug line-clamp-2 mb-2 group-hover:text-[var(--color-text)] transition-colors">
           {productName}
         </h3>
 
@@ -125,12 +125,12 @@ export function ProductCard({ product }: { product: IProduct }) {
                   className={
                     i < Math.round(product.averageRating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "fill-gray-200 text-gray-200"
+                      : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
                   }
                 />
               ))}
             </div>
-            <span className="text-xs text-admin-text-subtle">
+            <span className="text-xs text-text-tertiary">
               ({product.reviewCount})
             </span>
           </div>
@@ -146,7 +146,7 @@ export function ProductCard({ product }: { product: IProduct }) {
               ৳{product.price.toLocaleString()}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-admin-text-subtle line-through">
+              <span className="text-xs text-text-tertiary line-through">
                 ৳{product.compareAtPrice.toLocaleString()}
               </span>
             )}

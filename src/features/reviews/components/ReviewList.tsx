@@ -51,7 +51,7 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
 
   if (total === 0) {
     return (
-      <p className="text-sm text-admin-text-subtle py-4">
+      <p className="text-sm text-text-secondary py-4">
         No reviews yet. Be the first to review this product!
       </p>
     );
@@ -59,30 +59,30 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-admin-text-muted">{total} review{total !== 1 ? "s" : ""}</p>
+      <p className="text-sm text-text-secondary">{total} review{total !== 1 ? "s" : ""}</p>
 
       <div className="space-y-4">
         {reviews.map((review) => (
-          <div key={review._id} className="border border-admin-border rounded-lg p-4">
+          <div key={review._id} className="border border-border-subtle rounded-lg p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <ReviewStars rating={review.rating} size="sm" />
                   {review.title && (
-                    <span className="text-sm font-medium text-admin-text-primary truncate">
+                    <span className="text-sm font-medium text-[var(--color-text)] truncate">
                       {review.title}
                     </span>
                   )}
                 </div>
                 {review.comment && (
-                  <p className="mt-2 text-sm text-admin-text-secondary leading-relaxed">
+                  <p className="mt-2 text-sm text-text-secondary leading-relaxed">
                     {review.comment}
                   </p>
                 )}
               </div>
             </div>
-            <div className="mt-3 flex items-center gap-2 text-xs text-admin-text-subtle">
-              <span className="font-medium text-admin-text-secondary">{review.reviewerName || "Customer"}</span>
+            <div className="mt-3 flex items-center gap-2 text-xs text-text-tertiary">
+              <span className="font-medium text-text-secondary">{review.reviewerName || "Customer"}</span>
               <span>·</span>
               <span>{timeAgo(review.createdAt)}</span>
             </div>

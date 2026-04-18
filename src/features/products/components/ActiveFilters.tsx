@@ -24,7 +24,7 @@ export function ActiveFilters({ search, categorySlug, categoryName }: ActiveFilt
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-5">
-      <span className="text-xs text-admin-text-subtle font-medium">Active filters:</span>
+      <span className="text-xs text-text-tertiary font-medium">Active filters:</span>
 
       {categorySlug && (
         <button

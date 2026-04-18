@@ -222,7 +222,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2 space-y-5">
             {/* Saved addresses selector */}
             {isLoggedIn && savedAddresses.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
+              <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] p-7">
                 <AddressSelector
                   addresses={savedAddresses}
                   onSelect={handleAddressSelect}
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
               <div className="space-y-5">
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                     {t("fullName")} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -250,7 +250,7 @@ export default function CheckoutPage() {
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
                       errors.name
                         ? "border-red-400 focus:ring-red-200"
-                        : "border-gray-200 focus:ring-primary/20 focus:border-primary"
+                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
                     }`}
                   />
                   {errors.name && (
@@ -260,15 +260,15 @@ export default function CheckoutPage() {
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                     {t("phoneNumber")} <span className="text-red-500">*</span>
                   </label>
                   <div
                     className={`flex items-center border rounded-lg overflow-hidden transition-colors ${
-                      errors.phone ? "border-red-400" : "border-gray-200"
+                      errors.phone ? "border-red-400" : "border-border-subtle"
                     }`}
                   >
-                    <span className="px-3 py-2.5 text-sm font-medium text-gray-500 bg-gray-50 border-r border-gray-200 shrink-0 select-none">
+                    <span className="px-3 py-2.5 text-sm font-medium text-text-secondary bg-surface border-r border-border-subtle shrink-0 select-none">
                       +88
                     </span>
                     <input
@@ -289,9 +289,9 @@ export default function CheckoutPage() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                     {t("emailAddress")}{" "}
-                    <span className="text-gray-400 font-normal">{t("optional")}</span>
+                    <span className="text-text-tertiary font-normal">{t("optional")}</span>
                   </label>
                   <input
                     type="email"
@@ -300,13 +300,13 @@ export default function CheckoutPage() {
                       setForm((f) => ({ ...f, email: e.target.value }))
                     }
                     placeholder="you@example.com"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    className="w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg"
                   />
                 </div>
 
                 {/* Street */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                     {t("streetAddress")} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -318,11 +318,11 @@ export default function CheckoutPage() {
                     readOnly={usingSavedAddress}
                     placeholder={t("streetAddress")}
                     className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
-                      usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                      usingSavedAddress ? "bg-surface text-text-secondary" : ""
                     } ${
                       errors.street
                         ? "border-red-400 focus:ring-red-200"
-                        : "border-gray-200 focus:ring-primary/20 focus:border-primary"
+                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
                     }`}
                   />
                   {errors.street && (
@@ -333,7 +333,7 @@ export default function CheckoutPage() {
                 {/* City + Postal */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                       {t("city")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -345,11 +345,11 @@ export default function CheckoutPage() {
                       readOnly={usingSavedAddress}
                       placeholder={t("city")}
                       className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
-                        usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                        usingSavedAddress ? "bg-surface text-text-secondary" : ""
                       } ${
                         errors.city
                           ? "border-red-400 focus:ring-red-200"
-                          : "border-gray-200 focus:ring-primary/20 focus:border-primary"
+                          : "border-border-subtle focus:ring-primary/20 focus:border-primary"
                       }`}
                     />
                     {errors.city && (
@@ -357,7 +357,7 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                       {t("postalCode")}
                     </label>
                     <input
@@ -368,8 +368,8 @@ export default function CheckoutPage() {
                       }
                       readOnly={usingSavedAddress}
                       placeholder={t("postalCode")}
-                      className={`w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
-                        usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                      className={`w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg ${
+                        usingSavedAddress ? "bg-surface text-text-secondary" : ""
                       }`}
                     />
                   </div>
@@ -377,7 +377,7 @@ export default function CheckoutPage() {
 
                 {/* Country */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                     {t("country")}
                   </label>
                   <select
@@ -386,8 +386,8 @@ export default function CheckoutPage() {
                       setForm((f) => ({ ...f, country: e.target.value }))
                     }
                     disabled={usingSavedAddress}
-                    className={`w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white ${
-                      usingSavedAddress ? "bg-gray-50 text-gray-500" : ""
+                    className={`w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg ${
+                      usingSavedAddress ? "bg-surface text-text-secondary" : ""
                     }`}
                   >
                     <option>Bangladesh</option>
@@ -399,7 +399,7 @@ export default function CheckoutPage() {
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                     {t("orderNotes")} {t("optional")}
                   </label>
                   <textarea
@@ -409,7 +409,7 @@ export default function CheckoutPage() {
                     }
                     placeholder={t("orderNotes")}
                     rows={3}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
+                    className="w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none bg-bg"
                   />
                 </div>
               </div>
@@ -435,7 +435,7 @@ export default function CheckoutPage() {
                 />
                 <div>
                   <p className="text-sm font-medium">{t("cashOnDelivery")}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-secondary">
                     {t("payWhenReceive")}
                   </p>
                 </div>
@@ -445,7 +445,7 @@ export default function CheckoutPage() {
 
           {/* Order summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7 sticky top-24">
+            <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] p-7 sticky top-24">
               <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
               {/* Items */}
@@ -455,7 +455,7 @@ export default function CheckoutPage() {
                     key={`${item.productId}-${idx}`}
                     className="flex items-center gap-3"
                   >
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden relative shrink-0">
+                    <div className="w-12 h-12 bg-surface rounded-lg overflow-hidden relative shrink-0">
                       {item.thumbnail ? (
                         <Image
                           src={item.thumbnail}
@@ -466,7 +466,7 @@ export default function CheckoutPage() {
                       ) : (
                         <ShoppingBag
                           size={16}
-                          className="m-auto mt-3 text-gray-400"
+                          className="m-auto mt-3 text-text-tertiary"
                         />
                       )}
                     </div>
@@ -474,7 +474,7 @@ export default function CheckoutPage() {
                       <p className="text-xs font-medium truncate">
                         {item.productName}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         Qty: {item.quantity}
                       </p>
                     </div>
@@ -485,8 +485,8 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              <div className="border-t border-gray-100 pt-3 space-y-2 text-sm">
-                <div className="flex items-center justify-between gap-3 text-gray-600">
+              <div className="border-t border-border-subtle pt-3 space-y-2 text-sm">
+                <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span>{t("subtotal")}</span>
                   <span className="shrink-0">৳{subtotal.toLocaleString()}</span>
                 </div>
@@ -496,13 +496,13 @@ export default function CheckoutPage() {
                     <span className="shrink-0">-৳{discount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between gap-3 text-gray-600">
+                <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span>{t("shipping")}</span>
                   <span className="shrink-0 text-green-600">Free</span>
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 mt-3 pt-3 flex items-center justify-between gap-3 font-bold">
+              <div className="border-t border-border-subtle mt-3 pt-3 flex items-center justify-between gap-3 font-bold">
                 <span>{t("total")}</span>
                 <span className="shrink-0">৳{total.toLocaleString()}</span>
               </div>
@@ -534,7 +534,7 @@ export default function CheckoutPage() {
 
               <Link
                 href="/cart"
-                className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-800 transition-colors"
+                className="mt-3 block text-center text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
               >
                 {t("backToCart")}
               </Link>

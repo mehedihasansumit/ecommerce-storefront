@@ -121,6 +121,7 @@ export default function StoreEditForm({
     theme: {
       ...store.theme,
       dark: {
+        primaryColor:    store.theme.dark?.primaryColor,
         backgroundColor: store.theme.dark?.backgroundColor ?? "#111827",
         textColor:       store.theme.dark?.textColor ?? "#F9FAFB",
         surfaceColor:    store.theme.dark?.surfaceColor ?? "#1F2937",
@@ -625,6 +626,12 @@ export default function StoreEditForm({
                 <SectionTitle>Dark Mode Colours</SectionTitle>
                 <p className="text-xs text-admin-text-muted mt-0.5 mb-3">Applied when visitors enable dark mode on your storefront.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <ColorInput
+                    label="Dark Primary"
+                    value={formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleDarkColorChange("primaryColor", v)}
+                    disabled={loading}
+                  />
                   <ColorInput
                     label="Dark Background"
                     value={formData.theme.dark?.backgroundColor ?? "#111827"}

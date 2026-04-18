@@ -21,6 +21,7 @@ export const storeThemeSchema = z.object({
   borderRadius: z.string().optional(),
   layoutStyle: z.enum(["grid", "list", "masonry"]).optional(),
   dark: z.object({
+    primaryColor:    z.string().optional(),
     backgroundColor: z.string().optional(),
     textColor:       z.string().optional(),
     surfaceColor:    z.string().optional(),

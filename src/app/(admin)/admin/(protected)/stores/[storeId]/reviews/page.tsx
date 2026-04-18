@@ -50,13 +50,13 @@ export default async function AdminReviewsPage({
       <div className="flex items-center gap-3">
         <Link
           href={`/admin/stores/${storeId}`}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-admin-text-subtle hover:text-admin-text-secondary transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customer Reviews</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-admin-text-primary">Customer Reviews</h1>
+          <p className="text-sm text-admin-text-muted mt-0.5">
             {total} review{total !== 1 ? "s" : ""} total
             {pendingCount > 0 && (
               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -82,7 +82,7 @@ export default async function AdminReviewsPage({
               className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
                 active
                   ? "bg-gray-900 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-admin-surface border border-admin-border-md text-admin-text-secondary hover:bg-admin-surface-raised"
               }`}
             >
               {tab.label}
@@ -96,7 +96,7 @@ export default async function AdminReviewsPage({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-admin-text-muted">
           <span>
             Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
           </span>
@@ -105,12 +105,12 @@ export default async function AdminReviewsPage({
             {page > 1 ? (
               <Link
                 href={`/admin/stores/${storeId}/reviews?page=${page - 1}${filter ? `&filter=${filter}` : ""}`}
-                className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+                className="px-3 py-1.5 rounded-lg border border-admin-border-md bg-admin-surface hover:bg-admin-surface-raised transition-colors"
               >
                 ‹
               </Link>
             ) : (
-              <span className="px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50 text-gray-300 cursor-default">
+              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-gray-300 cursor-default">
                 ‹
               </span>
             )}
@@ -135,7 +135,7 @@ export default async function AdminReviewsPage({
               }
               return pages.map((p, idx) =>
                 p === "…" ? (
-                  <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-gray-400">
+                  <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-admin-text-subtle">
                     …
                   </span>
                 ) : (
@@ -145,7 +145,7 @@ export default async function AdminReviewsPage({
                     className={`min-w-8 px-2.5 py-1.5 rounded-lg border text-center transition-colors ${
                       p === page
                         ? "border-gray-900 bg-gray-900 text-white font-medium"
-                        : "border-gray-200 bg-white hover:bg-gray-50 text-gray-600"
+                        : "border-admin-border-md bg-admin-surface hover:bg-admin-surface-raised text-admin-text-secondary"
                     }`}
                   >
                     {p}
@@ -158,12 +158,12 @@ export default async function AdminReviewsPage({
             {page < totalPages ? (
               <Link
                 href={`/admin/stores/${storeId}/reviews?page=${page + 1}${filter ? `&filter=${filter}` : ""}`}
-                className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+                className="px-3 py-1.5 rounded-lg border border-admin-border-md bg-admin-surface hover:bg-admin-surface-raised transition-colors"
               >
                 ›
               </Link>
             ) : (
-              <span className="px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50 text-gray-300 cursor-default">
+              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-gray-300 cursor-default">
                 ›
               </span>
             )}

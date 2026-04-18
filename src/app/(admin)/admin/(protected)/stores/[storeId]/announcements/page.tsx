@@ -73,8 +73,8 @@ export default async function AnnouncementsPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-admin-text-primary">Announcements</h1>
+          <p className="text-sm text-admin-text-muted mt-0.5">
             {announcements.length}{" "}
             {announcements.length === 1 ? "announcement" : "announcements"} ·{" "}
             {stats.live} live
@@ -94,48 +94,48 @@ export default async function AnnouncementsPage({
       {/* Stats cards */}
       {announcements.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
             <div className="flex items-center gap-2 mb-1">
-              <Megaphone className="w-4 h-4 text-gray-400" />
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <Megaphone className="w-4 h-4 text-admin-text-subtle" />
+              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
                 Total
               </span>
             </div>
-            <p className="text-xl font-bold text-gray-900">{announcements.length}</p>
-            <p className="text-xs text-gray-400 mt-0.5">all announcements</p>
+            <p className="text-xl font-bold text-admin-text-primary">{announcements.length}</p>
+            <p className="text-xs text-admin-text-subtle mt-0.5">all announcements</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
             <div className="flex items-center gap-2 mb-1">
               <Radio className="w-4 h-4 text-green-500" />
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
                 Live
               </span>
             </div>
-            <p className="text-xl font-bold text-gray-900">{stats.live}</p>
-            <p className="text-xs text-gray-400 mt-0.5">showing now</p>
+            <p className="text-xl font-bold text-admin-text-primary">{stats.live}</p>
+            <p className="text-xs text-admin-text-subtle mt-0.5">showing now</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
             <div className="flex items-center gap-2 mb-1">
               <Clock className="w-4 h-4 text-blue-500" />
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
                 Scheduled
               </span>
             </div>
-            <p className="text-xl font-bold text-gray-900">{stats.scheduled}</p>
-            <p className="text-xs text-gray-400 mt-0.5">upcoming</p>
+            <p className="text-xl font-bold text-admin-text-primary">{stats.scheduled}</p>
+            <p className="text-xs text-admin-text-subtle mt-0.5">upcoming</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
             <div className="flex items-center gap-2 mb-1">
               <XCircle className="w-4 h-4 text-red-400" />
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
                 Expired
               </span>
             </div>
-            <p className="text-xl font-bold text-gray-900">{stats.expired}</p>
-            <p className="text-xs text-gray-400 mt-0.5">no longer active</p>
+            <p className="text-xl font-bold text-admin-text-primary">{stats.expired}</p>
+            <p className="text-xs text-admin-text-subtle mt-0.5">no longer active</p>
           </div>
         </div>
       )}
@@ -149,7 +149,7 @@ export default async function AnnouncementsPage({
             className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
               filterStatus === key
                 ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
             }`}
           >
             {label}

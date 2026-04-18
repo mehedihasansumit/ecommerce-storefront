@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { getTenant } from "@/shared/lib/tenant";
-import { TenantProvider } from "@/shared/context";
+import { TenantProvider, ThemeProvider } from "@/shared/context";
 import { DEFAULT_THEME } from "@/shared/lib/constants";
 import { Toaster } from "react-hot-toast";
 import { getLocale } from "next-intl/server";
@@ -61,9 +61,25 @@ export default async function RootLayout({
     "--border-radius": theme.borderRadius,
   };
 
+  const dark = theme.dark;
+  const darkCss = `html.dark {
+    --color-bg: ${dark?.backgroundColor ?? "#111827"} !important;
+    --color-text: ${dark?.textColor ?? "#F9FAFB"} !important;
+    --color-surface: ${dark?.surfaceColor ?? "#1F2937"} !important;
+    --color-border-subtle: ${dark?.borderColor ?? "#374151"} !important;
+    --color-header-bg: ${dark?.headerBg ?? "#0F172A"} !important;
+    --color-header-text: ${dark?.headerText ?? "#F8FAFC"} !important;
+    --color-text-secondary: #9CA3AF !important;
+    --color-text-tertiary: #6B7280 !important;
+  }`;
+
+  const antiFlashScript = `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');})()`;
+
   return (
     <html lang={locale} style={themeVars as React.CSSProperties}>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: darkCss }} />
+        <script dangerouslySetInnerHTML={{ __html: antiFlashScript }} />
         {isBengali ? (
           <link
             href={`https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap`}
@@ -81,8 +97,10 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col antialiased">
         <NextIntlClientProvider>
           <TenantProvider tenant={tenant}>
-            {children}
-            <Toaster position="top-right" />
+            <ThemeProvider>
+              {children}
+              <Toaster position="top-right" />
+            </ThemeProvider>
           </TenantProvider>
         </NextIntlClientProvider>
       </body>

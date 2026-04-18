@@ -37,13 +37,13 @@ const SIZES: Record<ButtonSize, string> = {
 };
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-gray-900 text-white hover:bg-gray-800",
+  primary: "bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white",
   brand: "text-white hover:brightness-110 shadow-sm hover:shadow-md",
-  secondary: "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50 hover:border-gray-400",
-  ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
+  secondary: "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700",
+  ghost: "bg-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
   danger: "bg-red-600 text-white hover:bg-red-700",
   "danger-outline":
-    "border border-red-200 text-red-600 hover:bg-red-50 bg-white",
+    "border border-red-200 text-red-600 hover:bg-red-50 bg-white dark:bg-gray-900 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950",
 };
 
 const RADIUS = "rounded-lg";

@@ -20,6 +20,14 @@ export const storeThemeSchema = z.object({
   fontFamily: z.string().optional(),
   borderRadius: z.string().optional(),
   layoutStyle: z.enum(["grid", "list", "masonry"]).optional(),
+  dark: z.object({
+    backgroundColor: z.string().optional(),
+    textColor:       z.string().optional(),
+    surfaceColor:    z.string().optional(),
+    borderColor:     z.string().optional(),
+    headerBg:        z.string().optional(),
+    headerText:      z.string().optional(),
+  }).optional(),
 });
 
 export const createStoreSchema = z.object({

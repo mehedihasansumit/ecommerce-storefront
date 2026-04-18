@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --color-primary: #3B82F6;
   --color-secondary: #10B981;
@@ -19,6 +21,35 @@
   --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Admin panel semantic tokens */
+  --admin-bg:               #F9FAFB;
+  --admin-surface:          #FFFFFF;
+  --admin-surface-raised:   #F9FAFB;
+  --admin-surface-hover:    #F9FAFB;
+  --admin-chip:             #F3F4F6;
+  --admin-border:           #F3F4F6;
+  --admin-border-md:        #E5E7EB;
+  --admin-text-primary:     #111827;
+  --admin-text-secondary:   #374151;
+  --admin-text-muted:       #6B7280;
+  --admin-text-subtle:      #9CA3AF;
+  --admin-chip-text:        #6B7280;
+}
+
+html.dark {
+  --admin-bg:               #111827;
+  --admin-surface:          #1F2937;
+  --admin-surface-raised:   rgba(17,24,39,0.6);
+  --admin-surface-hover:    rgba(55,65,81,0.4);
+  --admin-chip:             #374151;
+  --admin-border:           #374151;
+  --admin-border-md:        #374151;
+  --admin-text-primary:     #F9FAFB;
+  --admin-text-secondary:   #D1D5DB;
+  --admin-text-muted:       #9CA3AF;
+  --admin-text-subtle:      #6B7280;
+  --admin-chip-text:        #9CA3AF;
 }
 
 @theme inline {
@@ -38,6 +69,18 @@
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-surface-raised: var(--admin-surface-raised);
+  --color-admin-surface-hover: var(--admin-surface-hover);
+  --color-admin-chip: var(--admin-chip);
+  --color-admin-border: var(--admin-border);
+  --color-admin-border-md: var(--admin-border-md);
+  --color-admin-text-primary: var(--admin-text-primary);
+  --color-admin-text-secondary: var(--admin-text-secondary);
+  --color-admin-text-muted: var(--admin-text-muted);
+  --color-admin-text-subtle: var(--admin-text-subtle);
+  --color-admin-chip-text: var(--admin-chip-text);
 }
 
 html {
@@ -210,6 +253,14 @@ a {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
 }
 
 /* Hide scrollbar for carousel */

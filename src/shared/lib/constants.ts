@@ -9,6 +9,14 @@ export const DEFAULT_THEME = {
   fontFamily: "Inter",
   borderRadius: "0.5rem",
   layoutStyle: "grid" as const,
+  dark: {
+    backgroundColor: "#111827",
+    textColor: "#F9FAFB",
+    surfaceColor: "#1F2937",
+    borderColor: "#374151",
+    headerBg: "#0F172A",
+    headerText: "#F8FAFC",
+  },
 };
 
 export const ITEMS_PER_PAGE = 12;

@@ -118,7 +118,17 @@ export default function StoreEditForm({
   const [formData, setFormData] = useState({
     name: store.name,
     domains: store.domains.join(", "),
-    theme: { ...store.theme },
+    theme: {
+      ...store.theme,
+      dark: {
+        backgroundColor: store.theme.dark?.backgroundColor ?? "#111827",
+        textColor:       store.theme.dark?.textColor ?? "#F9FAFB",
+        surfaceColor:    store.theme.dark?.surfaceColor ?? "#1F2937",
+        borderColor:     store.theme.dark?.borderColor ?? "#374151",
+        headerBg:        store.theme.dark?.headerBg ?? "#0F172A",
+        headerText:      store.theme.dark?.headerText ?? "#F8FAFC",
+      },
+    },
     isActive: store.isActive,
     logo: store.logo || "",
     favicon: store.favicon || "",
@@ -199,6 +209,16 @@ export default function StoreEditForm({
     setFormData((prev) => ({
       ...prev,
       theme: { ...prev.theme, [colorKey]: value },
+    }));
+  };
+
+  const handleDarkColorChange = (key: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      theme: {
+        ...prev.theme,
+        dark: { ...prev.theme.dark, [key]: value },
+      },
     }));
   };
 
@@ -599,6 +619,49 @@ export default function StoreEditForm({
                   onChange={(v) => handleColorChange("headerText", v)}
                   disabled={loading}
                 />
+              </div>
+
+              <div className="pt-1">
+                <SectionTitle>Dark Mode Colours</SectionTitle>
+                <p className="text-xs text-gray-500 mt-0.5 mb-3">Applied when visitors enable dark mode on your storefront.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <ColorInput
+                    label="Dark Background"
+                    value={formData.theme.dark?.backgroundColor ?? "#111827"}
+                    onChange={(v) => handleDarkColorChange("backgroundColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Body Text"
+                    value={formData.theme.dark?.textColor ?? "#F9FAFB"}
+                    onChange={(v) => handleDarkColorChange("textColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Surface"
+                    value={formData.theme.dark?.surfaceColor ?? "#1F2937"}
+                    onChange={(v) => handleDarkColorChange("surfaceColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Border"
+                    value={formData.theme.dark?.borderColor ?? "#374151"}
+                    onChange={(v) => handleDarkColorChange("borderColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Header BG"
+                    value={formData.theme.dark?.headerBg ?? "#0F172A"}
+                    onChange={(v) => handleDarkColorChange("headerBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Header Text"
+                    value={formData.theme.dark?.headerText ?? "#F8FAFC"}
+                    onChange={(v) => handleDarkColorChange("headerText", v)}
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               <div className="pt-1">

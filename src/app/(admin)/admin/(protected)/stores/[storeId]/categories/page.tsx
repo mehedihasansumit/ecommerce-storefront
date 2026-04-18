@@ -43,8 +43,8 @@ export default async function StoreCategoriesPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-admin-text-primary">Categories</h1>
+          <p className="text-sm text-admin-text-muted mt-0.5">
             {total} {total === 1 ? "category" : "categories"}
           </p>
         </div>
@@ -65,7 +65,7 @@ export default async function StoreCategoriesPage({
             className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
               status === s
                 ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
             }`}
           >
             {s}
@@ -74,12 +74,12 @@ export default async function StoreCategoriesPage({
       </div>
 
       {categories.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FolderOpen className="w-7 h-7 text-gray-400" />
+        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+            <FolderOpen className="w-7 h-7 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No categories found</h3>
-          <p className="text-sm text-gray-500 mb-4">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No categories found</h3>
+          <p className="text-sm text-admin-text-muted mb-4">
             {status !== "all"
               ? `No ${status} categories.`
               : "Create categories to organize your products."}
@@ -94,33 +94,33 @@ export default async function StoreCategoriesPage({
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px]">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                 <tr>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Category
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Slug
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Parent
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Products
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Order
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Status
                   </th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-admin-border">
                 {categories.map((cat) => {
                   const name = tAdmin(cat.name);
                   const parentName = cat.parentId ? (nameMap.get(cat.parentId) ?? null) : null;
@@ -129,7 +129,7 @@ export default async function StoreCategoriesPage({
                   return (
                     <tr
                       key={cat._id}
-                      className="hover:bg-gray-50/60 transition-colors group"
+                      className="hover:bg-admin-surface-raised/60 transition-colors group"
                     >
                       {/* Category name + image */}
                       <td className="px-5 py-4">
@@ -138,14 +138,14 @@ export default async function StoreCategoriesPage({
                             <img
                               src={cat.image}
                               alt={name}
-                              className="w-9 h-9 rounded-lg object-cover border border-gray-100 shrink-0"
+                              className="w-9 h-9 rounded-lg object-cover border border-admin-border shrink-0"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                              <FolderOpen className="w-4 h-4 text-gray-400" />
+                            <div className="w-9 h-9 rounded-lg bg-admin-chip flex items-center justify-center shrink-0">
+                              <FolderOpen className="w-4 h-4 text-admin-text-subtle" />
                             </div>
                           )}
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-sm font-medium text-admin-text-primary">
                             {name}
                           </span>
                         </div>
@@ -153,15 +153,15 @@ export default async function StoreCategoriesPage({
 
                       {/* Slug */}
                       <td className="px-5 py-4">
-                        <span className="font-mono text-xs text-gray-500">
+                        <span className="font-mono text-xs text-admin-text-muted">
                           {cat.slug}
                         </span>
                       </td>
 
                       {/* Parent */}
-                      <td className="px-5 py-4 text-sm text-gray-500">
+                      <td className="px-5 py-4 text-sm text-admin-text-muted">
                         {parentName ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                          <span className="inline-flex items-center gap-1 text-xs text-admin-text-muted">
                             <ChevronRight className="w-3 h-3 text-gray-300" />
                             {parentName}
                           </span>
@@ -173,13 +173,13 @@ export default async function StoreCategoriesPage({
                       {/* Product count */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-1.5 text-sm">
-                          <Package className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="font-medium text-gray-700">{count}</span>
+                          <Package className="w-3.5 h-3.5 text-admin-text-subtle" />
+                          <span className="font-medium text-admin-text-secondary">{count}</span>
                         </div>
                       </td>
 
                       {/* Sort order */}
-                      <td className="px-5 py-4 text-sm text-gray-500">
+                      <td className="px-5 py-4 text-sm text-admin-text-muted">
                         {cat.sortOrder}
                       </td>
 
@@ -189,7 +189,7 @@ export default async function StoreCategoriesPage({
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                             cat.isActive
                               ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
+                              : "bg-admin-chip text-admin-text-muted"
                           }`}
                         >
                           <span
@@ -206,7 +206,7 @@ export default async function StoreCategoriesPage({
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link
                             href={`/admin/stores/${storeId}/categories/${cat._id}`}
-                            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg transition-colors"
                           >
                             Edit
                           </Link>

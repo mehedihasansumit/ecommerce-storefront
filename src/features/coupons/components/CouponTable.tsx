@@ -28,7 +28,7 @@ const STATUS_STYLES: Record<CouponStatus, string> = {
   scheduled: "bg-blue-100 text-blue-700",
   expired:   "bg-red-100 text-red-700",
   exhausted: "bg-orange-100 text-orange-700",
-  inactive:  "bg-gray-100 text-gray-500",
+  inactive:  "bg-admin-chip text-admin-text-muted",
 };
 
 const STATUS_DOT: Record<CouponStatus, string> = {
@@ -66,12 +66,12 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
 
   if (filtered.length === 0) {
     return (
-      <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Ticket className="w-7 h-7 text-gray-400" />
+      <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+        <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+          <Ticket className="w-7 h-7 text-admin-text-subtle" />
         </div>
-        <h3 className="text-base font-semibold text-gray-900 mb-1">No coupons found</h3>
-        <p className="text-sm text-gray-500">
+        <h3 className="text-base font-semibold text-admin-text-primary mb-1">No coupons found</h3>
+        <p className="text-sm text-admin-text-muted">
           {filterStatus && filterStatus !== "all"
             ? `No ${filterStatus} coupons.`
             : "Create your first coupon to start offering discounts."}
@@ -81,21 +81,21 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-200">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-admin-surface-raised border-b border-admin-border-md">
             <tr>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Code</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Discount</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Usage</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Min Order</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Valid</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Code</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Discount</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Usage</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Min Order</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Valid</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Status</th>
               <th className="px-5 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-admin-border">
             {filtered.map((coupon) => {
               const status = getCouponStatus(coupon);
               const usagePct =
@@ -104,14 +104,14 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                   : null;
 
               return (
-                <tr key={coupon._id} className="hover:bg-gray-50/60 transition-colors group">
+                <tr key={coupon._id} className="hover:bg-admin-surface-raised/60 transition-colors group">
                   {/* Code + description */}
                   <td className="px-5 py-4">
-                    <span className="font-mono text-sm font-bold text-gray-900 tracking-wider">
+                    <span className="font-mono text-sm font-bold text-admin-text-primary tracking-wider">
                       {coupon.code}
                     </span>
                     {coupon.description && (
-                      <p className="text-xs text-gray-400 mt-0.5 max-w-40 truncate">
+                      <p className="text-xs text-admin-text-subtle mt-0.5 max-w-40 truncate">
                         {coupon.description}
                       </p>
                     )}
@@ -119,12 +119,12 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
 
                   {/* Discount value */}
                   <td className="px-5 py-4">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-admin-text-primary">
                       {coupon.type === "percentage" ? `${coupon.value}%` : `৳${coupon.value}`}
                     </span>
-                    <p className="text-xs text-gray-400 mt-0.5 capitalize">{coupon.type}</p>
+                    <p className="text-xs text-admin-text-subtle mt-0.5 capitalize">{coupon.type}</p>
                     {coupon.maxDiscountAmount !== null && coupon.type === "percentage" && (
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] text-admin-text-subtle">
                         max ৳{coupon.maxDiscountAmount}
                       </p>
                     )}
@@ -132,14 +132,14 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
 
                   {/* Usage */}
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                    <div className="flex items-center gap-1.5 text-sm text-admin-text-secondary">
                       <span className="font-medium">{coupon.usedCount}</span>
                       {coupon.usageLimit !== null && (
-                        <span className="text-gray-400">/ {coupon.usageLimit}</span>
+                        <span className="text-admin-text-subtle">/ {coupon.usageLimit}</span>
                       )}
                     </div>
                     {usagePct !== null && (
-                      <div className="mt-1.5 w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="mt-1.5 w-20 h-1.5 bg-admin-chip rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
                             usagePct >= 100
@@ -153,14 +153,14 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                       </div>
                     )}
                     {coupon.perCustomerLimit > 1 && (
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[10px] text-admin-text-subtle mt-1">
                         {coupon.perCustomerLimit}× per customer
                       </p>
                     )}
                   </td>
 
                   {/* Min order */}
-                  <td className="px-5 py-4 text-sm text-gray-600">
+                  <td className="px-5 py-4 text-sm text-admin-text-secondary">
                     {coupon.minOrderAmount > 0 ? (
                       <span>৳{coupon.minOrderAmount.toLocaleString()}</span>
                     ) : (
@@ -169,7 +169,7 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                   </td>
 
                   {/* Valid date range */}
-                  <td className="px-5 py-4 text-xs text-gray-500">
+                  <td className="px-5 py-4 text-xs text-admin-text-muted">
                     <p>
                       {new Date(coupon.validFrom).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -177,7 +177,7 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                         year: "numeric",
                       })}
                     </p>
-                    <p className="text-gray-400">
+                    <p className="text-admin-text-subtle">
                       →{" "}
                       {new Date(coupon.validUntil).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -205,7 +205,7 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link
                         href={`/admin/stores/${storeId}/coupons/${coupon._id}`}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4" />
@@ -213,7 +213,7 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                       <button
                         onClick={() => handleDelete(coupon._id, coupon.code)}
                         disabled={deleting === coupon._id}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
+                        className="p-1.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />

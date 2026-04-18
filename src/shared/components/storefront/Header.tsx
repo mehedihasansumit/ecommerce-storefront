@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
+import { ThemeToggle } from "@/shared/components/ui";
 
 export function Header() {
   const tenant = useTenant();
@@ -147,7 +148,7 @@ export function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-0.5">
               {[
                 { href: "/", label: t("home") },
                 { href: "/products", label: t("products") },
@@ -157,16 +158,17 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative px-4 py-2 font-medium transition-all duration-200 rounded-sm ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"} ${isActive ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
+                    className={`relative px-4 py-2 font-medium transition-all duration-200 rounded-md ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"} ${isActive ? "opacity-100" : "opacity-55 hover:opacity-90 hover:bg-white/[0.07]"}`}
                   >
                     {link.label}
                     <span
-                      className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full transition-all duration-200"
+                      className="absolute bottom-1 left-3 right-3 h-[2px] rounded-full"
                       style={{
                         backgroundColor: "var(--color-accent)",
                         opacity: isActive ? 1 : 0,
                         transform: isActive ? "scaleX(1)" : "scaleX(0)",
                         transformOrigin: "center",
+                        transition: "opacity 200ms, transform 200ms cubic-bezier(0.16,1,0.3,1)",
                       }}
                     />
                   </Link>
@@ -179,6 +181,8 @@ export function Header() {
               <div className="hidden sm:block">
                 <LanguageSwitcher />
               </div>
+
+              <ThemeToggle variant="header" />
 
               {/* Search toggle */}
               <button
@@ -231,17 +235,17 @@ export function Header() {
                       </span>
                     </button>
                     {userMenuOpen && (
-                      <div className="absolute right-0 top-full mt-2 w-52 bg-white text-gray-800 shadow-[var(--shadow-lg)] border border-gray-100 rounded-xl py-2 z-50 animate-scale-in">
-                        <div className="px-4 py-2.5 border-b border-gray-100">
+                      <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-[var(--shadow-lg)] border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-50 animate-scale-in">
+                        <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-800">
                           {userName && (
-                            <p className="text-sm font-medium text-gray-800 truncate">{userName}</p>
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{userName}</p>
                           )}
-                          <p className="text-xs text-gray-400 truncate">{userEmail}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{userEmail}</p>
                         </div>
                         <Link
                           href="/account"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                           <User size={15} className="text-gray-400" />
                           {t("myAccount")}
@@ -249,7 +253,7 @@ export function Header() {
                         <Link
                           href="/orders"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                           <Package size={15} className="text-gray-400" />
                           {t("myOrders") || "My Orders"}
@@ -257,15 +261,15 @@ export function Header() {
                         <Link
                           href="/account/addresses"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                           <MapPin size={15} className="text-gray-400" />
                           {t("addresses") || "Addresses"}
                         </Link>
-                        <hr className="my-1 border-gray-100" />
+                        <hr className="my-1 border-gray-100 dark:border-gray-800" />
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                         >
                           <LogOut size={15} />
                           {t("logout") || "Logout"}
@@ -299,21 +303,27 @@ export function Header() {
           {/* Search bar dropdown */}
           {searchOpen && (
             <div className="pb-4 animate-slide-down">
-              <form onSubmit={handleSearch} className="relative">
+              <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
+                <Search
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none"
+                />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("searchPlaceholder") || "Search products..."}
-                  className="w-full px-4 py-3 pr-12 rounded-lg bg-white/12 border border-white/15 text-inherit placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all"
+                  className="w-full pl-10 pr-16 py-2.5 rounded-xl bg-white/10 border border-white/15 text-inherit placeholder:text-white/40 focus:outline-none focus:bg-white/14 focus:border-white/35 transition-all text-sm"
                 />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
-                >
-                  <Search size={18} />
-                </button>
+                {searchQuery && (
+                  <button
+                    type="submit"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium px-2.5 py-1 rounded-md bg-white/15 hover:bg-white/25 transition-colors"
+                  >
+                    Go
+                  </button>
+                )}
               </form>
             </div>
           )}
@@ -347,19 +357,14 @@ export function Header() {
             <div className="flex-1 py-4 flex flex-col overflow-y-auto">
               {/* Mobile Search */}
               <form onSubmit={handleSearch} className="mx-4 mb-3 relative">
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("searchPlaceholder") || "Search products..."}
-                  className="w-full px-4 py-2.5 pr-10 rounded-lg bg-white/12 border border-white/15 text-inherit placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all text-sm"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/12 text-inherit placeholder:text-white/40 focus:outline-none focus:bg-white/14 focus:border-white/30 transition-all text-sm"
                 />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
-                >
-                  <Search size={16} />
-                </button>
               </form>
               {[
                 { href: "/", label: t("home") },

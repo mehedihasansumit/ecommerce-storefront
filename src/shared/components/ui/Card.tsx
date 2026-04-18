@@ -18,7 +18,7 @@ export function Card({ padding = "lg", className, children, ...rest }: CardProps
   return (
     <div
       className={[
-        "bg-white border border-gray-200 rounded-lg",
+        "bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-700",
         PADDINGS[padding],
         className ?? "",
       ]
@@ -49,9 +49,9 @@ export function CardHeader({ title, description, action, className, ...rest }: C
       {...rest}
     >
       <div className="min-w-0">
-        <h2 className="text-base font-semibold text-gray-900 truncate">{title}</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">{title}</h2>
         {description && (
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}

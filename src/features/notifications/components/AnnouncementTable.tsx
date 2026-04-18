@@ -27,7 +27,7 @@ const STATUS_STYLES: Record<AnnouncementStatus, string> = {
   live:      "bg-green-100 text-green-700",
   scheduled: "bg-blue-100 text-blue-700",
   expired:   "bg-red-100 text-red-700",
-  inactive:  "bg-gray-100 text-gray-500",
+  inactive:  "bg-admin-chip text-admin-text-muted",
 };
 
 const STATUS_DOT: Record<AnnouncementStatus, string> = {
@@ -70,12 +70,12 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
 
   if (filtered.length === 0) {
     return (
-      <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Megaphone className="w-7 h-7 text-gray-400" />
+      <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+        <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+          <Megaphone className="w-7 h-7 text-admin-text-subtle" />
         </div>
-        <h3 className="text-base font-semibold text-gray-900 mb-1">No announcements found</h3>
-        <p className="text-sm text-gray-500">
+        <h3 className="text-base font-semibold text-admin-text-primary mb-1">No announcements found</h3>
+        <p className="text-sm text-admin-text-muted">
           {filterStatus && filterStatus !== "all"
             ? `No ${filterStatus} announcements.`
             : "Create one to display alerts and banners on your storefront."}
@@ -85,38 +85,38 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-200">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-admin-surface-raised border-b border-admin-border-md">
             <tr>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Announcement
               </th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Type
               </th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Schedule
               </th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Priority
               </th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Status
               </th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Broadcast
               </th>
               <th className="px-5 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-admin-border">
             {filtered.map((a) => {
               const status = getAnnouncementStatus(a);
 
               return (
-                <tr key={a._id} className="hover:bg-gray-50/60 transition-colors group">
+                <tr key={a._id} className="hover:bg-admin-surface-raised/60 transition-colors group">
                   {/* Title + preview */}
                   <td className="px-5 py-4">
                     <div className="flex items-start gap-3">
@@ -133,17 +133,17 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate max-w-48">
+                        <p className="text-sm font-medium text-admin-text-primary truncate max-w-48">
                           {a.title}
                         </p>
                         {a.message && (
-                          <p className="text-xs text-gray-400 mt-0.5 truncate max-w-48">
+                          <p className="text-xs text-admin-text-subtle mt-0.5 truncate max-w-48">
                             {a.message}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-1">
                           {a.dismissible && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-400">
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-admin-text-subtle">
                               <X className="w-2.5 h-2.5" /> Dismissible
                             </span>
                           )}
@@ -159,13 +159,13 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
 
                   {/* Display type */}
                   <td className="px-5 py-4">
-                    <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 capitalize">
+                    <span className="px-2 py-1 rounded-md text-xs font-medium bg-admin-chip text-admin-text-secondary capitalize">
                       {DISPLAY_TYPE_LABELS[a.displayType] ?? a.displayType}
                     </span>
                   </td>
 
                   {/* Schedule */}
-                  <td className="px-5 py-4 text-xs text-gray-500">
+                  <td className="px-5 py-4 text-xs text-admin-text-muted">
                     <p>
                       {new Date(a.startDate).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -174,7 +174,7 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
                       })}
                     </p>
                     {a.endDate ? (
-                      <p className="text-gray-400">
+                      <p className="text-admin-text-subtle">
                         →{" "}
                         {new Date(a.endDate).toLocaleDateString("en-GB", {
                           day: "2-digit",
@@ -189,7 +189,7 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
 
                   {/* Priority */}
                   <td className="px-5 py-4">
-                    <span className="text-sm font-semibold text-gray-700">
+                    <span className="text-sm font-semibold text-admin-text-secondary">
                       {a.priority}
                     </span>
                   </td>
@@ -214,7 +214,7 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
                         initialCount={a.broadcastCount ?? 0}
                       />
                       {a.broadcastSentAt && (
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] text-admin-text-subtle">
                           {new Date(a.broadcastSentAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
@@ -229,7 +229,7 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link
                         href={`/admin/stores/${storeId}/announcements/${a._id}`}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4" />
@@ -237,7 +237,7 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
                       <button
                         onClick={() => handleDelete(a._id, a.title)}
                         disabled={deleting === a._id}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
+                        className="p-1.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />

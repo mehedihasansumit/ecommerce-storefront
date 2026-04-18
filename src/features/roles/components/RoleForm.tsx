@@ -72,8 +72,8 @@ export function RoleForm({ role }: RoleFormProps) {
   }
 
   const inputClass =
-    "w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+    "w-full px-3 py-2 text-sm border border-admin-border-md rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent";
+  const labelClass = "block text-sm font-medium text-admin-text-secondary mb-1";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
@@ -84,8 +84,8 @@ export function RoleForm({ role }: RoleFormProps) {
       )}
 
       {/* Basic Info */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-900">Role Details</h2>
+      <div className="bg-admin-surface rounded-xl border border-admin-border-md p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-admin-text-primary">Role Details</h2>
         <div>
           <label className={labelClass}>Role Name</label>
           <input
@@ -108,7 +108,7 @@ export function RoleForm({ role }: RoleFormProps) {
       </div>
 
       {/* Super Admin Toggle */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+      <div className="bg-admin-surface rounded-xl border border-admin-border-md p-6 space-y-3">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -117,8 +117,8 @@ export function RoleForm({ role }: RoleFormProps) {
             className="w-4 h-4 rounded border-gray-300 accent-gray-900"
           />
           <div>
-            <span className="text-sm font-medium text-gray-900">Super Admin</span>
-            <p className="text-xs text-gray-500">
+            <span className="text-sm font-medium text-admin-text-primary">Super Admin</span>
+            <p className="text-xs text-admin-text-muted">
               Grants unrestricted access to everything. Permissions below are ignored.
             </p>
           </div>
@@ -127,10 +127,10 @@ export function RoleForm({ role }: RoleFormProps) {
 
       {/* Permissions */}
       {!isSuperAdmin && (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+      <div className="bg-admin-surface rounded-xl border border-admin-border-md p-6 space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Permissions</h2>
-          <span className="text-xs text-gray-500">
+          <h2 className="text-sm font-semibold text-admin-text-primary">Permissions</h2>
+          <span className="text-xs text-admin-text-muted">
             {permissions.length} selected
           </span>
         </div>
@@ -143,13 +143,13 @@ export function RoleForm({ role }: RoleFormProps) {
           return (
             <div key={group.label}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                <p className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                   {group.label}
                 </p>
                 <button
                   type="button"
                   onClick={() => toggleGroup(groupPerms)}
-                  className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                  className="text-xs text-admin-text-subtle hover:text-admin-text-secondary transition-colors"
                 >
                   {allSelected ? "Deselect all" : someSelected ? "Select all" : "Select all"}
                 </button>
@@ -166,7 +166,7 @@ export function RoleForm({ role }: RoleFormProps) {
                       onChange={() => togglePermission(perm)}
                       className="w-4 h-4 rounded border-gray-300 accent-gray-900"
                     />
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-admin-text-secondary">
                       {PERMISSION_LABELS[perm]}
                     </span>
                   </label>
@@ -189,7 +189,7 @@ export function RoleForm({ role }: RoleFormProps) {
         <button
           type="button"
           onClick={() => router.push("/admin/roles")}
-          className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-5 py-2 text-sm font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-admin-surface-raised transition-colors"
         >
           Cancel
         </button>

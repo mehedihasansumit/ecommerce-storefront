@@ -77,8 +77,8 @@ export default async function StoreProductsPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{total} {total === 1 ? "product" : "products"}</p>
+          <h1 className="text-2xl font-bold text-admin-text-primary">Products</h1>
+          <p className="text-sm text-admin-text-muted mt-0.5">{total} {total === 1 ? "product" : "products"}</p>
         </div>
         <Link
           href={`/admin/stores/${storeId}/products/new`}
@@ -109,7 +109,7 @@ export default async function StoreProductsPage({
               className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
                 status === s
                   ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
               }`}
             >
               {s}
@@ -120,12 +120,12 @@ export default async function StoreProductsPage({
 
       {/* Table / Empty state */}
       {products.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Package className="w-7 h-7 text-gray-400" />
+        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+            <Package className="w-7 h-7 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No products found</h3>
-          <p className="text-sm text-gray-500 mb-4">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No products found</h3>
+          <p className="text-sm text-admin-text-muted mb-4">
             {q
               ? `No products match "${q}".`
               : status !== "all"
@@ -143,36 +143,36 @@ export default async function StoreProductsPage({
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Product
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       SKU
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Category
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Price
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Stock
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Status
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Added
                     </th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {products.map((product) => {
                     const name = tAdmin(product.name);
                     const categoryName = product.categoryId
@@ -189,7 +189,7 @@ export default async function StoreProductsPage({
                     return (
                       <tr
                         key={product._id}
-                        className="hover:bg-gray-50/60 transition-colors group"
+                        className="hover:bg-admin-surface-raised/60 transition-colors group"
                       >
                         {/* Product */}
                         <td className="px-5 py-4">
@@ -198,15 +198,15 @@ export default async function StoreProductsPage({
                               <img
                                 src={product.thumbnail}
                                 alt={name}
-                                className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0"
+                                className="w-10 h-10 rounded-lg object-cover border border-admin-border shrink-0"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                                <Package className="w-4 h-4 text-gray-400" />
+                              <div className="w-10 h-10 rounded-lg bg-admin-chip flex items-center justify-center shrink-0">
+                                <Package className="w-4 h-4 text-admin-text-subtle" />
                               </div>
                             )}
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                              <p className="text-sm font-medium text-admin-text-primary truncate max-w-[180px]">
                                 {name}
                               </p>
                               {product.isFeatured && (
@@ -221,24 +221,24 @@ export default async function StoreProductsPage({
 
                         {/* SKU */}
                         <td className="px-5 py-4">
-                          <span className="font-mono text-xs text-gray-500">
+                          <span className="font-mono text-xs text-admin-text-muted">
                             {product.sku || "—"}
                           </span>
                         </td>
 
                         {/* Category */}
-                        <td className="px-5 py-4 text-sm text-gray-600">
+                        <td className="px-5 py-4 text-sm text-admin-text-secondary">
                           {categoryName}
                         </td>
 
                         {/* Price */}
                         <td className="px-5 py-4">
                           <div className="flex items-baseline gap-1.5">
-                            <span className="text-sm font-semibold text-gray-900">
+                            <span className="text-sm font-semibold text-admin-text-primary">
                               ৳{product.price.toLocaleString()}
                             </span>
                             {hasDiscount && (
-                              <span className="text-xs text-gray-400 line-through">
+                              <span className="text-xs text-admin-text-subtle line-through">
                                 ৳{product.compareAtPrice.toLocaleString()}
                               </span>
                             )}
@@ -253,7 +253,7 @@ export default async function StoreProductsPage({
                                 ? "text-red-600"
                                 : isLowStock
                                 ? "text-amber-600"
-                                : "text-gray-700"
+                                : "text-admin-text-secondary"
                             }`}
                           >
                             {product.stock}
@@ -276,7 +276,7 @@ export default async function StoreProductsPage({
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                               product.isActive
                                 ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
+                                : "bg-admin-chip text-admin-text-muted"
                             }`}
                           >
                             <span
@@ -289,7 +289,7 @@ export default async function StoreProductsPage({
                         </td>
 
                         {/* Date */}
-                        <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                        <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
                           {new Date(product.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
@@ -302,7 +302,7 @@ export default async function StoreProductsPage({
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Link
                               href={`/admin/stores/${storeId}/products/${product._id}`}
-                              className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                              className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg transition-colors"
                             >
                               Edit
                             </Link>
@@ -325,7 +325,7 @@ export default async function StoreProductsPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
@@ -333,10 +333,10 @@ export default async function StoreProductsPage({
                 <Link
                   href={buildHref(storeId, { q, category, status, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -356,7 +356,7 @@ export default async function StoreProductsPage({
                     item === "..." ? (
                       <span
                         key={`ellipsis-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-gray-400"
+                        className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle"
                       >
                         …
                       </span>
@@ -367,7 +367,7 @@ export default async function StoreProductsPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                           currentPage === item
                             ? "bg-gray-900 text-white"
-                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                         }`}
                       >
                         {item}
@@ -378,10 +378,10 @@ export default async function StoreProductsPage({
                 <Link
                   href={buildHref(storeId, { q, category, status, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

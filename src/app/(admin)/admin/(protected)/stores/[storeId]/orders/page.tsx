@@ -30,7 +30,7 @@ const PAYMENT_STYLES: Record<PaymentStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
   paid: "bg-green-100 text-green-800",
   failed: "bg-red-100 text-red-800",
-  refunded: "bg-gray-100 text-gray-600",
+  refunded: "bg-admin-chip text-admin-text-secondary",
 };
 
 const ORDER_STATUSES: OrderStatus[] = [
@@ -83,8 +83,8 @@ export default async function StoreOrdersPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-admin-text-primary">Orders</h1>
+          <p className="text-sm text-admin-text-muted mt-0.5">
             {total} {total === 1 ? "order" : "orders"}
           </p>
         </div>
@@ -106,7 +106,7 @@ export default async function StoreOrdersPage({
               href={buildHref(storeId, { q, payment })}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!status
                   ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                 }`}
             >
               All orders
@@ -117,7 +117,7 @@ export default async function StoreOrdersPage({
                 href={buildHref(storeId, { q, status: s, payment })}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
                     ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                    : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                   }`}
               >
                 {s}
@@ -131,7 +131,7 @@ export default async function StoreOrdersPage({
               href={buildHref(storeId, { q, status })}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!payment
                   ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                 }`}
             >
               All payments
@@ -142,7 +142,7 @@ export default async function StoreOrdersPage({
                 href={buildHref(storeId, { q, status, payment: s })}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${payment === s
                     ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                    : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                   }`}
               >
                 {s}
@@ -156,12 +156,12 @@ export default async function StoreOrdersPage({
 
       {/* Table / Empty */}
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag className="w-7 h-7 text-gray-400" />
+        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingBag className="w-7 h-7 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No orders found</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No orders found</h3>
+          <p className="text-sm text-admin-text-muted">
             {q
               ? `No orders match "${q}".`
               : status || payment
@@ -171,44 +171,44 @@ export default async function StoreOrdersPage({
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-200">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Order
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Customer
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Items
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Total
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Status
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Payment
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Date
                     </th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {orders.map((order) => (
                     <tr
                       key={order._id}
-                      className="hover:bg-gray-50/60 transition-colors group"
+                      className="hover:bg-admin-surface-raised/60 transition-colors group"
                     >
                       {/* Order number */}
                       <td className="px-5 py-4">
-                        <span className="font-mono text-sm font-semibold text-gray-900">
+                        <span className="font-mono text-sm font-semibold text-admin-text-primary">
                           {order.orderNumber}
                         </span>
                         {order.notes && (
@@ -221,28 +221,28 @@ export default async function StoreOrdersPage({
 
                       {/* Customer */}
                       <td className="px-5 py-4">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-admin-text-primary">
                           {order.shippingAddress.name}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-admin-text-subtle mt-0.5">
                           {order.shippingAddress.phone || order.guestPhone || "—"}
                         </p>
                       </td>
 
                       {/* Items */}
                       <td className="px-5 py-4">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-admin-text-secondary">
                           {order.items.length}{" "}
                           {order.items.length === 1 ? "item" : "items"}
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5 max-w-40 truncate">
+                        <div className="text-xs text-admin-text-subtle mt-0.5 max-w-40 truncate">
                           {order.items.map((i) => i.productName).join(", ")}
                         </div>
                       </td>
 
                       {/* Total */}
                       <td className="px-5 py-4">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-admin-text-primary">
                           ৳{order.total.toLocaleString()}
                         </span>
                         {order.discount > 0 && (
@@ -255,7 +255,7 @@ export default async function StoreOrdersPage({
                       {/* Order status */}
                       <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${ORDER_STATUS_STYLES[order.status] ?? "bg-gray-100 text-gray-700"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${ORDER_STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
                             }`}
                         >
                           {order.status === "pending" && <Clock className="w-3 h-3" />}
@@ -269,20 +269,20 @@ export default async function StoreOrdersPage({
                       {/* Payment status */}
                       <td className="px-5 py-4">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PAYMENT_STYLES[order.paymentStatus] ?? "bg-gray-100 text-gray-700"
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
                             }`}
                         >
                           {order.paymentStatus}
                         </span>
                         {order.paymentMethod && (
-                          <p className="text-xs text-gray-400 mt-0.5 capitalize">
+                          <p className="text-xs text-admin-text-subtle mt-0.5 capitalize">
                             {order.paymentMethod}
                           </p>
                         )}
                       </td>
 
                       {/* Date */}
-                      <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                      <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
                         {new Date(order.createdAt).toLocaleDateString("en-GB", {
                           day: "2-digit",
                           month: "short",
@@ -301,7 +301,7 @@ export default async function StoreOrdersPage({
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/stores/${storeId}/orders/${order._id}`}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg"
                         >
                           View
                         </Link>
@@ -316,7 +316,7 @@ export default async function StoreOrdersPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
@@ -324,9 +324,9 @@ export default async function StoreOrdersPage({
                 <Link
                   href={buildHref(storeId, { q, status, payment, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -345,7 +345,7 @@ export default async function StoreOrdersPage({
                     item === "..." ? (
                       <span
                         key={`e-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-gray-400"
+                        className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle"
                       >
                         …
                       </span>
@@ -355,7 +355,7 @@ export default async function StoreOrdersPage({
                         href={buildHref(storeId, { q, status, payment, page: item as number })}
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
                             ? "bg-gray-900 text-white"
-                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                           }`}
                       >
                         {item}
@@ -366,9 +366,9 @@ export default async function StoreOrdersPage({
                 <Link
                   href={buildHref(storeId, { q, status, payment, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
                   <ChevronRight className="w-4 h-4" />

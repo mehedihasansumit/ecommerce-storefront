@@ -25,3 +25,4 @@ export type { UploadedImage } from "./ImageInput";
 export { ImageGalleryInput } from "./ImageGalleryInput";
 export type { GalleryImage } from "./ImageGalleryInput";
 export { StoreImage } from "./StoreImage";
+export { ThemeToggle } from "./ThemeToggle";

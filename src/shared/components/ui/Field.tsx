@@ -46,7 +46,7 @@ export function Field({
   return (
     <div className={["space-y-1.5", className].filter(Boolean).join(" ")}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
           {required && <span className="text-red-500 ml-0.5">*</span>}
           {optional && (
@@ -56,7 +56,7 @@ export function Field({
       )}
       {clonedChild}
       {hint && !error && (
-        <p id={hintId} className="text-xs text-gray-500">
+        <p id={hintId} className="text-xs text-gray-500 dark:text-gray-500">
           {hint}
         </p>
       )}

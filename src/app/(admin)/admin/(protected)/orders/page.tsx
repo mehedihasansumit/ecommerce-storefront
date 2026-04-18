@@ -33,7 +33,7 @@ const PAYMENT_STYLES: Record<string, string> = {
   pending:  "bg-yellow-100 text-yellow-800",
   paid:     "bg-green-100 text-green-800",
   failed:   "bg-red-100 text-red-800",
-  refunded: "bg-gray-100 text-gray-600",
+  refunded: "bg-admin-chip text-admin-text-secondary",
 };
 
 const ALL_STATUSES: OrderStatus[] = [
@@ -87,8 +87,8 @@ export default async function AllOrdersPage({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">All Orders</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-admin-text-primary">All Orders</h1>
+          <p className="text-sm text-admin-text-muted mt-1">
             {total} {total === 1 ? "order" : "orders"} across all stores
           </p>
         </div>
@@ -101,7 +101,7 @@ export default async function AllOrdersPage({
           className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
             !status
               ? "bg-gray-900 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
           }`}
         >
           All Status
@@ -113,7 +113,7 @@ export default async function AllOrdersPage({
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${
               status === s
                 ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
             }`}
           >
             {s}
@@ -129,7 +129,7 @@ export default async function AllOrdersPage({
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               !filterStore
                 ? "bg-gray-700 text-white border-gray-700"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
             }`}
           >
             All Stores
@@ -141,7 +141,7 @@ export default async function AllOrdersPage({
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 filterStore === s._id
                   ? "bg-gray-700 text-white border-gray-700"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
               }`}
             >
               {s.name}
@@ -151,12 +151,12 @@ export default async function AllOrdersPage({
       )}
 
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag className="w-7 h-7 text-gray-400" />
+        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingBag className="w-7 h-7 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No orders found</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No orders found</h3>
+          <p className="text-sm text-admin-text-muted">
             {status || filterStore ? "Try removing some filters." : "Orders will appear here once placed."}
           </p>
         </div>
@@ -165,15 +165,15 @@ export default async function AllOrdersPage({
           {/* Mobile card list */}
           <div className="flex flex-col gap-3 sm:hidden">
             {orders.map((order) => (
-              <div key={order._id} className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col gap-3">
+              <div key={order._id} className="bg-admin-surface rounded-xl border border-admin-border-md p-4 flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-mono text-sm font-semibold text-gray-900">{order.orderNumber}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{storeMap[order.storeId] ?? "—"}</p>
+                    <p className="font-mono text-sm font-semibold text-admin-text-primary">{order.orderNumber}</p>
+                    <p className="text-xs text-admin-text-muted mt-0.5">{storeMap[order.storeId] ?? "—"}</p>
                   </div>
                   <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize shrink-0 ${
-                      STATUS_STYLES[order.status] ?? "bg-gray-100 text-gray-700"
+                      STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
                     }`}
                   >
                     {order.status === "pending" && <Clock className="w-3 h-3" />}
@@ -186,34 +186,34 @@ export default async function AllOrdersPage({
 
                 <div className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="font-medium text-gray-900">{order.shippingAddress.name}</p>
-                    <p className="text-xs text-gray-400">{order.shippingAddress.phone || "—"}</p>
+                    <p className="font-medium text-admin-text-primary">{order.shippingAddress.name}</p>
+                    <p className="text-xs text-admin-text-subtle">{order.shippingAddress.phone || "—"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">৳{order.total.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="font-semibold text-admin-text-primary">৳{order.total.toLocaleString()}</p>
+                    <p className="text-xs text-admin-text-subtle">
                       {order.items.length} {order.items.length === 1 ? "item" : "items"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-2 border-t border-admin-border">
                   <span
                     className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                      PAYMENT_STYLES[order.paymentStatus] ?? "bg-gray-100 text-gray-700"
+                      PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
                     }`}
                   >
                     {order.paymentStatus}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-admin-text-subtle">
                       {new Date(order.createdAt).toLocaleDateString("en-GB", {
                         day: "2-digit", month: "short", year: "numeric",
                       })}
                     </span>
                     <Link
                       href={`/admin/stores/${order.storeId}/orders/${order._id}`}
-                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
+                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
                     >
                       View
                     </Link>
@@ -224,54 +224,54 @@ export default async function AllOrdersPage({
           </div>
 
           {/* Desktop table */}
-          <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="hidden sm:block bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-200">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Store</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Customer</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Items</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Store</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Customer</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Items</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Total</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Status</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Payment</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Date</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {orders.map((order) => (
-                    <tr key={order._id} className="hover:bg-gray-50/60 transition-colors group">
+                    <tr key={order._id} className="hover:bg-admin-surface-raised/60 transition-colors group">
                       <td className="px-5 py-4">
-                        <span className="font-mono text-sm font-semibold text-gray-900">
+                        <span className="font-mono text-sm font-semibold text-admin-text-primary">
                           {order.orderNumber}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-sm text-gray-600">
+                      <td className="px-5 py-4 text-sm text-admin-text-secondary">
                         {storeMap[order.storeId] ?? "—"}
                       </td>
                       <td className="px-5 py-4">
-                        <p className="text-sm font-medium text-gray-900">{order.shippingAddress.name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{order.shippingAddress.phone || "—"}</p>
+                        <p className="text-sm font-medium text-admin-text-primary">{order.shippingAddress.name}</p>
+                        <p className="text-xs text-admin-text-subtle mt-0.5">{order.shippingAddress.phone || "—"}</p>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-admin-text-secondary">
                           {order.items.length} {order.items.length === 1 ? "item" : "items"}
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5 max-w-40 truncate">
+                        <div className="text-xs text-admin-text-subtle mt-0.5 max-w-40 truncate">
                           {order.items.map((i) => i.productName).join(", ")}
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-admin-text-primary">
                           ৳{order.total.toLocaleString()}
                         </span>
                       </td>
                       <td className="px-5 py-4">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                            STATUS_STYLES[order.status] ?? "bg-gray-100 text-gray-700"
+                            STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
                           }`}
                         >
                           {order.status === "pending" && <Clock className="w-3 h-3" />}
@@ -284,13 +284,13 @@ export default async function AllOrdersPage({
                       <td className="px-5 py-4">
                         <span
                           className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                            PAYMENT_STYLES[order.paymentStatus] ?? "bg-gray-100 text-gray-700"
+                            PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
                           }`}
                         >
                           {order.paymentStatus}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                      <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
                         {new Date(order.createdAt).toLocaleDateString("en-GB", {
                           day: "2-digit", month: "short", year: "numeric",
                         })}
@@ -304,7 +304,7 @@ export default async function AllOrdersPage({
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/stores/${order.storeId}/orders/${order._id}`}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg"
                         >
                           View
                         </Link>
@@ -319,17 +319,17 @@ export default async function AllOrdersPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-admin-text-muted">
                 Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
               </p>
               <div className="flex items-center gap-1">
                 <Link
                   href={pageHref(page - 1)}
                   aria-disabled={page <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     page <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -344,7 +344,7 @@ export default async function AllOrdersPage({
                   }, [])
                   .map((p, i) =>
                     p === "…" ? (
-                      <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-gray-400">
+                      <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle">
                         …
                       </span>
                     ) : (
@@ -354,7 +354,7 @@ export default async function AllOrdersPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                           page === p
                             ? "bg-gray-900 text-white"
-                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                         }`}
                       >
                         {p}
@@ -365,10 +365,10 @@ export default async function AllOrdersPage({
                 <Link
                   href={pageHref(page + 1)}
                   aria-disabled={page >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     page >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

@@ -66,8 +66,8 @@ export default async function AllCustomersPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-admin-text-primary">Customers</h1>
+          <p className="text-sm text-admin-text-muted mt-1">
             {total} {total === 1 ? "customer" : "customers"}
             {storeFilter ? " in this store" : " across all stores"}
           </p>
@@ -84,7 +84,7 @@ export default async function AllCustomersPage({
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 !storeFilter
                   ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
               }`}
             >
               All Stores
@@ -96,7 +96,7 @@ export default async function AllCustomersPage({
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                   storeFilter === s._id
                     ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                    : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                 }`}
               >
                 {s.name}
@@ -114,7 +114,7 @@ export default async function AllCustomersPage({
               className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
                 status === s
                   ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
               }`}
             >
               {s}
@@ -125,12 +125,12 @@ export default async function AllCustomersPage({
 
       {/* Empty state */}
       {total === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-7 h-7 text-gray-400" />
+        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
+          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users className="w-7 h-7 text-admin-text-subtle" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">No customers found</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No customers found</h3>
+          <p className="text-sm text-admin-text-muted">
             {storeFilter || status !== "all"
               ? "Try removing some filters."
               : "Customers will appear here once they register."}
@@ -146,20 +146,20 @@ export default async function AllCustomersPage({
                 customer.addresses?.find((a) => a.isDefault) ?? customer.addresses?.[0];
 
               return (
-                <div key={customer._id} className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col gap-3">
+                <div key={customer._id} className="bg-admin-surface rounded-xl border border-admin-border-md p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
                       {getInitials(customer.name)}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{customer.name}</p>
+                      <p className="text-sm font-medium text-admin-text-primary truncate">{customer.name}</p>
                       {store && (
-                        <p className="text-xs text-gray-400 truncate">{store.name}</p>
+                        <p className="text-xs text-admin-text-subtle truncate">{store.name}</p>
                       )}
                     </div>
                     <span
                       className={`ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${
-                        customer.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                        customer.isActive ? "bg-green-100 text-green-700" : "bg-admin-chip text-admin-text-muted"
                       }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${customer.isActive ? "bg-green-500" : "bg-gray-400"}`} />
@@ -169,27 +169,27 @@ export default async function AllCustomersPage({
 
                   <div className="space-y-1">
                     {customer.email && (
-                      <p className="text-xs text-gray-600 flex items-center gap-1.5">
-                        <Mail className="w-3 h-3 shrink-0 text-gray-400" />
+                      <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
+                        <Mail className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                         {customer.email}
                       </p>
                     )}
                     {customer.phone && (
-                      <p className="text-xs text-gray-600 flex items-center gap-1.5">
-                        <Phone className="w-3 h-3 shrink-0 text-gray-400" />
+                      <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
+                        <Phone className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                         {customer.phone}
                       </p>
                     )}
                     {defaultAddress && (
-                      <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                        <MapPin className="w-3 h-3 shrink-0 text-gray-400" />
+                      <p className="text-xs text-admin-text-muted flex items-center gap-1.5">
+                        <MapPin className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                         {[defaultAddress.city, defaultAddress.country].filter(Boolean).join(", ") || "—"}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                    <span className="text-xs text-gray-400">
+                  <div className="flex items-center justify-between pt-2 border-t border-admin-border">
+                    <span className="text-xs text-admin-text-subtle">
                       Joined{" "}
                       {new Date(customer.createdAt).toLocaleDateString("en-GB", {
                         day: "2-digit", month: "short", year: "numeric",
@@ -198,7 +198,7 @@ export default async function AllCustomersPage({
                     {store && (
                       <Link
                         href={`/admin/stores/${store._id}/customers`}
-                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
+                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
                       >
                         View in Store
                       </Link>
@@ -210,67 +210,67 @@ export default async function AllCustomersPage({
           </div>
 
           {/* Desktop table */}
-          <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="hidden sm:block bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-175">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <tr className="border-b border-admin-border-md bg-admin-surface-raised">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Customer
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Contact
                     </th>
                     {!storeFilter && (
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                         Store
                       </th>
                     )}
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Location
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Status
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Joined
                     </th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-admin-border">
                   {customers.map((customer) => {
                     const store = storeMap.get(customer.storeId);
                     const defaultAddress =
                       customer.addresses?.find((a) => a.isDefault) ?? customer.addresses?.[0];
 
                     return (
-                      <tr key={customer._id} className="hover:bg-gray-50/60 transition-colors group">
+                      <tr key={customer._id} className="hover:bg-admin-surface-raised/60 transition-colors group">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
                               {getInitials(customer.name)}
                             </div>
-                            <span className="text-sm font-medium text-gray-900">{customer.name}</span>
+                            <span className="text-sm font-medium text-admin-text-primary">{customer.name}</span>
                           </div>
                         </td>
 
                         <td className="px-5 py-4">
                           <div className="space-y-1">
                             {customer.email && (
-                              <p className="text-xs text-gray-600 flex items-center gap-1.5">
-                                <Mail className="w-3 h-3 shrink-0 text-gray-400" />
+                              <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
+                                <Mail className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                                 {customer.email}
                               </p>
                             )}
                             {customer.phone && (
-                              <p className="text-xs text-gray-600 flex items-center gap-1.5">
-                                <Phone className="w-3 h-3 shrink-0 text-gray-400" />
+                              <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
+                                <Phone className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                                 {customer.phone}
                               </p>
                             )}
                             {!customer.email && !customer.phone && (
-                              <span className="text-xs text-gray-400">—</span>
+                              <span className="text-xs text-admin-text-subtle">—</span>
                             )}
                           </div>
                         </td>
@@ -285,21 +285,21 @@ export default async function AllCustomersPage({
                                 {store.name}
                               </Link>
                             ) : (
-                              <span className="text-xs text-gray-400">—</span>
+                              <span className="text-xs text-admin-text-subtle">—</span>
                             )}
                           </td>
                         )}
 
                         <td className="px-5 py-4">
                           {defaultAddress ? (
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
+                            <span className="text-xs text-admin-text-muted flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-admin-text-subtle shrink-0" />
                               {[defaultAddress.city, defaultAddress.country]
                                 .filter(Boolean)
                                 .join(", ") || "—"}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400">—</span>
+                            <span className="text-xs text-admin-text-subtle">—</span>
                           )}
                         </td>
 
@@ -308,7 +308,7 @@ export default async function AllCustomersPage({
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                               customer.isActive
                                 ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
+                                : "bg-admin-chip text-admin-text-muted"
                             }`}
                           >
                             <span
@@ -320,7 +320,7 @@ export default async function AllCustomersPage({
                           </span>
                         </td>
 
-                        <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                        <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
                           {new Date(customer.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit", month: "short", year: "numeric",
                           })}
@@ -330,7 +330,7 @@ export default async function AllCustomersPage({
                           {store && (
                             <Link
                               href={`/admin/stores/${store._id}/customers`}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg whitespace-nowrap"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg whitespace-nowrap"
                             >
                               View in Store
                             </Link>
@@ -347,7 +347,7 @@ export default async function AllCustomersPage({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
@@ -355,10 +355,10 @@ export default async function AllCustomersPage({
                 <Link
                   href={buildHref({ page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -375,7 +375,7 @@ export default async function AllCustomersPage({
                     item === "..." ? (
                       <span
                         key={`ellipsis-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-gray-400"
+                        className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle"
                       >
                         …
                       </span>
@@ -386,7 +386,7 @@ export default async function AllCustomersPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                           currentPage === item
                             ? "bg-gray-900 text-white"
-                            : "border border-gray-200 text-gray-600 hover:bg-gray-100"
+                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                         }`}
                       >
                         {item}
@@ -397,10 +397,10 @@ export default async function AllCustomersPage({
                 <Link
                   href={buildHref({ page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-gray-500 transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
                     currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-gray-200"
-                      : "border-gray-200 hover:bg-gray-100"
+                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

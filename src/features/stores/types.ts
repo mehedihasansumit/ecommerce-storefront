@@ -1,6 +1,15 @@
 import { Types } from "mongoose";
 import type { LocalizedString } from "@/shared/types/i18n";
 
+export interface IStoreDarkTheme {
+  backgroundColor?: string;
+  textColor?: string;
+  surfaceColor?: string;
+  borderColor?: string;
+  headerBg?: string;
+  headerText?: string;
+}
+
 export interface IStoreTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -12,6 +21,7 @@ export interface IStoreTheme {
   fontFamily: string;
   borderRadius: string;
   layoutStyle: "grid" | "list" | "masonry";
+  dark?: IStoreDarkTheme;
 }
 
 export interface IHeroBanner {

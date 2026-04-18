@@ -26,6 +26,14 @@ const StoreSchema = new Schema<IStoreDocument>(
         enum: ["grid", "list", "masonry"],
         default: "grid",
       },
+      dark: {
+        backgroundColor: { type: String, default: "#111827" },
+        textColor:       { type: String, default: "#F9FAFB" },
+        surfaceColor:    { type: String, default: "#1F2937" },
+        borderColor:     { type: String, default: "#374151" },
+        headerBg:        { type: String, default: "#0F172A" },
+        headerText:      { type: String, default: "#F8FAFC" },
+      },
     },
 
     heroBanners: [

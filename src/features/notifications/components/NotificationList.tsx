@@ -73,27 +73,27 @@ export function NotificationList() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading...</div>
+        <div className="text-center py-12 text-admin-text-subtle">Loading...</div>
       ) : notifications.length === 0 ? (
         <div className="text-center py-16 flex flex-col items-center gap-3">
           <Bell size={40} className="text-gray-300" />
-          <p className="text-gray-500">No notifications yet</p>
+          <p className="text-admin-text-muted">No notifications yet</p>
         </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => (
             <div
               key={n._id}
-              className={`bg-white rounded-xl border p-4 flex items-start gap-3 transition-colors ${
+              className={`bg-admin-surface rounded-xl border p-4 flex items-start gap-3 transition-colors ${
                 !n.isRead
                   ? "border-blue-200 bg-blue-50/30"
-                  : "border-gray-100"
+                  : "border-admin-border"
               }`}
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800">{n.title}</p>
-                <p className="text-sm text-gray-500 mt-0.5">{n.message}</p>
-                <p className="text-xs text-gray-400 mt-1.5">
+                <p className="text-sm text-admin-text-muted mt-0.5">{n.message}</p>
+                <p className="text-xs text-admin-text-subtle mt-1.5">
                   {formatDate(n.createdAt)}
                 </p>
               </div>
@@ -117,7 +117,7 @@ export function NotificationList() {
               >
                 Previous
               </button>
-              <span className="px-3 py-1.5 text-sm text-gray-500">
+              <span className="px-3 py-1.5 text-sm text-admin-text-muted">
                 Page {page} of {totalPages}
               </span>
               <button

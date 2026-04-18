@@ -187,7 +187,7 @@ export default async function StoreDetailPage({
   return (
     <div className="space-y-6">
       {/* Store Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm">
+      <div className="relative rounded-2xl overflow-hidden bg-admin-surface border border-admin-border-md shadow-sm">
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
@@ -208,13 +208,13 @@ export default async function StoreDetailPage({
                 {store.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 leading-tight">{store.name}</h1>
+                <h1 className="text-2xl font-bold text-admin-text-primary leading-tight">{store.name}</h1>
                 <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                  <Globe size={12} className="text-gray-400" />
+                  <Globe size={12} className="text-admin-text-subtle" />
                   {store.domains.map((domain) => (
                     <span
                       key={domain}
-                      className="text-xs px-2 py-0.5 bg-gray-100 rounded-md text-gray-500 font-mono border border-gray-200"
+                      className="text-xs px-2 py-0.5 bg-admin-chip rounded-md text-admin-text-muted font-mono border border-admin-border-md"
                     >
                       {domain}
                     </span>
@@ -242,7 +242,7 @@ export default async function StoreDetailPage({
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
                   store.isActive
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-gray-100 text-gray-500 border border-gray-200"
+                    : "bg-admin-chip text-admin-text-muted border border-admin-border-md"
                 }`}
               >
                 <span
@@ -256,7 +256,7 @@ export default async function StoreDetailPage({
           </div>
 
           {canEditStore && (
-            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3 text-xs text-gray-400">
+            <div className="mt-4 pt-4 border-t border-admin-border flex items-center gap-3 text-xs text-admin-text-subtle">
               <span className="font-medium">Theme:</span>
               <span>{store.theme.fontFamily}</span>
               <span className="text-gray-300">·</span>
@@ -275,7 +275,7 @@ export default async function StoreDetailPage({
       {/* Module Navigation */}
       {modules.length > 0 && (
         <div>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
+          <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 px-0.5">
             Store Modules
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -285,7 +285,7 @@ export default async function StoreDetailPage({
                 <Link
                   key={mod.href}
                   href={mod.href}
-                  className="group flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
+                  className="group flex items-center gap-3 p-4 bg-admin-surface rounded-xl border border-admin-border-md hover:border-gray-300 hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
                 >
                   <div
                     className={`w-9 h-9 rounded-lg ${mod.lightColor} ${mod.textColor} flex items-center justify-center flex-shrink-0 transition-colors group-hover:${mod.color}`}
@@ -294,7 +294,7 @@ export default async function StoreDetailPage({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-gray-800 truncate">{mod.label}</p>
-                    <p className="text-xs text-gray-400 truncate">{mod.description}</p>
+                    <p className="text-xs text-admin-text-subtle truncate">{mod.description}</p>
                   </div>
                   <ArrowRight
                     size={14}
@@ -310,7 +310,7 @@ export default async function StoreDetailPage({
       {/* Store Settings Form */}
       {(canEditStore || canManagePoints) && (
         <div id="loyalty-points">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
+          <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 px-0.5">
             Store Settings
           </h2>
           <StoreEditForm

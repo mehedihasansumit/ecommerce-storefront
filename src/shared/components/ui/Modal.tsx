@@ -71,25 +71,25 @@ export function Modal({
         ref={panelRef}
         tabIndex={-1}
         className={[
-          "relative w-full bg-white rounded-xl shadow-lg animate-scale-in flex flex-col max-h-[90vh]",
+          "relative w-full bg-white dark:bg-gray-900 rounded-xl shadow-lg animate-scale-in flex flex-col max-h-[90vh]",
           SIZES[size],
         ].join(" ")}
       >
         {title && (
-          <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-100">
+          <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-100 dark:border-gray-800">
             <div className="min-w-0">
-              <h2 id="modal-title" className="text-base font-semibold text-gray-900">
+              <h2 id="modal-title" className="text-base font-semibold text-gray-900 dark:text-gray-100">
                 {title}
               </h2>
               {description && (
-                <p className="text-sm text-gray-500 mt-1">{description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
               )}
             </div>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 transition-colors"
             >
               <X size={18} />
             </button>
@@ -97,7 +97,7 @@ export function Modal({
         )}
         <div className="p-5 overflow-y-auto flex-1">{children}</div>
         {footer && (
-          <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+          <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl dark:border-gray-800 dark:bg-gray-800">
             {footer}
           </div>
         )}

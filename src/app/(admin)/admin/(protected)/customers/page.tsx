@@ -330,7 +330,7 @@ export default async function AllCustomersPage({
                           {store && (
                             <Link
                               href={`/admin/stores/${store._id}/customers`}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg whitespace-nowrap"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
                             >
                               View in Store
                             </Link>

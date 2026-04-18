@@ -110,7 +110,7 @@ export default async function AdminReviewsPage({
                 ‹
               </Link>
             ) : (
-              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-gray-300 cursor-default">
+              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-admin-text-subtle cursor-default">
                 ‹
               </span>
             )}
@@ -163,7 +163,7 @@ export default async function AdminReviewsPage({
                 ›
               </Link>
             ) : (
-              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-gray-300 cursor-default">
+              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-admin-text-subtle cursor-default">
                 ›
               </span>
             )}

@@ -162,11 +162,11 @@ export default async function StoreCategoriesPage({
                       <td className="px-5 py-4 text-sm text-admin-text-muted">
                         {parentName ? (
                           <span className="inline-flex items-center gap-1 text-xs text-admin-text-muted">
-                            <ChevronRight className="w-3 h-3 text-gray-300" />
+                            <ChevronRight className="w-3 h-3 text-admin-text-subtle" />
                             {parentName}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-300">—</span>
+                          <span className="text-xs text-admin-text-subtle">—</span>
                         )}
                       </td>
 
@@ -206,7 +206,7 @@ export default async function StoreCategoriesPage({
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link
                             href={`/admin/stores/${storeId}/categories/${cat._id}`}
-                            className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg transition-colors"
+                            className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors"
                           >
                             Edit
                           </Link>

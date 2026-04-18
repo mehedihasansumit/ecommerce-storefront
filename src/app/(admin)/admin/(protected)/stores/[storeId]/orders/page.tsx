@@ -289,7 +289,7 @@ export default async function StoreOrdersPage({
                           year: "numeric",
                         })}
                         <br />
-                        <span className="text-gray-300">
+                        <span className="text-admin-text-subtle">
                           {new Date(order.createdAt).toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -301,7 +301,7 @@ export default async function StoreOrdersPage({
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/stores/${storeId}/orders/${order._id}`}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-gray-200 rounded-lg"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg"
                         >
                           View
                         </Link>

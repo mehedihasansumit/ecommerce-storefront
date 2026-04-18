@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { ShoppingBag, ChevronLeft, ChevronRight, ArrowLeft, Package } from "lucide-react";
 import { getCustomerToken } from "@/shared/lib/auth";
 import { getStoreId } from "@/shared/lib/tenant";
 import { OrderService } from "@/features/orders/service";
 import { AuthRepository } from "@/features/auth/repository";
 import type { JwtCustomerPayload } from "@/features/auth/types";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Card, Badge, EmptyState, Button, Price } from "@/shared/components/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("orders");
@@ -16,13 +17,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const PAGE_SIZE = 10;
 
-const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  processing: "bg-purple-100 text-purple-800",
-  shipped: "bg-indigo-100 text-indigo-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
+const STATUS_BADGE: Record<string, { tone: "warning" | "neutral" | "success" | "danger" }> = {
+  pending:    { tone: "warning" },
+  confirmed:  { tone: "neutral" },
+  processing: { tone: "neutral" },
+  shipped:    { tone: "neutral" },
+  delivered:  { tone: "success" },
+  cancelled:  { tone: "danger"  },
 };
 
 export default async function OrdersPage({
@@ -55,87 +56,98 @@ export default async function OrdersPage({
   const currentPage = Math.min(page, totalPages);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("myOrders")}</h1>
-          {total > 0 && (
-            <p className="text-sm text-gray-500 mt-1">{total} orders total</p>
-          )}
-        </div>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
         <Link
           href="/account"
-          className="text-sm"
-          style={{ color: "var(--color-primary)" }}
+          className="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 transition-colors shrink-0"
+          aria-label="Back to account"
         >
-          ← My Account
+          <ArrowLeft size={16} className="text-gray-600" />
         </Link>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">{t("myOrders")}</h1>
+          {total > 0 && (
+            <p className="text-xs text-gray-400 mt-0.5">{total} orders total</p>
+          )}
+        </div>
       </div>
 
       {total === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500 mb-4">{t("noOrders")}</p>
-          <Link
-            href="/products"
-            className="inline-block px-6 py-2 text-white font-medium"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              borderRadius: "var(--border-radius)",
-            }}
-          >
-            Start Shopping
-          </Link>
-        </div>
+        <Card padding="lg">
+          <EmptyState
+            icon={ShoppingBag}
+            title={t("noOrders")}
+            description="Your orders will appear here after you make a purchase."
+            action={
+              <Link href="/products">
+                <Button variant="brand" size="lg">Start Shopping</Button>
+              </Link>
+            }
+          />
+        </Card>
       ) : (
         <>
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <div
-                key={order._id}
-                className="border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg p-6 bg-white hover:shadow-[var(--shadow-sm)] transition-shadow"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold">
-                      {t("orderNumber")}
-                      {order.orderNumber}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {t("date")}:{" "}
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {t("items", { count: order.items.length })}
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:items-end gap-2">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 text-[11px] font-medium rounded-md ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-700"}`}
-                    >
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                    <p className="font-semibold">
-                      ৳{order.total.toLocaleString()}
-                    </p>
-                    <Link
-                      href={`/orders/${order._id}`}
-                      className="text-sm font-medium"
-                      style={{ color: "var(--color-primary)" }}
-                    >
-                      {t("viewOrder")} →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {orders.map((order) => {
+              const badge = STATUS_BADGE[order.status] ?? { tone: "neutral" as const };
+              const previewItems = order.items.slice(0, 2);
+              const moreCount = order.items.length - previewItems.length;
+              return (
+                <Card key={order._id} padding="none">
+                  <Link href={`/orders/${order._id}`} className="block hover:bg-gray-50 transition-colors rounded-lg overflow-hidden">
+                    <div className="px-5 py-4">
+                      {/* Top row */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-semibold text-gray-900">
+                              #{order.orderNumber}
+                            </span>
+                            <Badge tone={badge.tone} size="sm">
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(order.createdAt).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                            {" · "}
+                            {t("items", { count: order.items.length })}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <Price amount={order.total} size="md" />
+                        </div>
+                      </div>
+
+                      {/* Item preview */}
+                      {previewItems.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2">
+                          <Package size={13} className="text-gray-300 shrink-0" />
+                          <p className="text-xs text-gray-500 truncate">
+                            {previewItems.map((i) => i.productName).join(", ")}
+                            {moreCount > 0 && ` +${moreCount} more`}
+                          </p>
+                          <ChevronRight size={14} className="text-gray-300 shrink-0 ml-auto" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-8">
-              <p className="text-sm text-gray-500">
-                Showing {(currentPage - 1) * PAGE_SIZE + 1}–
-                {Math.min(currentPage * PAGE_SIZE, total)} of {total}
+            <div className="flex items-center justify-between mt-6">
+              <p className="text-xs text-gray-500">
+                {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
               <div className="flex items-center gap-1">
                 <Link
@@ -144,16 +156,14 @@ export default async function OrdersPage({
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors ${
                     currentPage <= 1
                       ? "opacity-30 pointer-events-none border-gray-200 text-gray-400"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-100"
+                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(
-                    (p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1
-                  )
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
                   .reduce<(number | "...")[]>((acc, p, idx, arr) => {
                     if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("...");
                     acc.push(p);
@@ -174,7 +184,7 @@ export default async function OrdersPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium border transition-colors ${
                           currentPage === item
                             ? "border-transparent text-white"
-                            : "border-gray-200 text-gray-600 hover:bg-gray-100"
+                            : "border-gray-200 text-gray-600 hover:bg-gray-50"
                         }`}
                         style={
                           currentPage === item
@@ -193,7 +203,7 @@ export default async function OrdersPage({
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors ${
                     currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-gray-200 text-gray-400"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-100"
+                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

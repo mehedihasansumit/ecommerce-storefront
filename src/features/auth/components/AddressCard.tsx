@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Pencil, Trash2, MapPin, Star } from "lucide-react";
 import type { IAddress } from "../types";
+import { Button, Badge } from "@/shared/components/ui";
 
 interface AddressCardProps {
   address: IAddress;
@@ -27,14 +28,12 @@ export function AddressCard({
 
   const cardContent = (
     <>
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           {selectable && (
             <div
               className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                selected
-                  ? "border-[var(--color-primary)]"
-                  : "border-gray-300"
+                selected ? "border-[var(--color-primary)]" : "border-gray-300"
               }`}
             >
               {selected && (
@@ -45,50 +44,55 @@ export function AddressCard({
               )}
             </div>
           )}
-          <MapPin size={16} className="text-gray-400 shrink-0" />
-          <span className="text-sm font-semibold text-gray-800">
+          <MapPin size={15} className="text-gray-400 shrink-0" />
+          <span className="text-sm font-semibold text-gray-800 truncate">
             {address.label || t("street")}
           </span>
           {address.isDefault && (
-            <span
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
-              style={{ backgroundColor: "var(--color-primary)" }}
-            >
-              <Star size={10} />
+            <Badge tone="brand" size="sm">
+              <Star size={9} />
               {t("default")}
-            </span>
+            </Badge>
           )}
         </div>
+
         {!selectable && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {!address.isDefault && onSetDefault && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onSetDefault(address._id)}
-                className="px-2 py-1 text-xs text-gray-500 hover:text-gray-800 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
               >
                 {t("setDefault")}
-              </button>
+              </Button>
             )}
             {onEdit && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onEdit(address)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50 transition-colors"
+                aria-label="Edit address"
               >
                 <Pencil size={14} />
-              </button>
+              </Button>
             )}
             {onDelete && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onDelete(address._id)}
-                className="p-1.5 text-gray-400 hover:text-red-500 rounded hover:bg-red-50 transition-colors"
+                aria-label="Delete address"
+                className="text-gray-400 hover:text-red-500 hover:bg-red-50"
               >
                 <Trash2 size={14} />
-              </button>
+              </Button>
             )}
           </div>
         )}
       </div>
-      <div className="mt-2 text-sm text-gray-600 space-y-0.5 ml-6">
+
+      <div className="mt-2 text-sm text-gray-500 space-y-0.5 ml-6">
         <p>{address.street}</p>
         <p>
           {address.city}
@@ -116,7 +120,7 @@ export function AddressCard({
   }
 
   return (
-    <div className="p-4 rounded-lg border border-gray-200 bg-white">
+    <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 transition-colors">
       {cardContent}
     </div>
   );

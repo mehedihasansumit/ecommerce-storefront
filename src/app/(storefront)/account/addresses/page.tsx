@@ -9,6 +9,7 @@ import { AddressForm } from "@/features/auth/components/AddressForm";
 import { AddressCard } from "@/features/auth/components/AddressCard";
 import type { IAddress } from "@/features/auth/types";
 import { useTenant } from "@/shared/hooks/useTenant";
+import { Button, Card, CardHeader, EmptyState, ConfirmDialog } from "@/shared/components/ui";
 
 export default function AddressesPage() {
   const t = useTranslations("addresses");
@@ -18,10 +19,12 @@ export default function AddressesPage() {
   useEffect(() => {
     document.title = `Addresses | ${tenant?.name ?? "Store"}`;
   }, [tenant?.name]);
+
   const [addresses, setAddresses] = useState<IAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<IAddress | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchAddresses = useCallback(async () => {
     try {
@@ -68,19 +71,16 @@ export default function AddressesPage() {
     setEditingAddress(null);
   }
 
-  async function handleDelete(addressId: string) {
-    if (!confirm(t("deleteConfirm"))) return;
-    const res = await fetch(`/api/addresses/${addressId}`, {
-      method: "DELETE",
-    });
+  async function handleDelete() {
+    if (!deletingId) return;
+    const res = await fetch(`/api/addresses/${deletingId}`, { method: "DELETE" });
     const result = await res.json();
     if (res.ok) setAddresses(result.addresses);
+    setDeletingId(null);
   }
 
   async function handleSetDefault(addressId: string) {
-    const res = await fetch(`/api/addresses/${addressId}/default`, {
-      method: "PUT",
-    });
+    const res = await fetch(`/api/addresses/${addressId}/default`, { method: "PUT" });
     const result = await res.json();
     if (res.ok) setAddresses(result.addresses);
   }
@@ -89,85 +89,91 @@ export default function AddressesPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
-          <div className="h-24 bg-gray-200 rounded" />
-          <div className="h-24 bg-gray-200 rounded" />
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gray-200 rounded-lg" />
+            <div className="h-7 bg-gray-200 rounded w-40" />
+          </div>
+          <div className="h-28 bg-gray-200 rounded-lg" />
+          <div className="h-28 bg-gray-200 rounded-lg" />
         </div>
       </div>
     );
   }
 
+  const canAddMore = !showAddForm && !editingAddress && addresses.length < 10;
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/account"
-            className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50 transition-colors"
+            className="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-gray-200 hover:border-gray-300 transition-colors shrink-0"
+            aria-label="Back to account"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={16} className="text-gray-600" />
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
             {t("title")}
           </h1>
         </div>
-        {!showAddForm && !editingAddress && addresses.length < 10 && (
-          <button
+        {canAddMore && (
+          <Button
+            variant="brand"
+            size="sm"
+            leftIcon={<Plus size={15} />}
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium transition-all hover:brightness-105"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              borderRadius: "var(--border-radius)",
-            }}
           >
-            <Plus size={16} />
             {t("addNew")}
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Add form */}
       {showAddForm && (
-        <div className="mb-6 bg-white border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg p-6">
-          <h2 className="font-semibold text-lg mb-4">{t("addNew")}</h2>
+        <Card padding="lg">
+          <CardHeader title={t("addNew")} />
           <AddressForm
             onSubmit={handleAdd}
             onCancel={() => setShowAddForm(false)}
           />
-        </div>
+        </Card>
       )}
 
       {/* Edit form */}
       {editingAddress && (
-        <div className="mb-6 bg-white border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg p-6">
-          <h2 className="font-semibold text-lg mb-4">{t("editAddress")}</h2>
+        <Card padding="lg">
+          <CardHeader title={t("editAddress")} />
           <AddressForm
             initialData={editingAddress}
             onSubmit={handleUpdate}
             onCancel={() => setEditingAddress(null)}
           />
-        </div>
+        </Card>
       )}
 
-      {/* Address list */}
+      {/* Address list or empty state */}
       {addresses.length === 0 ? (
-        <div className="text-center py-12 bg-white border border-gray-100 shadow-[var(--shadow-xs)] rounded-lg">
-          <MapPin size={40} className="mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500 text-sm">{t("noAddresses")}</p>
-          {!showAddForm && (
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="mt-4 px-5 py-2 text-white text-sm font-medium transition-all hover:brightness-105"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                borderRadius: "var(--border-radius)",
-              }}
-            >
-              {t("addNew")}
-            </button>
-          )}
-        </div>
+        <Card padding="lg">
+          <EmptyState
+            icon={MapPin}
+            title={t("noAddresses")}
+            description="Add an address to make checkout faster."
+            action={
+              !showAddForm && (
+                <Button
+                  variant="brand"
+                  leftIcon={<Plus size={15} />}
+                  onClick={() => setShowAddForm(true)}
+                >
+                  {t("addNew")}
+                </Button>
+              )
+            }
+          />
+        </Card>
       ) : (
         <div className="space-y-3">
           {addresses.map((addr) => (
@@ -178,7 +184,7 @@ export default function AddressesPage() {
                 setEditingAddress(a);
                 setShowAddForm(false);
               }}
-              onDelete={handleDelete}
+              onDelete={(id) => setDeletingId(id)}
               onSetDefault={handleSetDefault}
             />
           ))}
@@ -186,8 +192,20 @@ export default function AddressesPage() {
       )}
 
       {addresses.length >= 10 && (
-        <p className="mt-4 text-sm text-amber-600">{t("maxReached")}</p>
+        <p className="text-sm text-amber-600 px-1">{t("maxReached")}</p>
       )}
+
+      {/* Delete confirm dialog */}
+      <ConfirmDialog
+        open={!!deletingId}
+        onClose={() => setDeletingId(null)}
+        onConfirm={handleDelete}
+        title={t("deleteConfirm")}
+        description="This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel={t("cancel")}
+        tone="danger"
+      />
     </div>
   );
 }

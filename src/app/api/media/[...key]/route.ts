@@ -27,7 +27,7 @@ export async function GET(
 
     const body = await result.Body!.transformToByteArray();
 
-    return new NextResponse(body, {
+    return new NextResponse(body.buffer as ArrayBuffer, {
       headers: {
         "Content-Type": result.ContentType ?? "application/octet-stream",
         "Cache-Control": result.CacheControl ?? "public, max-age=31536000, immutable",

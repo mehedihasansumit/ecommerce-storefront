@@ -62,6 +62,13 @@ export interface IStoreSocialOrdering {
   };
 }
 
+export interface IStorePointsConfig {
+  enabled: boolean;
+  pointsPerReview: number;
+  minRedemptionPoints: number;
+  pointsPerBdt: number;
+}
+
 export interface IStore {
   _id: string;
   name: string;
@@ -77,6 +84,7 @@ export interface IStore {
   contact: IStoreContact;
   socialLinks: IStoreSocialLinks;
   socialOrdering: IStoreSocialOrdering;
+  pointsConfig: IStorePointsConfig;
   supportedLanguages: string[];
   defaultLanguage: string;
   createdAt: Date;

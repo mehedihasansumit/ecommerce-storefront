@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   MessageCircle,
+  Sparkles,
 } from "lucide-react";
 import type { IStore } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
@@ -26,7 +27,16 @@ import { ImageInput } from "@/shared/components/ui";
 
 interface StoreEditFormProps {
   store: IStore;
+  canEditStore?: boolean;
+  canManagePoints?: boolean;
 }
+
+const DEFAULT_POINTS_CONFIG = {
+  enabled: true,
+  pointsPerReview: 10,
+  minRedemptionPoints: 100,
+  pointsPerBdt: 10,
+};
 
 const WHATSAPP_TEMPLATE_PLACEHOLDERS = [
   "{{productName}}",
@@ -59,9 +69,16 @@ interface BannerState {
   linkText: string;
 }
 
-type Tab = "general" | "theme" | "banners" | "contact" | "socialOrdering" | "seo";
+type Tab =
+  | "general"
+  | "theme"
+  | "banners"
+  | "contact"
+  | "socialOrdering"
+  | "seo"
+  | "loyalty";
 
-const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
+const STORE_TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "general", label: "General", icon: Settings },
   { id: "theme", label: "Theme", icon: Palette },
   { id: "banners", label: "Banners", icon: ImageIcon },
@@ -70,8 +87,23 @@ const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "seo", label: "SEO", icon: Search },
 ];
 
-export default function StoreEditForm({ store }: StoreEditFormProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("general");
+const LOYALTY_TAB: { id: Tab; label: string; icon: React.ElementType } = {
+  id: "loyalty",
+  label: "Loyalty Points",
+  icon: Sparkles,
+};
+
+export default function StoreEditForm({
+  store,
+  canEditStore = true,
+  canManagePoints = false,
+}: StoreEditFormProps) {
+  const visibleTabs = [
+    ...(canEditStore ? STORE_TABS : []),
+    ...(canManagePoints ? [LOYALTY_TAB] : []),
+  ];
+  const initialTab: Tab = visibleTabs[0]?.id ?? "general";
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -114,6 +146,16 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
     },
     supportedLanguages: supportedLangs,
     defaultLanguage: store.defaultLanguage || "en",
+    pointsConfig: {
+      enabled: store.pointsConfig?.enabled ?? DEFAULT_POINTS_CONFIG.enabled,
+      pointsPerReview:
+        store.pointsConfig?.pointsPerReview ?? DEFAULT_POINTS_CONFIG.pointsPerReview,
+      minRedemptionPoints:
+        store.pointsConfig?.minRedemptionPoints ??
+        DEFAULT_POINTS_CONFIG.minRedemptionPoints,
+      pointsPerBdt:
+        store.pointsConfig?.pointsPerBdt ?? DEFAULT_POINTS_CONFIG.pointsPerBdt,
+    },
   });
 
   const [heroBanners, setHeroBanners] = useState<BannerState[]>(
@@ -230,28 +272,34 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
         .map((k) => k.trim())
         .filter((k) => k);
 
+      const payload: Record<string, unknown> = {};
+      if (canEditStore) {
+        payload.name = formData.name;
+        payload.domains = domainsArray;
+        payload.theme = formData.theme;
+        payload.isActive = formData.isActive;
+        payload.logo = formData.logo;
+        payload.favicon = formData.favicon;
+        payload.heroBanners = heroBanners;
+        payload.contact = formData.contact;
+        payload.socialOrdering = formData.socialOrdering;
+        payload.seo = {
+          title: formData.seo.title,
+          description: formData.seo.description,
+          keywords,
+          ogImage: formData.seo.ogImage,
+        };
+        payload.supportedLanguages = formData.supportedLanguages;
+        payload.defaultLanguage = formData.defaultLanguage;
+      }
+      if (canManagePoints) {
+        payload.pointsConfig = formData.pointsConfig;
+      }
+
       const res = await fetch(`/api/stores/${store._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          domains: domainsArray,
-          theme: formData.theme,
-          isActive: formData.isActive,
-          logo: formData.logo,
-          favicon: formData.favicon,
-          heroBanners,
-          contact: formData.contact,
-          socialOrdering: formData.socialOrdering,
-          seo: {
-            title: formData.seo.title,
-            description: formData.seo.description,
-            keywords,
-            ogImage: formData.seo.ogImage,
-          },
-          supportedLanguages: formData.supportedLanguages,
-          defaultLanguage: formData.defaultLanguage,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -277,7 +325,7 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
     >
       {/* Tab Bar */}
       <div className="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
-        {TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
@@ -1342,6 +1390,171 @@ export default function StoreEditForm({ store }: StoreEditFormProps) {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+        {/* ── LOYALTY TAB ── */}
+        {activeTab === "loyalty" && (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 space-y-5">
+              <div>
+                <SectionTitle>Earning &amp; Redemption Rules</SectionTitle>
+                <p className="text-xs text-gray-400 mt-1">
+                  Customers earn points when their reviews are approved and can
+                  redeem them into coupons on their account page.
+                </p>
+              </div>
+
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={formData.pointsConfig.enabled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      pointsConfig: {
+                        ...prev.pointsConfig,
+                        enabled: e.target.checked,
+                      },
+                    }))
+                  }
+                  disabled={loading}
+                  className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 mt-0.5"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-800">
+                    Points earning enabled
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    When off, review approvals don&apos;t award points. Existing
+                    balances stay intact and can still be redeemed.
+                  </p>
+                </div>
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Field
+                  label="Points per review"
+                  hint="Awarded when a review is approved"
+                >
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.pointsConfig.pointsPerReview}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        pointsConfig: {
+                          ...prev.pointsConfig,
+                          pointsPerReview: Math.max(
+                            0,
+                            parseInt(e.target.value || "0", 10)
+                          ),
+                        },
+                      }))
+                    }
+                    className={inputCls}
+                    disabled={loading}
+                  />
+                </Field>
+
+                <Field
+                  label="Minimum redemption"
+                  hint="Smallest redeemable amount"
+                >
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.pointsConfig.minRedemptionPoints}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        pointsConfig: {
+                          ...prev.pointsConfig,
+                          minRedemptionPoints: Math.max(
+                            1,
+                            parseInt(e.target.value || "1", 10)
+                          ),
+                        },
+                      }))
+                    }
+                    className={inputCls}
+                    disabled={loading}
+                  />
+                </Field>
+
+                <Field
+                  label="Points per ৳1"
+                  hint={`${formData.pointsConfig.pointsPerBdt} pts = ৳1`}
+                >
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.pointsConfig.pointsPerBdt}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        pointsConfig: {
+                          ...prev.pointsConfig,
+                          pointsPerBdt: Math.max(
+                            1,
+                            parseInt(e.target.value || "1", 10)
+                          ),
+                        },
+                      }))
+                    }
+                    className={inputCls}
+                    disabled={loading}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="lg:col-span-2">
+              <SectionTitle>How it looks</SectionTitle>
+              <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center">
+                    <Sparkles size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">
+                      {formData.pointsConfig.enabled
+                        ? "Earning active"
+                        : "Earning paused"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formData.pointsConfig.pointsPerReview} pts · per review
+                    </p>
+                  </div>
+                </div>
+                <div className="border-t border-gray-200" />
+                <div className="text-xs text-gray-600 space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Min redemption</span>
+                    <span className="font-medium">
+                      {formData.pointsConfig.minRedemptionPoints} pts
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Conversion rate</span>
+                    <span className="font-medium">
+                      {formData.pointsConfig.pointsPerBdt} pts = ৳1
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Min redemption value</span>
+                    <span className="font-medium">
+                      ৳
+                      {Math.floor(
+                        formData.pointsConfig.minRedemptionPoints /
+                          Math.max(1, formData.pointsConfig.pointsPerBdt)
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

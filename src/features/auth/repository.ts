@@ -251,6 +251,54 @@ export const AuthRepository = {
     await UserModel.findOneAndUpdate({ _id: userId, storeId }, { $inc: { points: amount } });
   },
 
+  async findCustomersByPoints(
+    storeId: string,
+    {
+      skip = 0,
+      limit = 20,
+      search,
+      minPoints,
+    }: { skip?: number; limit?: number; search?: string; minPoints?: number } = {}
+  ): Promise<IUser[]> {
+    await dbConnect();
+    const filter: Record<string, unknown> = { storeId };
+    if (minPoints !== undefined) filter.points = { $gte: minPoints };
+    if (search) {
+      const re = { $regex: search, $options: "i" };
+      filter.$or = [{ name: re }, { email: re }, { phone: re }];
+    }
+    const users = await UserModel.find(filter)
+      .select("-passwordHash")
+      .sort({ points: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    return users.map(serializeUser);
+  },
+
+  async countCustomersByPoints(
+    storeId: string,
+    { search, minPoints }: { search?: string; minPoints?: number } = {}
+  ): Promise<number> {
+    await dbConnect();
+    const filter: Record<string, unknown> = { storeId };
+    if (minPoints !== undefined) filter.points = { $gte: minPoints };
+    if (search) {
+      const re = { $regex: search, $options: "i" };
+      filter.$or = [{ name: re }, { email: re }, { phone: re }];
+    }
+    return UserModel.countDocuments(filter);
+  },
+
+  async findUsersByIds(userIds: string[]): Promise<IUser[]> {
+    await dbConnect();
+    if (userIds.length === 0) return [];
+    const users = await UserModel.find({ _id: { $in: userIds } })
+      .select("-passwordHash")
+      .lean();
+    return users.map(serializeUser);
+  },
+
   async setDefaultAddress(
     storeId: string,
     userId: string,

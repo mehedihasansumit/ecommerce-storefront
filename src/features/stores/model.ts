@@ -85,6 +85,13 @@ const StoreSchema = new Schema<IStoreDocument>(
       },
     },
 
+    pointsConfig: {
+      enabled: { type: Boolean, default: true },
+      pointsPerReview: { type: Number, default: 10 },
+      minRedemptionPoints: { type: Number, default: 100 },
+      pointsPerBdt: { type: Number, default: 10 },
+    },
+
     supportedLanguages: {
       type: [String],
       default: ["en"],

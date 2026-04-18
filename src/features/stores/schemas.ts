@@ -111,6 +111,14 @@ export const updateStoreSchema = z.object({
         .optional(),
     })
     .optional(),
+  pointsConfig: z
+    .object({
+      enabled: z.boolean().optional(),
+      pointsPerReview: z.number().int().min(0).optional(),
+      minRedemptionPoints: z.number().int().min(1).optional(),
+      pointsPerBdt: z.number().int().min(1).optional(),
+    })
+    .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),
 });

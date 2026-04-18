@@ -2,23 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { POINTS_PER_BDT, MIN_REDEMPTION_POINTS } from "@/features/points/types";
 
 interface RedeemPointsButtonProps {
   points: number;
+  minRedemption: number;
+  pointsPerBdt: number;
 }
 
-export default function RedeemPointsButton({ points }: RedeemPointsButtonProps) {
+export default function RedeemPointsButton({
+  points,
+  minRedemption,
+  pointsPerBdt,
+}: RedeemPointsButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Redeem maximum possible in multiples of MIN_REDEMPTION_POINTS
-  const redeemablePoints =
-    Math.floor(points / MIN_REDEMPTION_POINTS) * MIN_REDEMPTION_POINTS;
-  const discountValue = redeemablePoints / POINTS_PER_BDT;
+  // Redeem maximum possible in multiples of minRedemption
+  const redeemablePoints = Math.floor(points / minRedemption) * minRedemption;
+  const discountValue = redeemablePoints / pointsPerBdt;
 
   async function handleRedeem() {
     setLoading(true);

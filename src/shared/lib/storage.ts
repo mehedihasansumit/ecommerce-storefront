@@ -22,7 +22,9 @@ const REGION = process.env.S3_REGION || "garage";
 export const BUCKET =
   process.env.S3_BUCKET || process.env.RUSTFS_BUCKET || "ecommerce-uploads";
 
-const PUBLIC_URL = (process.env.S3_PUBLIC_URL || ENDPOINT).replace(/\/$/, "");
+// When a real CDN URL is configured, use it directly. Otherwise serve through the
+// Next.js /api/media proxy so no public bucket access or /etc/hosts is needed in dev.
+const CDN_URL = process.env.S3_PUBLIC_URL?.replace(/\/$/, "");
 
 const s3Client = new S3Client({
   endpoint: ENDPOINT,
@@ -35,7 +37,8 @@ const s3Client = new S3Client({
 });
 
 export function publicUrlFor(key: string): string {
-  return `${PUBLIC_URL}/${BUCKET}/${key}`;
+  if (CDN_URL) return `${CDN_URL}/${key}`;
+  return `/api/media/${key}`;
 }
 
 export async function uploadFile(

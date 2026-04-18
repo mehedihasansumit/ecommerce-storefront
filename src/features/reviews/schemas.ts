@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { MIN_REDEMPTION_POINTS } from "@/features/points/types";
 
 export const createReviewSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
@@ -19,15 +18,9 @@ export const getReviewsQuerySchema = z.object({
   isApproved: z.enum(["true", "false"]).transform((v) => v === "true").optional(),
 });
 
+// Per-store min/multiples are enforced by PointService.redeem using the store's pointsConfig.
 export const redeemPointsSchema = z.object({
-  points: z
-    .number()
-    .int()
-    .min(MIN_REDEMPTION_POINTS, `Minimum redemption is ${MIN_REDEMPTION_POINTS} points`)
-    .refine(
-      (v) => v % MIN_REDEMPTION_POINTS === 0,
-      `Must redeem in multiples of ${MIN_REDEMPTION_POINTS} points`
-    ),
+  points: z.number().int().positive(),
 });
 
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;

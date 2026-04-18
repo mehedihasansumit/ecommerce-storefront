@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight, Coins } from "lucide-react";
 import { AuthService } from "@/features/auth/service";
 import { OrderService } from "@/features/orders/service";
 import { CustomersSearch } from "./CustomersSearch";
@@ -197,6 +197,9 @@ export default async function StoreCustomersPage({
                       Spent
                     </th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Points
+                    </th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Status
                     </th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -289,6 +292,21 @@ export default async function StoreCustomersPage({
                             <span className="text-sm font-semibold text-gray-900">
                               ৳{stats.totalSpent.toLocaleString()}
                             </span>
+                          ) : (
+                            <span className="text-sm text-gray-400">—</span>
+                          )}
+                        </td>
+
+                        {/* Points */}
+                        <td className="px-5 py-4">
+                          {(customer.points ?? 0) > 0 ? (
+                            <Link
+                              href={`/admin/stores/${storeId}/points/${customer._id}`}
+                              className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900 hover:text-amber-600 transition-colors"
+                            >
+                              <Coins className="w-3.5 h-3.5 text-amber-500" />
+                              {(customer.points ?? 0).toLocaleString()}
+                            </Link>
                           ) : (
                             <span className="text-sm text-gray-400">—</span>
                           )}

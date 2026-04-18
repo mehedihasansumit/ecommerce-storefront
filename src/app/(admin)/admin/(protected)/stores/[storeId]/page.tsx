@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Globe,
   Star,
+  Sparkles,
 } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -44,6 +45,8 @@ export default async function StoreDetailPage({
     PERMISSIONS.ANALYTICS_VIEW,
     PERMISSIONS.REVIEWS_VIEW,
     PERMISSIONS.REVIEWS_MODERATE,
+    PERMISSIONS.POINTS_VIEW,
+    PERMISSIONS.POINTS_MANAGE,
   ].some((p) => hasPermission(adminUser, p));
   if (!hasAnyAccess) redirect("/admin");
 
@@ -69,6 +72,8 @@ export default async function StoreDetailPage({
   const canViewReviews =
     hasPermission(adminUser, PERMISSIONS.REVIEWS_VIEW) ||
     hasPermission(adminUser, PERMISSIONS.REVIEWS_MODERATE);
+  const canViewPoints = hasPermission(adminUser, PERMISSIONS.POINTS_VIEW);
+  const canManagePoints = hasPermission(adminUser, PERMISSIONS.POINTS_MANAGE);
 
   const modules = [
     canViewProducts && {
@@ -151,6 +156,15 @@ export default async function StoreDetailPage({
       color: "bg-yellow-500",
       lightColor: "bg-yellow-50",
       textColor: "text-yellow-600",
+    },
+    canViewPoints && {
+      href: `/admin/stores/${storeId}/points`,
+      icon: Sparkles,
+      label: "Loyalty Points",
+      description: "Balances, ledger & rules",
+      color: "bg-pink-500",
+      lightColor: "bg-pink-50",
+      textColor: "text-pink-600",
     },
   ].filter(Boolean) as {
     href: string;
@@ -294,12 +308,16 @@ export default async function StoreDetailPage({
       )}
 
       {/* Store Settings Form */}
-      {canEditStore && (
-        <div>
+      {(canEditStore || canManagePoints) && (
+        <div id="loyalty-points">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-0.5">
             Store Settings
           </h2>
-          <StoreEditForm store={store} />
+          <StoreEditForm
+            store={store}
+            canEditStore={canEditStore}
+            canManagePoints={canManagePoints}
+          />
         </div>
       )}
     </div>

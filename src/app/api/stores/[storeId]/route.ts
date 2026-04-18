@@ -27,13 +27,27 @@ export async function PUT(
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
-    if (!hasPermission(admin, PERMISSIONS.STORES_EDIT)) return forbiddenResponse("Missing permission: stores.edit");
 
     const { storeId } = await params;
     if (!canAccessStore(admin, storeId)) return forbiddenResponse("No access to this store");
 
     const body = await request.json();
     const validated = updateStoreSchema.parse(body);
+
+    // Figure out what's being edited and enforce the right permission(s)
+    const pointsOnly =
+      validated.pointsConfig !== undefined &&
+      Object.keys(validated).every((k) => k === "pointsConfig");
+
+    if (validated.pointsConfig !== undefined) {
+      if (!hasPermission(admin, PERMISSIONS.POINTS_MANAGE))
+        return forbiddenResponse("Missing permission: points.manage");
+    }
+    if (!pointsOnly) {
+      if (!hasPermission(admin, PERMISSIONS.STORES_EDIT))
+        return forbiddenResponse("Missing permission: stores.edit");
+    }
+
     // Strip undefined values — MongoDB does not accept undefined in $set
     const cleanData = JSON.parse(JSON.stringify(validated));
     const store = await StoreService.update(storeId, cleanData);

@@ -10,7 +10,7 @@ import { OrderService } from "@/features/orders/service";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import LogoutButton from "./LogoutButton";
 import RedeemPointsButton from "./RedeemPointsButton";
-import { POINTS_PER_BDT, MIN_REDEMPTION_POINTS } from "@/features/points/types";
+import { PointService } from "@/features/points/service";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("account");
@@ -48,10 +48,16 @@ export default async function AccountPage() {
   if (!user) redirect("/account/login");
 
   const storeId = await getStoreId();
-  const orders =
+  const [orders, pointsConfig] = await Promise.all([
     user.phone && storeId
-      ? await OrderService.getByPhone(storeId, user.phone)
-      : [];
+      ? OrderService.getByPhone(storeId, user.phone)
+      : Promise.resolve([]),
+    storeId ? PointService.getConfig(storeId) : Promise.resolve(null),
+  ]);
+  const pointsEnabled = pointsConfig?.enabled ?? true;
+  const pointsPerBdt = pointsConfig?.pointsPerBdt ?? 10;
+  const minRedemption = pointsConfig?.minRedemptionPoints ?? 100;
+  const pointsPerReview = pointsConfig?.pointsPerReview ?? 10;
 
   const totalSpent = orders.reduce((sum, o) => sum + o.total, 0);
   const recentOrders = orders.slice(0, 3);
@@ -122,28 +128,34 @@ export default async function AccountPage() {
       </div>
 
       {/* Points & Rewards */}
-      <div className="bg-white border border-gray-100 shadow-xs rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-gray-900">Points &amp; Rewards</h2>
-          <span className="text-xs text-gray-400">{POINTS_PER_BDT} pts = ৳1</span>
-        </div>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-3xl font-bold" style={{ color: "var(--color-primary)" }}>
-              {user.points ?? 0}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Available points</p>
+      {pointsEnabled && (
+        <div className="bg-white border border-gray-100 shadow-xs rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-900">Points &amp; Rewards</h2>
+            <span className="text-xs text-gray-400">{pointsPerBdt} pts = ৳1</span>
           </div>
-          {(user.points ?? 0) >= MIN_REDEMPTION_POINTS && (
-            <RedeemPointsButton points={user.points ?? 0} />
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-3xl font-bold" style={{ color: "var(--color-primary)" }}>
+                {user.points ?? 0}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Available points</p>
+            </div>
+            {(user.points ?? 0) >= minRedemption && (
+              <RedeemPointsButton
+                points={user.points ?? 0}
+                minRedemption={minRedemption}
+                pointsPerBdt={pointsPerBdt}
+              />
+            )}
+          </div>
+          {(user.points ?? 0) < minRedemption && (
+            <p className="text-xs text-gray-400 mt-3">
+              {minRedemption - (user.points ?? 0)} more points needed to redeem &middot; Write a product review to earn {pointsPerReview} pts
+            </p>
           )}
         </div>
-        {(user.points ?? 0) < MIN_REDEMPTION_POINTS && (
-          <p className="text-xs text-gray-400 mt-3">
-            {MIN_REDEMPTION_POINTS - (user.points ?? 0)} more points needed to redeem &middot; Write a product review to earn 10 pts
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Section navigation cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

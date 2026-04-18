@@ -107,7 +107,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
 
       {/* Language Tabs */}
       {supportedLanguages.length > 1 && (
-        <div className="flex gap-1 border-b border-gray-200">
+        <div className="flex gap-1 border-b border-admin-border">
           {supportedLanguages.map((lang) => (
             <button
               key={lang}
@@ -115,8 +115,8 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
               onClick={() => setActiveLang(lang)}
               className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
                 activeLang === lang
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-gray-900 text-admin-text-primary"
+                  : "border-transparent text-admin-text-muted hover:text-admin-text-secondary"
               }`}
             >
               {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
@@ -126,11 +126,11 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
       )}
 
       {/* Basic Info */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">
+      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
+        <h2 className="font-semibold text-admin-text-primary">
           Category Information
           {supportedLanguages.length > 1 && (
-            <span className="ml-2 text-xs font-normal text-gray-400">
+            <span className="ml-2 text-xs font-normal text-admin-text-subtle">
               — {LANGUAGE_LABELS[activeLang] || activeLang}
             </span>
           )}
@@ -142,7 +142,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
             type="text"
             value={localizedName[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             required={activeLang === (supportedLanguages[0] ?? "en")}
           />
         </div>
@@ -153,7 +153,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
             value={localizedDesc[activeLang] ?? ""}
             onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
 
@@ -172,7 +172,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
             type="number"
             value={form.sortOrder}
             onChange={(e) => set("sortOrder", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
           />
         </div>
       </div>
@@ -190,7 +190,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50"
+            className="px-6 py-2 border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover"
           >
             Cancel
           </button>

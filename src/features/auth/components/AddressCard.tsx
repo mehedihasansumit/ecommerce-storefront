@@ -33,7 +33,7 @@ export function AddressCard({
           {selectable && (
             <div
               className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                selected ? "border-[var(--color-primary)]" : "border-gray-300"
+                selected ? "border-[var(--color-primary)]" : "border-admin-border-md"
               }`}
             >
               {selected && (
@@ -44,8 +44,8 @@ export function AddressCard({
               )}
             </div>
           )}
-          <MapPin size={15} className="text-gray-400 shrink-0" />
-          <span className="text-sm font-semibold text-gray-800 truncate">
+          <MapPin size={15} className="text-admin-text-subtle shrink-0" />
+          <span className="text-sm font-semibold text-admin-text-secondary truncate">
             {address.label || t("street")}
           </span>
           {address.isDefault && (
@@ -83,7 +83,7 @@ export function AddressCard({
                 size="icon"
                 onClick={() => onDelete(address._id)}
                 aria-label="Delete address"
-                className="text-gray-400 hover:text-red-500 hover:bg-red-50"
+                className="text-admin-text-subtle hover:text-red-500 hover:bg-red-50"
               >
                 <Trash2 size={14} />
               </Button>
@@ -92,7 +92,7 @@ export function AddressCard({
         )}
       </div>
 
-      <div className="mt-2 text-sm text-gray-500 space-y-0.5 ml-6">
+      <div className="mt-2 text-sm text-admin-text-muted space-y-0.5 ml-6">
         <p>{address.street}</p>
         <p>
           {address.city}
@@ -111,7 +111,7 @@ export function AddressCard({
         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
           selected
             ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]"
-            : "border-gray-200 hover:border-gray-300"
+            : "border-admin-border hover:border-admin-border-md"
         }`}
       >
         {cardContent}
@@ -120,7 +120,7 @@ export function AddressCard({
   }
 
   return (
-    <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 transition-colors">
+    <div className="p-4 rounded-lg border border-admin-border bg-admin-surface hover:border-admin-border-md transition-colors">
       {cardContent}
     </div>
   );

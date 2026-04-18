@@ -42,7 +42,7 @@ export function ReviewStars({ rating, size = "md", showValue = false }: ReviewSt
         );
       })}
       {showValue && (
-        <span className="ml-1 text-sm text-gray-600">{rating.toFixed(1)}</span>
+        <span className="ml-1 text-sm text-admin-text-secondary">{rating.toFixed(1)}</span>
       )}
     </div>
   );

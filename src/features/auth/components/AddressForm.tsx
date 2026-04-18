@@ -58,14 +58,14 @@ export function AddressForm({
     `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
       fieldErrors[field]
         ? "border-red-400 focus:ring-red-200"
-        : "border-gray-200 focus:ring-primary/20 focus:border-primary"
+        : "border-admin-border focus:ring-primary/20 focus:border-primary"
     }`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Label */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
           {t("label")}
         </label>
         <input
@@ -79,7 +79,7 @@ export function AddressForm({
 
       {/* Street */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
           {t("street")} <span className="text-red-500">*</span>
         </label>
         <input
@@ -97,7 +97,7 @@ export function AddressForm({
       {/* City + Postal */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-admin-text-secondary mb-1">
             {t("city")} <span className="text-red-500">*</span>
           </label>
           <input
@@ -112,7 +112,7 @@ export function AddressForm({
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-admin-text-secondary mb-1">
             {t("postalCode")}
           </label>
           <input
@@ -129,7 +129,7 @@ export function AddressForm({
 
       {/* State */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
           {t("state")}
         </label>
         <input
@@ -143,13 +143,13 @@ export function AddressForm({
 
       {/* Country */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
           {t("country")}
         </label>
         <select
           value={form.country}
           onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-white"
+          className="w-full px-3 py-2.5 border border-admin-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-admin-surface"
         >
           <option>Bangladesh</option>
           <option>India</option>
@@ -166,10 +166,10 @@ export function AddressForm({
           onChange={(e) =>
             setForm((f) => ({ ...f, isDefault: e.target.checked }))
           }
-          className="w-4 h-4 rounded border-gray-300"
+          className="w-4 h-4 rounded border-admin-border-md"
           style={{ accentColor: "var(--color-primary)" }}
         />
-        <span className="text-sm text-gray-700">{t("setAsDefault")}</span>
+        <span className="text-sm text-admin-text-secondary">{t("setAsDefault")}</span>
       </label>
 
       {error && (
@@ -195,7 +195,7 @@ export function AddressForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-5 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-5 py-2.5 text-sm font-medium text-admin-text-secondary border border-admin-border rounded-lg hover:bg-admin-surface-hover transition-colors"
           >
             {t("cancel")}
           </button>

@@ -209,7 +209,7 @@ export function AnnouncementBanner() {
           {a.dismissible && (
             <button
               onClick={() => handleDismiss(a._id)}
-              className="absolute right-4 top-4 w-7 h-7 flex items-center justify-center rounded-lg opacity-50 hover:opacity-100 hover:bg-white/10 transition-all"
+              className="absolute right-4 top-4 w-7 h-7 flex items-center justify-center rounded-lg opacity-50 hover:opacity-100 hover:bg-admin-surface/10 transition-all"
             >
               <X size={14} />
             </button>
@@ -226,7 +226,7 @@ export function AnnouncementBanner() {
               className="absolute inset-0 bg-black/40 backdrop-blur-md"
               onClick={() => a.dismissible && handleDismiss(a._id)}
             />
-            <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden z-10 animate-scale-in">
+            <div className="relative w-full max-w-sm bg-admin-surface rounded-3xl shadow-2xl overflow-hidden z-10 animate-scale-in">
               {/* Color header */}
               <div
                 className="relative px-8 pt-12 pb-10 text-center overflow-hidden"
@@ -269,7 +269,7 @@ export function AnnouncementBanner() {
               {/* White body */}
               <div className="px-8 py-7 text-center">
                 <p
-                  className="text-gray-500 text-[15px] leading-relaxed"
+                  className="text-admin-text-muted text-[15px] leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: renderMessage(a.message, a.backgroundColor) }}
                 />
                 <div className="mt-7 flex flex-col gap-2.5">
@@ -287,7 +287,7 @@ export function AnnouncementBanner() {
                   {a.dismissible && (
                     <button
                       onClick={() => handleDismiss(a._id)}
-                      className="w-full py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
+                      className="w-full py-2.5 rounded-xl text-sm font-medium text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-surface-hover transition-all"
                     >
                       Maybe later
                     </button>
@@ -298,7 +298,7 @@ export function AnnouncementBanner() {
               {a.dismissible && (
                 <button
                   onClick={() => handleDismiss(a._id)}
-                  className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors"
+                  className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-admin-surface/20 transition-colors"
                   style={{ color: a.textColor }}
                 >
                   <X size={15} />
@@ -319,7 +319,7 @@ export function AnnouncementBanner() {
           return (
             <div
               key={a._id}
-              className="pointer-events-auto w-[340px] bg-white rounded-2xl border border-gray-200/80 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.04)] overflow-hidden"
+              className="pointer-events-auto w-[340px] bg-admin-surface rounded-2xl border border-admin-border/80 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.04)] overflow-hidden"
               style={{
                 transition: "opacity 350ms cubic-bezier(0.4,0,0.2,1), transform 350ms cubic-bezier(0.34,1.56,0.64,1)",
                 opacity: isVisible ? 1 : 0,
@@ -353,12 +353,12 @@ export function AnnouncementBanner() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       {a.title && (
-                        <p className="text-[13px] font-semibold text-gray-900 leading-snug tracking-tight">
+                        <p className="text-[13px] font-semibold text-admin-text-primary leading-snug tracking-tight">
                           {a.title}
                         </p>
                       )}
                       <p
-                        className="text-xs text-gray-400 mt-0.5 leading-relaxed line-clamp-3"
+                        className="text-xs text-admin-text-subtle mt-0.5 leading-relaxed line-clamp-3"
                         dangerouslySetInnerHTML={{ __html: renderMessage(a.message, a.backgroundColor) }}
                       />
 
@@ -379,7 +379,7 @@ export function AnnouncementBanner() {
                     {a.dismissible && (
                       <button
                         onClick={() => handleDismiss(a._id)}
-                        className="shrink-0 -mt-0.5 w-6 h-6 flex items-center justify-center rounded-full text-gray-200 hover:text-gray-400 hover:bg-gray-100 transition-all"
+                        className="shrink-0 -mt-0.5 w-6 h-6 flex items-center justify-center rounded-full text-gray-200 hover:text-admin-text-subtle hover:bg-admin-chip transition-all"
                       >
                         <X size={11} />
                       </button>

@@ -90,14 +90,14 @@ function LivePreview({ form }: PreviewProps) {
   return (
     <div className="flex flex-col gap-3">
       {/* Browser chrome */}
-      <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+      <div className="rounded-xl border border-admin-border overflow-hidden shadow-sm bg-admin-surface">
         {/* Chrome bar */}
-        <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-1.5 px-3 py-2 bg-admin-surface-raised border-b border-admin-border">
           <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
           <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
           <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
           <div className="flex-1 mx-3 h-5 bg-gray-200 rounded-md flex items-center px-2">
-            <span className="text-[9px] text-gray-400 truncate">yourstore.com</span>
+            <span className="text-[9px] text-admin-text-subtle truncate">yourstore.com</span>
           </div>
         </div>
 
@@ -107,7 +107,7 @@ function LivePreview({ form }: PreviewProps) {
             className="flex items-center justify-center px-4 py-6"
             style={{ backgroundColor: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)" }}
           >
-            <div className="w-52 bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="w-52 bg-admin-surface rounded-2xl shadow-xl overflow-hidden">
               {/* Colored header */}
               <div
                 className="relative px-5 pt-8 pb-6 text-center overflow-hidden"
@@ -136,7 +136,7 @@ function LivePreview({ form }: PreviewProps) {
               {/* White body */}
               <div className="px-4 py-4 text-center">
                 <p
-                  className="text-[10px] text-gray-500 leading-relaxed"
+                  className="text-[10px] text-admin-text-muted leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: msgHtml }}
                 />
                 {form.linkText && (
@@ -147,7 +147,7 @@ function LivePreview({ form }: PreviewProps) {
                     {form.linkText} →
                   </div>
                 )}
-                <div className="mt-2 text-[10px] text-gray-400">Maybe later</div>
+                <div className="mt-2 text-[10px] text-admin-text-subtle">Maybe later</div>
               </div>
             </div>
           </div>
@@ -155,7 +155,7 @@ function LivePreview({ form }: PreviewProps) {
 
         {/* Viewport (bar / banner / float) */}
         {form.displayType !== "modal" && (
-        <div className="relative bg-gray-50" style={{ minHeight: 220 }}>
+        <div className="relative bg-admin-surface-raised" style={{ minHeight: 220 }}>
 
           {/* ── Bar ──────────────────────────────────────────────── */}
           {form.displayType === "bar" && (
@@ -221,7 +221,7 @@ function LivePreview({ form }: PreviewProps) {
 
           {/* ── Float ────────────────────────────────────────────── */}
           {form.displayType === "float" && (
-            <div className="absolute bottom-3 right-3 w-44 bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+            <div className="absolute bottom-3 right-3 w-44 bg-admin-surface rounded-2xl border border-admin-border shadow-lg overflow-hidden">
               <div className="flex">
                 <div className="w-1 shrink-0" style={{ backgroundColor: form.backgroundColor }} />
                 <div className="flex-1 p-3">
@@ -237,12 +237,12 @@ function LivePreview({ form }: PreviewProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       {form.title && (
-                        <p className="text-[10px] font-semibold text-gray-900 leading-snug tracking-tight">
+                        <p className="text-[10px] font-semibold text-admin-text-primary leading-snug tracking-tight">
                           {form.title}
                         </p>
                       )}
                       <p
-                        className="text-[9px] text-gray-400 mt-0.5 leading-relaxed line-clamp-3"
+                        className="text-[9px] text-admin-text-subtle mt-0.5 leading-relaxed line-clamp-3"
                         dangerouslySetInnerHTML={{ __html: msgHtml }}
                       />
                       {form.linkText && (
@@ -268,8 +268,8 @@ function LivePreview({ form }: PreviewProps) {
 
       {/* Type badge */}
       <div className="flex items-center gap-2">
-        <Monitor size={13} className="text-gray-400" />
-        <span className="text-xs text-gray-500 capitalize">
+        <Monitor size={13} className="text-admin-text-subtle" />
+        <span className="text-xs text-admin-text-muted capitalize">
           {form.displayType === "float" ? "Float card (bottom-right)"
             : form.displayType === "bar" ? "Top bar"
             : form.displayType === "banner" ? "Banner (full width)"
@@ -360,8 +360,8 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
   }
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+    "w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+  const labelClass = "block text-sm font-medium text-admin-text-secondary mb-1";
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -399,12 +399,12 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
             className={`${inputClass} resize-none`}
             required
           />
-          <p className="text-xs text-gray-400 mt-1 flex flex-wrap gap-x-2 gap-y-1">
+          <p className="text-xs text-admin-text-subtle mt-1 flex flex-wrap gap-x-2 gap-y-1">
             <span>Supports:</span>
-            <code className="bg-gray-100 px-1 rounded">**bold**</code>
-            <code className="bg-gray-100 px-1 rounded">*italic*</code>
-            <code className="bg-gray-100 px-1 rounded">- list item</code>
-            <code className="bg-gray-100 px-1 rounded">==highlight==</code>
+            <code className="bg-admin-chip px-1 rounded">**bold**</code>
+            <code className="bg-admin-chip px-1 rounded">*italic*</code>
+            <code className="bg-admin-chip px-1 rounded">- list item</code>
+            <code className="bg-admin-chip px-1 rounded">==highlight==</code>
             <span className="text-gray-300">— highlight uses the background color</span>
           </p>
         </div>
@@ -439,7 +439,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
               min={0}
               className={inputClass}
             />
-            <p className="text-xs text-gray-400 mt-1">Higher = shown first</p>
+            <p className="text-xs text-admin-text-subtle mt-1">Higher = shown first</p>
           </div>
         </div>
 
@@ -453,7 +453,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
                 onChange={(e) =>
                   setForm((f) => ({ ...f, backgroundColor: e.target.value }))
                 }
-                className="w-10 h-10 rounded border border-gray-300 cursor-pointer"
+                className="w-10 h-10 rounded border border-admin-border-md cursor-pointer"
               />
               <input
                 type="text"
@@ -474,7 +474,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
                 onChange={(e) =>
                   setForm((f) => ({ ...f, textColor: e.target.value }))
                 }
-                className="w-10 h-10 rounded border border-gray-300 cursor-pointer"
+                className="w-10 h-10 rounded border border-admin-border-md cursor-pointer"
               />
               <input
                 type="text"
@@ -492,7 +492,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
           <div>
             <label className={labelClass}>
               Link URL{" "}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              <span className="text-admin-text-subtle font-normal">(optional)</span>
             </label>
             <input
               type="text"
@@ -532,7 +532,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
           <div>
             <label className={labelClass}>
               End Date{" "}
-              <span className="text-gray-400 font-normal">
+              <span className="text-admin-text-subtle font-normal">
                 (leave empty for no end)
               </span>
             </label>
@@ -555,9 +555,9 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
               onChange={(e) =>
                 setForm((f) => ({ ...f, isActive: e.target.checked }))
               }
-              className="w-4 h-4 rounded border-gray-300"
+              className="w-4 h-4 rounded border-admin-border-md"
             />
-            <span className="text-sm font-medium text-gray-700">Active</span>
+            <span className="text-sm font-medium text-admin-text-secondary">Active</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -566,9 +566,9 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
               onChange={(e) =>
                 setForm((f) => ({ ...f, dismissible: e.target.checked }))
               }
-              className="w-4 h-4 rounded border-gray-300"
+              className="w-4 h-4 rounded border-admin-border-md"
             />
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-admin-text-secondary">
               Dismissible by customer
             </span>
           </label>
@@ -586,7 +586,7 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50"
+            className="px-6 py-2.5 bg-admin-surface text-admin-text-secondary text-sm font-medium rounded-lg border border-admin-border-md hover:bg-admin-surface-hover"
           >
             Cancel
           </button>
@@ -595,11 +595,11 @@ export function AnnouncementForm({ storeId, announcement }: AnnouncementFormProp
 
       {/* ── Right: live preview (sticky on desktop) ─────────────── */}
       <div className="w-full lg:w-90 shrink-0 lg:sticky lg:top-6">
-        <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+        <div className="bg-admin-surface-raised rounded-xl border border-admin-border p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Monitor size={15} className="text-gray-500" />
-            <span className="text-sm font-semibold text-gray-700">Live Preview</span>
-            <span className="ml-auto text-[11px] text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+            <Monitor size={15} className="text-admin-text-muted" />
+            <span className="text-sm font-semibold text-admin-text-secondary">Live Preview</span>
+            <span className="ml-auto text-[11px] text-admin-text-subtle bg-admin-surface border border-admin-border px-2 py-0.5 rounded-full">
               Desktop
             </span>
           </div>

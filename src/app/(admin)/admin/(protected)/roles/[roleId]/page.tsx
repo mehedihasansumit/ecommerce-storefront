@@ -22,7 +22,7 @@ export default async function EditRolePage({
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Role</h1>
+        <h1 className="text-2xl font-bold text-admin-text-primary">Edit Role</h1>
         <p className="text-sm text-admin-text-muted mt-1">{role.name}</p>
       </div>
       <RoleForm role={role} />

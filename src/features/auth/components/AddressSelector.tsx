@@ -51,7 +51,7 @@ export function AddressSelector({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-700">
+      <h3 className="text-sm font-semibold text-admin-text-secondary">
         {t("savedAddresses")}
       </h3>
 
@@ -72,7 +72,7 @@ export function AddressSelector({
         <button
           type="button"
           onClick={handleEnterNew}
-          className="flex items-center gap-2 w-full p-4 rounded-lg border-2 border-dashed border-gray-300 text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-colors"
+          className="flex items-center gap-2 w-full p-4 rounded-lg border-2 border-dashed border-admin-border-md text-sm text-admin-text-secondary hover:border-gray-400 hover:text-admin-text-secondary transition-colors"
         >
           <Plus size={16} />
           {t("enterNewAddress")}
@@ -96,10 +96,10 @@ export function AddressSelector({
               type="checkbox"
               checked={saveForFuture}
               onChange={(e) => setSaveForFuture(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300"
+              className="w-4 h-4 rounded border-admin-border-md"
               style={{ accentColor: "var(--color-primary)" }}
             />
-            <span className="text-sm text-gray-600">{t("saveForFuture")}</span>
+            <span className="text-sm text-admin-text-secondary">{t("saveForFuture")}</span>
           </label>
         </div>
       )}

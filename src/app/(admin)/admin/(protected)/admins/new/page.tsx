@@ -21,7 +21,7 @@ export default async function NewAdminPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">New Admin</h1>
+        <h1 className="text-2xl font-bold text-admin-text-primary">New Admin</h1>
         <p className="text-sm text-admin-text-muted mt-1">Create a new admin account</p>
       </div>
       <AdminForm stores={storeOptions} roles={roles} />

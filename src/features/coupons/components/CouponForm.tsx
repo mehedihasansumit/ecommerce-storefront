@@ -79,8 +79,8 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
   }
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+    "w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+  const labelClass = "block text-sm font-medium text-admin-text-secondary mb-1";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
@@ -164,7 +164,7 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
         <div>
           <label className={labelClass}>
             Max Discount Amount{" "}
-            <span className="text-gray-400 font-normal">(for % coupons)</span>
+            <span className="text-admin-text-subtle font-normal">(for % coupons)</span>
           </label>
           <input
             type="number"
@@ -211,7 +211,7 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
         <div>
           <label className={labelClass}>
             Total Usage Limit{" "}
-            <span className="text-gray-400 font-normal">(leave empty for unlimited)</span>
+            <span className="text-admin-text-subtle font-normal">(leave empty for unlimited)</span>
           </label>
           <input
             type="number"
@@ -240,19 +240,19 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-gray-50">
+        <div className="flex items-start gap-3 p-4 rounded-lg border border-admin-border bg-admin-surface-raised">
           <input
             type="checkbox"
             id="requiresLogin"
             checked={form.requiresLogin}
             onChange={(e) => setForm((f) => ({ ...f, requiresLogin: e.target.checked }))}
-            className="w-4 h-4 mt-0.5 rounded border-gray-300"
+            className="w-4 h-4 mt-0.5 rounded border-admin-border-md"
           />
           <div>
-            <label htmlFor="requiresLogin" className="text-sm font-medium text-gray-700 cursor-pointer">
+            <label htmlFor="requiresLogin" className="text-sm font-medium text-admin-text-secondary cursor-pointer">
               Requires login to use
             </label>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-admin-text-muted mt-0.5">
               When enabled, only logged-in customers can apply this coupon. Guest checkouts will be rejected.
             </p>
           </div>
@@ -264,9 +264,9 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
             id="isActive"
             checked={form.isActive}
             onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
-            className="w-4 h-4 rounded border-gray-300"
+            className="w-4 h-4 rounded border-admin-border-md"
           />
-          <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+          <label htmlFor="isActive" className="text-sm font-medium text-admin-text-secondary">
             Active
           </label>
         </div>
@@ -284,7 +284,7 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50"
+          className="px-6 py-2.5 bg-admin-surface text-admin-text-secondary text-sm font-medium rounded-lg border border-admin-border-md hover:bg-admin-surface-hover"
         >
           Cancel
         </button>

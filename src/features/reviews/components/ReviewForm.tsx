@@ -65,11 +65,11 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="font-semibold text-gray-900">Write a Review</h3>
+      <h3 className="font-semibold text-admin-text-primary">Write a Review</h3>
 
       {/* Star rating input */}
       <div>
-        <label className="block text-sm text-gray-600 mb-1.5">Your Rating <span className="text-red-500">*</span></label>
+        <label className="block text-sm text-admin-text-secondary mb-1.5">Your Rating <span className="text-red-500">*</span></label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((i) => (
             <button
@@ -95,7 +95,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
       {/* Title */}
       <div>
-        <label className="block text-sm text-gray-600 mb-1.5" htmlFor="review-title">
+        <label className="block text-sm text-admin-text-secondary mb-1.5" htmlFor="review-title">
           Title <span className="text-red-500">*</span>
         </label>
         <input
@@ -106,15 +106,15 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
           maxLength={100}
           placeholder="Summarize your review"
           required
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
+          className="w-full border border-admin-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
           style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
         />
       </div>
 
       {/* Comment */}
       <div>
-        <label className="block text-sm text-gray-600 mb-1.5" htmlFor="review-comment">
-          Review <span className="text-gray-400">(optional)</span>
+        <label className="block text-sm text-admin-text-secondary mb-1.5" htmlFor="review-comment">
+          Review <span className="text-admin-text-subtle">(optional)</span>
         </label>
         <textarea
           id="review-comment"
@@ -123,7 +123,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
           maxLength={2000}
           rows={4}
           placeholder="Share your experience with this product..."
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:border-transparent"
+          className="w-full border border-admin-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:border-transparent"
           style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
         />
       </div>

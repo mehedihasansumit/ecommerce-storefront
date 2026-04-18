@@ -41,11 +41,11 @@ export async function ReviewSection({
     <section>
       {/* Section header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Customer Reviews</h2>
+        <h2 className="text-xl font-semibold text-admin-text-primary">Customer Reviews</h2>
         {reviewCount > 0 && (
           <div className="flex items-center gap-2">
             <ReviewStars rating={averageRating} size="md" />
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-admin-text-muted">
               {averageRating.toFixed(1)} out of 5
             </span>
           </div>
@@ -54,7 +54,7 @@ export async function ReviewSection({
 
       {/* Review form area */}
       {!isCustomer && (
-        <div className="bg-gray-50 rounded-lg p-5 mb-8 text-sm text-gray-600">
+        <div className="bg-admin-surface-raised rounded-lg p-5 mb-8 text-sm text-admin-text-secondary">
           <Link
             href="/account/login"
             className="font-medium"
@@ -74,12 +74,12 @@ export async function ReviewSection({
             </div>
           )}
           {!eligibility.hasPurchased && !eligibility.alreadyReviewed && (
-            <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 text-sm text-gray-600">
+            <div className="bg-admin-surface-raised border border-admin-border rounded-lg p-4 text-sm text-admin-text-secondary">
               Only customers who have purchased this product can write a review.
             </div>
           )}
           {eligibility.canReview && (
-            <div className="border border-gray-100 rounded-lg p-5">
+            <div className="border border-admin-border rounded-lg p-5">
               <ReviewForm productId={productId} />
             </div>
           )}

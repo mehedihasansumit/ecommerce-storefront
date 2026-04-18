@@ -75,7 +75,7 @@ export function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={handleOpen}
-        className="p-2.5 rounded-lg hover:bg-white/10 transition-colors relative"
+        className="p-2.5 rounded-lg hover:bg-admin-surface/10 transition-colors relative"
         aria-label="Notifications"
       >
         <Bell size={18} />
@@ -93,8 +93,8 @@ export function NotificationBell() {
       </button>
 
       {dropdownOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white text-gray-800 shadow-[var(--shadow-lg)] border border-gray-100 rounded-xl z-50 animate-scale-in overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-admin-surface text-admin-text-secondary shadow-[var(--shadow-lg)] border border-admin-border rounded-xl z-50 animate-scale-in overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-admin-border">
             <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
               <button
@@ -108,28 +108,28 @@ export function NotificationBell() {
 
           <div className="max-h-72 overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-center text-sm text-gray-400">
+              <div className="p-4 text-center text-sm text-admin-text-subtle">
                 Loading...
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-400">
+              <div className="p-6 text-center text-sm text-admin-text-subtle">
                 No notifications yet
               </div>
             ) : (
               notifications.map((n) => (
                 <div
                   key={n._id}
-                  className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${
+                  className={`px-4 py-3 border-b border-gray-50 hover:bg-admin-surface-hover transition-colors ${
                     !n.isRead ? "bg-blue-50/50" : ""
                   }`}
                 >
-                  <p className="text-sm font-medium text-gray-800 leading-snug">
+                  <p className="text-sm font-medium text-admin-text-secondary leading-snug">
                     {n.title}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                  <p className="text-xs text-admin-text-muted mt-0.5 line-clamp-2">
                     {n.message}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-1">
+                  <p className="text-[10px] text-admin-text-subtle mt-1">
                     {timeAgo(n.createdAt)}
                   </p>
                 </div>
@@ -140,7 +140,7 @@ export function NotificationBell() {
           <Link
             href="/notifications"
             onClick={() => setDropdownOpen(false)}
-            className="block text-center text-sm text-blue-600 hover:text-blue-800 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors"
+            className="block text-center text-sm text-blue-600 hover:text-blue-800 py-3 border-t border-admin-border hover:bg-admin-surface-hover transition-colors"
           >
             View all notifications
           </Link>

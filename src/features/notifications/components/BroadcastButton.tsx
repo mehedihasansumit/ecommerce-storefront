@@ -75,7 +75,7 @@ export function BroadcastButton({
 
   if (status === "loading") {
     return (
-      <span className="p-1.5 text-gray-400">
+      <span className="p-1.5 text-admin-text-subtle">
         <Loader2 size={14} className="animate-spin" />
       </span>
     );
@@ -84,7 +84,7 @@ export function BroadcastButton({
   return (
     <button
       onClick={handleBroadcast}
-      className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
+      className="p-1.5 text-admin-text-subtle hover:text-blue-600 transition-colors"
       title="Send to email subscribers"
     >
       <Send size={14} />

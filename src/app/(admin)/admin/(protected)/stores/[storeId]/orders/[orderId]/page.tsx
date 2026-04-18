@@ -89,7 +89,7 @@ export default async function OrderDetailPage({
       <div>
         <Link
           href={`/admin/stores/${storeId}/orders`}
-          className="inline-flex items-center gap-1.5 text-sm text-admin-text-muted hover:text-gray-800 transition-colors mb-3"
+          className="inline-flex items-center gap-1.5 text-sm text-admin-text-muted hover:text-admin-text-secondary transition-colors mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
           Orders
@@ -98,7 +98,7 @@ export default async function OrderDetailPage({
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold font-mono tracking-tight text-gray-900">
+              <h1 className="text-2xl font-bold font-mono tracking-tight text-admin-text-primary">
                 {order.orderNumber}
               </h1>
               <span
@@ -125,7 +125,7 @@ export default async function OrderDetailPage({
               <span className="text-gray-300">·</span>
               <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span>
               <span className="text-gray-300">·</span>
-              <span className="font-semibold text-gray-800">
+              <span className="font-semibold text-admin-text-secondary">
                 ৳{order.total.toLocaleString()}
               </span>
             </div>
@@ -156,7 +156,7 @@ export default async function OrderDetailPage({
               </span>
             }
           >
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-admin-border">
               {order.items.map((item, idx) => (
                 <div key={idx} className="px-5 py-3.5 flex items-start gap-4">
                   {/* Qty badge */}
@@ -165,7 +165,7 @@ export default async function OrderDetailPage({
                   </span>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 leading-snug">
+                    <p className="text-sm font-medium text-admin-text-primary leading-snug">
                       {item.productName}
                     </p>
                     {Object.keys(item.variantSelections || {}).length > 0 && (
@@ -183,7 +183,7 @@ export default async function OrderDetailPage({
                   </div>
 
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-admin-text-primary">
                       ৳{item.totalPrice.toLocaleString()}
                     </p>
                     <p className="text-xs text-admin-text-subtle mt-0.5">
@@ -228,7 +228,7 @@ export default async function OrderDetailPage({
                   <span>৳{order.tax.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-base pt-2 border-t border-admin-border text-gray-900">
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-admin-border text-admin-text-primary">
                 <span>Total</span>
                 <span>৳{order.total.toLocaleString()}</span>
               </div>
@@ -249,7 +249,7 @@ export default async function OrderDetailPage({
                       />
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-medium capitalize text-gray-800">
+                          <p className="text-sm font-medium capitalize text-admin-text-secondary">
                             {entry.status}
                           </p>
                           {entry.note && (
@@ -307,7 +307,7 @@ export default async function OrderDetailPage({
                       <div className="bg-red-50 px-4 py-2 text-xs font-semibold text-red-700">
                         Related orders — {order.clientIp}
                       </div>
-                      <div className="divide-y divide-gray-100">
+                      <div className="divide-y divide-admin-border">
                         {sameIpOrders.map((o) => (
                           <Link
                             key={o._id}
@@ -315,7 +315,7 @@ export default async function OrderDetailPage({
                             className="flex items-center justify-between px-4 py-3 text-sm hover:bg-admin-surface-hover transition-colors group"
                           >
                             <div>
-                              <span className="font-mono font-semibold text-gray-800 group-hover:text-gray-900">
+                              <span className="font-mono font-semibold text-admin-text-secondary group-hover:text-admin-text-primary">
                                 {o.orderNumber}
                               </span>
                               <span className="ml-2 text-admin-text-subtle text-xs">
@@ -357,7 +357,7 @@ export default async function OrderDetailPage({
           {/* Customer */}
           <SectionCard icon={User} title="Customer">
             <div className="px-5 py-4 space-y-3">
-              <p className="font-semibold text-gray-900">{order.shippingAddress.name}</p>
+              <p className="font-semibold text-admin-text-primary">{order.shippingAddress.name}</p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-admin-text-secondary">
                   <Phone className="w-3.5 h-3.5 text-admin-text-subtle shrink-0" />
@@ -412,7 +412,7 @@ export default async function OrderDetailPage({
               <div className="rounded-lg bg-admin-surface-raised border border-admin-border px-4 py-3 space-y-1.5 text-sm">
                 <div className="flex justify-between text-admin-text-muted">
                   <span>Order total</span>
-                  <span className="font-semibold text-gray-800">৳{order.total.toLocaleString()}</span>
+                  <span className="font-semibold text-admin-text-secondary">৳{order.total.toLocaleString()}</span>
                 </div>
                 {order.discount > 0 && (
                   <div className="flex justify-between text-green-600">

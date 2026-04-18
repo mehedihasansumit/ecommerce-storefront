@@ -112,13 +112,13 @@ export default async function AccountPage() {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="rounded-lg px-4 py-3">
+          <div className="rounded-lg px-4 py-3 border border-border-subtle">
             <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("totalOrders")}</p>
-            <p className="text-2xl font-bold" style={{ color: "var(--color-secondary)" }}>
+            <p className="text-2xl font-bold" >
               {orders.length}
             </p>
           </div>
-          <div className="rounded-lg bg-surface px-4 py-3">
+          <div className="rounded-lg px-4 py-3 border border-border-subtle">
             <p className="text-xs text-text-tertiary uppercase tracking-wide mb-1">{t("totalSpent")}</p>
             <Price amount={totalSpent} size="lg" className="mt-0.5" />
           </div>
@@ -138,7 +138,7 @@ export default async function AccountPage() {
               </div>
               <h2 className="font-semibold text-[var(--color-text)]">Points &amp; Rewards</h2>
             </div>
-            <span className="text-xs text-text-tertiary bg-surface px-2 py-1 rounded-md">{pointsPerBdt} pts = ৳1</span>
+            <span className="text-xs text-text-tertiary px-2 py-1 rounded-md border border-border-subtle">{pointsPerBdt} pts = ৳1</span>
           </div>
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -156,7 +156,7 @@ export default async function AccountPage() {
             )}
           </div>
           {(user.points ?? 0) < minRedemption && (
-            <div className="mt-3 p-3 rounded-lg bg-surface border border-border-subtle">
+            <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-border-subtle">
               <div className="flex items-center gap-2">
                 <Star className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 <p className="text-xs text-text-secondary">
@@ -280,9 +280,9 @@ export default async function AccountPage() {
               {t("manageAddresses")} →
             </Link>
           </div>
-          <div className="text-sm text-gray-600 space-y-0.5 ml-10">
+          <div className="text-sm text-text-secondary space-y-0.5 ml-10">
             {defaultAddr.label && (
-              <p className="font-semibold text-gray-800">{defaultAddr.label}</p>
+              <p className="font-semibold text-[var(--color-text)]">{defaultAddr.label}</p>
             )}
             <p>{defaultAddr.street}</p>
             <p>

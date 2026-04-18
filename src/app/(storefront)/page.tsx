@@ -55,7 +55,7 @@ export default async function HomePage() {
       <HeroBanner banners={tenant.heroBanners} />
 
       {/* Trust badges */}
-      <section className="border-b border-gray-100">
+      <section className="border-b border-gray-100 dark:border-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -167,7 +167,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/products"
-                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-border-subtle hover:border-text-secondary hover:bg-surface dark:hover:bg-surface transition-all"
                 style={{ borderRadius: "var(--border-radius)" }}
               >
                 {tr("viewAll")}
@@ -207,7 +207,7 @@ export default async function HomePage() {
             </div>
             <Link
               href="/products"
-              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-border-subtle hover:border-text-secondary hover:bg-surface dark:hover:bg-surface transition-all"
               style={{ borderRadius: "var(--border-radius)" }}
             >
               {tr("viewAll")}
@@ -237,7 +237,7 @@ export default async function HomePage() {
           <div
             className="relative overflow-hidden"
             style={{
-              backgroundColor: "var(--color-primary)",
+              backgroundColor: "var(--color-newsletter-bg)",
               borderRadius: "calc(var(--border-radius) * 3)",
             }}
           >
@@ -260,14 +260,23 @@ export default async function HomePage() {
               />
             </div>
 
-            <div className="relative px-8 py-16 md:px-16 md:py-20 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+            <div
+              className="relative px-8 py-16 md:px-16 md:py-20 flex flex-col md:flex-row items-center gap-10 md:gap-16"
+              style={{ color: "var(--color-newsletter-text)" }}
+            >
               {/* Left: icon + copy */}
               <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-white/90 text-xs font-semibold uppercase tracking-widest mb-5">
+                <div
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-xs font-semibold uppercase tracking-widest mb-5"
+                  style={{ color: "var(--color-newsletter-text)", opacity: 0.9 }}
+                >
                   <Sparkles size={13} />
                   {tr("exclusiveOffers") || "Exclusive Offers"}
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                <h2
+                  className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4"
+                  style={{ color: "var(--color-newsletter-text)" }}
+                >
                   {tr("newsletterTitle") || (
                     <>
                       Stay in the{" "}
@@ -278,7 +287,10 @@ export default async function HomePage() {
                     </>
                   )}
                 </h2>
-                <p className="text-white/70 text-base md:text-lg max-w-sm md:max-w-none">
+                <p
+                  className="text-base md:text-lg max-w-sm md:max-w-none"
+                  style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 70%, transparent)" }}
+                >
                   {tr("newsletterDesc") ||
                     "Subscribe to get special offers, free giveaways, and new arrivals straight to your inbox."}
                 </p>
@@ -295,7 +307,10 @@ export default async function HomePage() {
                       )
                     )}
                   </div>
-                  <p className="text-white/60 text-sm">
+                  <p
+                    className="text-sm"
+                    style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 60%, transparent)" }}
+                  >
                     {tr("subscriberCount") || "Join 2,000+ subscribers"}
                   </p>
                 </div>
@@ -309,13 +324,19 @@ export default async function HomePage() {
                 >
                   <div className="flex items-center gap-2 mb-5">
                     <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                      <Mail size={16} className="text-white" />
+                      <Mail size={16} style={{ color: "var(--color-newsletter-text)" }} />
                     </div>
                     <div>
-                      <p className="text-white font-semibold text-sm leading-tight">
+                      <p
+                        className="font-semibold text-sm leading-tight"
+                        style={{ color: "var(--color-newsletter-text)" }}
+                      >
                         {tr("getNotified") || "Get Notified First"}
                       </p>
-                      <p className="text-white/55 text-xs">
+                      <p
+                        className="text-xs"
+                        style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 55%, transparent)" }}
+                      >
                         {tr("noSpam") || "No spam, unsubscribe anytime"}
                       </p>
                     </div>
@@ -327,7 +348,10 @@ export default async function HomePage() {
                     subscribeLabel={tr("subscribe") || "Subscribe"}
                   />
 
-                  <p className="text-white/40 text-xs text-center mt-4">
+                  <p
+                    className="text-xs text-center mt-4"
+                    style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 40%, transparent)" }}
+                  >
                     {tr("privacyNote") ||
                       "By subscribing you agree to our Privacy Policy."}
                   </p>

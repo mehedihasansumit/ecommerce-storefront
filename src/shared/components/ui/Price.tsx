@@ -48,7 +48,7 @@ export function Price({
         .filter(Boolean)
         .join(" ")}
     >
-      <span className={s.primary} style={{ color: "var(--color-primary)" }}>
+      <span className={s.primary} style={{ color: "var(--color-price)" }}>
         {formatMoney(amount, currency, locale)}
       </span>
       {hasDiscount && (

@@ -5,7 +5,17 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/shared/context/CartContext";
-import { ShoppingBag, Loader2 } from "lucide-react";
+import {
+  ShoppingBag,
+  Loader2,
+  MapPin,
+  CreditCard,
+  CheckCircle2,
+  ChevronDown,
+  Tag,
+  Lock,
+  Truck,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AddressSelector } from "@/features/auth/components/AddressSelector";
 import type { IAddress } from "@/features/auth/types";
@@ -33,6 +43,12 @@ const initialForm: FormData = {
   notes: "",
 };
 
+const inputBase =
+  "w-full px-3.5 py-2.5 border rounded-lg text-sm bg-bg text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all placeholder:text-text-tertiary";
+const inputNormal = `${inputBase} border-border-subtle focus:border-[var(--color-primary)] focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`;
+const inputError = `${inputBase} border-red-400 focus:ring-red-200`;
+const inputReadOnly = `${inputBase} border-border-subtle bg-surface text-text-secondary cursor-default`;
+
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const router = useRouter();
@@ -42,13 +58,14 @@ export default function CheckoutPage() {
   useEffect(() => {
     document.title = `Checkout | ${tenant?.name ?? "Store"}`;
   }, [tenant?.name]);
+
   const [form, setForm] = useState<FormData>(initialForm);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
-  // Saved address state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState<IAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -71,7 +88,6 @@ export default function CheckoutPage() {
             addrData.addresses[0];
           setSelectedAddressId(defaultAddr._id);
           setUsingSavedAddress(true);
-          // Pre-fill form with default address
           setForm((f) => ({
             ...f,
             street: defaultAddr.street,
@@ -82,23 +98,14 @@ export default function CheckoutPage() {
         }
       }
     } catch {
-      // ignore - guest checkout
+      // guest checkout
     }
   }, []);
 
+  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { if (mounted) loadSavedAddresses(); }, [mounted, loadSavedAddresses]);
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) loadSavedAddresses();
-  }, [mounted, loadSavedAddresses]);
-
-  // Redirect to cart if empty (only after hydration)
-  useEffect(() => {
-    if (mounted && items.length === 0) {
-      router.replace("/cart");
-    }
+    if (mounted && items.length === 0) router.replace("/cart");
   }, [mounted, items.length, router]);
 
   function handleAddressSelect(address: IAddress | null) {
@@ -115,13 +122,7 @@ export default function CheckoutPage() {
     } else {
       setSelectedAddressId(null);
       setUsingSavedAddress(false);
-      setForm((f) => ({
-        ...f,
-        street: "",
-        city: "",
-        postalCode: "",
-        country: "Bangladesh",
-      }));
+      setForm((f) => ({ ...f, street: "", city: "", postalCode: "", country: "Bangladesh" }));
     }
   }
 
@@ -134,7 +135,6 @@ export default function CheckoutPage() {
     const result = await res.json();
     if (!res.ok) throw new Error(result.error);
     setSavedAddresses(result.addresses);
-    // Select the newly added address (last one)
     const newAddr = result.addresses[result.addresses.length - 1];
     setSelectedAddressId(newAddr._id);
     setUsingSavedAddress(true);
@@ -213,213 +213,168 @@ export default function CheckoutPage() {
   if (!mounted) return null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-8">{t("checkout")}</h1>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      {/* Header */}
+      <div className="mb-8">
+        <Link
+          href="/cart"
+          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors mb-4"
+        >
+          ← {t("backToCart")}
+        </Link>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("checkout")}</h1>
+      </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Shipping form */}
-          <div className="lg:col-span-2 space-y-5">
-            {/* Saved addresses selector */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
+
+          {/* ── Left column ── */}
+          <div className="space-y-4">
+
+            {/* Step 1 — Saved addresses */}
             {isLoggedIn && savedAddresses.length > 0 && (
-              <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] p-7">
+              <Section icon={<MapPin size={16} />} step="1" title={t("deliveryAddress") || "Delivery Address"}>
                 <AddressSelector
                   addresses={savedAddresses}
                   onSelect={handleAddressSelect}
                   onSaveNew={handleSaveNewAddress}
                 />
-              </div>
+              </Section>
             )}
 
-            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
-              <h2 className="font-bold text-lg mb-5">{t("deliveryInfo")}</h2>
-
-              <div className="space-y-5">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    {t("fullName")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, name: e.target.value }))
-                    }
-                    placeholder={t("fullName")}
-                    className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
-                      errors.name
-                        ? "border-red-400 focus:ring-red-200"
-                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
-                    }`}
-                  />
-                  {errors.name && (
-                    <p className="mt-1 text-xs text-red-500">{errors.name}</p>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    {t("phoneNumber")} <span className="text-red-500">*</span>
-                  </label>
-                  <div
-                    className={`flex items-center border rounded-lg overflow-hidden transition-colors ${
-                      errors.phone ? "border-red-400" : "border-border-subtle"
-                    }`}
-                  >
-                    <span className="px-3 py-2.5 text-sm font-medium text-text-secondary bg-surface border-r border-border-subtle shrink-0 select-none">
-                      +88
-                    </span>
+            {/* Step 2 — Delivery info */}
+            <Section
+              icon={<MapPin size={16} />}
+              step={isLoggedIn && savedAddresses.length > 0 ? "2" : "1"}
+              title={t("deliveryInfo")}
+            >
+              <div className="space-y-4">
+                {/* Name + Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldWrap label={t("fullName")} required error={errors.name}>
                     <input
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, phone: e.target.value }))
-                      }
-                      placeholder="01XXXXXXXXX"
-                      maxLength={11}
-                      className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent"
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder={t("fullName")}
+                      className={errors.name ? inputError : inputNormal}
                     />
-                  </div>
-                  {errors.phone && (
-                    <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
-                  )}
+                  </FieldWrap>
+
+                  <FieldWrap label={t("phoneNumber")} required error={errors.phone}>
+                    <div className={`flex items-center border rounded-lg overflow-hidden transition-colors ${errors.phone ? "border-red-400" : "border-border-subtle focus-within:border-[var(--color-primary)]"}`}>
+                      <span className="px-3 py-2.5 text-sm font-medium text-text-secondary bg-surface border-r border-border-subtle shrink-0 select-none">
+                        +88
+                      </span>
+                      <input
+                        type="tel"
+                        value={form.phone}
+                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                        placeholder="01XXXXXXXXX"
+                        maxLength={11}
+                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent text-[var(--color-text)]"
+                      />
+                    </div>
+                  </FieldWrap>
                 </div>
 
                 {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    {t("emailAddress")}{" "}
-                    <span className="text-text-tertiary font-normal">{t("optional")}</span>
-                  </label>
+                <FieldWrap label={t("emailAddress")} optional={t("optional")}>
                   <input
                     type="email"
                     value={form.email}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, email: e.target.value }))
-                    }
+                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                     placeholder="you@example.com"
-                    className="w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg"
+                    className={inputNormal}
                   />
-                </div>
+                </FieldWrap>
 
                 {/* Street */}
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    {t("streetAddress")} <span className="text-red-500">*</span>
-                  </label>
+                <FieldWrap label={t("streetAddress")} required error={errors.street}>
                   <input
                     type="text"
                     value={form.street}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, street: e.target.value }))
-                    }
+                    onChange={(e) => setForm((f) => ({ ...f, street: e.target.value }))}
                     readOnly={usingSavedAddress}
                     placeholder={t("streetAddress")}
-                    className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
-                      usingSavedAddress ? "bg-surface text-text-secondary" : ""
-                    } ${
-                      errors.street
-                        ? "border-red-400 focus:ring-red-200"
-                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
-                    }`}
+                    className={usingSavedAddress ? inputReadOnly : errors.street ? inputError : inputNormal}
                   />
-                  {errors.street && (
-                    <p className="mt-1 text-xs text-red-500">{errors.street}</p>
-                  )}
-                </div>
+                </FieldWrap>
 
                 {/* City + Postal */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                      {t("city")} <span className="text-red-500">*</span>
-                    </label>
+                  <FieldWrap label={t("city")} required error={errors.city}>
                     <input
                       type="text"
                       value={form.city}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, city: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                       readOnly={usingSavedAddress}
                       placeholder={t("city")}
-                      className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
-                        usingSavedAddress ? "bg-surface text-text-secondary" : ""
-                      } ${
-                        errors.city
-                          ? "border-red-400 focus:ring-red-200"
-                          : "border-border-subtle focus:ring-primary/20 focus:border-primary"
-                      }`}
+                      className={usingSavedAddress ? inputReadOnly : errors.city ? inputError : inputNormal}
                     />
-                    {errors.city && (
-                      <p className="mt-1 text-xs text-red-500">{errors.city}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                      {t("postalCode")}
-                    </label>
+                  </FieldWrap>
+                  <FieldWrap label={t("postalCode")}>
                     <input
                       type="text"
                       value={form.postalCode}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, postalCode: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
                       readOnly={usingSavedAddress}
                       placeholder={t("postalCode")}
-                      className={`w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg ${
-                        usingSavedAddress ? "bg-surface text-text-secondary" : ""
-                      }`}
+                      className={usingSavedAddress ? inputReadOnly : inputNormal}
                     />
-                  </div>
+                  </FieldWrap>
                 </div>
 
                 {/* Country */}
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    {t("country")}
-                  </label>
+                <FieldWrap label={t("country")}>
                   <select
                     value={form.country}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, country: e.target.value }))
-                    }
+                    onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
                     disabled={usingSavedAddress}
-                    className={`w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg ${
-                      usingSavedAddress ? "bg-surface text-text-secondary" : ""
-                    }`}
+                    className={usingSavedAddress ? inputReadOnly : inputNormal}
                   >
                     <option>Bangladesh</option>
                     <option>India</option>
                     <option>Pakistan</option>
                     <option>Other</option>
                   </select>
-                </div>
+                </FieldWrap>
 
-                {/* Notes */}
+                {/* Notes — collapsible */}
                 <div>
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    {t("orderNotes")} {t("optional")}
-                  </label>
-                  <textarea
-                    value={form.notes}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, notes: e.target.value }))
-                    }
-                    placeholder={t("orderNotes")}
-                    rows={3}
-                    className="w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none bg-bg"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setNotesOpen((o) => !o)}
+                    className="flex items-center gap-2 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
+                  >
+                    <ChevronDown
+                      size={15}
+                      className={`transition-transform duration-200 ${notesOpen ? "rotate-180" : ""}`}
+                    />
+                    {t("orderNotes")}
+                    <span className="text-text-tertiary font-normal">({t("optional")})</span>
+                  </button>
+                  {notesOpen && (
+                    <textarea
+                      value={form.notes}
+                      onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                      placeholder={t("orderNotes")}
+                      rows={3}
+                      className={`${inputNormal} mt-2 resize-none`}
+                    />
+                  )}
                 </div>
               </div>
-            </div>
+            </Section>
 
-            {/* Payment method */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-[var(--shadow-xs)] p-7">
-              <h2 className="font-bold text-lg mb-4">{t("paymentMethod")}</h2>
+            {/* Step 3 — Payment */}
+            <Section
+              icon={<CreditCard size={16} />}
+              step={isLoggedIn && savedAddresses.length > 0 ? "3" : "2"}
+              title={t("paymentMethod")}
+            >
               <label
-                className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg border"
+                className="flex items-center gap-3 cursor-pointer px-4 py-3.5 rounded-xl border-2 transition-all"
                 style={{
                   backgroundColor: "color-mix(in srgb, var(--color-primary) 5%, transparent)",
                   borderColor: "var(--color-primary)",
@@ -430,118 +385,201 @@ export default function CheckoutPage() {
                   name="payment"
                   defaultChecked
                   readOnly
-                  className="w-4 h-4 accent-current"
+                  className="w-4 h-4"
                   style={{ accentColor: "var(--color-primary)" }}
                 />
-                <div>
-                  <p className="text-sm font-medium">{t("cashOnDelivery")}</p>
-                  <p className="text-xs text-text-secondary">
-                    {t("payWhenReceive")}
-                  </p>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{t("cashOnDelivery")}</p>
+                  <p className="text-xs text-text-secondary mt-0.5">{t("payWhenReceive")}</p>
                 </div>
+                <CheckCircle2 size={18} style={{ color: "var(--color-primary)" }} />
               </label>
-            </div>
+
+              <div className="mt-3 flex items-center gap-2 text-xs text-text-tertiary">
+                <Lock size={12} />
+                {t("secureCheckout") || "Your information is encrypted and secure"}
+              </div>
+            </Section>
           </div>
 
-          {/* Order summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] p-7 sticky top-24">
-              <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
+          {/* ── Right column — Order summary ── */}
+          <div className="sticky top-24">
+            <div
+              className="bg-bg border border-border-subtle shadow-[var(--shadow-sm)] overflow-hidden"
+              style={{ borderRadius: "calc(var(--border-radius) * 1.5)" }}
+            >
+              {/* Summary header */}
+              <div className="px-5 pt-5 pb-4 border-b border-border-subtle">
+                <h2 className="font-bold text-base">{t("orderSummary")}</h2>
+              </div>
 
               {/* Items */}
-              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
+              <div className="px-5 py-4 space-y-3 max-h-56 overflow-y-auto">
                 {items.map((item, idx) => (
-                  <div
-                    key={`${item.productId}-${idx}`}
-                    className="flex items-center gap-3"
-                  >
-                    <div className="w-12 h-12 bg-surface rounded-lg overflow-hidden relative shrink-0">
+                  <div key={`${item.productId}-${idx}`} className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 bg-surface overflow-hidden relative shrink-0"
+                      style={{ borderRadius: "var(--border-radius)" }}
+                    >
                       {item.thumbnail ? (
-                        <Image
-                          src={item.thumbnail}
-                          alt={item.productName}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={item.thumbnail} alt={item.productName} fill className="object-cover" />
                       ) : (
-                        <ShoppingBag
-                          size={16}
-                          className="m-auto mt-3 text-text-tertiary"
-                        />
+                        <ShoppingBag size={16} className="m-auto mt-3 text-text-tertiary" />
+                      )}
+                      {item.quantity > 1 && (
+                        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-700 text-white text-[10px] font-bold flex items-center justify-center">
+                          {item.quantity}
+                        </span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">
-                        {item.productName}
-                      </p>
-                      <p className="text-xs text-text-secondary">
-                        Qty: {item.quantity}
-                      </p>
+                      <p className="text-xs font-medium truncate leading-snug">{item.productName}</p>
+                      {Object.keys(item.variantSelections || {}).length > 0 && (
+                        <p className="text-[11px] text-text-tertiary truncate">
+                          {Object.entries(item.variantSelections).map(([k, v]) => `${k}: ${v}`).join(" · ")}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-text-secondary">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-xs font-semibold shrink-0">
+                    <p className="text-xs font-semibold shrink-0" style={{ color: "var(--color-price)" }}>
                       ৳{(item.priceAtAdd * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-border-subtle pt-3 space-y-2 text-sm">
+              {/* Totals */}
+              <div className="px-5 pb-5 pt-3 border-t border-border-subtle space-y-2.5 text-sm">
                 <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span>{t("subtotal")}</span>
-                  <span className="shrink-0">৳{subtotal.toLocaleString()}</span>
+                  <span className="shrink-0 font-medium">৳{subtotal.toLocaleString()}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex items-center justify-between gap-3 text-green-600">
-                    <span className="truncate">Discount ({coupon?.code})</span>
-                    <span className="shrink-0">-৳{discount.toLocaleString()}</span>
+                  <div className="flex items-center justify-between gap-3 text-green-600 dark:text-green-400">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Tag size={12} /> {coupon?.code}
+                    </span>
+                    <span className="shrink-0 font-medium">-৳{discount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-3 text-text-secondary">
-                  <span>{t("shipping")}</span>
-                  <span className="shrink-0 text-green-600">Free</span>
+                  <span className="flex items-center gap-1.5">
+                    <Truck size={13} />{t("shipping")}
+                  </span>
+                  <span className="shrink-0 font-medium text-green-600 dark:text-green-400">Free</span>
+                </div>
+
+                <div className="pt-3 mt-1 border-t border-border-subtle flex items-center justify-between gap-3">
+                  <span className="font-bold">{t("total")}</span>
+                  <span
+                    className="font-extrabold text-xl shrink-0"
+                    style={{ color: "var(--color-price)" }}
+                  >
+                    ৳{total.toLocaleString()}
+                  </span>
                 </div>
               </div>
 
-              <div className="border-t border-border-subtle mt-3 pt-3 flex items-center justify-between gap-3 font-bold">
-                <span>{t("total")}</span>
-                <span className="shrink-0">৳{total.toLocaleString()}</span>
-              </div>
-
-              {serverError && (
-                <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg">
-                  {serverError}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="mt-5 w-full flex items-center justify-center gap-2 py-4 text-white font-semibold transition-all hover:brightness-105 hover:shadow-[var(--shadow-md)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  borderRadius: "var(--border-radius)",
-                }}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    {t("placingOrder")}
-                  </>
-                ) : (
-                  t("placeOrder")
+              {/* CTA */}
+              <div className="px-5 pb-5">
+                {serverError && (
+                  <div className="mb-3 p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-sm rounded-xl border border-red-200 dark:border-red-800">
+                    {serverError}
+                  </div>
                 )}
-              </button>
 
-              <Link
-                href="/cart"
-                className="mt-3 block text-center text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
-              >
-                {t("backToCart")}
-              </Link>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full flex items-center justify-center gap-2 py-4 text-white font-semibold text-sm transition-all hover:opacity-90 hover:shadow-[var(--shadow-md)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: "var(--color-primary)",
+                    borderRadius: "var(--border-radius)",
+                  }}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={17} className="animate-spin" />
+                      {t("placingOrder")}
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={15} />
+                      {t("placeOrder")}
+                    </>
+                  )}
+                </button>
+
+                <p className="mt-2.5 text-[11px] text-text-tertiary text-center">
+                  {t("secureCheckout") || "SSL encrypted · Safe & secure checkout"}
+                </p>
+              </div>
             </div>
           </div>
+
         </div>
       </form>
+    </div>
+  );
+}
+
+/* ── Section wrapper ── */
+function Section({
+  icon,
+  step,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  step: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="bg-bg border border-border-subtle shadow-[var(--shadow-xs)] overflow-hidden"
+      style={{ borderRadius: "calc(var(--border-radius) * 1.5)" }}
+    >
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+        <span
+          className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+          style={{ backgroundColor: "var(--color-primary)" }}
+        >
+          {step}
+        </span>
+        <span className="flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+          {icon}
+          {title}
+        </span>
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+/* ── Field wrapper ── */
+function FieldWrap({
+  label,
+  required,
+  optional,
+  error,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  optional?: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {optional && <span className="ml-1 text-text-tertiary font-normal">({optional})</span>}
+      </label>
+      {children}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

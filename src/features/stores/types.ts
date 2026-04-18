@@ -9,6 +9,16 @@ export interface IStoreDarkTheme {
   borderColor?: string;
   headerBg?: string;
   headerText?: string;
+  newsletterBg?: string;
+  newsletterText?: string;
+  newsletterBtnBg?: string;
+  newsletterBtnText?: string;
+  priceColor?: string;
+  saleBadgeBg?: string;
+  saleBadgeText?: string;
+  footerBg?: string;
+  footerText?: string;
+  linkColor?: string;
 }
 
 export interface IStoreTheme {
@@ -22,6 +32,16 @@ export interface IStoreTheme {
   fontFamily: string;
   borderRadius: string;
   layoutStyle: "grid" | "list" | "masonry";
+  newsletterBg?: string;
+  newsletterText?: string;
+  newsletterBtnBg?: string;
+  newsletterBtnText?: string;
+  priceColor?: string;
+  saleBadgeBg?: string;
+  saleBadgeText?: string;
+  footerBg?: string;
+  footerText?: string;
+  linkColor?: string;
   dark?: IStoreDarkTheme;
 }
 

@@ -63,8 +63,11 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
         {/* Discount badge */}
         {hasDiscount && (
           <span
-            className="inline-block px-3 py-1 text-xs font-bold text-white rounded-full mb-4"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="inline-block px-3 py-1 text-xs font-bold rounded-full mb-4"
+            style={{
+              backgroundColor: "var(--color-sale-badge-bg)",
+              color: "var(--color-sale-badge-text)",
+            }}
           >
             {tr("save") || "Save"} {discountPercent}%
           </span>
@@ -100,7 +103,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
         <div className="flex items-baseline gap-3 mb-6">
           <span
             className="text-2xl md:text-3xl font-bold"
-            style={{ color: "var(--color-primary)" }}
+            style={{ color: "var(--color-price)" }}
           >
             ৳{displayPrice.toLocaleString()}
           </span>

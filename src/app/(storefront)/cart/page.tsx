@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Loader2, X, Tag } from "lucide-react";
+import { ShoppingBag, Loader2, X, Tag, ArrowRight, Truck } from "lucide-react";
 import { useCart } from "@/shared/context/CartContext";
 import { CartItemRow } from "@/features/cart/components/CartItemRow";
 import { useTranslations } from "next-intl";
@@ -27,30 +27,59 @@ export default function CartPage() {
     document.title = `Cart | ${tenant?.name ?? "Store"}`;
   }, [tenant?.name]);
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
-      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-10">{t("yourCart")}</h1>
-
-      {items.length === 0 ? (
-        <div className="text-center py-20 flex flex-col items-center gap-4">
-          <ShoppingBag size={48} className="text-gray-300 dark:text-gray-600" />
-          <p className="text-lg text-text-secondary">{t("empty")}</p>
+  if (items.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="flex flex-col items-center gap-5 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center">
+            <ShoppingBag size={36} className="text-text-tertiary" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold mb-1">{t("empty")}</h1>
+            <p className="text-text-secondary text-sm">{t("emptyDesc") || "Add some items to get started."}</p>
+          </div>
           <Link
             href="/products"
-            className="inline-block px-6 py-2.5 text-white font-medium transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md"
             style={{
               backgroundColor: "var(--color-primary)",
               borderRadius: "var(--border-radius)",
             }}
           >
             {t("continueShopping")}
+            <ArrowRight size={16} />
           </Link>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Items list */}
-          <div className="lg:col-span-2">
-            <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] px-4 sm:px-6">
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          {t("yourCart")}
+          <span className="ml-2 text-base font-normal text-text-secondary">
+            ({items.length} {items.length === 1 ? "item" : "items"})
+          </span>
+        </h1>
+        <Link
+          href="/products"
+          className="hidden sm:inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
+        >
+          ← {t("continueShopping")}
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Items list */}
+        <div className="lg:col-span-2">
+          <div
+            className="bg-bg border border-border-subtle shadow-[var(--shadow-sm)] overflow-hidden"
+            style={{ borderRadius: "calc(var(--border-radius) * 1.5)" }}
+          >
+            <div className="px-5 sm:px-6">
               {items.map((item, idx) => (
                 <CartItemRow
                   key={`${item.productId}-${JSON.stringify(item.variantSelections)}-${idx}`}
@@ -64,67 +93,92 @@ export default function CartPage() {
                 />
               ))}
             </div>
-
-            <Link
-              href="/products"
-              className="inline-block mt-4 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
-            >
-              ← {t("continueShopping")}
-            </Link>
           </div>
 
-          {/* Order summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-bg rounded-xl border border-border-subtle shadow-[var(--shadow-xs)] p-5 sticky top-24">
-              <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
+          {/* Free shipping nudge */}
+          <div className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-border-subtle text-sm text-text-secondary">
+            <Truck size={15} className="shrink-0" style={{ color: "var(--color-primary)" }} />
+            <span>{t("freeShippingNote") || "Free shipping on this order"}</span>
+          </div>
 
-              {/* Coupon input */}
-              <CouponInput
-                coupon={coupon}
-                couponLoading={couponLoading}
-                couponError={couponError}
-                onApply={applyCoupon}
-                onRemove={removeCoupon}
-              />
+          <Link
+            href="/products"
+            className="inline-flex sm:hidden items-center gap-1.5 mt-4 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
+          >
+            ← {t("continueShopping")}
+          </Link>
+        </div>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex items-start justify-between gap-3 text-text-secondary">
-                  <span className="min-w-0">
-                    {t("subtotal")} ({t("items", { count: items.length })})
+        {/* Order summary */}
+        <div className="lg:col-span-1">
+          <div
+            className="bg-bg border border-border-subtle shadow-[var(--shadow-sm)] p-5 sticky top-24"
+            style={{ borderRadius: "calc(var(--border-radius) * 1.5)" }}
+          >
+            <h2 className="font-bold text-base mb-5">{t("orderSummary")}</h2>
+
+            {/* Coupon */}
+            <CouponInput
+              coupon={coupon}
+              couponLoading={couponLoading}
+              couponError={couponError}
+              onApply={applyCoupon}
+              onRemove={removeCoupon}
+            />
+
+            {/* Line items */}
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between gap-3 text-text-secondary">
+                <span>{t("subtotal")} ({items.length} {items.length === 1 ? "item" : "items"})</span>
+                <span className="font-medium shrink-0">৳{subtotal.toLocaleString()}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex items-center justify-between gap-3 text-green-600 dark:text-green-400">
+                  <span className="flex items-center gap-1.5">
+                    <Tag size={13} />
+                    Coupon ({coupon?.code})
                   </span>
-                  <span className="shrink-0 font-medium">৳{subtotal.toLocaleString()}</span>
+                  <span className="font-medium shrink-0">-৳{discount.toLocaleString()}</span>
                 </div>
-                {discount > 0 && (
-                  <div className="flex items-center justify-between gap-3 text-green-600">
-                    <span>Discount</span>
-                    <span className="shrink-0">-৳{discount.toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between gap-3 text-text-secondary">
-                  <span>{t("shipping")}</span>
-                  <span className="shrink-0 text-green-600">Free</span>
-                </div>
+              )}
+              <div className="flex items-center justify-between gap-3 text-text-secondary">
+                <span>{t("shipping")}</span>
+                <span className="shrink-0 font-medium text-green-600 dark:text-green-400">Free</span>
               </div>
-
-              <div className="border-t border-border-subtle mt-4 pt-4 flex items-center justify-between gap-3 font-bold text-base">
-                <span>{t("total")}</span>
-                <span className="shrink-0">৳{total.toLocaleString()}</span>
-              </div>
-
-              <Link
-                href="/checkout"
-                className="mt-5 block w-full text-center py-3.5 text-white font-semibold transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  borderRadius: "var(--border-radius)",
-                }}
-              >
-                {t("checkout")}
-              </Link>
             </div>
+
+            {/* Total */}
+            <div
+              className="mt-4 pt-4 border-t border-border-subtle flex items-center justify-between gap-3"
+            >
+              <span className="font-bold text-base">{t("total")}</span>
+              <span
+                className="font-extrabold text-xl shrink-0"
+                style={{ color: "var(--color-price)" }}
+              >
+                ৳{total.toLocaleString()}
+              </span>
+            </div>
+
+            {/* Checkout CTA */}
+            <Link
+              href="/checkout"
+              className="mt-5 flex items-center justify-center gap-2 w-full py-3.5 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md"
+              style={{
+                backgroundColor: "var(--color-primary)",
+                borderRadius: "var(--border-radius)",
+              }}
+            >
+              {t("checkout")}
+              <ArrowRight size={16} />
+            </Link>
+
+            <p className="mt-3 text-[11px] text-text-tertiary text-center">
+              {t("secureCheckout") || "Secure checkout · SSL encrypted"}
+            </p>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -153,14 +207,14 @@ function CouponInput({
 
   if (coupon) {
     return (
-      <div className="mb-4 flex items-center gap-2 px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg text-sm">
-        <Tag size={14} className="text-green-600 shrink-0" />
-        <span className="text-green-700 font-medium flex-1">
-          {coupon.code} (-৳{coupon.discount.toLocaleString()})
+      <div className="mb-4 flex items-center gap-2 px-3 py-2.5 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl text-sm">
+        <Tag size={13} className="text-green-600 dark:text-green-400 shrink-0" />
+        <span className="text-green-700 dark:text-green-300 font-medium flex-1 truncate">
+          {coupon.code} · -৳{coupon.discount.toLocaleString()}
         </span>
         <button
           onClick={onRemove}
-          className="text-green-600 hover:text-green-800 p-0.5"
+          className="shrink-0 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 p-0.5 rounded transition-colors"
           aria-label="Remove coupon"
         >
           <X size={14} />
@@ -170,20 +224,24 @@ function CouponInput({
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-5">
       <form onSubmit={handleApply} className="flex gap-2">
         <input
           type="text"
           value={code}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
           placeholder="Coupon code"
-          className="flex-1 min-w-0 px-3 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-bg"
+          className="flex-1 min-w-0 px-3 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-bg text-[var(--color-text)] placeholder:text-text-tertiary"
+          style={{ ["--tw-ring-color" as string]: "color-mix(in srgb, var(--color-primary) 30%, transparent)" }}
         />
         <button
           type="submit"
           disabled={couponLoading || !code.trim()}
-          className="shrink-0 w-16 flex items-center justify-center py-2 text-sm font-medium border rounded-lg transition-colors hover:bg-surface dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+          className="shrink-0 px-4 py-2 text-sm font-semibold border rounded-lg transition-all hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+          style={{
+            borderColor: "var(--color-primary)",
+            color: "var(--color-primary)",
+          }}
         >
           {couponLoading ? <Loader2 size={14} className="animate-spin" /> : "Apply"}
         </button>

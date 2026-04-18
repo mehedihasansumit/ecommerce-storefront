@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import type { IAddress } from "../types";
+import { Button, Alert } from "@/shared/components/ui";
 
 interface AddressFormProps {
   initialData?: IAddress;
@@ -42,7 +44,6 @@ export function AddressForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-
     setSaving(true);
     setError("");
     try {
@@ -54,18 +55,20 @@ export function AddressForm({
     }
   }
 
+  const inputBase =
+    "w-full px-3 py-2.5 border rounded-lg text-sm bg-bg text-[var(--color-text)] placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors";
   const inputClass = (field: string) =>
-    `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors ${
+    `${inputBase} ${
       fieldErrors[field]
         ? "border-red-400 focus:ring-red-200"
-        : "border-admin-border focus:ring-primary/20 focus:border-primary"
+        : "border-border-subtle focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
     }`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Label */}
       <div>
-        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
+        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
           {t("label")}
         </label>
         <input
@@ -79,7 +82,7 @@ export function AddressForm({
 
       {/* Street */}
       <div>
-        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
+        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
           {t("street")} <span className="text-red-500">*</span>
         </label>
         <input
@@ -97,7 +100,7 @@ export function AddressForm({
       {/* City + Postal */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-admin-text-secondary mb-1">
+          <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
             {t("city")} <span className="text-red-500">*</span>
           </label>
           <input
@@ -112,7 +115,7 @@ export function AddressForm({
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-admin-text-secondary mb-1">
+          <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
             {t("postalCode")}
           </label>
           <input
@@ -129,7 +132,7 @@ export function AddressForm({
 
       {/* State */}
       <div>
-        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
+        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
           {t("state")}
         </label>
         <input
@@ -143,13 +146,13 @@ export function AddressForm({
 
       {/* Country */}
       <div>
-        <label className="block text-sm font-medium text-admin-text-secondary mb-1">
+        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
           {t("country")}
         </label>
         <select
           value={form.country}
           onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
-          className="w-full px-3 py-2.5 border border-admin-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-admin-surface"
+          className={`${inputBase} border-border-subtle focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]`}
         >
           <option>Bangladesh</option>
           <option>India</option>
@@ -166,39 +169,27 @@ export function AddressForm({
           onChange={(e) =>
             setForm((f) => ({ ...f, isDefault: e.target.checked }))
           }
-          className="w-4 h-4 rounded border-admin-border-md"
+          className="w-4 h-4 rounded border-border-subtle"
           style={{ accentColor: "var(--color-primary)" }}
         />
-        <span className="text-sm text-admin-text-secondary">{t("setAsDefault")}</span>
+        <span className="text-sm text-text-secondary">{t("setAsDefault")}</span>
       </label>
 
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <Alert tone="error">{error}</Alert>}
 
       <div className="flex gap-3">
-        <button
+        <Button
           type="submit"
-          disabled={saving}
-          className="px-5 py-2.5 text-white text-sm font-medium transition-all hover:brightness-105 disabled:opacity-60 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor: "var(--color-primary)",
-            borderRadius: "var(--border-radius)",
-          }}
+          variant="brand"
+          loading={saving}
+          leftIcon={saving ? <Loader2 size={14} className="animate-spin" /> : undefined}
         >
-          {saving
-            ? "..."
-            : submitLabel ||
-              (initialData ? t("updateAddress") : t("saveAddress"))}
-        </button>
+          {submitLabel ?? (initialData ? t("updateAddress") : t("saveAddress"))}
+        </Button>
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-5 py-2.5 text-sm font-medium text-admin-text-secondary border border-admin-border rounded-lg hover:bg-admin-surface-hover transition-colors"
-          >
+          <Button type="button" variant="secondary" onClick={onCancel}>
             {t("cancel")}
-          </button>
+          </Button>
         )}
       </div>
     </form>

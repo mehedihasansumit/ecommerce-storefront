@@ -104,6 +104,7 @@
   "cart": {
     "yourCart": "Your Cart",
     "empty": "Your cart is empty",
+    "emptyDesc": "Add some items to get started.",
     "continueShopping": "Continue Shopping",
     "subtotal": "Subtotal",
     "shipping": "Shipping",

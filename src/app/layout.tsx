@@ -60,6 +60,16 @@ export default async function RootLayout({
       ? `'${bnFont}', sans-serif`
       : `'${theme.fontFamily}', sans-serif`,
     "--border-radius": theme.borderRadius,
+    "--color-newsletter-bg": theme.newsletterBg || theme.primaryColor,
+    "--color-newsletter-text": theme.newsletterText || "#FFFFFF",
+    "--color-newsletter-btn-bg": theme.newsletterBtnBg || "#FFFFFF",
+    "--color-newsletter-btn-text": theme.newsletterBtnText || theme.primaryColor,
+    "--color-price": theme.priceColor || theme.primaryColor,
+    "--color-sale-badge-bg": theme.saleBadgeBg || "#EF4444",
+    "--color-sale-badge-text": theme.saleBadgeText || "#FFFFFF",
+    "--color-footer-bg": theme.footerBg || theme.headerBg,
+    "--color-footer-text": theme.footerText || theme.headerText,
+    "--color-link": theme.linkColor || theme.primaryColor,
   };
 
   const dark = theme.dark as IStoreDarkTheme | undefined;
@@ -73,6 +83,16 @@ export default async function RootLayout({
     --color-header-text: ${dark?.headerText ?? "#F8FAFC"} !important;
     --color-text-secondary: #9CA3AF !important;
     --color-text-tertiary: #6B7280 !important;
+    --color-newsletter-bg: ${dark?.newsletterBg ?? dark?.primaryColor ?? theme.primaryColor} !important;
+    --color-newsletter-text: ${dark?.newsletterText ?? "#FFFFFF"} !important;
+    --color-newsletter-btn-bg: ${dark?.newsletterBtnBg ?? "#1F2937"} !important;
+    --color-newsletter-btn-text: ${dark?.newsletterBtnText ?? dark?.primaryColor ?? theme.primaryColor} !important;
+    --color-price: ${dark?.priceColor ?? dark?.primaryColor ?? theme.primaryColor} !important;
+    --color-sale-badge-bg: ${dark?.saleBadgeBg ?? "#DC2626"} !important;
+    --color-sale-badge-text: ${dark?.saleBadgeText ?? "#FFFFFF"} !important;
+    --color-footer-bg: ${dark?.footerBg ?? dark?.headerBg ?? "#0F172A"} !important;
+    --color-footer-text: ${dark?.footerText ?? dark?.headerText ?? "#F8FAFC"} !important;
+    --color-link: ${dark?.linkColor ?? dark?.primaryColor ?? theme.primaryColor} !important;
   }`;
 
   const antiFlashScript = `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');})()`;

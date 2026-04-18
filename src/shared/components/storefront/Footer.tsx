@@ -52,8 +52,8 @@ export function Footer() {
     <footer
       className="mt-auto"
       style={{
-        backgroundColor: "var(--color-header-bg)",
-        color: "var(--color-header-text)",
+        backgroundColor: "var(--color-footer-bg)",
+        color: "var(--color-footer-text)",
       }}
     >
       <div className="h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />

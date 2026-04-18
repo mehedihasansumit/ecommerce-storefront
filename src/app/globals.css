@@ -22,6 +22,18 @@
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Extended UI zone tokens */
+  --color-newsletter-bg: #3B82F6;
+  --color-newsletter-text: #FFFFFF;
+  --color-newsletter-btn-bg: #FFFFFF;
+  --color-newsletter-btn-text: #3B82F6;
+  --color-price: #3B82F6;
+  --color-sale-badge-bg: #EF4444;
+  --color-sale-badge-text: #FFFFFF;
+  --color-footer-bg: #111827;
+  --color-footer-text: #FFFFFF;
+  --color-link: #3B82F6;
+
   /* Admin panel semantic tokens */
   --admin-bg:               #F9FAFB;
   --admin-surface:          #FFFFFF;
@@ -58,6 +70,9 @@ html.dark {
   --color-border-subtle:    #374151;
   --color-text-secondary:   #9CA3AF;
   --color-text-tertiary:    #6B7280;
+  --color-newsletter-btn-bg: #1F2937;
+  --color-sale-badge-bg:    #DC2626;
+  --color-footer-bg:        #0F172A;
 }
 
 @theme inline {

@@ -58,8 +58,11 @@ export function ProductCard({ product }: { product: IProduct }) {
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {hasDiscount && (
             <span
-              className="px-2 py-0.5 text-[11px] font-bold text-white rounded-md leading-tight"
-              style={{ backgroundColor: "var(--color-accent)" }}
+              className="px-2 py-0.5 text-[11px] font-bold rounded-md leading-tight"
+              style={{
+                backgroundColor: "var(--color-sale-badge-bg)",
+                color: "var(--color-sale-badge-text)",
+              }}
             >
               -{discountPercent}%
             </span>
@@ -141,7 +144,7 @@ export function ProductCard({ product }: { product: IProduct }) {
           <div className="flex items-baseline gap-2">
             <span
               className="text-base font-bold"
-              style={{ color: "var(--color-primary)" }}
+              style={{ color: "var(--color-price)" }}
             >
               ৳{product.price.toLocaleString()}
             </span>

@@ -68,16 +68,16 @@ export function NewsletterForm({
     return (
       <div className="flex flex-col items-center gap-3 py-2">
         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-          <CheckCircle size={28} className="text-white" />
+          <CheckCircle size={28} style={{ color: "var(--color-newsletter-text)" }} />
         </div>
-        <p className="text-white font-semibold text-lg">Thanks for subscribing!</p>
-        <p className="text-white/70 text-sm">We'll keep you updated with the best offers.</p>
+        <p className="font-semibold text-lg" style={{ color: "var(--color-newsletter-text)" }}>Thanks for subscribing!</p>
+        <p className="text-sm" style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 70%, transparent)" }}>We'll keep you updated with the best offers.</p>
       </div>
     );
   }
 
   const inputClass =
-    "w-full px-5 py-3 rounded-full bg-white/10 border border-white/25 text-white placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all disabled:opacity-60 text-sm";
+    "w-full px-5 py-3 rounded-full bg-white/10 border border-white/25 placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all disabled:opacity-60 text-sm";
 
   return (
     <div className="max-w-sm mx-auto">
@@ -89,11 +89,15 @@ export function NewsletterForm({
           placeholder={emailPlaceholder}
           disabled={status === "loading"}
           className={inputClass}
+          style={{ color: "var(--color-newsletter-text)" }}
         />
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-white/20" />
-          <span className="text-white/40 text-xs uppercase tracking-widest">or</span>
+          <span
+            className="text-xs uppercase tracking-widest"
+            style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 40%, transparent)" }}
+          >or</span>
           <div className="flex-1 h-px bg-white/20" />
         </div>
 
@@ -104,13 +108,17 @@ export function NewsletterForm({
           placeholder="+880 1XXX XXXXXX"
           disabled={status === "loading"}
           className={inputClass}
+          style={{ color: "var(--color-newsletter-text)" }}
         />
 
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full px-8 py-3.5 bg-white font-semibold rounded-full transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2 mt-1"
-          style={{ color: "var(--color-primary)" }}
+          className="w-full px-8 py-3.5 font-semibold rounded-full transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2 mt-1"
+          style={{
+            backgroundColor: "var(--color-newsletter-btn-bg)",
+            color: "var(--color-newsletter-btn-text)",
+          }}
         >
           {status === "loading" ? (
             <>
@@ -124,7 +132,10 @@ export function NewsletterForm({
       </form>
 
       {status === "error" && errorMsg && (
-        <p className="mt-3 text-white/80 text-sm text-center bg-white/10 rounded-full px-4 py-1.5">
+        <p
+          className="mt-3 text-sm text-center bg-white/10 rounded-full px-4 py-1.5"
+          style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 80%, transparent)" }}
+        >
           {errorMsg}
         </p>
       )}

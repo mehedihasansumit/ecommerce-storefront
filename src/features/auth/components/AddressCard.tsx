@@ -32,8 +32,8 @@ export function AddressCard({
         <div className="flex items-center gap-2 min-w-0">
           {selectable && (
             <div
-              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                selected ? "border-[var(--color-primary)]" : "border-admin-border-md"
+              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                selected ? "border-[var(--color-primary)]" : "border-border-subtle"
               }`}
             >
               {selected && (
@@ -44,8 +44,8 @@ export function AddressCard({
               )}
             </div>
           )}
-          <MapPin size={15} className="text-admin-text-subtle shrink-0" />
-          <span className="text-sm font-semibold text-admin-text-secondary truncate">
+          <MapPin size={15} className="text-text-tertiary shrink-0" />
+          <span className="text-sm font-semibold text-[var(--color-text)] truncate">
             {address.label || t("street")}
           </span>
           {address.isDefault && (
@@ -83,7 +83,7 @@ export function AddressCard({
                 size="icon"
                 onClick={() => onDelete(address._id)}
                 aria-label="Delete address"
-                className="text-admin-text-subtle hover:text-red-500 hover:bg-red-50"
+                className="text-text-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 <Trash2 size={14} />
               </Button>
@@ -92,7 +92,7 @@ export function AddressCard({
         )}
       </div>
 
-      <div className="mt-2 text-sm text-admin-text-muted space-y-0.5 ml-6">
+      <div className="mt-2 text-sm text-text-secondary space-y-0.5 ml-6">
         <p>{address.street}</p>
         <p>
           {address.city}
@@ -107,11 +107,14 @@ export function AddressCard({
   if (selectable) {
     return (
       <div
+        role="button"
+        tabIndex={0}
         onClick={() => onSelect?.(address._id)}
-        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+        onKeyDown={(e) => e.key === "Enter" && onSelect?.(address._id)}
+        className={`p-4 rounded-lg border-2 cursor-pointer transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
           selected
             ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]"
-            : "border-admin-border hover:border-admin-border-md"
+            : "border-border-subtle hover:border-[var(--color-primary)]/40"
         }`}
       >
         {cardContent}
@@ -120,7 +123,7 @@ export function AddressCard({
   }
 
   return (
-    <div className="p-4 rounded-lg border border-admin-border bg-admin-surface hover:border-admin-border-md transition-colors">
+    <div className="p-4 rounded-lg border border-border-subtle bg-bg hover:border-[var(--color-primary)]/30 transition-colors">
       {cardContent}
     </div>
   );

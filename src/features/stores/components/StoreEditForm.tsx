@@ -121,13 +121,23 @@ export default function StoreEditForm({
     theme: {
       ...store.theme,
       dark: {
-        primaryColor:    store.theme.dark?.primaryColor,
-        backgroundColor: store.theme.dark?.backgroundColor ?? "#111827",
-        textColor:       store.theme.dark?.textColor ?? "#F9FAFB",
-        surfaceColor:    store.theme.dark?.surfaceColor ?? "#1F2937",
-        borderColor:     store.theme.dark?.borderColor ?? "#374151",
-        headerBg:        store.theme.dark?.headerBg ?? "#0F172A",
-        headerText:      store.theme.dark?.headerText ?? "#F8FAFC",
+        primaryColor:      store.theme.dark?.primaryColor,
+        backgroundColor:   store.theme.dark?.backgroundColor ?? "#111827",
+        textColor:         store.theme.dark?.textColor ?? "#F9FAFB",
+        surfaceColor:      store.theme.dark?.surfaceColor ?? "#1F2937",
+        borderColor:       store.theme.dark?.borderColor ?? "#374151",
+        headerBg:          store.theme.dark?.headerBg ?? "#0F172A",
+        headerText:        store.theme.dark?.headerText ?? "#F8FAFC",
+        newsletterBg:      store.theme.dark?.newsletterBg,
+        newsletterText:    store.theme.dark?.newsletterText,
+        newsletterBtnBg:   store.theme.dark?.newsletterBtnBg,
+        newsletterBtnText: store.theme.dark?.newsletterBtnText,
+        priceColor:        store.theme.dark?.priceColor,
+        saleBadgeBg:       store.theme.dark?.saleBadgeBg,
+        saleBadgeText:     store.theme.dark?.saleBadgeText,
+        footerBg:          store.theme.dark?.footerBg,
+        footerText:        store.theme.dark?.footerText,
+        linkColor:         store.theme.dark?.linkColor,
       },
     },
     isActive: store.isActive,
@@ -666,6 +676,154 @@ export default function StoreEditForm({
                     label="Dark Header Text"
                     value={formData.theme.dark?.headerText ?? "#F8FAFC"}
                     onChange={(v) => handleDarkColorChange("headerText", v)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* Advanced Colors */}
+              <div className="pt-1">
+                <SectionTitle>Advanced Colours</SectionTitle>
+                <p className="text-xs text-admin-text-muted mt-0.5 mb-3">
+                  Fine-tune individual UI zones. Leave blank to inherit the primary/secondary colours.
+                </p>
+
+                {/* Newsletter Section */}
+                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Newsletter Section</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
+                  <ColorInput
+                    label="BG (Light)"
+                    value={formData.theme.newsletterBg ?? formData.theme.primaryColor}
+                    onChange={(v) => handleColorChange("newsletterBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="BG (Dark)"
+                    value={formData.theme.dark?.newsletterBg ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleDarkColorChange("newsletterBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Text (Light)"
+                    value={formData.theme.newsletterText ?? "#FFFFFF"}
+                    onChange={(v) => handleColorChange("newsletterText", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Text (Dark)"
+                    value={formData.theme.dark?.newsletterText ?? "#FFFFFF"}
+                    onChange={(v) => handleDarkColorChange("newsletterText", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Button BG (Light)"
+                    value={formData.theme.newsletterBtnBg ?? "#FFFFFF"}
+                    onChange={(v) => handleColorChange("newsletterBtnBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Button BG (Dark)"
+                    value={formData.theme.dark?.newsletterBtnBg ?? "#1F2937"}
+                    onChange={(v) => handleDarkColorChange("newsletterBtnBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Button Text (Light)"
+                    value={formData.theme.newsletterBtnText ?? formData.theme.primaryColor}
+                    onChange={(v) => handleColorChange("newsletterBtnText", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Button Text (Dark)"
+                    value={formData.theme.dark?.newsletterBtnText ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleDarkColorChange("newsletterBtnText", v)}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Products & Prices */}
+                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Products &amp; Prices</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-1">
+                  <ColorInput
+                    label="Price (Light)"
+                    value={formData.theme.priceColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleColorChange("priceColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Price (Dark)"
+                    value={formData.theme.dark?.priceColor ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleDarkColorChange("priceColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Sale Badge BG (Light)"
+                    value={formData.theme.saleBadgeBg ?? "#EF4444"}
+                    onChange={(v) => handleColorChange("saleBadgeBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Sale Badge BG (Dark)"
+                    value={formData.theme.dark?.saleBadgeBg ?? "#DC2626"}
+                    onChange={(v) => handleDarkColorChange("saleBadgeBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Sale Badge Text (Light)"
+                    value={formData.theme.saleBadgeText ?? "#FFFFFF"}
+                    onChange={(v) => handleColorChange("saleBadgeText", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Sale Badge Text (Dark)"
+                    value={formData.theme.dark?.saleBadgeText ?? "#FFFFFF"}
+                    onChange={(v) => handleDarkColorChange("saleBadgeText", v)}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Footer */}
+                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Footer</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
+                  <ColorInput
+                    label="Footer BG (Light)"
+                    value={formData.theme.footerBg ?? formData.theme.headerBg}
+                    onChange={(v) => handleColorChange("footerBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Footer BG (Dark)"
+                    value={formData.theme.dark?.footerBg ?? formData.theme.dark?.headerBg ?? "#0F172A"}
+                    onChange={(v) => handleDarkColorChange("footerBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Footer Text (Light)"
+                    value={formData.theme.footerText ?? formData.theme.headerText}
+                    onChange={(v) => handleColorChange("footerText", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Footer Text (Dark)"
+                    value={formData.theme.dark?.footerText ?? formData.theme.dark?.headerText ?? "#F8FAFC"}
+                    onChange={(v) => handleDarkColorChange("footerText", v)}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Links */}
+                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Links</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
+                  <ColorInput
+                    label="Link (Light)"
+                    value={formData.theme.linkColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleColorChange("linkColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Link (Dark)"
+                    value={formData.theme.dark?.linkColor ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
+                    onChange={(v) => handleDarkColorChange("linkColor", v)}
                     disabled={loading}
                   />
                 </div>

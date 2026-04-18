@@ -27,6 +27,7 @@ const StoreSchema = new Schema<IStoreDocument>(
         default: "grid",
       },
       dark: {
+        primaryColor:    { type: String },
         backgroundColor: { type: String, default: "#111827" },
         textColor:       { type: String, default: "#F9FAFB" },
         surfaceColor:    { type: String, default: "#1F2937" },

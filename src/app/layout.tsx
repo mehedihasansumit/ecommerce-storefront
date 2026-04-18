@@ -6,6 +6,7 @@ import { DEFAULT_THEME } from "@/shared/lib/constants";
 import { Toaster } from "react-hot-toast";
 import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
+import type { IStoreDarkTheme } from "@/features/stores/types";
 
 function localizedValue(
   value: Record<string, string> | string | undefined,
@@ -61,8 +62,9 @@ export default async function RootLayout({
     "--border-radius": theme.borderRadius,
   };
 
-  const dark = theme.dark;
+  const dark = theme.dark as IStoreDarkTheme | undefined;
   const darkCss = `html.dark {
+    --color-primary: ${dark?.primaryColor ?? theme.primaryColor} !important;
     --color-bg: ${dark?.backgroundColor ?? "#111827"} !important;
     --color-text: ${dark?.textColor ?? "#F9FAFB"} !important;
     --color-surface: ${dark?.surfaceColor ?? "#1F2937"} !important;

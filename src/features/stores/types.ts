@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface IStoreDarkTheme {
+  primaryColor?: string;
   backgroundColor?: string;
   textColor?: string;
   surfaceColor?: string;

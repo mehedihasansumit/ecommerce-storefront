@@ -20,6 +20,7 @@ const COLOR_PRESETS = {
       borderRadius: "0.5rem",
       layoutStyle: "grid",
       dark: {
+        primaryColor: "#60A5FA",
         backgroundColor: "#0F172A",
         textColor: "#F1F5F9",
         surfaceColor: "#1E293B",
@@ -45,6 +46,7 @@ const COLOR_PRESETS = {
       borderRadius: "0.75rem",
       layoutStyle: "grid",
       dark: {
+        primaryColor: "#A78BFA",
         backgroundColor: "#1F1917",
         textColor: "#F5F5F4",
         surfaceColor: "#292524",
@@ -70,6 +72,7 @@ const COLOR_PRESETS = {
       borderRadius: "0.5rem",
       layoutStyle: "grid",
       dark: {
+        primaryColor: "#34D399",
         backgroundColor: "#051F1A",
         textColor: "#CCFBF1",
         surfaceColor: "#0D433D",
@@ -95,6 +98,7 @@ const COLOR_PRESETS = {
       borderRadius: "0.5rem",
       layoutStyle: "grid",
       dark: {
+        primaryColor: "#FB923C",
         backgroundColor: "#1F0605",
         textColor: "#FEF3C7",
         surfaceColor: "#3F1308",
@@ -120,6 +124,7 @@ const COLOR_PRESETS = {
       borderRadius: "0.5rem",
       layoutStyle: "grid",
       dark: {
+        primaryColor: "#9CA3AF",
         backgroundColor: "#030712",
         textColor: "#F3F4F6",
         surfaceColor: "#111827",
@@ -145,6 +150,7 @@ const COLOR_PRESETS = {
       borderRadius: "0.5rem",
       layoutStyle: "grid",
       dark: {
+        primaryColor: "#F472B6",
         backgroundColor: "#1F0819",
         textColor: "#FFE4E6",
         surfaceColor: "#3D0E2A",

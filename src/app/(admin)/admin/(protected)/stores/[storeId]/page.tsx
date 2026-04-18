@@ -259,9 +259,9 @@ export default async function StoreDetailPage({
             <div className="mt-4 pt-4 border-t border-admin-border flex items-center gap-3 text-xs text-admin-text-subtle">
               <span className="font-medium">Theme:</span>
               <span>{store.theme.fontFamily}</span>
-              <span className="text-gray-300">·</span>
+              <span className="text-admin-text-subtle">·</span>
               <span className="capitalize">{store.theme.layoutStyle} layout</span>
-              <span className="text-gray-300">·</span>
+              <span className="text-admin-text-subtle">·</span>
               <span>
                 {store.theme.borderRadius === "0rem"
                   ? "No radius"
@@ -285,7 +285,7 @@ export default async function StoreDetailPage({
                 <Link
                   key={mod.href}
                   href={mod.href}
-                  className="group flex items-center gap-3 p-4 bg-admin-surface rounded-xl border border-admin-border-md hover:border-gray-300 hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
+                  className="group flex items-center gap-3 p-4 bg-admin-surface rounded-xl border border-admin-border-md hover:border-admin-border-md hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
                 >
                   <div
                     className={`w-9 h-9 rounded-lg ${mod.lightColor} ${mod.textColor} flex items-center justify-center flex-shrink-0 transition-colors group-hover:${mod.color}`}
@@ -293,12 +293,12 @@ export default async function StoreDetailPage({
                     <Icon size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-800 truncate">{mod.label}</p>
+                    <p className="text-sm font-semibold text-admin-text-secondary truncate">{mod.label}</p>
                     <p className="text-xs text-admin-text-subtle truncate">{mod.description}</p>
                   </div>
                   <ArrowRight
                     size={14}
-                    className="text-gray-300 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0"
+                    className="text-admin-text-subtle flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0"
                   />
                 </Link>
               );

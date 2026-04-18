@@ -341,10 +341,10 @@ export default function StoreEditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+      className="bg-admin-surface rounded-2xl border border-admin-border shadow-sm overflow-hidden"
     >
       {/* Tab Bar */}
-      <div className="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
+      <div className="flex border-b border-admin-border bg-admin-surface-raised overflow-x-auto">
         {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -355,8 +355,8 @@ export default function StoreEditForm({
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-px ${
                 isActive
-                  ? "border-gray-900 text-gray-900 bg-white"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                  ? "border-gray-900 text-admin-text-primary bg-admin-surface"
+                  : "border-transparent text-admin-text-muted hover:text-admin-text-secondary hover:bg-admin-chip"
               }`}
             >
               <Icon size={15} />
@@ -480,7 +480,7 @@ export default function StoreEditForm({
                         className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer transition-all select-none ${
                           checked
                             ? "border-gray-900 bg-gray-900 text-white"
-                            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                            : "border-admin-border bg-admin-surface text-admin-text-secondary hover:border-admin-border-md"
                         }`}
                       >
                         <input
@@ -527,7 +527,7 @@ export default function StoreEditForm({
             {/* Right — store summary card */}
             <div className="lg:col-span-2">
               <SectionTitle>Store Summary</SectionTitle>
-              <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-4">
+              <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-4">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base flex-shrink-0"
@@ -536,31 +536,31 @@ export default function StoreEditForm({
                     {(formData.name || store.name).charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-800 leading-tight">
+                    <p className="text-sm font-semibold text-admin-text-secondary leading-tight">
                       {formData.name || "—"}
                     </p>
-                    <p className={`text-xs font-medium mt-0.5 ${formData.isActive ? "text-emerald-600" : "text-gray-400"}`}>
+                    <p className={`text-xs font-medium mt-0.5 ${formData.isActive ? "text-emerald-600" : "text-admin-text-subtle"}`}>
                       {formData.isActive ? "Active" : "Inactive"}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-xs text-gray-500">
+                <div className="space-y-2 text-xs text-admin-text-muted">
                   <div className="flex justify-between">
-                    <span className="font-medium text-gray-400">Domains</span>
-                    <span className="text-right font-mono text-gray-600 max-w-[60%] truncate">
+                    <span className="font-medium text-admin-text-subtle">Domains</span>
+                    <span className="text-right font-mono text-admin-text-secondary max-w-[60%] truncate">
                       {formData.domains || "—"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium text-gray-400">Languages</span>
-                    <span className="text-gray-600">
+                    <span className="font-medium text-admin-text-subtle">Languages</span>
+                    <span className="text-admin-text-secondary">
                       {formData.supportedLanguages.map(l => LANGUAGE_LABELS[l] || l).join(", ") || "—"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium text-gray-400">Default</span>
-                    <span className="text-gray-600">
+                    <span className="font-medium text-admin-text-subtle">Default</span>
+                    <span className="text-admin-text-secondary">
                       {LANGUAGE_LABELS[formData.defaultLanguage] || formData.defaultLanguage}
                     </span>
                   </div>
@@ -623,7 +623,7 @@ export default function StoreEditForm({
 
               <div className="pt-1">
                 <SectionTitle>Dark Mode Colours</SectionTitle>
-                <p className="text-xs text-gray-500 mt-0.5 mb-3">Applied when visitors enable dark mode on your storefront.</p>
+                <p className="text-xs text-admin-text-muted mt-0.5 mb-3">Applied when visitors enable dark mode on your storefront.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <ColorInput
                     label="Dark Background"
@@ -732,7 +732,7 @@ export default function StoreEditForm({
               <SectionTitle>Live Preview</SectionTitle>
               <div className="mt-3 sticky top-6">
                 <div
-                  className="rounded-xl overflow-hidden border border-gray-200 shadow-sm text-xs"
+                  className="rounded-xl overflow-hidden border border-admin-border shadow-sm text-xs"
                   style={{ fontFamily: formData.theme.fontFamily }}
                 >
                   {/* Mock header */}
@@ -784,7 +784,7 @@ export default function StoreEditForm({
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className="aspect-square flex flex-col items-center justify-center gap-1 border border-gray-100 bg-white shadow-sm"
+                        className="aspect-square flex flex-col items-center justify-center gap-1 border border-admin-border bg-admin-surface shadow-sm"
                         style={{
                           borderRadius: formData.theme.borderRadius,
                         }}
@@ -844,7 +844,7 @@ export default function StoreEditForm({
             <div className="flex items-center justify-between">
               <div>
                 <SectionTitle>Hero Banners</SectionTitle>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-admin-text-subtle mt-0.5">
                   Banners rotate on the storefront homepage.
                 </p>
               </div>
@@ -861,7 +861,7 @@ export default function StoreEditForm({
 
             {/* Language tabs */}
             {multiLang && (
-              <div className="flex gap-1 border-b border-gray-200">
+              <div className="flex gap-1 border-b border-admin-border">
                 {formData.supportedLanguages.map((lang) => (
                   <button
                     key={lang}
@@ -869,8 +869,8 @@ export default function StoreEditForm({
                     onClick={() => setActiveLang(lang)}
                     className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
                       activeLang === lang
-                        ? "border-gray-900 text-gray-900"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
+                        ? "border-gray-900 text-admin-text-primary"
+                        : "border-transparent text-admin-text-muted hover:text-admin-text-secondary"
                     }`}
                   >
                     {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
@@ -880,12 +880,12 @@ export default function StoreEditForm({
             )}
 
             {heroBanners.length === 0 ? (
-              <div className="py-12 border-2 border-dashed border-gray-200 rounded-xl text-center">
+              <div className="py-12 border-2 border-dashed border-admin-border rounded-xl text-center">
                 <ImageIcon size={32} className="mx-auto text-gray-300 mb-3" />
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-sm font-medium text-admin-text-muted">
                   No banners yet
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-admin-text-subtle mt-1">
                   Click &ldquo;Add Banner&rdquo; to create your first hero
                   banner.
                 </p>
@@ -899,25 +899,25 @@ export default function StoreEditForm({
                   return (
                     <div
                       key={index}
-                      className="border border-gray-200 rounded-xl overflow-hidden"
+                      className="border border-admin-border rounded-xl overflow-hidden"
                     >
                       {/* Banner header row */}
                       <div
-                        className="flex items-center justify-between px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                        className="flex items-center justify-between px-4 py-3 bg-admin-surface-raised cursor-pointer hover:bg-admin-chip transition-colors"
                         onClick={() =>
                           setExpandedBanner(isExpanded ? null : index)
                         }
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                          <div className="w-7 h-7 rounded-lg bg-gray-200 flex items-center justify-center text-xs font-bold text-admin-text-secondary">
                             {index + 1}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-800">
+                            <p className="text-sm font-medium text-admin-text-secondary">
                               {hasTitle || `Banner ${index + 1}`}
                             </p>
                             {banner.image && (
-                              <p className="text-xs text-gray-400 truncate max-w-xs">
+                              <p className="text-xs text-admin-text-subtle truncate max-w-xs">
                                 {banner.image}
                               </p>
                             )}
@@ -931,21 +931,21 @@ export default function StoreEditForm({
                               handleRemoveBanner(index);
                             }}
                             disabled={loading}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-1.5 text-admin-text-subtle hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
                           {isExpanded ? (
-                            <ChevronUp size={16} className="text-gray-400" />
+                            <ChevronUp size={16} className="text-admin-text-subtle" />
                           ) : (
-                            <ChevronDown size={16} className="text-gray-400" />
+                            <ChevronDown size={16} className="text-admin-text-subtle" />
                           )}
                         </div>
                       </div>
 
                       {/* Banner fields */}
                       {isExpanded && (
-                        <div className="p-4 space-y-3 border-t border-gray-200">
+                        <div className="p-4 space-y-3 border-t border-admin-border">
                           <ImageInput
                             label="Banner image"
                             value={banner.image}
@@ -1045,7 +1045,7 @@ export default function StoreEditForm({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
               <SectionTitle>Contact Details</SectionTitle>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-admin-text-subtle">
                 Displayed in your store footer and used for customer support.
               </p>
               <Field label="Email Address">
@@ -1084,7 +1084,7 @@ export default function StoreEditForm({
             </div>
             {/* Right column — placeholder for map or additional info */}
             <div className="hidden lg:flex items-start justify-center pt-8">
-              <div className="w-full h-48 rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 gap-2">
+              <div className="w-full h-48 rounded-xl bg-admin-surface-raised border-2 border-dashed border-admin-border flex flex-col items-center justify-center text-admin-text-subtle gap-2">
                 <Phone size={24} />
                 <p className="text-sm font-medium">Contact info</p>
                 <p className="text-xs text-center px-4">Fill in your store&apos;s contact details on the left.</p>
@@ -1107,7 +1107,7 @@ export default function StoreEditForm({
                 </div>
                 <div>
                   <SectionTitle>WhatsApp Ordering</SectionTitle>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-admin-text-subtle mt-0.5">
                     Let customers order directly via WhatsApp message.
                   </p>
                 </div>
@@ -1130,9 +1130,9 @@ export default function StoreEditForm({
                     }))
                   }
                   disabled={loading}
-                  className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  className="w-5 h-5 rounded border-admin-border-md text-green-600 focus:ring-green-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-admin-text-secondary">
                   Enable WhatsApp order button on product pages
                 </span>
               </label>
@@ -1190,7 +1190,7 @@ export default function StoreEditForm({
                                 },
                               }))
                             }
-                            className="px-2 py-0.5 text-[11px] font-mono rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50"
+                            className="px-2 py-0.5 text-[11px] font-mono rounded-md bg-admin-chip hover:bg-admin-surface-hover text-admin-text-secondary transition-colors disabled:opacity-50"
                           >
                             {token}
                           </button>
@@ -1237,7 +1237,7 @@ export default function StoreEditForm({
                         placeholder={WHATSAPP_EXAMPLE_TEMPLATE}
                       />
 
-                      <p className="text-[11px] text-gray-400">
+                      <p className="text-[11px] text-admin-text-subtle">
                         Leave blank to use the default bulleted template. The same message is
                         copied to the clipboard when customers tap the Facebook button.
                       </p>
@@ -1257,7 +1257,7 @@ export default function StoreEditForm({
                 </div>
                 <div>
                   <SectionTitle>Facebook Ordering</SectionTitle>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-admin-text-subtle mt-0.5">
                     Let customers reach your Facebook page to place orders.
                   </p>
                 </div>
@@ -1280,9 +1280,9 @@ export default function StoreEditForm({
                     }))
                   }
                   disabled={loading}
-                  className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-5 h-5 rounded border-admin-border-md text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-admin-text-secondary">
                   Enable Facebook order button on product pages
                 </span>
               </label>
@@ -1328,12 +1328,12 @@ export default function StoreEditForm({
               <div className="flex items-center justify-between">
                 <div>
                   <SectionTitle>Search Engine Optimisation</SectionTitle>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-admin-text-subtle mt-0.5">
                     Controls how your store appears in Google search results.
                   </p>
                 </div>
                 {multiLang && (
-                  <div className="flex gap-1 border border-gray-200 rounded-lg p-0.5 bg-gray-50">
+                  <div className="flex gap-1 border border-admin-border rounded-lg p-0.5 bg-admin-surface-raised">
                     {formData.supportedLanguages.map((lang) => (
                       <button
                         key={lang}
@@ -1341,8 +1341,8 @@ export default function StoreEditForm({
                         onClick={() => setActiveLang(lang)}
                         className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                           activeLang === lang
-                            ? "bg-white text-gray-900 shadow-sm"
-                            : "text-gray-500 hover:text-gray-700"
+                            ? "bg-admin-surface text-admin-text-primary shadow-sm"
+                            : "text-admin-text-muted hover:text-admin-text-secondary"
                         }`}
                       >
                         {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
@@ -1364,7 +1364,7 @@ export default function StoreEditForm({
                   placeholder="My Store — Best Products Online"
                   maxLength={70}
                 />
-                <p className="text-xs text-gray-400 mt-1 text-right">
+                <p className="text-xs text-admin-text-subtle mt-1 text-right">
                   {(formData.seo.title[activeLang] ?? "").length}/70
                 </p>
               </Field>
@@ -1381,7 +1381,7 @@ export default function StoreEditForm({
                   placeholder="Discover our wide range of products at the best prices..."
                   maxLength={180}
                 />
-                <p className="text-xs text-gray-400 mt-1 text-right">
+                <p className="text-xs text-admin-text-subtle mt-1 text-right">
                   {(formData.seo.description[activeLang] ?? "").length}/180
                 </p>
               </Field>
@@ -1418,18 +1418,18 @@ export default function StoreEditForm({
             {/* Right — SERP Preview (always visible) */}
             <div className="lg:col-span-2">
               <SectionTitle>Search Preview</SectionTitle>
-              <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-0.5">
+              <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-0.5">
                 <p className="text-[15px] text-blue-700 font-medium leading-snug">
                   {formData.seo.title[activeLang] || (
-                    <span className="text-gray-400 italic">Page title</span>
+                    <span className="text-admin-text-subtle italic">Page title</span>
                   )}
                 </p>
                 <p className="text-xs text-green-700">
                   {store.domains[0] || "mystore.com"}
                 </p>
-                <p className="text-sm text-gray-600 leading-relaxed mt-1">
+                <p className="text-sm text-admin-text-secondary leading-relaxed mt-1">
                   {formData.seo.description[activeLang] || (
-                    <span className="text-gray-400 italic">
+                    <span className="text-admin-text-subtle italic">
                       Meta description will appear here once you fill in the field on the left.
                     </span>
                   )}
@@ -1437,14 +1437,14 @@ export default function StoreEditForm({
               </div>
               {formData.seo.keywords && (
                 <div className="mt-4">
-                  <p className="text-xs font-medium text-gray-500 mb-2">Keywords</p>
+                  <p className="text-xs font-medium text-admin-text-muted mb-2">Keywords</p>
                   <div className="flex flex-wrap gap-1.5">
                     {formData.seo.keywords.split(",").map((kw, i) => {
                       const k = kw.trim();
                       return k ? (
                         <span
                           key={i}
-                          className="px-2 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 text-xs rounded-md"
+                          className="px-2 py-0.5 bg-admin-chip border border-admin-border text-admin-text-secondary text-xs rounded-md"
                         >
                           {k}
                         </span>
@@ -1462,13 +1462,13 @@ export default function StoreEditForm({
             <div className="lg:col-span-3 space-y-5">
               <div>
                 <SectionTitle>Earning &amp; Redemption Rules</SectionTitle>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-admin-text-subtle mt-1">
                   Customers earn points when their reviews are approved and can
                   redeem them into coupons on their account page.
                 </p>
               </div>
 
-              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer select-none">
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-admin-border bg-admin-surface-raised cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={formData.pointsConfig.enabled}
@@ -1482,13 +1482,13 @@ export default function StoreEditForm({
                     }))
                   }
                   disabled={loading}
-                  className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 mt-0.5"
+                  className="w-5 h-5 rounded border-admin-border-md text-admin-text-primary focus:ring-gray-900 mt-0.5"
                 />
                 <div>
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-sm font-medium text-admin-text-secondary">
                     Points earning enabled
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-admin-text-subtle mt-0.5">
                     When off, review approvals don&apos;t award points. Existing
                     balances stay intact and can still be redeemed.
                   </p>
@@ -1576,38 +1576,38 @@ export default function StoreEditForm({
             {/* Preview */}
             <div className="lg:col-span-2">
               <SectionTitle>How it looks</SectionTitle>
-              <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-5 space-y-3">
+              <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center">
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">
+                    <p className="text-sm font-semibold text-admin-text-secondary">
                       {formData.pointsConfig.enabled
                         ? "Earning active"
                         : "Earning paused"}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-admin-text-muted">
                       {formData.pointsConfig.pointsPerReview} pts · per review
                     </p>
                   </div>
                 </div>
-                <div className="border-t border-gray-200" />
-                <div className="text-xs text-gray-600 space-y-1.5">
+                <div className="border-t border-admin-border" />
+                <div className="text-xs text-admin-text-secondary space-y-1.5">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Min redemption</span>
+                    <span className="text-admin-text-subtle">Min redemption</span>
                     <span className="font-medium">
                       {formData.pointsConfig.minRedemptionPoints} pts
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Conversion rate</span>
+                    <span className="text-admin-text-subtle">Conversion rate</span>
                     <span className="font-medium">
                       {formData.pointsConfig.pointsPerBdt} pts = ৳1
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Min redemption value</span>
+                    <span className="text-admin-text-subtle">Min redemption value</span>
                     <span className="font-medium">
                       ৳
                       {Math.floor(
@@ -1624,8 +1624,8 @@ export default function StoreEditForm({
       </div>
 
       {/* Footer — Save Button */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-        <p className="text-xs text-gray-400">
+      <div className="flex items-center justify-between px-6 py-4 border-t border-admin-border bg-admin-surface-raised">
+        <p className="text-xs text-admin-text-subtle">
           Changes apply to all storefront visitors immediately.
         </p>
         <button
@@ -1655,11 +1655,11 @@ export default function StoreEditForm({
 // ── Helpers ────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow placeholder:text-gray-400 disabled:opacity-50 disabled:bg-gray-50";
+  "w-full px-3 py-2 text-sm border border-admin-border-md rounded-lg bg-admin-surface focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow placeholder:text-admin-text-subtle disabled:opacity-50 disabled:bg-admin-surface-raised";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+    <h3 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider">
       {children}
     </h3>
   );
@@ -1678,12 +1678,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-sm font-medium text-admin-text-secondary mb-1.5">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-admin-text-subtle mt-1">{hint}</p>}
     </div>
   );
 }
@@ -1698,7 +1698,7 @@ interface ColorInputProps {
 function ColorInput({ label, value, onChange, disabled }: ColorInputProps) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1.5">
+      <label className="block text-xs font-medium text-admin-text-muted mb-1.5">
         {label}
       </label>
       <div className="flex items-center gap-2">
@@ -1708,7 +1708,7 @@ function ColorInput({ label, value, onChange, disabled }: ColorInputProps) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
-            className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white disabled:opacity-50"
+            className="w-9 h-9 rounded-lg border border-admin-border cursor-pointer p-0.5 bg-admin-surface disabled:opacity-50"
             title={`Pick ${label} colour`}
           />
         </div>
@@ -1716,7 +1716,7 @@ function ColorInput({ label, value, onChange, disabled }: ColorInputProps) {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 min-w-0 px-2 py-2 text-xs border border-gray-200 rounded-lg font-mono bg-white focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:opacity-50"
+          className="flex-1 min-w-0 px-2 py-2 text-xs border border-admin-border rounded-lg font-mono bg-admin-surface focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:opacity-50"
           disabled={disabled}
           placeholder="#000000"
         />

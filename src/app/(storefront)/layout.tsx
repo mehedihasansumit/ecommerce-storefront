@@ -14,7 +14,7 @@ export default function StorefrontLayout({
       <CartProvider>
         <AnnouncementBanner />
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 storefront-grid-bg">{children}</main>
         <Footer />
       </CartProvider>
     </ThemeProvider>

@@ -88,7 +88,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
                   className={
                     i < Math.round(product.averageRating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
+                      : "fill-border-subtle text-border-subtle dark:fill-text-tertiary dark:text-text-tertiary"
                   }
                 />
               ))}

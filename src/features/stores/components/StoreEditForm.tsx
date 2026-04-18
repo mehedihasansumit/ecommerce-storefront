@@ -138,6 +138,7 @@ export default function StoreEditForm({
         footerBg:          store.theme.dark?.footerBg,
         footerText:        store.theme.dark?.footerText,
         linkColor:         store.theme.dark?.linkColor,
+        cardBg:            store.theme.dark?.cardBg,
       },
     },
     isActive: store.isActive,
@@ -687,6 +688,23 @@ export default function StoreEditForm({
                 <p className="text-xs text-admin-text-muted mt-0.5 mb-3">
                   Fine-tune individual UI zones. Leave blank to inherit the primary/secondary colours.
                 </p>
+
+                {/* Card Background */}
+                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Card Background</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
+                  <ColorInput
+                    label="Card BG (Light)"
+                    value={formData.theme.cardBg ?? formData.theme.backgroundColor}
+                    onChange={(v) => handleColorChange("cardBg", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Card BG (Dark)"
+                    value={formData.theme.dark?.cardBg ?? formData.theme.dark?.backgroundColor ?? "#111827"}
+                    onChange={(v) => handleDarkColorChange("cardBg", v)}
+                    disabled={loading}
+                  />
+                </div>
 
                 {/* Newsletter Section */}
                 <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Newsletter Section</p>

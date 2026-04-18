@@ -49,7 +49,12 @@ export function CartItemRow({
           style={{ borderRadius: "var(--border-radius)" }}
         >
           {thumbnail ? (
-            <Image src={thumbnail} alt={productName} fill className="object-cover hover:scale-105 transition-transform duration-300" />
+            <Image
+              src={thumbnail}
+              alt={productName}
+              fill
+              className="object-cover hover:scale-105 transition-transform duration-300"
+            />
           ) : (
             <div className="w-full h-full bg-surface" />
           )}
@@ -61,13 +66,13 @@ export function CartItemRow({
         <div className="flex items-start justify-between gap-2">
           <Link
             href={`/products/${productSlug}`}
-            className="font-medium text-sm sm:text-base hover:underline line-clamp-2 leading-snug"
+            className="font-medium text-sm sm:text-base text-[var(--color-text)] hover:underline line-clamp-2 leading-snug"
           >
             {productName}
           </Link>
           <button
             onClick={() => handleUpdate(0)}
-            className="shrink-0 p-1.5 rounded-lg text-text-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            className="shrink-0 p-1.5 rounded-lg text-text-tertiary hover:text-red-500 hover:bg-red-50/80 transition-colors"
             aria-label="Remove item"
           >
             <Trash2 size={15} />
@@ -79,7 +84,8 @@ export function CartItemRow({
             {variantEntries.map(([key, val]) => (
               <span
                 key={key}
-                className="px-2 py-0.5 text-[11px] rounded-full bg-surface border border-border-subtle text-text-secondary"
+                className="px-2 py-0.5 text-[11px] rounded-full border border-border-subtle text-text-secondary"
+                style={{ backgroundColor: "var(--color-card-bg)" }}
               >
                 {key}: <span className="font-semibold">{val}</span>
               </span>
@@ -90,22 +96,25 @@ export function CartItemRow({
         <div className="flex items-center justify-between gap-3 mt-auto">
           {/* Qty stepper */}
           <div
-            className="flex items-center border border-border-subtle bg-bg shadow-[var(--shadow-xs)]"
-            style={{ borderRadius: "var(--border-radius)" }}
+            className="flex items-center border border-border-subtle overflow-hidden"
+            style={{
+              borderRadius: "var(--border-radius)",
+              backgroundColor: "var(--color-card-bg)",
+            }}
           >
             <button
               onClick={() => handleUpdate(qty - 1)}
-              className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors rounded-l"
+              className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
               aria-label="Decrease quantity"
             >
               <Minus size={13} />
             </button>
-            <span className="px-3 py-1.5 text-sm font-semibold min-w-[2rem] text-center border-x border-border-subtle">
+            <span className="px-3 py-1.5 text-sm font-semibold min-w-[2rem] text-center border-x border-border-subtle text-[var(--color-text)]">
               {qty}
             </span>
             <button
               onClick={() => handleUpdate(qty + 1)}
-              className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors rounded-r"
+              className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
               aria-label="Increase quantity"
             >
               <Plus size={13} />

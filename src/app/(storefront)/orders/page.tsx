@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ShoppingBag, ChevronLeft, ChevronRight, ArrowLeft, Package } from "lucide-react";
+import { ShoppingBag, ChevronLeft, ChevronRight, ArrowLeft, Package, Clock } from "lucide-react";
 import { getCustomerToken } from "@/shared/lib/auth";
 import { getStoreId } from "@/shared/lib/tenant";
 import { OrderService } from "@/features/orders/service";
@@ -36,9 +36,7 @@ export default async function OrdersPage({
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
   const payload = await getCustomerToken();
-  if (!payload || payload.type !== "customer") {
-    redirect("/account/login");
-  }
+  if (!payload || payload.type !== "customer") redirect("/account/login");
 
   const customerPayload = payload as JwtCustomerPayload;
   const storeId = await getStoreId();
@@ -62,7 +60,8 @@ export default async function OrdersPage({
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/account"
-          className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg border border-border-subtle hover:border-primary/30 transition-colors shrink-0"
+          className="w-9 h-9 rounded-lg flex items-center justify-center border border-border-subtle hover:border-[var(--color-primary)]/40 transition-colors shrink-0"
+          style={{ backgroundColor: "var(--color-card-bg)" }}
           aria-label="Back to account"
         >
           <ArrowLeft size={16} className="text-text-secondary" />
@@ -97,28 +96,34 @@ export default async function OrdersPage({
               const moreCount = order.items.length - previewItems.length;
               return (
                 <Card key={order._id} padding="none">
-                  <Link href={`/orders/${order._id}`} className="block hover:bg-surface dark:hover:bg-gray-800 transition-colors rounded-lg overflow-hidden">
+                  <Link
+                    href={`/orders/${order._id}`}
+                    className="block hover:bg-surface transition-colors rounded-lg overflow-hidden"
+                  >
                     <div className="px-5 py-4">
                       {/* Top row */}
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-[var(--color-text)]">
+                            <span className="text-sm font-bold text-[var(--color-text)]">
                               #{order.orderNumber}
                             </span>
                             <Badge tone={badge.tone} size="sm">
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </Badge>
                           </div>
-                          <p className="text-xs text-text-tertiary mt-1">
-                            {new Date(order.createdAt).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                            {" · "}
-                            {t("items", { count: order.items.length })}
-                          </p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Clock size={11} className="text-text-tertiary" />
+                            <p className="text-xs text-text-tertiary">
+                              {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                              {" · "}
+                              {t("items", { count: order.items.length })}
+                            </p>
+                          </div>
                         </div>
                         <div className="shrink-0 text-right">
                           <Price amount={order.total} size="md" />
@@ -128,12 +133,14 @@ export default async function OrdersPage({
                       {/* Item preview */}
                       {previewItems.length > 0 && (
                         <div className="mt-3 pt-3 border-t border-border-subtle flex items-center gap-2">
-                          <Package size={13} className="text-text-tertiary shrink-0" />
-                          <p className="text-xs text-text-secondary truncate">
+                          <Package size={12} className="text-text-tertiary shrink-0" />
+                          <p className="text-xs text-text-secondary truncate flex-1">
                             {previewItems.map((i) => i.productName).join(", ")}
-                            {moreCount > 0 && ` +${moreCount} more`}
+                            {moreCount > 0 && (
+                              <span className="text-text-tertiary"> +{moreCount} more</span>
+                            )}
                           </p>
-                          <ChevronRight size={14} className="text-text-tertiary shrink-0 ml-auto" />
+                          <ChevronRight size={14} className="text-text-tertiary shrink-0" />
                         </div>
                       )}
                     </div>
@@ -156,7 +163,7 @@ export default async function OrdersPage({
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors ${
                     currentPage <= 1
                       ? "opacity-30 pointer-events-none border-border-subtle text-text-tertiary"
-                      : "border-border-subtle text-text-secondary hover:bg-surface dark:hover:bg-gray-800"
+                      : "border-border-subtle text-text-secondary hover:bg-surface"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -184,7 +191,7 @@ export default async function OrdersPage({
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium border transition-colors ${
                           currentPage === item
                             ? "border-transparent text-white"
-                            : "border-border-subtle text-text-secondary hover:bg-surface dark:hover:bg-gray-800"
+                            : "border-border-subtle text-text-secondary hover:bg-surface"
                         }`}
                         style={
                           currentPage === item
@@ -203,7 +210,7 @@ export default async function OrdersPage({
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors ${
                     currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-border-subtle text-text-tertiary"
-                      : "border-border-subtle text-text-secondary hover:bg-surface dark:hover:bg-gray-800"
+                      : "border-border-subtle text-text-secondary hover:bg-surface"
                   }`}
                 >
                   <ChevronRight className="w-4 h-4" />

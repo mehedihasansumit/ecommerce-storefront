@@ -19,6 +19,7 @@ export const DEFAULT_THEME = {
   footerBg: undefined as string | undefined,
   footerText: undefined as string | undefined,
   linkColor: undefined as string | undefined,
+  cardBg: undefined as string | undefined,
   dark: {
     backgroundColor: "#111827",
     textColor: "#F9FAFB",
@@ -36,6 +37,7 @@ export const DEFAULT_THEME = {
     footerBg: undefined as string | undefined,
     footerText: undefined as string | undefined,
     linkColor: undefined as string | undefined,
+    cardBg: undefined as string | undefined,
   },
 };
 

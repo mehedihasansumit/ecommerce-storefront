@@ -113,7 +113,9 @@
     "checkout": "Checkout",
     "removeItem": "Remove",
     "orderSummary": "Order Summary",
-    "items": "{count, plural, one {# item} other {# items}}"
+    "items": "{count, plural, one {# item} other {# items}}",
+    "freeShippingNote": "Free shipping on this order",
+    "secureCheckout": "Secure checkout · SSL encrypted"
   },
   "checkout": {
     "checkout": "Checkout",
@@ -145,7 +147,9 @@
     "phoneInvalid": "Phone number must be exactly 11 digits",
     "addressRequired": "Address is required",
     "cityRequired": "City is required",
-    "submitting": "Placing order..."
+    "submitting": "Placing order...",
+    "secureCheckout": "SSL encrypted · Safe & secure checkout",
+    "deliveryAddress": "Delivery Address"
   },
   "auth": {
     "login": "Login",

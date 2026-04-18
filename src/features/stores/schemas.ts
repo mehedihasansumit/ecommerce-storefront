@@ -30,6 +30,7 @@ export const storeThemeSchema = z.object({
   footerBg: z.string().optional(),
   footerText: z.string().optional(),
   linkColor: z.string().optional(),
+  cardBg: z.string().optional(),
   dark: z.object({
     primaryColor:    z.string().optional(),
     backgroundColor: z.string().optional(),
@@ -48,6 +49,7 @@ export const storeThemeSchema = z.object({
     footerBg:        z.string().optional(),
     footerText:      z.string().optional(),
     linkColor:       z.string().optional(),
+    cardBg:          z.string().optional(),
   }).optional(),
 });
 

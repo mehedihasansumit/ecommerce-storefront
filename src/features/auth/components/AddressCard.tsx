@@ -123,7 +123,7 @@ export function AddressCard({
   }
 
   return (
-    <div className="p-4 rounded-lg border border-border-subtle bg-bg hover:border-[var(--color-primary)]/30 transition-colors">
+    <div className="p-4 rounded-lg border border-border-subtle hover:border-[var(--color-primary)]/30 transition-colors" style={{ backgroundColor: "var(--color-card-bg)" }}>
       {cardContent}
     </div>
   );

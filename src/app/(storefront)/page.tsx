@@ -37,7 +37,7 @@ export default async function HomePage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{tr("storeNotFound")}</h1>
-          <p className="text-gray-500">{tr("noStoreConfigured")}</p>
+          <p className="text-text-secondary">{tr("noStoreConfigured")}</p>
         </div>
       </div>
     );
@@ -55,7 +55,7 @@ export default async function HomePage() {
       <HeroBanner banners={tenant.heroBanners} />
 
       {/* Trust badges */}
-      <section className="border-b border-gray-100 dark:border-primary">
+      <section className="border-b border-border-subtle">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -98,7 +98,7 @@ export default async function HomePage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold truncate">{item.title}</p>
-                  <p className="text-xs text-gray-500 truncate">{item.desc}</p>
+                  <p className="text-xs text-text-secondary truncate">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -111,7 +111,7 @@ export default async function HomePage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="text-center mb-12 md:mb-14">
             <h2 className="text-3xl font-semibold tracking-tight mb-3">{tr("shopByCategory")}</h2>
-            <p className="text-gray-500 max-w-md mx-auto">
+            <p className="text-text-secondary max-w-md mx-auto">
               {tr("shopByCategoryDesc") ||
                 "Explore our curated collections"}
             </p>
@@ -121,7 +121,7 @@ export default async function HomePage() {
               <Link
                 key={category._id}
                 href={`/categories/${category.slug}`}
-                className="group relative overflow-hidden bg-gray-100 aspect-[3/4] flex items-end"
+                className="group relative overflow-hidden bg-surface aspect-3/4 flex items-end"
                 style={{ borderRadius: "var(--border-radius)" }}
               >
                 {category.image && (
@@ -161,7 +161,7 @@ export default async function HomePage() {
                 <h2 className="text-3xl font-semibold tracking-tight mb-2">
                   {tr("newArrivals")}
                 </h2>
-                <p className="text-gray-500">
+                <p className="text-text-secondary">
                   {tr("newArrivalsDesc")}
                 </p>
               </div>
@@ -200,7 +200,7 @@ export default async function HomePage() {
               <h2 className="text-3xl font-semibold tracking-tight mb-2">
                 {tr("featuredProducts")}
               </h2>
-              <p className="text-gray-500">
+              <p className="text-text-secondary">
                 {tr("featuredProductsDesc") ||
                   "Hand-picked products just for you"}
               </p>

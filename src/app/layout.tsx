@@ -70,6 +70,7 @@ export default async function RootLayout({
     "--color-footer-bg": theme.footerBg || theme.headerBg,
     "--color-footer-text": theme.footerText || theme.headerText,
     "--color-link": theme.linkColor || theme.primaryColor,
+    "--color-card-bg": theme.cardBg || theme.backgroundColor,
   };
 
   const dark = theme.dark as IStoreDarkTheme | undefined;
@@ -81,8 +82,8 @@ export default async function RootLayout({
     --color-border-subtle: ${dark?.borderColor ?? "#374151"} !important;
     --color-header-bg: ${dark?.headerBg ?? "#0F172A"} !important;
     --color-header-text: ${dark?.headerText ?? "#F8FAFC"} !important;
-    --color-text-secondary: #9CA3AF !important;
-    --color-text-tertiary: #6B7280 !important;
+    --color-text-secondary: #E5E7EB !important;
+    --color-text-tertiary: #D1D5DB !important;
     --color-newsletter-bg: ${dark?.newsletterBg ?? dark?.primaryColor ?? theme.primaryColor} !important;
     --color-newsletter-text: ${dark?.newsletterText ?? "#FFFFFF"} !important;
     --color-newsletter-btn-bg: ${dark?.newsletterBtnBg ?? "#1F2937"} !important;
@@ -93,6 +94,7 @@ export default async function RootLayout({
     --color-footer-bg: ${dark?.footerBg ?? dark?.headerBg ?? "#0F172A"} !important;
     --color-footer-text: ${dark?.footerText ?? dark?.headerText ?? "#F8FAFC"} !important;
     --color-link: ${dark?.linkColor ?? dark?.primaryColor ?? theme.primaryColor} !important;
+    --color-card-bg: ${dark?.cardBg ?? dark?.backgroundColor ?? "#111827"} !important;
   }`;
 
   const antiFlashScript = `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');})()`;

@@ -19,6 +19,7 @@ export interface IStoreDarkTheme {
   footerBg?: string;
   footerText?: string;
   linkColor?: string;
+  cardBg?: string;
 }
 
 export interface IStoreTheme {
@@ -42,6 +43,7 @@ export interface IStoreTheme {
   footerBg?: string;
   footerText?: string;
   linkColor?: string;
+  cardBg?: string;
   dark?: IStoreDarkTheme;
 }
 

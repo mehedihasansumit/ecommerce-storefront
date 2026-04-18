@@ -31,8 +31,8 @@ export function ProductCard({ product }: { product: IProduct }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative block overflow-hidden bg-bg border border-border-subtle transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
-      style={{ borderRadius: "var(--border-radius)" }}
+      className="group relative block overflow-hidden border border-border-subtle transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
+      style={{ backgroundColor: "var(--color-card-bg)", borderRadius: "var(--border-radius)" }}
     >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-surface">
@@ -46,7 +46,7 @@ export function ProductCard({ product }: { product: IProduct }) {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-text-tertiary">
             <Eye size={32} />
           </div>
         )}
@@ -128,7 +128,7 @@ export function ProductCard({ product }: { product: IProduct }) {
                   className={
                     i < Math.round(product.averageRating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
+                      : "fill-border-subtle text-border-subtle dark:fill-text-tertiary dark:text-text-tertiary"
                   }
                 />
               ))}

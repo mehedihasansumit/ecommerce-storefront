@@ -113,15 +113,15 @@ export function NotificationBell() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-85 bg-bg border border-border-subtle shadow-lg z-50 animate-scale-in overflow-hidden"
-          style={{ borderRadius: "calc(var(--border-radius) * 1.5)" }}
+          className="absolute right-0 top-full mt-2 w-85 border border-border-subtle shadow-lg z-50 animate-scale-in overflow-hidden"
+          style={{ backgroundColor: "var(--color-card-bg)", borderRadius: "calc(var(--border-radius) * 1.5)" }}
           role="dialog"
           aria-label="Notifications panel"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-border-subtle">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[var(--color-text)]">Notifications</span>
+              <span className="text-sm font-bold text-text">Notifications</span>
               {unreadCount > 0 && (
                 <span
                   className="px-1.5 py-0.5 text-[10px] font-bold rounded-full text-white leading-none"
@@ -191,7 +191,7 @@ export function NotificationBell() {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--color-text)] leading-snug">
+                    <p className="text-sm font-semibold text-text leading-snug">
                       {n.title}
                     </p>
                     <p className="text-xs text-text-secondary mt-0.5 line-clamp-2 leading-relaxed">

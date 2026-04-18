@@ -33,6 +33,7 @@
   --color-footer-bg: #111827;
   --color-footer-text: #FFFFFF;
   --color-link: #3B82F6;
+  --color-card-bg: #FFFFFF;
 
   /* Admin panel semantic tokens */
   --admin-bg:               #F9FAFB;
@@ -68,11 +69,12 @@ html.dark {
   --color-text:             #F9FAFB;
   --color-surface:          #1F2937;
   --color-border-subtle:    #374151;
-  --color-text-secondary:   #9CA3AF;
-  --color-text-tertiary:    #6B7280;
+  --color-text-secondary:   #E5E7EB;
+  --color-text-tertiary:    #D1D5DB;
   --color-newsletter-btn-bg: #1F2937;
   --color-sale-badge-bg:    #DC2626;
   --color-footer-bg:        #0F172A;
+  --color-card-bg:          #111827;
 }
 
 @theme inline {
@@ -121,6 +123,21 @@ body {
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Storefront grid background */
+.storefront-grid-bg {
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(to right,  rgba(0, 0, 0, 0.045) 0.5px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.045) 0.5px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+html.dark .storefront-grid-bg {
+  background-image:
+    linear-gradient(to right,  rgba(255, 255, 255, 0.02) 0.5px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 0.5px, transparent 1px);
 }
 
 a {

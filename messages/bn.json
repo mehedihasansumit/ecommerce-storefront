@@ -113,7 +113,9 @@
     "checkout": "চেক আউট",
     "removeItem": "অপসারণ করুন",
     "orderSummary": "অ্ডার সারসংক্ষেপ",
-    "items": "{count, plural, one {# টি পণ্য} other {# টি পণ্য}}"
+    "items": "{count, plural, one {# টি পণ্য} other {# টি পণ্য}}",
+    "freeShippingNote": "এই অর্ডারে বিনামূল্যে শিপিং",
+    "secureCheckout": "নিরাপদ চেকআউট · SSL এনক্রিপ্টেড"
   },
   "checkout": {
     "checkout": "চেকআউট",
@@ -145,7 +147,9 @@
     "phoneInvalid": "ফোন নম্বর অবশ্যই ১১ ডিজিটের হতে হবে",
     "addressRequired": "ঠিকানা প্রয়োজন",
     "cityRequired": "শহরের নাম প্রয়োজন",
-    "submitting": "অর্ডার প্রক্রিয়াধীন..."
+    "submitting": "অর্ডার প্রক্রিয়াধীন...",
+    "secureCheckout": "SSL এনক্রিপ্টেড · নিরাপদ চেকআউট",
+    "deliveryAddress": "ডেলিভারি ঠিকানা"
   },
   "auth": {
     "login": "লগইন",

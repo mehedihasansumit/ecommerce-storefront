@@ -235,41 +235,44 @@ export function Header() {
                       </span>
                     </button>
                     {userMenuOpen && (
-                      <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-[var(--shadow-lg)] border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-50 animate-scale-in">
-                        <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-800">
+                      <div
+                        className="absolute right-0 top-full mt-2 w-52 border border-border-subtle shadow-lg rounded-xl py-2 z-50 animate-scale-in"
+                        style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-text)" }}
+                      >
+                        <div className="px-4 py-2.5 border-b border-border-subtle">
                           {userName && (
-                            <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{userName}</p>
+                            <p className="text-sm font-medium text-[var(--color-text)] truncate">{userName}</p>
                           )}
-                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{userEmail}</p>
+                          <p className="text-xs text-text-tertiary truncate">{userEmail}</p>
                         </div>
                         <Link
                           href="/account"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
                         >
-                          <User size={15} className="text-gray-400" />
+                          <User size={15} className="text-text-tertiary" />
                           {t("myAccount")}
                         </Link>
                         <Link
                           href="/orders"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
                         >
-                          <Package size={15} className="text-gray-400" />
+                          <Package size={15} className="text-text-tertiary" />
                           {t("myOrders") || "My Orders"}
                         </Link>
                         <Link
                           href="/account/addresses"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
                         >
-                          <MapPin size={15} className="text-gray-400" />
+                          <MapPin size={15} className="text-text-tertiary" />
                           {t("addresses") || "Addresses"}
                         </Link>
-                        <hr className="my-1 border-gray-100 dark:border-gray-800" />
+                        <hr className="my-1 border-border-subtle" />
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                         >
                           <LogOut size={15} />
                           {t("logout") || "Logout"}

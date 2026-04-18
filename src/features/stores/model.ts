@@ -36,6 +36,7 @@ const StoreSchema = new Schema<IStoreDocument>(
       footerBg:          { type: String },
       footerText:        { type: String },
       linkColor:         { type: String },
+      cardBg:            { type: String },
       dark: {
         primaryColor:    { type: String },
         backgroundColor: { type: String, default: "#111827" },
@@ -54,6 +55,7 @@ const StoreSchema = new Schema<IStoreDocument>(
         footerBg:        { type: String },
         footerText:      { type: String },
         linkColor:       { type: String },
+        cardBg:          { type: String },
       },
     },
 

@@ -114,7 +114,7 @@ html.dark {
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* html[lang="bn"] {
@@ -122,7 +122,7 @@ html {
 } */
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
@@ -228,6 +228,15 @@ a {
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s var(--ease-out-expo) both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.32s var(--ease-out-expo) both;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
 
 .animate-scale-in {

@@ -3,7 +3,18 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, LayoutGrid, Search, ShoppingCart, User, X } from "lucide-react";
+import {
+  Home,
+  LayoutGrid,
+  Search,
+  ShoppingCart,
+  User,
+  X,
+  Package,
+  MapPin,
+  LogOut,
+  ChevronRight,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/shared/context/CartContext";
 
@@ -14,13 +25,18 @@ export function MobileBottomNav() {
   const { itemCount } = useCart();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/auth/customer")
       .then((r) => r.json())
-      .then((data) => setUserLoggedIn(!!data.user?.email))
+      .then((data) => {
+        setUserEmail(data.user?.email ?? null);
+        setUserName(data.user?.name ?? null);
+      })
       .catch(() => {});
   }, [pathname]);
 
@@ -33,11 +49,15 @@ export function MobileBottomNav() {
   useEffect(() => {
     setSearchOpen(false);
     setSearchQuery("");
+    setAccountSheetOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSearchOpen(false);
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setAccountSheetOpen(false);
+      }
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
@@ -51,6 +71,26 @@ export function MobileBottomNav() {
       setSearchQuery("");
     }
   }
+
+  async function handleLogout() {
+    setAccountSheetOpen(false);
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUserEmail(null);
+    setUserName(null);
+    router.push("/");
+    router.refresh();
+  }
+
+  function getInitials(name: string) {
+    return name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .join("");
+  }
+
+  const userLoggedIn = !!userEmail;
 
   const tabs = [
     {
@@ -85,14 +125,20 @@ export function MobileBottomNav() {
       id: "account",
       icon: User,
       label: userLoggedIn ? t("account") : t("login"),
-      href: userLoggedIn ? "/account" : "/account/login",
-      isActive: pathname.startsWith("/account"),
+      href: userLoggedIn ? null : "/account/login",
+      isActive: pathname.startsWith("/account") || accountSheetOpen,
     },
+  ];
+
+  const accountMenuItems = [
+    { href: "/account",           icon: User,    label: t("myAccount") },
+    { href: "/orders",            icon: Package, label: t("myOrders")  },
+    { href: "/account/addresses", icon: MapPin,  label: t("addresses") },
   ];
 
   return (
     <>
-      {/* Search bar — slides up above nav */}
+      {/* Search bar */}
       {searchOpen && (
         <div
           className="fixed inset-x-0 z-[49] animate-slide-down md:hidden"
@@ -134,6 +180,83 @@ export function MobileBottomNav() {
         </div>
       )}
 
+      {/* Account bottom sheet */}
+      {accountSheetOpen && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 animate-fade-in"
+            onClick={() => setAccountSheetOpen(false)}
+          />
+          {/* Sheet */}
+          <div
+            className="absolute inset-x-0 bottom-0 rounded-t-2xl animate-slide-up pb-[calc(env(safe-area-inset-bottom)+4rem)]"
+            style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-text)" }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-border-subtle" />
+            </div>
+
+            {/* User info */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 select-none"
+                style={{ backgroundColor: "var(--color-primary)" }}
+              >
+                {userName ? getInitials(userName) : <User size={18} />}
+              </div>
+              <div className="min-w-0">
+                {userName && (
+                  <p className="font-semibold text-sm text-[var(--color-text)] truncate">{userName}</p>
+                )}
+                <p className="text-xs text-text-tertiary truncate">{userEmail}</p>
+              </div>
+              <button
+                onClick={() => setAccountSheetOpen(false)}
+                className="ml-auto p-1.5 rounded-lg hover:bg-surface transition-colors shrink-0"
+                aria-label="Close"
+              >
+                <X size={16} className="text-text-tertiary" />
+              </button>
+            </div>
+
+            {/* Menu items */}
+            <nav className="py-2">
+              {accountMenuItems.map(({ href, icon: Icon, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface transition-colors"
+                  onClick={() => setAccountSheetOpen(false)}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 12%, transparent)" }}
+                  >
+                    <Icon size={16} style={{ color: "var(--color-primary)" }} />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--color-text)]">{label}</span>
+                  <ChevronRight size={15} className="ml-auto text-text-tertiary" />
+                </Link>
+              ))}
+
+              <hr className="my-1 border-border-subtle mx-5" />
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-5 py-3.5 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-red-50 dark:bg-red-950/30">
+                  <LogOut size={16} className="text-red-500" />
+                </div>
+                <span className="text-sm font-medium text-red-500">{t("logout")}</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
+
       {/* Bottom nav bar */}
       <nav
         className="fixed inset-x-0 bottom-0 z-50 md:hidden border-t border-white/15"
@@ -159,7 +282,9 @@ export function MobileBottomNav() {
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] font-medium leading-none mt-1 w-full text-center truncate px-1">{tab.label}</span>
+                <span className="text-[10px] font-medium leading-none mt-1 w-full text-center truncate px-1">
+                  {tab.label}
+                </span>
               </>
             );
 
@@ -170,7 +295,8 @@ export function MobileBottomNav() {
               opacity: tab.isActive ? 1 : 0.55,
             };
 
-            if (tab.href === null) {
+            // Search tab
+            if (tab.id === "search") {
               return (
                 <button
                   key={tab.id}
@@ -185,8 +311,27 @@ export function MobileBottomNav() {
               );
             }
 
+            // Account tab — sheet when logged in, navigate when not
+            if (tab.id === "account") {
+              if (userLoggedIn) {
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={baseClass}
+                    style={style}
+                    onClick={() => setAccountSheetOpen((v) => !v)}
+                    aria-label="Account"
+                  >
+                    {content}
+                  </button>
+                );
+              }
+            }
+
+            // Regular nav link
             return (
-              <Link key={tab.id} href={tab.href} className={baseClass} style={style}>
+              <Link key={tab.id} href={tab.href!} className={baseClass} style={style}>
                 {content}
               </Link>
             );

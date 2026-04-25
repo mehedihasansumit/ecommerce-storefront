@@ -5,9 +5,6 @@ import {
   ShoppingCart,
   User,
   Search,
-  Menu,
-  X,
-  ChevronRight,
   LogOut,
   Package,
   MapPin,
@@ -28,7 +25,6 @@ export function Header() {
   const { itemCount } = useCart();
   const router = useRouter();
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,7 +47,6 @@ export function Header() {
       .catch(() => {});
   }, [pathname]);
 
-  // Close user menu on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -83,19 +78,14 @@ export function Header() {
     }
   }, [searchOpen]);
 
-  // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
     setSearchOpen(false);
+    setSearchQuery("");
   }, [pathname]);
 
-  // Close mobile menu on escape
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setMobileMenuOpen(false);
-        setSearchOpen(false);
-      }
+      if (e.key === "Escape") setSearchOpen(false);
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
@@ -111,337 +101,213 @@ export function Header() {
   };
 
   return (
-    <>
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled ? "glass shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : ""
-        }`}
-        style={{
-          backgroundColor: scrolled
-            ? "color-mix(in srgb, var(--color-header-bg) 85%, transparent)"
-            : "var(--color-header-bg)",
-          color: "var(--color-header-text)",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[4.5rem]">
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 shrink-0 min-w-0 group"
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled ? "glass shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : ""
+      }`}
+      style={{
+        backgroundColor: scrolled
+          ? "color-mix(in srgb, var(--color-header-bg) 85%, transparent)"
+          : "var(--color-header-bg)",
+        color: "var(--color-header-text)",
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-[4rem] md:h-[4.5rem]">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 shrink-0 min-w-0 group"
+          >
+            {tenant?.logo ? (
+              <StoreImage
+                src={tenant.logo}
+                alt={tenant.name}
+                width={160}
+                height={40}
+                priority
+                sizes="160px"
+                className="h-7 md:h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
+              />
+            ) : (
+              <span className="text-base sm:text-xl font-bold tracking-tight truncate max-w-[140px] sm:max-w-none">
+                {tenant?.name || t("storeName")}
+              </span>
+            )}
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-0.5">
+            {[
+              { href: "/", label: t("home") },
+              { href: "/products", label: t("products") },
+            ].map((link) => {
+              const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative px-4 py-2 font-medium transition-all duration-200 rounded-md ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"} ${isActive ? "opacity-100" : "opacity-55 hover:opacity-90 hover:bg-white/[0.07]"}`}
+                >
+                  {link.label}
+                  <span
+                    className="absolute bottom-1 left-3 right-3 h-[2px] rounded-full"
+                    style={{
+                      backgroundColor: "var(--color-accent)",
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                      transformOrigin: "center",
+                      transition: "opacity 200ms, transform 200ms cubic-bezier(0.16,1,0.3,1)",
+                    }}
+                  />
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher />
+
+            <ThemeToggle variant="header" />
+
+            {/* Notifications (logged in only) */}
+            {userEmail && <NotificationBell />}
+
+            {/* Search — desktop only */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="hidden md:flex p-2.5 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Search"
             >
-              {tenant?.logo ? (
-                <StoreImage
-                  src={tenant.logo}
-                  alt={tenant.name}
-                  width={160}
-                  height={40}
-                  priority
-                  sizes="160px"
-                  className="h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
-                />
-              ) : (
-                <span className="text-lg sm:text-xl font-bold tracking-tight truncate max-w-[140px] sm:max-w-none">
-                  {tenant?.name || t("storeName")}
+              <Search size={18} />
+            </button>
+
+            {/* Cart — desktop only */}
+            <Link
+              href="/cart"
+              className="hidden md:flex p-2.5 rounded-lg hover:bg-white/10 transition-colors relative"
+            >
+              <ShoppingCart size={18} />
+              {itemCount > 0 && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center leading-none ring-2"
+                  style={{
+                    backgroundColor: "var(--color-accent)",
+                    ["--tw-ring-color" as string]: "var(--color-header-bg)",
+                  }}
+                >
+                  {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-0.5">
-              {[
-                { href: "/", label: t("home") },
-                { href: "/products", label: t("products") },
-              ].map((link) => {
-                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`relative px-4 py-2 font-medium transition-all duration-200 rounded-md ${isBn ? "text-[15px]" : "text-[13px] uppercase tracking-widest"} ${isActive ? "opacity-100" : "opacity-55 hover:opacity-90 hover:bg-white/[0.07]"}`}
-                  >
-                    {link.label}
-                    <span
-                      className="absolute bottom-1 left-3 right-3 h-[2px] rounded-full"
-                      style={{
-                        backgroundColor: "var(--color-accent)",
-                        opacity: isActive ? 1 : 0,
-                        transform: isActive ? "scaleX(1)" : "scaleX(0)",
-                        transformOrigin: "center",
-                        transition: "opacity 200ms, transform 200ms cubic-bezier(0.16,1,0.3,1)",
-                      }}
-                    />
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Actions */}
-            <div className="flex items-center gap-1.5">
-              <div className="hidden sm:block">
-                <LanguageSwitcher />
-              </div>
-
-              <ThemeToggle variant="header" />
-
-              {/* Search toggle */}
-              <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2.5 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="Search"
-              >
-                <Search size={18} />
-              </button>
-
-              {/* Notifications (logged in only) */}
-              {userEmail && <NotificationBell />}
-
-              {/* Cart */}
-              <Link
-                href="/cart"
-                className="p-2.5 rounded-lg hover:bg-white/10 transition-colors relative"
-              >
-                <ShoppingCart size={18} />
-                {itemCount > 0 && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center leading-none ring-2"
-                    style={{
-                      backgroundColor: "var(--color-accent)",
-                      ["--tw-ring-color" as string]: "var(--color-header-bg)",
-                    }}
-                  >
-                    {itemCount > 99 ? "99+" : itemCount}
-                  </span>
-                )}
-              </Link>
-
-              {/* Account */}
-              <div className="hidden sm:block relative" ref={userMenuRef}>
-                {userEmail ? (
-                  <>
-                    <button
-                      onClick={() => setUserMenuOpen((v) => !v)}
-                      className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-                      aria-label="Account menu"
-                      aria-expanded={userMenuOpen}
-                    >
-                      <span
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white select-none"
-                        style={{ backgroundColor: "var(--color-primary)" }}
-                      >
-                        {userName
-                          ? userName.charAt(0).toUpperCase()
-                          : userEmail.charAt(0).toUpperCase()}
-                      </span>
-                    </button>
-                    {userMenuOpen && (
-                      <div
-                        className="absolute right-0 top-full mt-2 w-52 border border-border-subtle shadow-lg rounded-xl py-2 z-50 animate-scale-in"
-                        style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-text)" }}
-                      >
-                        <div className="px-4 py-2.5 border-b border-border-subtle">
-                          {userName && (
-                            <p className="text-sm font-medium text-[var(--color-text)] truncate">{userName}</p>
-                          )}
-                          <p className="text-xs text-text-tertiary truncate">{userEmail}</p>
-                        </div>
-                        <Link
-                          href="/account"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
-                        >
-                          <User size={15} className="text-text-tertiary" />
-                          {t("myAccount")}
-                        </Link>
-                        <Link
-                          href="/orders"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
-                        >
-                          <Package size={15} className="text-text-tertiary" />
-                          {t("myOrders") || "My Orders"}
-                        </Link>
-                        <Link
-                          href="/account/addresses"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
-                        >
-                          <MapPin size={15} className="text-text-tertiary" />
-                          {t("addresses") || "Addresses"}
-                        </Link>
-                        <hr className="my-1 border-border-subtle" />
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                        >
-                          <LogOut size={15} />
-                          {t("logout") || "Logout"}
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    href="/account/login"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
-                  >
-                    <User size={18} />
-                    <span className="hidden lg:inline">{t("login") || "Login"}</span>
-                  </Link>
-                )}
-              </div>
-
-              {/* Mobile menu button */}
-              <button
-                className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Menu"
-                aria-expanded={mobileMenuOpen}
-              >
-                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Search bar dropdown */}
-          {searchOpen && (
-            <div className="pb-4 animate-slide-down">
-              <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-                <Search
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none"
-                />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t("searchPlaceholder") || "Search products..."}
-                  className="w-full pl-10 pr-16 py-2.5 rounded-xl bg-white/10 border border-white/15 text-inherit placeholder:text-white/40 focus:outline-none focus:bg-white/14 focus:border-white/35 transition-all text-sm"
-                />
-                {searchQuery && (
-                  <button
-                    type="submit"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium px-2.5 py-1 rounded-md bg-white/15 hover:bg-white/25 transition-colors"
-                  >
-                    Go
-                  </button>
-                )}
-              </form>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Mobile Navigation - Slide-in overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 animate-fade-in"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          {/* Panel */}
-          <nav
-            className="absolute right-0 top-0 h-full w-80 shadow-2xl animate-slide-in-right flex flex-col"
-            style={{ backgroundColor: "var(--color-header-bg)", color: "var(--color-header-text)" }}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <span className="font-semibold text-lg">
-                {tenant?.name || t("storeName")}
-              </span>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="flex-1 py-4 flex flex-col overflow-y-auto">
-              {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="mx-4 mb-3 relative">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t("searchPlaceholder") || "Search products..."}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/12 text-inherit placeholder:text-white/40 focus:outline-none focus:bg-white/14 focus:border-white/30 transition-all text-sm"
-                />
-              </form>
-              {[
-                { href: "/", label: t("home") },
-                { href: "/products", label: t("products") },
-                { href: "/cart", label: t("cart") || "Cart" },
-              ].map((link) => {
-                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`flex items-center justify-between px-6 py-4 transition-colors ${isActive ? "bg-white/15 font-semibold" : "hover:bg-white/10 font-medium"}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span>{link.label}</span>
-                    <ChevronRight size={16} className={isActive ? "opacity-80" : "opacity-50"} />
-                  </Link>
-                );
-              })}
+            {/* Account — desktop only */}
+            <div className="hidden sm:block relative" ref={userMenuRef}>
               {userEmail ? (
                 <>
-                  <div className="px-6 py-3 border-b border-white/10">
-                    <p className="text-sm font-medium truncate">{userName || userEmail}</p>
-                    {userName && <p className="text-xs opacity-60 truncate">{userEmail}</p>}
-                  </div>
-                  <Link
-                    href="/account"
-                    className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="font-medium">{t("myAccount")}</span>
-                    <ChevronRight size={16} className="opacity-50" />
-                  </Link>
-                  <Link
-                    href="/orders"
-                    className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="font-medium">{t("myOrders") || "Orders"}</span>
-                    <ChevronRight size={16} className="opacity-50" />
-                  </Link>
-                  <Link
-                    href="/account/addresses"
-                    className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="font-medium">{t("addresses") || "Addresses"}</span>
-                    <ChevronRight size={16} className="opacity-50" />
-                  </Link>
                   <button
-                    onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
-                    className="flex items-center gap-2 px-6 py-3 text-red-400 hover:bg-white/10 transition-colors text-left"
+                    onClick={() => setUserMenuOpen((v) => !v)}
+                    className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                    aria-label="Account menu"
+                    aria-expanded={userMenuOpen}
                   >
-                    <LogOut size={16} />
-                    <span className="font-medium">{t("logout") || "Logout"}</span>
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white select-none"
+                      style={{ backgroundColor: "var(--color-primary)" }}
+                    >
+                      {userName
+                        ? userName.charAt(0).toUpperCase()
+                        : userEmail.charAt(0).toUpperCase()}
+                    </span>
                   </button>
+                  {userMenuOpen && (
+                    <div
+                      className="absolute right-0 top-full mt-2 w-52 border border-border-subtle shadow-lg rounded-xl py-2 z-50 animate-scale-in"
+                      style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-text)" }}
+                    >
+                      <div className="px-4 py-2.5 border-b border-border-subtle">
+                        {userName && (
+                          <p className="text-sm font-medium text-[var(--color-text)] truncate">{userName}</p>
+                        )}
+                        <p className="text-xs text-text-tertiary truncate">{userEmail}</p>
+                      </div>
+                      <Link
+                        href="/account"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
+                      >
+                        <User size={15} className="text-text-tertiary" />
+                        {t("myAccount")}
+                      </Link>
+                      <Link
+                        href="/orders"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
+                      >
+                        <Package size={15} className="text-text-tertiary" />
+                        {t("myOrders") || "My Orders"}
+                      </Link>
+                      <Link
+                        href="/account/addresses"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
+                      >
+                        <MapPin size={15} className="text-text-tertiary" />
+                        {t("addresses") || "Addresses"}
+                      </Link>
+                      <hr className="my-1 border-border-subtle" />
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      >
+                        <LogOut size={15} />
+                        {t("logout") || "Logout"}
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <Link
                   href="/account/login"
-                  className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
                 >
-                  <span className="font-medium">{t("login") || "Login"}</span>
-                  <ChevronRight size={16} className="opacity-50" />
+                  <User size={18} />
+                  <span className="hidden lg:inline">{t("login") || "Login"}</span>
                 </Link>
               )}
-              <div className="px-6 pt-4 mt-auto border-t border-white/10">
-                <LanguageSwitcher />
-              </div>
             </div>
-          </nav>
+          </div>
         </div>
-      )}
-    </>
+
+        {/* Search bar dropdown — desktop only */}
+        {searchOpen && (
+          <div className="hidden md:block pb-4 animate-slide-down">
+            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
+              <Search
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none"
+              />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("searchPlaceholder") || "Search products..."}
+                className="w-full pl-10 pr-16 py-2.5 rounded-xl bg-white/10 border border-white/15 text-inherit placeholder:text-white/40 focus:outline-none focus:bg-white/14 focus:border-white/35 transition-all text-sm"
+              />
+              {searchQuery && (
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium px-2.5 py-1 rounded-md bg-white/15 hover:bg-white/25 transition-colors"
+                >
+                  Go
+                </button>
+              )}
+            </form>
+          </div>
+        )}
+      </div>
+    </header>
   );
 }

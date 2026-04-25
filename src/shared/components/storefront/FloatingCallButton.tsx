@@ -22,9 +22,9 @@ export function FloatingCallButton() {
   const buttonClass =
     "fixed right-4 z-40 flex items-center justify-center gap-2 rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 select-none glass md:bottom-6 bottom-[4.5rem]";
   const buttonStyle = {
-    backgroundColor: "color-mix(in srgb, var(--color-primary))",
-    border: "1px solid color-mix(in srgb, var(--color-primary))",
-    color: "var(--color-primary)",
+    backgroundColor: "var(--color-primary)",
+    border: "1px solid var(--color-primary)",
+    color: "var(--color-header-text, #fff)",
     padding: "0.75rem 1rem",
   };
 

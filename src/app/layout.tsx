@@ -76,6 +76,8 @@ export default async function RootLayout({
   const dark = theme.dark as IStoreDarkTheme | undefined;
   const darkCss = `html.dark {
     --color-primary: ${dark?.primaryColor ?? theme.primaryColor} !important;
+    --color-secondary: ${dark?.secondaryColor ?? theme.secondaryColor} !important;
+    --color-accent: ${dark?.accentColor ?? theme.accentColor} !important;
     --color-bg: ${dark?.backgroundColor ?? "#111827"} !important;
     --color-text: ${dark?.textColor ?? "#F9FAFB"} !important;
     --color-surface: ${dark?.surfaceColor ?? "#1F2937"} !important;

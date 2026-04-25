@@ -125,15 +125,21 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
           <div>
             {displayStock > 0 ? (
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-sm text-green-600 font-medium">
+                <span
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: "var(--color-success)" }}
+                />
+                <span className="text-sm font-medium" style={{ color: "var(--color-success)" }}>
                   {tr("inStock", { available: displayStock })}
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-500 rounded-full" />
-                <span className="text-sm text-red-600 font-medium">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: "var(--color-error)" }}
+                />
+                <span className="text-sm font-medium" style={{ color: "var(--color-error)" }}>
                   {tr("outOfStock")}
                 </span>
               </div>

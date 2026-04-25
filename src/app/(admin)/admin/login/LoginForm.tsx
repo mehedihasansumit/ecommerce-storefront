@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle } from "lucide-react";
+import { Alert, Button, Field, Input } from "@/shared/components/ui";
 
 export function LoginForm() {
   const router = useRouter();
@@ -38,45 +38,32 @@ export function LoginForm() {
 
   return (
     <>
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
-          <AlertCircle size={18} />
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="error" className="mb-4">{error}</Alert>}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
+        <Field label="Email" required>
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:border-admin-text-primary"
             placeholder="admin@example.com"
             required
             disabled={loading}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input
+        </Field>
+        <Field label="Password" required>
+          <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-admin-border-md rounded-lg focus:outline-none focus:border-admin-text-primary"
             placeholder="••••••••"
             required
             disabled={loading}
           />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+        </Field>
+        <Button type="submit" variant="primary" fullWidth loading={loading}>
+          Login
+        </Button>
       </form>
     </>
   );

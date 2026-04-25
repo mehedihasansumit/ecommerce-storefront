@@ -33,6 +33,8 @@ export const storeThemeSchema = z.object({
   cardBg: z.string().optional(),
   dark: z.object({
     primaryColor:    z.string().optional(),
+    secondaryColor:  z.string().optional(),
+    accentColor:     z.string().optional(),
     backgroundColor: z.string().optional(),
     textColor:       z.string().optional(),
     surfaceColor:    z.string().optional(),

@@ -226,15 +226,35 @@ export default async function StoreDetailPage({
             <div className="flex items-center gap-3 flex-shrink-0">
               {/* Theme palette */}
               {canEditStore && (
-                <div className="hidden sm:flex items-center gap-1">
-                  {themeColors.map((color, i) => (
-                    <div
-                      key={i}
-                      className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
+                <div className="hidden sm:flex flex-col items-end gap-1.5">
+                  <div className="flex items-center gap-1">
+                    {themeColors.map((color, i) => (
+                      <div
+                        key={i}
+                        className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                  {store.theme.dark && (
+                    <div className="flex items-center gap-1">
+                      {[
+                        store.theme.dark.backgroundColor,
+                        store.theme.dark.primaryColor ?? store.theme.primaryColor,
+                        store.theme.dark.surfaceColor,
+                        store.theme.dark.headerBg,
+                      ].filter(Boolean).map((color, i) => (
+                        <div
+                          key={i}
+                          className="w-4 h-4 rounded-full border-2 border-white/60 shadow-sm opacity-80"
+                          style={{ backgroundColor: color as string }}
+                          title={`dark: ${color}`}
+                        />
+                      ))}
+                      <span className="text-[10px] text-admin-text-subtle ml-0.5">dark</span>
+                    </div>
+                  )}
                 </div>
               )}
 

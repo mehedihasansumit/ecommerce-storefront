@@ -3,6 +3,8 @@ import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface IStoreDarkTheme {
   primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
   backgroundColor?: string;
   textColor?: string;
   surfaceColor?: string;

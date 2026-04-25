@@ -122,6 +122,8 @@ export default function StoreEditForm({
       ...store.theme,
       dark: {
         primaryColor:      store.theme.dark?.primaryColor,
+        secondaryColor:    store.theme.dark?.secondaryColor,
+        accentColor:       store.theme.dark?.accentColor,
         backgroundColor:   store.theme.dark?.backgroundColor ?? "#111827",
         textColor:         store.theme.dark?.textColor ?? "#F9FAFB",
         surfaceColor:      store.theme.dark?.surfaceColor ?? "#1F2937",
@@ -641,6 +643,18 @@ export default function StoreEditForm({
                     label="Dark Primary"
                     value={formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
                     onChange={(v) => handleDarkColorChange("primaryColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Secondary"
+                    value={formData.theme.dark?.secondaryColor ?? formData.theme.secondaryColor}
+                    onChange={(v) => handleDarkColorChange("secondaryColor", v)}
+                    disabled={loading}
+                  />
+                  <ColorInput
+                    label="Dark Accent"
+                    value={formData.theme.dark?.accentColor ?? formData.theme.accentColor}
+                    onChange={(v) => handleDarkColorChange("accentColor", v)}
                     disabled={loading}
                   />
                   <ColorInput

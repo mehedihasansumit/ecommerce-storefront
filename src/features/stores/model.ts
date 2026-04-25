@@ -39,6 +39,8 @@ const StoreSchema = new Schema<IStoreDocument>(
       cardBg:            { type: String },
       dark: {
         primaryColor:    { type: String },
+        secondaryColor:  { type: String },
+        accentColor:     { type: String },
         backgroundColor: { type: String, default: "#111827" },
         textColor:       { type: String, default: "#F9FAFB" },
         surfaceColor:    { type: String, default: "#1F2937" },

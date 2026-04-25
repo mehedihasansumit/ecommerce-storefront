@@ -68,7 +68,10 @@ export function ProductCard({ product }: { product: IProduct }) {
             </span>
           )}
           {isNew && !hasDiscount && (
-            <span className="px-2 py-0.5 text-[11px] font-bold text-white rounded-md leading-tight bg-emerald-500">
+            <span
+              className="px-2 py-0.5 text-[11px] font-bold text-white rounded-md leading-tight"
+              style={{ backgroundColor: "var(--color-accent)" }}
+            >
               New
             </span>
           )}

@@ -10,7 +10,7 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-admin-chip">
+    <div className="min-h-screen flex items-center justify-center bg-admin-bg">
       <div className="bg-admin-surface rounded-lg shadow-md p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
         <LoginForm />

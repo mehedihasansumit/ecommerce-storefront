@@ -388,8 +388,7 @@ export default function OrderDetailPage({
               </p>
             </div>
             <span
-              className="px-3 py-1.5 rounded-full text-xs font-semibold"
-              className={isCancelled ? "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400" : ""}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold${isCancelled ? " bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400" : ""}`}
             style={
                 !isCancelled
                   ? {

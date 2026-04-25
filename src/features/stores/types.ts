@@ -76,6 +76,7 @@ export interface IStorePayment {
 export interface IStoreContact {
   email: string;
   phone: string;
+  phones?: string[];
   address: string;
 }
 

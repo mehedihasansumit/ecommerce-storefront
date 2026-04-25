@@ -117,6 +117,7 @@ export const updateStoreSchema = z.object({
     .object({
       email: z.string().optional(),
       phone: z.string().optional(),
+      phones: z.array(z.string()).optional(),
       address: z.string().optional(),
     })
     .optional(),

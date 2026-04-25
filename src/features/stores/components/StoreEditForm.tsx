@@ -149,6 +149,7 @@ export default function StoreEditForm({
     contact: {
       email: store.contact?.email || "",
       phone: store.contact?.phone || "",
+      phones: store.contact?.phones || [],
       address: store.contact?.address || "",
     },
     seo: {
@@ -1256,17 +1257,57 @@ export default function StoreEditForm({
                   placeholder="hello@mystore.com"
                 />
               </Field>
-              <Field label="Phone Number">
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.contact.phone}
-                  onChange={(e) => handleInputChange(e, "contact")}
-                  className={inputCls}
-                  disabled={loading}
-                  placeholder="+880 1700-000000"
-                />
-              </Field>
+              <div>
+                <label className="block text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2">
+                  Phone Numbers
+                </label>
+                <div className="space-y-2">
+                  {(formData.contact.phones ?? []).map((ph, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        type="tel"
+                        value={ph}
+                        onChange={(e) => {
+                          const updated = [...(formData.contact.phones ?? [])];
+                          updated[i] = e.target.value;
+                          setFormData((prev) => ({ ...prev, contact: { ...prev.contact, phones: updated } }));
+                        }}
+                        className={`${inputCls} flex-1`}
+                        disabled={loading}
+                        placeholder="+880 1700-000000"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (formData.contact.phones ?? []).filter((_, idx) => idx !== i);
+                          setFormData((prev) => ({ ...prev, contact: { ...prev.contact, phones: updated } }));
+                        }}
+                        className="p-1.5 rounded-lg text-admin-text-subtle hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0"
+                        disabled={loading}
+                        aria-label="Remove number"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {(formData.contact.phones ?? []).length < 5 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          contact: { ...prev.contact, phones: [...(prev.contact.phones ?? []), ""] },
+                        }))
+                      }
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-dashed border-admin-border-md text-admin-text-subtle hover:text-admin-text-primary hover:border-admin-border transition-colors"
+                      disabled={loading}
+                    >
+                      <Plus size={13} />
+                      Add number
+                    </button>
+                  )}
+                </div>
+              </div>
               <Field label="Address">
                 <textarea
                   name="address"

@@ -10,7 +10,8 @@
     "searchPlaceholder": "Search products...",
     "login": "Login",
     "logout": "Logout",
-    "addresses": "Addresses"
+    "addresses": "Addresses",
+    "callUs": "Call us"
   },
   "footer": {
     "quickLinks": "Quick Links",

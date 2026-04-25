@@ -94,6 +94,7 @@ const StoreSchema = new Schema<IStoreDocument>(
     contact: {
       email: { type: String, default: "" },
       phone: { type: String, default: "" },
+      phones: [{ type: String }],
       address: { type: String, default: "" },
     },
 

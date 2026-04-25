@@ -302,7 +302,7 @@ export default function CheckoutPage() {
                 </FieldWrap>
 
                 {/* City + Postal */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FieldWrap label={t("city")} required error={errors.city}>
                     <input
                       type="text"

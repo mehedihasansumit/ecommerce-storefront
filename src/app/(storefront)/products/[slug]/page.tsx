@@ -94,7 +94,7 @@ export default async function ProductDetailPage({
         />
 
         {/* Trust signals */}
-        <div className="mt-8 flex items-center gap-8 pt-6 border-t border-border-subtle">
+        <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 md:gap-8 pt-6 border-t border-border-subtle">
           {[
             { icon: Truck, label: tr("freeShipping") || "Free Shipping" },
             { icon: RotateCcw, label: tr("easyReturns") || "Easy Returns" },

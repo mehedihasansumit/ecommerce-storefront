@@ -1,5 +1,6 @@
 import { Header } from "@/shared/components/storefront/Header";
 import { Footer } from "@/shared/components/storefront/Footer";
+import { MobileBottomNav } from "@/shared/components/storefront/MobileBottomNav";
 import { CartProvider } from "@/shared/context/CartContext";
 import { ThemeProvider } from "@/shared/context/ThemeContext";
 import { AnnouncementBanner } from "@/features/notifications/components/AnnouncementBanner";
@@ -14,8 +15,9 @@ export default function StorefrontLayout({
       <CartProvider>
         <AnnouncementBanner />
         <Header />
-        <main className="flex-1 storefront-grid-bg">{children}</main>
+        <main className="flex-1 storefront-grid-bg pb-16 md:pb-0">{children}</main>
         <Footer />
+        <MobileBottomNav />
       </CartProvider>
     </ThemeProvider>
   );

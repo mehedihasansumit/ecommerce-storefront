@@ -61,10 +61,12 @@ export function AddressCard({
             {!address.isDefault && onSetDefault && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => onSetDefault(address._id)}
+                aria-label="Set as default"
+                title={t("setDefault")}
               >
-                {t("setDefault")}
+                <Star size={14} />
               </Button>
             )}
             {onEdit && (

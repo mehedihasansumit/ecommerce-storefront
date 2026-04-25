@@ -205,7 +205,7 @@ export default async function ProductsPage({
         {/* Product Grid */}
         <div className="flex-1 min-w-0">
           {/* Results bar */}
-          <div className="flex items-center justify-between mb-4 gap-4">
+          <div className="flex flex-wrap items-center justify-between mb-4 gap-2 sm:gap-4">
             <p className="text-xs text-text-tertiary shrink-0">
               {t("showing") || "Showing"}{" "}
               <span className="font-medium text-[var(--color-text)]">

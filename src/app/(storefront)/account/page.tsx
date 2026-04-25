@@ -72,17 +72,17 @@ export default async function AccountPage() {
 
       {/* Profile header */}
       <Card padding="lg">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0 select-none"
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0 select-none"
               style={{ backgroundColor: "var(--color-primary)" }}
             >
               {initials}
             </div>
-            <div>
-              <h1 className="text-xl font-semibold leading-tight text-[var(--color-text)]">{user.name}</h1>
-              <p className="text-sm text-text-secondary mt-0.5 truncate max-w-52 sm:max-w-none">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-semibold leading-tight text-[var(--color-text)] truncate">{user.name}</h1>
+              <p className="text-sm text-text-secondary mt-0.5 truncate">
                 {user.email || user.phone}
               </p>
               <p className="text-xs text-text-tertiary mt-0.5">
@@ -147,7 +147,7 @@ export default async function AccountPage() {
           </div>
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-4xl font-bold" style={{ color: "var(--color-primary)" }}>
+              <p className="text-3xl sm:text-4xl font-bold" style={{ color: "var(--color-primary)" }}>
                 {(user.points ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-text-tertiary mt-1">Available points</p>

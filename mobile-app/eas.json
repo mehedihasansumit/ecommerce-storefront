@@ -1,0 +1,55 @@
+{
+  "cli": {
+    "version": ">= 16.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:3000",
+        "EXPO_PUBLIC_STORE_DOMAIN": ""
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.yourbackend.com",
+        "EXPO_PUBLIC_STORE_DOMAIN": ""
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.yourbackend.com",
+        "EXPO_PUBLIC_STORE_DOMAIN": ""
+      }
+    },
+    "shirts-store": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.yourbackend.com",
+        "EXPO_PUBLIC_STORE_DOMAIN": "shirts.yourstore.com",
+        "EXPO_PUBLIC_APP_NAME": "Shirts Store",
+        "EXPO_PUBLIC_APP_SLUG": "shirts-store",
+        "EXPO_PUBLIC_APP_SCHEME": "shirtsstore",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.yourcompany.shirtsstore",
+        "EXPO_PUBLIC_PACKAGE_NAME": "com.yourcompany.shirtsstore"
+      }
+    },
+    "punjabi-store": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.yourbackend.com",
+        "EXPO_PUBLIC_STORE_DOMAIN": "punjabi.yourstore.com",
+        "EXPO_PUBLIC_APP_NAME": "Punjabi Bazar",
+        "EXPO_PUBLIC_APP_SLUG": "punjabi-bazar",
+        "EXPO_PUBLIC_APP_SCHEME": "punjabibazar",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.yourcompany.punjabibazar",
+        "EXPO_PUBLIC_PACKAGE_NAME": "com.yourcompany.punjabibazar"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

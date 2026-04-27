@@ -1,9 +1,7 @@
 import { create } from "zustand";
-import { createMMKV } from "react-native-mmkv";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { ICartItem } from "@/shared/types/cart";
 import type { CouponValidationResult } from "@/shared/types/coupon";
-
-const storage = createMMKV({ id: "cart-store" });
 
 interface CartState {
   storeId: string | null;
@@ -19,7 +17,7 @@ interface CartState {
   clearCart: () => void;
   setCoupon: (coupon: CouponValidationResult & { code: string }) => void;
   removeCoupon: () => void;
-  initForStore: (storeId: string) => void;
+  initForStore: (storeId: string) => Promise<void>;
 }
 
 function isSameItem(
@@ -41,7 +39,7 @@ function computeTotals(items: ICartItem[], discount: number) {
 }
 
 function persist(storeId: string | null, items: ICartItem[], coupon: CartState["coupon"]) {
-  storage.set("cart-v1", JSON.stringify({ storeId, items, coupon }));
+  AsyncStorage.setItem("cart-v1", JSON.stringify({ storeId, items, coupon }));
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -53,8 +51,8 @@ export const useCartStore = create<CartState>((set, get) => ({
   discount: 0,
   total: 0,
 
-  initForStore: (storeId) => {
-    const raw = storage.getString("cart-v1");
+  initForStore: async (storeId) => {
+    const raw = await AsyncStorage.getItem("cart-v1");
     if (raw) {
       try {
         const saved = JSON.parse(raw);

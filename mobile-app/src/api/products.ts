@@ -11,10 +11,11 @@ interface ProductListParams {
 }
 
 interface ProductListResponse {
-  products: IProduct[];
+  data: IProduct[];
   total: number;
   page: number;
-  pages: number;
+  limit: number;
+  totalPages: number;
 }
 
 export async function getProducts(params: ProductListParams = {}): Promise<ProductListResponse> {

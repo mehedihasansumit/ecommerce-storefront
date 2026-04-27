@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
-import { AppState, type AppStateStatus } from "react-native";
+import { AppState, View, Text, StyleSheet, type AppStateStatus } from "react-native";
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
+import Toast, { type ToastConfig } from "react-native-toast-message";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/store/auth.store";
 import { useTenantStore } from "@/store/tenant.store";
 import { useSettingsStore } from "@/store/settings.store";
@@ -16,6 +17,74 @@ import {
   addNotificationReceivedListener,
   addNotificationResponseListener,
 } from "@/lib/pushNotifications";
+
+const toastConfig: ToastConfig = {
+  success: ({ text1, text2, onPress }) => (
+    <View style={toastStyles.wrap} accessible accessibilityRole="alert">
+      <View style={[toastStyles.icon, { backgroundColor: "#22C55E18" }]}>
+        <Ionicons name="checkmark-circle" size={22} color="#22C55E" />
+      </View>
+      <View style={toastStyles.body}>
+        <Text style={toastStyles.title} numberOfLines={1}>{text1}</Text>
+        {!!text2 && <Text style={toastStyles.sub} numberOfLines={1}>{text2}</Text>}
+        {!!onPress && <Text style={toastStyles.hint}>Tap to view cart →</Text>}
+      </View>
+    </View>
+  ),
+  error: ({ text1, text2 }) => (
+    <View style={toastStyles.wrap} accessible accessibilityRole="alert">
+      <View style={[toastStyles.icon, { backgroundColor: "#EF444418" }]}>
+        <Ionicons name="alert-circle" size={22} color="#EF4444" />
+      </View>
+      <View style={toastStyles.body}>
+        <Text style={toastStyles.title} numberOfLines={1}>{text1}</Text>
+        {!!text2 && <Text style={toastStyles.sub} numberOfLines={2}>{text2}</Text>}
+      </View>
+    </View>
+  ),
+  info: ({ text1, text2 }) => (
+    <View style={toastStyles.wrap} accessible accessibilityRole="alert">
+      <View style={[toastStyles.icon, { backgroundColor: "#3B82F618" }]}>
+        <Ionicons name="information-circle" size={22} color="#3B82F6" />
+      </View>
+      <View style={toastStyles.body}>
+        <Text style={toastStyles.title} numberOfLines={1}>{text1}</Text>
+        {!!text2 && <Text style={toastStyles.sub} numberOfLines={2}>{text2}</Text>}
+      </View>
+    </View>
+  ),
+};
+
+const toastStyles = StyleSheet.create({
+  wrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  icon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  body: { flex: 1, gap: 2 },
+  title: { fontSize: 14, fontWeight: "700", color: "#111827" },
+  sub: { fontSize: 13, color: "#6B7280" },
+  hint: { fontSize: 11, color: "#9CA3AF", marginTop: 2 },
+});
 
 // Refetch on app focus (background → foreground)
 AppState.addEventListener("change", (status: AppStateStatus) => {
@@ -47,9 +116,7 @@ export default function RootLayout() {
   const notifResponseSub = useRef<any>(null);
 
   useEffect(() => {
-    hydrateTenant();
-    hydrateSettings();
-    hydrateAuth();
+    Promise.all([hydrateTenant(), hydrateSettings(), hydrateAuth()]);
   }, []);
 
   // Auto-login: verify token with server after hydration
@@ -95,12 +162,11 @@ export default function RootLayout() {
           <ThemeProvider>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
-              <Stack.Screen name="onboarding/store-select" />
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
                 name="products/[slug]"
-                options={{ headerShown: true, title: "" }}
+                options={{ headerShown: false }}
               />
               <Stack.Screen
                 name="orders/[id]"
@@ -127,7 +193,7 @@ export default function RootLayout() {
                 options={{ headerShown: false, presentation: "fullScreenModal" }}
               />
             </Stack>
-            <Toast />
+            <Toast config={toastConfig} position="top" topOffset={56} visibilityTime={2500} />
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

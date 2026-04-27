@@ -6,6 +6,25 @@ import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
 import { ZodError } from "zod";
 
+export async function GET(_request: NextRequest) {
+  try {
+    const storeId = await getStoreId();
+    if (!storeId)
+      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+
+    const payload = await getCustomerToken();
+    if (!payload || payload.type !== "customer") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = (payload as JwtCustomerPayload).userId;
+    const orders = await OrderService.getByUser(storeId, userId);
+    return NextResponse.json({ orders });
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const storeId = await getStoreId();

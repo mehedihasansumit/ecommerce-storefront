@@ -1,71 +1,80 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useTenantStore } from "@/store/tenant.store";
+import { useTheme } from "@/context/ThemeContext";
 import { useCartStore } from "@/store/cart.store";
 import { useUnreadCount } from "@/hooks/useNotifications";
 import { View, Text, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function CartBadge() {
-  const itemCount = useCartStore((s) => s.itemCount);
-  if (itemCount === 0) return null;
-  return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>{itemCount > 99 ? "99+" : String(itemCount)}</Text>
-    </View>
-  );
-}
-
-function NotifBadge() {
-  const { data } = useUnreadCount();
-  const count = data ?? 0;
+function Badge({ count }: { count: number }) {
   if (count === 0) return null;
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeText}>{count > 9 ? "9+" : String(count)}</Text>
+      <Text style={styles.badgeText}>{count > 99 ? "99+" : String(count)}</Text>
     </View>
   );
 }
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
 
-function tabIcon(focused: boolean, outline: IoniconsName, filled: IoniconsName) {
-  return ({ color, size }: { color: string; size: number }) => (
-    <Ionicons name={focused ? filled : outline} color={color} size={size} />
-  );
-}
-
 export default function TabsLayout() {
-  const store = useTenantStore((s) => s.store);
-  const primaryColor = store?.theme?.primaryColor ?? "#3B82F6";
+  const theme = useTheme();
+  const primaryColor = theme.primaryColor;
+  const cartCount = useCartStore((s) => s.itemCount);
+  const { data: notifCount = 0 } = useUnreadCount();
+  const insets = useSafeAreaInsets();
+
+  function tabIcon(outline: IoniconsName, filled: IoniconsName) {
+    return ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+      <Ionicons name={focused ? filled : outline} color={color} size={size} />
+    );
+  }
+
+  function onTabPress() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: primaryColor,
-        tabBarInactiveTintColor: "#9CA3AF",
-        tabBarStyle: { borderTopColor: "#F3F4F6" },
+        tabBarInactiveTintColor: theme.textTertiary,
+        tabBarStyle: {
+          borderTopColor: theme.border,
+          borderTopWidth: 1,
+          backgroundColor: theme.cardBg,
+          height: 60 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
+          paddingTop: 6,
+          elevation: 8,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          marginTop: -2,
+        },
       }}
+      screenListeners={{ tabPress: onTabPress }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size, focused }) =>
-            tabIcon(focused, "home-outline", "home")(({ color, size })),
+          tabBarIcon: tabIcon("home-outline", "home"),
         }}
       />
       <Tabs.Screen
         name="products"
         options={{
           title: "Products",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "bag" : "bag-outline"}
-              color={color}
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon("bag-outline", "bag"),
         }}
       />
       <Tabs.Screen
@@ -74,12 +83,8 @@ export default function TabsLayout() {
           title: "Cart",
           tabBarIcon: ({ color, size, focused }) => (
             <View>
-              <Ionicons
-                name={focused ? "cart" : "cart-outline"}
-                color={color}
-                size={size}
-              />
-              <CartBadge />
+              <Ionicons name={focused ? "cart" : "cart-outline"} color={color} size={size} />
+              <Badge count={cartCount} />
             </View>
           ),
         }}
@@ -88,13 +93,7 @@ export default function TabsLayout() {
         name="orders"
         options={{
           title: "Orders",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "receipt" : "receipt-outline"}
-              color={color}
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon("receipt-outline", "receipt"),
         }}
       />
       <Tabs.Screen
@@ -103,12 +102,8 @@ export default function TabsLayout() {
           title: "Account",
           tabBarIcon: ({ color, size, focused }) => (
             <View>
-              <Ionicons
-                name={focused ? "person" : "person-outline"}
-                color={color}
-                size={size}
-              />
-              <NotifBadge />
+              <Ionicons name={focused ? "person" : "person-outline"} color={color} size={size} />
+              <Badge count={notifCount} />
             </View>
           ),
         }}

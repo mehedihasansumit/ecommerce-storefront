@@ -18,7 +18,7 @@ export function useProducts(filters: ProductFilters = {}) {
       getProducts({ page: pageParam as number, limit: 12, ...filters }),
     initialPageParam: 1,
     getNextPageParam: (last) =>
-      last.page < last.pages ? last.page + 1 : undefined,
+      last.page < last.totalPages ? last.page + 1 : undefined,
     enabled: !!storeId,
   });
 }

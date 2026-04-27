@@ -7,12 +7,22 @@ import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permiss
 import { ZodError } from "zod";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
     const { productId } = await params;
-    const product = await ProductService.getById(productId);
+    const isObjectId = /^[a-f\d]{24}$/i.test(productId);
+
+    let product;
+    if (isObjectId) {
+      product = await ProductService.getById(productId);
+    } else {
+      const storeId = request.nextUrl.searchParams.get("storeId");
+      if (!storeId) return errorResponse("storeId is required", 400);
+      product = await ProductService.getBySlug(storeId, productId);
+    }
+
     if (!product) return errorResponse("Product not found", 404);
     return successResponse(product);
   } catch {

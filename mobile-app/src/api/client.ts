@@ -11,13 +11,16 @@ export const apiClient = axios.create({
   },
 });
 
-// Request: inject Host header (tenant) + Cookie header (auth)
+// Request: inject Host header (tenant) + storeId param + Cookie header (auth)
 apiClient.interceptors.request.use((config) => {
-  const { domain } = useTenantStore.getState();
+  const { domain, store } = useTenantStore.getState();
   const { token } = useAuthStore.getState();
 
   if (domain) {
     config.headers["Host"] = domain;
+  }
+  if (store?._id) {
+    config.params = { storeId: store._id, ...config.params };
   }
   if (token) {
     config.headers["Cookie"] = `customer-token=${token}`;

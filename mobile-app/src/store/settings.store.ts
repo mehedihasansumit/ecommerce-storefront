@@ -1,8 +1,6 @@
 import { create } from "zustand";
-import { createMMKV } from "react-native-mmkv";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getLocales } from "expo-localization";
-
-const storage = createMMKV({ id: "settings-store" });
 
 type ColorScheme = "light" | "dark" | "system";
 
@@ -11,7 +9,7 @@ interface SettingsState {
   colorScheme: ColorScheme;
   setLocale: (locale: string) => void;
   setColorScheme: (scheme: ColorScheme) => void;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
 }
 
 function detectLocale(): string {
@@ -25,18 +23,18 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   colorScheme: "system",
 
   setLocale: (locale) => {
-    storage.set("locale", locale);
+    AsyncStorage.setItem("settings:locale", locale);
     set({ locale });
   },
 
   setColorScheme: (colorScheme) => {
-    storage.set("colorScheme", colorScheme);
+    AsyncStorage.setItem("settings:colorScheme", colorScheme);
     set({ colorScheme });
   },
 
-  hydrate: () => {
-    const locale = storage.getString("locale") ?? detectLocale();
-    const colorScheme = (storage.getString("colorScheme") as ColorScheme) ?? "system";
+  hydrate: async () => {
+    const locale = (await AsyncStorage.getItem("settings:locale")) ?? detectLocale();
+    const colorScheme = ((await AsyncStorage.getItem("settings:colorScheme")) as ColorScheme) ?? "system";
     set({ locale, colorScheme });
   },
 }));

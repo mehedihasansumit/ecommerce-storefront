@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,51 +7,85 @@ import {
   TextInput,
   StyleSheet,
   ActivityIndicator,
+  Dimensions,
+  PanResponder,
+  Animated,
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Swipeable } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { useCartStore } from "@/store/cart.store";
 import { useTheme } from "@/context/ThemeContext";
 import { validateCoupon } from "@/api/coupons";
 import { resolveImageUrl } from "@/shared/lib/image";
+import { EmptyState } from "@/components/ui";
 import type { ICartItem } from "@/shared/types/cart";
 
-function DeleteAction({ onPress }: { onPress: () => void }) {
-  return (
-    <TouchableOpacity style={styles.deleteAction} onPress={onPress} activeOpacity={0.8}>
-      <Ionicons name="trash" size={20} color="#fff" />
-      <Text style={styles.deleteText}>Remove</Text>
-    </TouchableOpacity>
-  );
-}
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const DELETE_THRESHOLD = 80;
 
 function CartItemRow({ item }: { item: ICartItem }) {
   const theme = useTheme();
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
-  const swipeRef = useRef<Swipeable>(null);
+  const dragX = useRef(new Animated.Value(0)).current;
 
   const variantLabel = Object.entries(item.variantSelections)
     .map(([k, v]) => `${k}: ${v}`)
     .join(", ");
 
   function handleRemove() {
-    swipeRef.current?.close();
     removeItem(item.productId, item.variantSelections);
     Toast.show({ type: "success", text1: "Item removed", visibilityTime: 1500 });
   }
 
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
+      onPanResponderMove: (_, g) => {
+        if (g.dx <= 0) dragX.setValue(g.dx);
+      },
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -DELETE_THRESHOLD) {
+          Animated.timing(dragX, {
+            toValue: -SCREEN_WIDTH,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(handleRemove);
+        } else {
+          Animated.spring(dragX, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    })
+  ).current;
+
+  const deleteOpacity = dragX.interpolate({
+    inputRange: [-DELETE_THRESHOLD, 0],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
   return (
-    <Swipeable
-      ref={swipeRef}
-      renderRightActions={() => <DeleteAction onPress={handleRemove} />}
-      rightThreshold={60}
-    >
-      <View style={[styles.itemRow, { backgroundColor: theme.cardBg, borderBottomColor: theme.border }]}>
+    <View style={{ overflow: "hidden" }}>
+      <Animated.View style={[styles.deleteActionBg, { opacity: deleteOpacity }]}>
+        <TouchableOpacity style={styles.deleteAction} onPress={handleRemove} activeOpacity={0.8}>
+          <Ionicons name="trash" size={20} color="#fff" />
+          <Text style={styles.deleteText}>Remove</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.itemRow,
+          { backgroundColor: theme.cardBg, borderBottomColor: theme.border },
+          { transform: [{ translateX: dragX }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
         <Image source={resolveImageUrl(item.thumbnail)} style={styles.itemImage} contentFit="cover" />
         <View style={styles.itemInfo}>
           <Text style={[styles.itemName, { color: theme.textColor }]} numberOfLines={2}>
@@ -70,7 +104,7 @@ function CartItemRow({ item }: { item: ICartItem }) {
               onPress={() => updateQuantity(item.productId, item.variantSelections, item.quantity - 1)}
               hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             >
-              <Ionicons name="remove" size={14} color={theme.textColor} />
+              <Ionicons name="remove" size={18} color={theme.textColor} />
             </TouchableOpacity>
             <Text style={[styles.qtyText, { color: theme.textColor }]}>{item.quantity}</Text>
             <TouchableOpacity
@@ -78,7 +112,7 @@ function CartItemRow({ item }: { item: ICartItem }) {
               onPress={() => updateQuantity(item.productId, item.variantSelections, item.quantity + 1)}
               hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             >
-              <Ionicons name="add" size={14} color={theme.textColor} />
+              <Ionicons name="add" size={18} color={theme.textColor} />
             </TouchableOpacity>
 
             <Text style={[styles.unitPrice, { color: theme.textTertiary }]}>
@@ -86,8 +120,8 @@ function CartItemRow({ item }: { item: ICartItem }) {
             </Text>
           </View>
         </View>
-      </View>
-    </Swipeable>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -119,21 +153,13 @@ export default function CartScreen() {
   if (items.length === 0) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.surface }]} edges={["top"]}>
-        <View style={styles.emptyContainer}>
-          <View style={[styles.emptyIcon, { backgroundColor: theme.surface }]}>
-            <Ionicons name="cart-outline" size={52} color={theme.textTertiary} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: theme.textColor }]}>Your cart is empty</Text>
-          <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
-            Add products to get started
-          </Text>
-          <TouchableOpacity
-            style={[styles.shopBtn, { backgroundColor: theme.primaryColor }]}
-            onPress={() => router.push("/(tabs)/products")}
-          >
-            <Text style={styles.shopBtnText}>Browse Products</Text>
-          </TouchableOpacity>
-        </View>
+        <EmptyState
+          icon="cart-outline"
+          title="Your cart is empty"
+          description="Add products to get started"
+          actionLabel="Browse Products"
+          onAction={() => router.push("/(tabs)/products")}
+        />
       </SafeAreaView>
     );
   }
@@ -280,20 +306,6 @@ const styles = StyleSheet.create({
   swipeHintBar: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 20, paddingVertical: 5 },
   swipeHint: { fontSize: 11 },
   scroll: { flex: 1 },
-  emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 32 },
-  emptyIcon: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  emptyTitle: { fontSize: 18, fontWeight: "700" },
-  emptySubtitle: { fontSize: 14, textAlign: "center" },
-  shopBtn: { paddingHorizontal: 28, paddingVertical: 13, borderRadius: 12, marginTop: 8 },
-  shopBtnText: { color: "#fff", fontWeight: "600", fontSize: 15 },
-
   itemRow: {
     flexDirection: "row",
     gap: 12,
@@ -317,11 +329,21 @@ const styles = StyleSheet.create({
   qtyText: { fontSize: 14, fontWeight: "700", minWidth: 24, textAlign: "center" },
   unitPrice: { fontSize: 11, marginLeft: 4 },
 
-  deleteAction: {
+  deleteActionBg: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 80,
     backgroundColor: "#EF4444",
     justifyContent: "center",
     alignItems: "center",
-    width: 80,
+  },
+  deleteAction: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 4,
   },
   deleteText: { color: "#fff", fontSize: 11, fontWeight: "600" },

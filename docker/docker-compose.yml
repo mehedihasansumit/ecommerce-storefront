@@ -1,0 +1,29 @@
+services:
+  garage:
+    image: dxflrs/garage:v1.0.1
+    container_name: garage
+    restart: unless-stopped
+    ports:
+      - "3900:3900"   # S3 API
+      - "3901:3901"   # RPC
+      - "3902:3902"   # Web
+      - "3903:3903"   # Admin API
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    environment:
+      GARAGE_CONFIG_FILE: /etc/garage.toml
+
+  filestash:
+    image: machines/filestash
+    container_name: garage-ui
+    restart: unless-stopped
+    ports:
+      - "8334:8334"
+    depends_on:
+      - garage
+
+volumes:
+  garage_meta:
+  garage_data:

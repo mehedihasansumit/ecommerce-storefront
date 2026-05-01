@@ -61,6 +61,12 @@ const StoreSchema = new Schema<IStoreDocument>(
       },
     },
 
+    heroLayout: {
+      type: String,
+      enum: ["slider", "split", "centered", "grid", "minimal", "image"],
+      default: "slider",
+    },
+
     heroBanners: [
       {
         image: String,
@@ -136,7 +142,6 @@ const StoreSchema = new Schema<IStoreDocument>(
 );
 
 StoreSchema.index({ domains: 1 });
-StoreSchema.index({ slug: 1 });
 
 export const StoreModel: Model<IStoreDocument> =
   mongoose.models.Store || mongoose.model<IStoreDocument>("Store", StoreSchema);

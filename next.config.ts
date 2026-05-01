@@ -23,6 +23,17 @@ const s3Pattern =
 const usingMediaProxy = !process.env.S3_PUBLIC_URL;
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Service-Worker-Allowed", value: "/" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+        ],
+      },
+    ];
+  },
   images: {
     unoptimized: usingMediaProxy,
     remotePatterns: [
@@ -39,6 +50,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "img.freepik.com" },
       { protocol: "https", hostname: "static.vecteezy.com" },
     ],
+    qualities: [75, 85],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 640, 768, 1024, 1280, 1536],
     imageSizes: [64, 96, 128, 256, 384],

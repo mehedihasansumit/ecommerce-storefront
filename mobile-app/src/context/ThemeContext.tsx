@@ -21,7 +21,7 @@ export interface AppTheme {
   error: string;
   success: string;
   warning: string;
-  borderRadius: string;
+  borderRadius: number;
   isDark: boolean;
   raw: IStoreTheme | null;
 }
@@ -42,7 +42,7 @@ const LIGHT: AppTheme = {
   error: "#EF4444",
   success: "#22C55E",
   warning: "#F59E0B",
-  borderRadius: "8px",
+  borderRadius: 8,
   isDark: false,
   raw: null,
 };
@@ -110,7 +110,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         darkOverride?.headerText ?? storeTheme.headerText ?? base.headerText,
       cardBg:
         darkOverride?.cardBg ?? storeTheme.cardBg ?? base.cardBg,
-      borderRadius: storeTheme.borderRadius ?? base.borderRadius,
+      borderRadius: parseFloat(storeTheme.borderRadius) || base.borderRadius,
       isDark,
       raw: storeTheme,
     };

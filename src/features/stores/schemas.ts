@@ -84,6 +84,7 @@ export const updateStoreSchema = z.object({
   logo: z.string().optional(),
   favicon: z.string().optional(),
   theme: storeThemeSchema.optional(),
+  heroLayout: z.enum(["slider", "split", "centered", "grid", "minimal", "image"]).optional(),
   heroBanners: z
     .array(
       z.object({

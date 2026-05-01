@@ -20,7 +20,7 @@ import {
   MessageCircle,
   Sparkles,
 } from "lucide-react";
-import type { IStore } from "@/features/stores/types";
+import type { IStore, HeroLayoutStyle } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
 import { ImageInput } from "@/shared/components/ui";
@@ -92,6 +92,134 @@ const LOYALTY_TAB: { id: Tab; label: string; icon: React.ElementType } = {
   label: "Loyalty Points",
   icon: Sparkles,
 };
+
+const HERO_LAYOUTS: {
+  id: HeroLayoutStyle;
+  label: string;
+  description: string;
+  Preview: () => React.ReactElement;
+}[] = [
+  {
+    id: "slider",
+    label: "Full Slider",
+    description: "Auto-rotating full-width image slides",
+    Preview: () => (
+      <svg viewBox="0 0 120 68" className="w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="68" fill="#E5E7EB" />
+        <rect width="120" height="68" fill="#6B7280" opacity="0.15" />
+        <rect x="8" y="10" width="104" height="48" rx="3" fill="#9CA3AF" opacity="0.5" />
+        <rect x="24" y="22" width="50" height="7" rx="2" fill="#fff" opacity="0.9" />
+        <rect x="24" y="33" width="35" height="4" rx="2" fill="#fff" opacity="0.6" />
+        <rect x="24" y="42" width="22" height="7" rx="2" fill="#374151" opacity="0.8" />
+        {/* dots */}
+        <circle cx="54" cy="62" r="2" fill="#6B7280" opacity="0.5" />
+        <circle cx="60" cy="62" r="2.5" fill="#374151" />
+        <circle cx="66" cy="62" r="2" fill="#6B7280" opacity="0.5" />
+        {/* arrows */}
+        <circle cx="14" cy="34" r="6" fill="#fff" opacity="0.7" />
+        <path d="M15.5 31l-3 3 3 3" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="106" cy="34" r="6" fill="#fff" opacity="0.7" />
+        <path d="M104.5 31l3 3-3 3" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "split",
+    label: "Split",
+    description: "Image on left, text on right",
+    Preview: () => (
+      <svg viewBox="0 0 120 68" className="w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="68" fill="#E5E7EB" />
+        {/* left image half */}
+        <rect width="60" height="68" fill="#9CA3AF" opacity="0.4" />
+        <rect x="12" y="20" width="36" height="28" rx="2" fill="#9CA3AF" opacity="0.6" />
+        {/* right text half */}
+        <rect x="68" y="16" width="40" height="6" rx="2" fill="#374151" opacity="0.7" />
+        <rect x="68" y="26" width="34" height="4" rx="2" fill="#6B7280" opacity="0.5" />
+        <rect x="68" y="33" width="30" height="4" rx="2" fill="#6B7280" opacity="0.4" />
+        <rect x="68" y="44" width="24" height="8" rx="2" fill="#374151" opacity="0.75" />
+        {/* divider */}
+        <line x1="60" y1="0" x2="60" y2="68" stroke="#D1D5DB" strokeWidth="1" />
+      </svg>
+    ),
+  },
+  {
+    id: "centered",
+    label: "Centered",
+    description: "Text overlay centered on image",
+    Preview: () => (
+      <svg viewBox="0 0 120 68" className="w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="68" fill="#9CA3AF" opacity="0.5" />
+        {/* overlay gradient */}
+        <rect width="120" height="68" fill="url(#cg)" />
+        <defs>
+          <linearGradient id="cg" x1="60" y1="0" x2="60" y2="68" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#000" stopOpacity="0.1" />
+            <stop offset="1" stopColor="#000" stopOpacity="0.55" />
+          </linearGradient>
+        </defs>
+        {/* centered text */}
+        <rect x="30" y="18" width="60" height="7" rx="2" fill="#fff" opacity="0.95" />
+        <rect x="38" y="29" width="44" height="4" rx="2" fill="#fff" opacity="0.7" />
+        <rect x="44" y="40" width="32" height="8" rx="3" fill="#fff" opacity="0.9" />
+      </svg>
+    ),
+  },
+  {
+    id: "grid",
+    label: "Grid",
+    description: "One large + two smaller side panels",
+    Preview: () => (
+      <svg viewBox="0 0 120 68" className="w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="68" fill="#E5E7EB" />
+        {/* large left */}
+        <rect x="4" y="4" width="72" height="60" rx="3" fill="#9CA3AF" opacity="0.5" />
+        <rect x="12" y="22" width="40" height="6" rx="2" fill="#fff" opacity="0.9" />
+        <rect x="12" y="32" width="28" height="4" rx="2" fill="#fff" opacity="0.6" />
+        <rect x="12" y="42" width="20" height="7" rx="2" fill="#374151" opacity="0.75" />
+        {/* top-right small */}
+        <rect x="80" y="4" width="36" height="28" rx="3" fill="#9CA3AF" opacity="0.4" />
+        <rect x="86" y="13" width="20" height="4" rx="2" fill="#fff" opacity="0.8" />
+        {/* bottom-right small */}
+        <rect x="80" y="36" width="36" height="28" rx="3" fill="#9CA3AF" opacity="0.35" />
+        <rect x="86" y="45" width="20" height="4" rx="2" fill="#fff" opacity="0.8" />
+      </svg>
+    ),
+  },
+  {
+    id: "image",
+    label: "Image Only",
+    description: "Pure banner, no text overlay",
+    Preview: () => (
+      <svg viewBox="0 0 120 68" className="w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="68" fill="#9CA3AF" opacity="0.5" />
+        {/* subtle landscape scene to imply full photo */}
+        <rect y="44" width="120" height="24" fill="#6B7280" opacity="0.3" />
+        <circle cx="90" cy="20" r="12" fill="#FCD34D" opacity="0.6" />
+        {/* no text at all */}
+        {/* nav dots only */}
+        <circle cx="54" cy="62" r="1.5" fill="#fff" opacity="0.4" />
+        <circle cx="60" cy="62" r="2" fill="#fff" opacity="0.85" />
+        <circle cx="66" cy="62" r="1.5" fill="#fff" opacity="0.4" />
+      </svg>
+    ),
+  },
+  {
+    id: "minimal",
+    label: "Minimal",
+    description: "Full bleed image, text at bottom",
+    Preview: () => (
+      <svg viewBox="0 0 120 68" className="w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="68" fill="#9CA3AF" opacity="0.45" />
+        {/* bottom text bar */}
+        <rect y="46" width="120" height="22" fill="#111827" opacity="0.75" />
+        <rect x="8" y="51" width="55" height="6" rx="2" fill="#fff" opacity="0.95" />
+        <rect x="8" y="61" width="36" height="4" rx="2" fill="#fff" opacity="0.6" />
+        <rect x="92" y="53" width="22" height="9" rx="3" fill="#fff" opacity="0.85" />
+      </svg>
+    ),
+  },
+];
 
 export default function StoreEditForm({
   store,
@@ -169,6 +297,7 @@ export default function StoreEditForm({
         pageUrl: store.socialOrdering?.facebook?.pageUrl ?? "",
       },
     },
+    heroLayout: (store.heroLayout || "slider") as HeroLayoutStyle,
     supportedLanguages: supportedLangs,
     defaultLanguage: store.defaultLanguage || "en",
     pointsConfig: {
@@ -291,7 +420,7 @@ export default function StoreEditForm({
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -315,6 +444,7 @@ export default function StoreEditForm({
         payload.isActive = formData.isActive;
         payload.logo = formData.logo;
         payload.favicon = formData.favicon;
+        payload.heroLayout = formData.heroLayout;
         payload.heroBanners = heroBanners;
         payload.contact = formData.contact;
         payload.socialOrdering = formData.socialOrdering;
@@ -386,13 +516,13 @@ export default function StoreEditForm({
         <div className="px-6 pt-4">
           {error && (
             <div className="flex items-center gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-              <AlertCircle size={15} className="flex-shrink-0" />
+              <AlertCircle size={15} className="shrink-0" />
               {error}
             </div>
           )}
           {success && (
             <div className="flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
-              <Check size={15} className="flex-shrink-0" />
+              <Check size={15} className="shrink-0" />
               Store settings saved successfully.
             </div>
           )}
@@ -545,7 +675,7 @@ export default function StoreEditForm({
               <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-4">
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base flex-shrink-0"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0"
                     style={{ backgroundColor: store.theme.primaryColor }}
                   >
                     {(formData.name || store.name).charAt(0).toUpperCase()}
@@ -1038,7 +1168,70 @@ export default function StoreEditForm({
 
         {/* ── BANNERS TAB ── */}
         {activeTab === "banners" && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Layout picker */}
+            <div>
+              <SectionTitle>Hero Section Layout</SectionTitle>
+              <p className="text-xs text-admin-text-subtle mt-0.5 mb-3">
+                Choose how banners are displayed on the storefront homepage.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {HERO_LAYOUTS.map((layout) => {
+                  const selected = formData.heroLayout === layout.id;
+                  return (
+                    <button
+                      key={layout.id}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          heroLayout: layout.id,
+                        }))
+                      }
+                      disabled={loading}
+                      className={`group flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all text-left disabled:opacity-50 ${
+                        selected
+                          ? "border-gray-900 dark:border-gray-100 bg-gray-900/5 dark:bg-white/5"
+                          : "border-admin-border bg-admin-surface hover:border-admin-border-md"
+                      }`}
+                    >
+                      <div
+                        className={`w-full rounded-lg overflow-hidden border ${
+                          selected
+                            ? "border-gray-900/20 dark:border-white/20"
+                            : "border-admin-border"
+                        }`}
+                      >
+                        <layout.Preview />
+                      </div>
+                      <div className="w-full">
+                        <p
+                          className={`text-xs font-semibold ${
+                            selected
+                              ? "text-admin-text-primary"
+                              : "text-admin-text-secondary"
+                          }`}
+                        >
+                          {layout.label}
+                        </p>
+                        <p className="text-[11px] text-admin-text-subtle leading-snug mt-0.5">
+                          {layout.description}
+                        </p>
+                      </div>
+                      {selected && (
+                        <span className="self-start inline-flex items-center gap-1 text-[10px] font-semibold text-white dark:text-gray-900 bg-gray-900 dark:bg-white rounded-full px-2 py-0.5">
+                          <Check size={9} />
+                          Active
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="border-t border-admin-border" />
+
             <div className="flex items-center justify-between">
               <div>
                 <SectionTitle>Hero Banners</SectionTitle>

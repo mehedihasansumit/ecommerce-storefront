@@ -8,6 +8,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useSettingsStore } from "@/store/settings.store";
 import { useUnreadCount } from "@/hooks/useNotifications";
 import { logout } from "@/api/auth";
+import { Button } from "@/components/ui";
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -101,20 +102,22 @@ export default function AccountScreen() {
           <Text style={[styles.guestSub, { color: theme.textSecondary }]}>
             Track orders, manage addresses, and more
           </Text>
-          <TouchableOpacity
-            style={[styles.signInBtn, { backgroundColor: theme.primaryColor }]}
+          <Button
+            variant="brand"
+            size="lg"
             onPress={() => router.push("/(auth)/login")}
+            style={styles.authBtn}
           >
-            <Text style={styles.signInBtnText}>Sign In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.registerBtn, { borderColor: theme.border, backgroundColor: theme.cardBg }]}
+            Sign In
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
             onPress={() => router.push("/(auth)/register")}
+            style={styles.authBtn}
           >
-            <Text style={[styles.registerBtnText, { color: theme.primaryColor }]}>
-              Create Account
-            </Text>
-          </TouchableOpacity>
+            Create Account
+          </Button>
         </View>
       </SafeAreaView>
     );
@@ -240,22 +243,7 @@ const styles = StyleSheet.create({
   },
   guestTitle: { fontSize: 20, fontWeight: "700", textAlign: "center" },
   guestSub: { fontSize: 14, textAlign: "center" },
-  signInBtn: {
-    width: "100%",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  signInBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  registerBtn: {
-    width: "100%",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    borderWidth: 1.5,
-  },
-  registerBtnText: { fontSize: 16, fontWeight: "600" },
+  authBtn: { width: "100%", marginTop: 4 },
 
   profileHeader: {
     flexDirection: "row",

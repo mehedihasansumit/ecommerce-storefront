@@ -52,7 +52,7 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero Banner */}
-      <HeroBanner banners={tenant.heroBanners} />
+      <HeroBanner banners={tenant.heroBanners} layout={tenant.heroLayout} />
 
       {/* Trust badges */}
       <section className="border-b border-border-subtle">

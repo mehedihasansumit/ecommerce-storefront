@@ -49,6 +49,14 @@ export interface IStoreTheme {
   dark?: IStoreDarkTheme;
 }
 
+export type HeroLayoutStyle =
+  | "slider"
+  | "split"
+  | "centered"
+  | "grid"
+  | "minimal"
+  | "image";
+
 export interface IHeroBanner {
   image: string;
   title: LocalizedString;
@@ -114,6 +122,7 @@ export interface IStore {
   logo: string;
   favicon: string;
   theme: IStoreTheme;
+  heroLayout?: HeroLayoutStyle;
   heroBanners: IHeroBanner[];
   seo: IStoreSeo;
   payment: IStorePayment;

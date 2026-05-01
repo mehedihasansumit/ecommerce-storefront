@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,14 @@ import {
   ActivityIndicator,
   Dimensions,
   Linking,
+  Modal,
+  PanResponder,
 } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +35,131 @@ import { StarRating } from "@/components/ui/StarRating";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+function getDistance(touches: { pageX: number; pageY: number }[]) {
+  const dx = touches[0].pageX - touches[1].pageX;
+  const dy = touches[0].pageY - touches[1].pageY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function ZoomableModal({
+  visible,
+  imageUrl,
+  onClose,
+}: {
+  visible: boolean;
+  imageUrl: string;
+  onClose: () => void;
+}) {
+  const scale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedScale = useRef(1);
+  const savedX = useRef(0);
+  const savedY = useRef(0);
+  const pinchDist = useRef(0);
+  const lastTap = useRef(0);
+
+  useEffect(() => {
+    if (visible) {
+      scale.value = 1;
+      translateX.value = 0;
+      translateY.value = 0;
+      savedScale.current = 1;
+      savedX.current = 0;
+      savedY.current = 0;
+    }
+  }, [visible]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (e) => {
+        const now = Date.now();
+        if (e.nativeEvent.touches.length === 1 && now - lastTap.current < 280) {
+          if (savedScale.current > 1) {
+            scale.value = withSpring(1);
+            translateX.value = withSpring(0);
+            translateY.value = withSpring(0);
+            savedScale.current = 1;
+            savedX.current = 0;
+            savedY.current = 0;
+          } else {
+            scale.value = withSpring(2.5);
+            savedScale.current = 2.5;
+          }
+        }
+        lastTap.current = now;
+        pinchDist.current = 0;
+      },
+      onPanResponderMove: (e, g) => {
+        const touches = e.nativeEvent.touches as { pageX: number; pageY: number }[];
+        if (touches.length === 2) {
+          if (pinchDist.current === 0) pinchDist.current = getDistance(touches);
+          const dist = getDistance(touches);
+          scale.value = Math.max(1, Math.min(5, savedScale.current * dist / pinchDist.current));
+        } else if (touches.length === 1 && savedScale.current > 1) {
+          translateX.value = savedX.current + g.dx;
+          translateY.value = savedY.current + g.dy;
+        }
+      },
+      onPanResponderRelease: (_, g) => {
+        const sc = scale.value;
+        savedScale.current = sc;
+        pinchDist.current = 0;
+        if (sc <= 1.05) {
+          scale.value = withSpring(1);
+          savedScale.current = 1;
+          translateX.value = withSpring(0);
+          translateY.value = withSpring(0);
+          savedX.current = 0;
+          savedY.current = 0;
+          if (g.dy > 80 && Math.abs(g.dx) < 60) onClose();
+        } else {
+          savedX.current = translateX.value;
+          savedY.current = translateY.value;
+        }
+      },
+    })
+  ).current;
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+    ],
+  }));
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      statusBarTranslucent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={zoomStyles.backdrop}>
+        <TouchableOpacity
+          style={zoomStyles.closeBtn}
+          onPress={onClose}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <Ionicons name="close" size={26} color="#fff" />
+        </TouchableOpacity>
+        <Animated.View style={[zoomStyles.imageWrap, animatedStyle]} {...panResponder.panHandlers}>
+          <Image
+            source={resolveImageUrl(imageUrl)}
+            style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH }}
+            contentFit="contain"
+          />
+        </Animated.View>
+        <Text style={zoomStyles.hint}>Pinch · Double-tap · Swipe down to close</Text>
+      </View>
+    </Modal>
+  );
+}
+
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data: product, isLoading, error } = useProduct(slug);
@@ -39,6 +171,7 @@ export default function ProductDetailScreen() {
   const cartCount = useCartStore((s) => s.itemCount);
 
   const [selectedImage, setSelectedImage] = useState(0);
+  const [zoomVisible, setZoomVisible] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -49,7 +182,6 @@ export default function ProductDetailScreen() {
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.headerBtn}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="arrow-back" size={22} color={theme.headerText} />
         </TouchableOpacity>
@@ -96,7 +228,6 @@ export default function ProductDetailScreen() {
 
   const name = t(product.name, locale);
   const description = t(product.description, locale);
-  const images = product.images.length > 0 ? product.images : [];
 
   const selectedVariant: IProductVariant | undefined =
     product.variants.length > 0
@@ -104,6 +235,17 @@ export default function ProductDetailScreen() {
           Object.entries(selectedOptions).every(([key, val]) => v.optionValues[key] === val)
         )
       : undefined;
+
+  const images =
+    selectedVariant?.images?.length
+      ? selectedVariant.images
+      : product.images.length > 0
+      ? product.images
+      : [];
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedVariant?._id]);
 
   const price = selectedVariant?.price ?? product.price;
   const compareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
@@ -151,19 +293,26 @@ export default function ProductDetailScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Image gallery */}
-        <View style={[styles.galleryContainer, { backgroundColor: theme.surface }]}>
+        <TouchableOpacity
+          activeOpacity={0.95}
+          onPress={() => setZoomVisible(true)}
+          style={[styles.galleryContainer, { backgroundColor: theme.surface }]}
+        >
           <Image
             source={resolveImageUrl(images[selectedImage]?.url || product.thumbnail)}
             style={styles.mainImage}
-            contentFit="cover"
+            contentFit="contain"
             transition={150}
           />
+          <View style={styles.zoomHint}>
+            <Ionicons name="expand-outline" size={18} color="rgba(255,255,255,0.8)" />
+          </View>
           {hasDiscount && (
             <View style={[styles.discountBadge, { backgroundColor: theme.error }]}>
               <Text style={styles.discountText}>-{discountPct}%</Text>
             </View>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* Thumbnail strip */}
         {images.length > 1 && (
@@ -314,6 +463,12 @@ export default function ProductDetailScreen() {
         <ReviewSection productId={product._id} primaryColor={primaryColor} />
       </ScrollView>
 
+      <ZoomableModal
+        visible={zoomVisible}
+        imageUrl={images[selectedImage]?.url || product.thumbnail}
+        onClose={() => setZoomVisible(false)}
+      />
+
       {/* Sticky add-to-cart bar */}
       <SafeAreaView
         edges={["bottom"]}
@@ -358,7 +513,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
   },
-  headerBtn: { padding: 6, position: "relative" },
+  headerBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", position: "relative" },
   cartBadge: {
     position: "absolute",
     top: 2,
@@ -373,6 +528,14 @@ const styles = StyleSheet.create({
   cartBadgeText: { color: "#fff", fontSize: 9, fontWeight: "800" },
   galleryContainer: { width: SCREEN_WIDTH, height: SCREEN_WIDTH },
   mainImage: { width: "100%", height: "100%" },
+  zoomHint: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    borderRadius: 8,
+    padding: 5,
+  },
   discountBadge: {
     position: "absolute",
     top: 12,
@@ -452,4 +615,32 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   addBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+});
+
+const zoomStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.96)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 52,
+    right: 20,
+    zIndex: 10,
+    padding: 8,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 20,
+  },
+  imageWrap: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_WIDTH,
+  },
+  hint: {
+    position: "absolute",
+    bottom: 48,
+    color: "rgba(255,255,255,0.35)",
+    fontSize: 12,
+  },
 });

@@ -8,7 +8,7 @@ import { useOrders } from "@/hooks/useOrders";
 import { useAuthStore } from "@/store/auth.store";
 import { useTheme } from "@/context/ThemeContext";
 import { useSettingsStore } from "@/store/settings.store";
-import { SkeletonOrderRow } from "@/components/ui/Skeleton";
+import { SkeletonOrderRow, StatusPill, EmptyState } from "@/components/ui";
 import { ORDER_STATUS_LABELS } from "@/shared/lib/constants";
 import type { IOrder } from "@/shared/types/order";
 
@@ -22,25 +22,9 @@ const STATUS_FILTERS = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-function getStatusColor(
-  status: string,
-  theme: ReturnType<typeof useTheme>
-): { bg: string; text: string } {
-  switch (status) {
-    case "pending":    return { bg: "#FEF3C7", text: "#92400E" };
-    case "confirmed":  return { bg: "#DBEAFE", text: "#1E40AF" };
-    case "processing": return { bg: "#EDE9FE", text: "#5B21B6" };
-    case "shipped":    return { bg: "#CFFAFE", text: "#0E7490" };
-    case "delivered":  return { bg: theme.success + "22", text: theme.success };
-    case "cancelled":  return { bg: theme.error + "18", text: theme.error };
-    default:           return { bg: theme.surface, text: theme.textSecondary };
-  }
-}
-
 function OrderCard({ order }: { order: IOrder }) {
   const theme = useTheme();
   const locale = useSettingsStore((s) => s.locale);
-  const c = getStatusColor(order.status, theme);
 
   const dateLocale = locale === "bn" ? "bn-BD" : "en-US";
 
@@ -52,11 +36,7 @@ function OrderCard({ order }: { order: IOrder }) {
     >
       <View style={styles.cardTop}>
         <Text style={[styles.orderNum, { color: theme.textColor }]}>#{order.orderNumber}</Text>
-        <View style={[styles.badge, { backgroundColor: c.bg }]}>
-          <Text style={[styles.badgeText, { color: c.text }]}>
-            {ORDER_STATUS_LABELS[order.status] ?? order.status}
-          </Text>
-        </View>
+        <StatusPill status={order.status} label={ORDER_STATUS_LABELS[order.status] ?? order.status} />
       </View>
       <Text style={[styles.date, { color: theme.textTertiary }]}>
         {new Date(order.createdAt).toLocaleDateString(dateLocale, {
@@ -99,18 +79,12 @@ export default function OrdersScreen() {
   if (!user) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.surface }]} edges={["top"]}>
-        <View style={styles.center}>
-          <Ionicons name="receipt-outline" size={56} color={theme.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: theme.textSecondary }]}>
-            Sign in to view orders
-          </Text>
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.primaryColor }]}
-            onPress={() => router.push("/(auth)/login")}
-          >
-            <Text style={styles.actionBtnText}>Sign In</Text>
-          </TouchableOpacity>
-        </View>
+        <EmptyState
+          icon="receipt-outline"
+          title="Sign in to view orders"
+          actionLabel="Sign In"
+          onAction={() => router.push("/(auth)/login")}
+        />
       </SafeAreaView>
     );
   }
@@ -136,18 +110,12 @@ export default function OrdersScreen() {
         <View style={[styles.titleBar, { backgroundColor: theme.cardBg, borderBottomColor: theme.border }]}>
           <Text style={[styles.title, { color: theme.textColor }]}>My Orders</Text>
         </View>
-        <View style={styles.center}>
-          <Ionicons name="cloud-offline-outline" size={48} color={theme.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: theme.textSecondary }]}>
-            Failed to load orders
-          </Text>
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.primaryColor }]}
-            onPress={() => refetch()}
-          >
-            <Text style={styles.actionBtnText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
+        <EmptyState
+          icon="cloud-offline-outline"
+          title="Failed to load orders"
+          actionLabel="Try Again"
+          onAction={() => refetch()}
+        />
       </SafeAreaView>
     );
   }
@@ -197,24 +165,12 @@ export default function OrdersScreen() {
       )}
 
       {filteredOrders.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="receipt-outline" size={56} color={theme.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: theme.textSecondary }]}>
-            {orders.length === 0 ? "No orders yet" : "No orders in this status"}
-          </Text>
-          {orders.length === 0 ? (
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: theme.primaryColor }]}
-              onPress={() => router.push("/(tabs)/products")}
-            >
-              <Text style={styles.actionBtnText}>Start Shopping</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={() => setStatusFilter("all")}>
-              <Text style={[styles.clearFilter, { color: theme.primaryColor }]}>Show all orders</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <EmptyState
+          icon="receipt-outline"
+          title={orders.length === 0 ? "No orders yet" : "No orders in this status"}
+          actionLabel={orders.length === 0 ? "Start Shopping" : "Show all orders"}
+          onAction={orders.length === 0 ? () => router.push("/(tabs)/products") : () => setStatusFilter("all")}
+        />
       ) : (
         <FlashList
           data={filteredOrders}
@@ -262,11 +218,6 @@ const styles = StyleSheet.create({
   },
   filterChipText: { fontSize: 12, fontWeight: "600" },
   filterChipCount: { fontSize: 11, fontWeight: "500" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16 },
-  emptyTitle: { fontSize: 16 },
-  clearFilter: { fontSize: 14, fontWeight: "600" },
-  actionBtn: { paddingHorizontal: 28, paddingVertical: 12, borderRadius: 10 },
-  actionBtnText: { color: "#fff", fontWeight: "600", fontSize: 15 },
   list: { padding: 16 },
   card: {
     borderRadius: 12,
@@ -282,8 +233,6 @@ const styles = StyleSheet.create({
   },
   cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   orderNum: { fontSize: 15, fontWeight: "700" },
-  badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
-  badgeText: { fontSize: 12, fontWeight: "600" },
   date: { fontSize: 12 },
   itemSummary: { fontSize: 13 },
   cardBottom: {

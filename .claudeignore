@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+mobile-app/node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Generated files
+next-env.d.ts
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (local dev only)
+public/uploads/
+
+# Environment secrets
+.env*.local
+.env
+
+# Lock files (large, rarely useful)
+package-lock.json
+mobile-app/package-lock.json
+yarn.lock
+pnpm-lock.yaml

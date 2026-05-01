@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { getTenant } from "@/shared/lib/tenant";
 import { TenantProvider, ThemeProvider } from "@/shared/context";
@@ -18,6 +18,18 @@ function localizedValue(
   return value[locale] || value["en"] || Object.values(value)[0] || fallback;
 }
 
+export async function generateViewport(): Promise<Viewport> {
+  const tenant = await getTenant();
+  const light = tenant?.theme?.primaryColor ?? "#3B82F6";
+  const dark = tenant?.theme?.dark?.primaryColor ?? light;
+  return {
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: light },
+      { media: "(prefers-color-scheme: dark)", color: dark },
+    ],
+  };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
   if (!tenant) {
@@ -32,7 +44,16 @@ export async function generateMetadata(): Promise<Metadata> {
       locale,
       `Shop at ${tenant.name}`
     ),
-    icons: favicon ? { icon: favicon, shortcut: favicon } : undefined,
+    icons: {
+      icon: favicon || "/favicon.ico",
+      shortcut: favicon || "/favicon.ico",
+      apple: "/icons/apple-touch-icon.png",
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: tenant.name,
+    },
   };
 }
 
@@ -129,6 +150,11 @@ export default async function RootLayout({
             </ThemeProvider>
           </TenantProvider>
         </NextIntlClientProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(function(){});})}`,
+          }}
+        />
       </body>
     </html>
   );

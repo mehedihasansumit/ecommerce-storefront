@@ -85,8 +85,8 @@ function HeroCarousel({ banners, primaryColor }: { banners: IHeroBanner[]; prima
                 <Text style={styles.heroSubtitle}>{t(item.subtitle, locale)}</Text>
               )}
               {item.linkText && (
-                <View style={[styles.heroCta, { backgroundColor: primaryColor }]}>
-                  <Text style={styles.heroCtaText}>{item.linkText}</Text>
+                <View style={styles.heroCta}>
+                  <Text style={[styles.heroCtaText, { color: primaryColor }]}>{item.linkText}</Text>
                 </View>
               )}
             </View>
@@ -360,8 +360,8 @@ const styles = StyleSheet.create({
   },
   logo: { height: 36, width: 120 },
   storeName: { fontSize: 18, fontWeight: "800" },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 4 },
-  headerBtn: { padding: 6, position: "relative" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 2 },
+  headerBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", position: "relative" },
   cartBadge: {
     position: "absolute",
     top: 2,
@@ -384,16 +384,17 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.32)",
     gap: 6,
   },
-  heroTitle: { fontSize: 24, fontWeight: "800", color: "#fff", textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
-  heroSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.9)" },
+  heroTitle: { fontSize: 24, fontWeight: "800", color: "#fff", letterSpacing: -0.3, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
+  heroSubtitle: { fontSize: 13, color: "rgba(255,255,255,0.85)", fontWeight: "500" },
   heroCta: {
     alignSelf: "flex-start",
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    marginTop: 6,
+    marginTop: 12,
+    backgroundColor: "#fff",
   },
-  heroCtaText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  heroCtaText: { fontSize: 13, fontWeight: "700" },
   dots: {
     position: "absolute",
     bottom: 16,

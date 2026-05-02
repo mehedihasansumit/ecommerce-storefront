@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { THEME_TOKENS } from "./theme-tokens";
 
 /** Accepts { en: "...", bn: "..." } or a plain string (wrapped to { en: value }). */
 const localizedStringSchema = z
@@ -9,50 +10,16 @@ const localizedStringSchema = z
   .optional()
   .default({});
 
+const themeColorFields = Object.fromEntries(
+  THEME_TOKENS.map((t) => [t.key, z.string().optional()])
+);
+
 export const storeThemeSchema = z.object({
-  primaryColor: z.string().optional(),
-  secondaryColor: z.string().optional(),
-  accentColor: z.string().optional(),
-  backgroundColor: z.string().optional(),
-  textColor: z.string().optional(),
-  headerBg: z.string().optional(),
-  headerText: z.string().optional(),
+  ...themeColorFields,
   fontFamily: z.string().optional(),
   borderRadius: z.string().optional(),
   layoutStyle: z.enum(["grid", "list", "masonry"]).optional(),
-  newsletterBg: z.string().optional(),
-  newsletterText: z.string().optional(),
-  newsletterBtnBg: z.string().optional(),
-  newsletterBtnText: z.string().optional(),
-  priceColor: z.string().optional(),
-  saleBadgeBg: z.string().optional(),
-  saleBadgeText: z.string().optional(),
-  footerBg: z.string().optional(),
-  footerText: z.string().optional(),
-  linkColor: z.string().optional(),
-  cardBg: z.string().optional(),
-  dark: z.object({
-    primaryColor:    z.string().optional(),
-    secondaryColor:  z.string().optional(),
-    accentColor:     z.string().optional(),
-    backgroundColor: z.string().optional(),
-    textColor:       z.string().optional(),
-    surfaceColor:    z.string().optional(),
-    borderColor:     z.string().optional(),
-    headerBg:        z.string().optional(),
-    headerText:      z.string().optional(),
-    newsletterBg:    z.string().optional(),
-    newsletterText:  z.string().optional(),
-    newsletterBtnBg: z.string().optional(),
-    newsletterBtnText: z.string().optional(),
-    priceColor:      z.string().optional(),
-    saleBadgeBg:     z.string().optional(),
-    saleBadgeText:   z.string().optional(),
-    footerBg:        z.string().optional(),
-    footerText:      z.string().optional(),
-    linkColor:       z.string().optional(),
-    cardBg:          z.string().optional(),
-  }).optional(),
+  dark: z.object(themeColorFields).optional(),
 });
 
 export const createStoreSchema = z.object({

@@ -11,12 +11,16 @@ const StoreSchema = new Schema<IStoreDocument>(
     logo: { type: String, default: "" },
     favicon: { type: String, default: "" },
 
+    // NOTE: Color fields mirror `THEME_TOKENS` in ./theme-tokens.ts.
+    // Add new colors there too (registry drives form, CSS vars, defaults, Zod).
     theme: {
       primaryColor: { type: String, default: "#3B82F6" },
       secondaryColor: { type: String, default: "#10B981" },
       accentColor: { type: String, default: "#F59E0B" },
       backgroundColor: { type: String, default: "#FFFFFF" },
       textColor: { type: String, default: "#111827" },
+      surfaceColor: { type: String },
+      borderColor: { type: String },
       headerBg: { type: String, default: "#111827" },
       headerText: { type: String, default: "#FFFFFF" },
       fontFamily: { type: String, default: "Inter" },

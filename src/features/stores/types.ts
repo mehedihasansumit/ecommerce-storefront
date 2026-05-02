@@ -24,12 +24,17 @@ export interface IStoreDarkTheme {
   cardBg?: string;
 }
 
+// NOTE: Color tokens here mirror `THEME_TOKENS` in ./theme-tokens.ts.
+// When adding a color, also add it to that registry — the registry drives
+// form rendering, CSS-var injection, defaults, and Zod field set.
 export interface IStoreTheme {
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
   backgroundColor: string;
   textColor: string;
+  surfaceColor?: string;
+  borderColor?: string;
   headerBg: string;
   headerText: string;
   fontFamily: string;

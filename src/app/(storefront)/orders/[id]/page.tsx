@@ -324,28 +324,94 @@ export default function OrderDetailPage({
       {/* ── Confirmation banner ── */}
       {confirmed && (
         <div
-          className="rounded-2xl p-6 text-center mb-6"
+          className="relative overflow-hidden rounded-2xl p-8 sm:p-10 text-center mb-6 animate-fade-in-up"
           style={{
-            background: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, color-mix(in srgb, var(--color-primary) 4%, transparent) 100%)",
             border:
-              "1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)",
+              "1px solid color-mix(in srgb, var(--color-primary) 22%, transparent)",
           }}
         >
+          {/* decorative blobs */}
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-            style={{ background: "var(--color-primary)" }}
-          >
-            <CheckCircle size={28} color="#fff" />
+            aria-hidden
+            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-30 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full opacity-20 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
+            }}
+          />
+
+          <div className="relative">
+            {/* check circle */}
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 animate-scale-in"
+              style={{
+                background: "var(--color-primary)",
+                boxShadow:
+                  "0 0 0 8px color-mix(in srgb, var(--color-primary) 14%, transparent), 0 10px 30px -8px color-mix(in srgb, var(--color-primary) 50%, transparent)",
+              }}
+            >
+              <CheckCircle size={40} color="#fff" strokeWidth={2.5} />
+            </div>
+
+            <h1
+              className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1.5"
+              style={{ color: "var(--color-primary)" }}
+            >
+              {t("congratulations")} <PartyPopper size={24} className="inline-block ml-1 align-middle" />
+            </h1>
+            <p className="text-base font-semibold text-[var(--color-text)] mb-1">
+              {t("orderPlaced")}
+            </p>
+            <p className="text-sm text-text-secondary mb-5">
+              {t("orderPlacedDesc", { phone: order.shippingAddress.phone })}
+            </p>
+
+            {/* order number chip */}
+            <div
+              className="inline-flex flex-col items-center gap-1 px-5 py-3 rounded-xl mb-5"
+              style={{
+                background: "var(--color-bg)",
+                border:
+                  "1px dashed color-mix(in srgb, var(--color-primary) 35%, transparent)",
+              }}
+            >
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                {t("orderNumberLabel")}
+              </span>
+              <span
+                className="text-base font-bold tracking-wide"
+                style={{ color: "var(--color-primary)" }}
+              >
+                {order.orderNumber}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-center gap-2.5">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md"
+                style={{ backgroundColor: "var(--color-primary)" }}
+              >
+                {t("continueShopping")}
+              </Link>
+              <Link
+                href="/orders"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold border border-border-subtle text-[var(--color-text)] bg-bg hover:bg-surface transition-colors"
+              >
+                {t("trackOrder")}
+              </Link>
+            </div>
           </div>
-          <h1
-            className="text-xl font-bold mb-1"
-            style={{ color: "var(--color-primary)" }}
-          >
-            {t("orderPlaced")}
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {t("orderPlacedDesc", { phone: order.shippingAddress.phone })}
-          </p>
         </div>
       )}
 

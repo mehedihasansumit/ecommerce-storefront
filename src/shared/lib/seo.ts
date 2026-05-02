@@ -16,7 +16,7 @@ export function createStoreMetadata(
   options: PageMetaOptions = {},
   locale = "en"
 ): Metadata {
-  const domain = store.domains[0] || "localhost:3000";
+  const domain = store.domains?.[0] || "localhost:3000";
   const baseUrl = `https://${domain}`;
   const storeTitle = t(store.seo.title, locale) || store.name;
   const title = options.title
@@ -59,7 +59,7 @@ export function buildProductJsonLd(product: IProduct, storeUrl: string, locale =
     "@type": "Product",
     name: t(product.name, locale),
     description: t(product.shortDescription, locale) || t(product.description, locale),
-    image: product.images.map((img) => img.url),
+    image: (product.images ?? []).map((img) => img.url),
     sku: product.sku,
     offers: {
       "@type": "Offer",
@@ -98,7 +98,7 @@ export function buildBreadcrumbJsonLd(
 }
 
 export function buildOrganizationJsonLd(store: IStore) {
-  const domain = store.domains[0] || "localhost:3000";
+  const domain = store.domains?.[0] || "localhost:3000";
   return {
     "@context": "https://schema.org",
     "@type": "Organization",

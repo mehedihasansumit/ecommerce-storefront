@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   AlertCircle,
   Check,
@@ -20,10 +20,19 @@ import {
   MessageCircle,
   Sparkles,
 } from "lucide-react";
-import type { IStore, HeroLayoutStyle } from "@/features/stores/types";
+import type { IStore, HeroLayoutStyle, IStoreTheme } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
 import { ImageInput } from "@/shared/components/ui";
+import {
+  THEME_TOKEN_GROUPS,
+  THEME_PRESETS,
+  getTokensByGroup,
+  getPresetSwatches,
+  type ThemeTokenDef,
+  type ThemeTokenGroup,
+  type ThemePreset,
+} from "@/features/stores/theme-tokens";
 
 interface StoreEditFormProps {
   store: IStore;
@@ -363,6 +372,17 @@ export default function StoreEditForm({
         ...prev.theme,
         dark: { ...prev.theme.dark, [key]: value },
       },
+    }));
+  };
+
+  const applyPreset = (preset: ThemePreset) => {
+    setFormData((prev) => ({
+      ...prev,
+      theme: {
+        ...prev.theme,
+        ...preset.light,
+        dark: { ...prev.theme.dark, ...preset.dark },
+      } as typeof prev.theme,
     }));
   };
 
@@ -720,277 +740,138 @@ export default function StoreEditForm({
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Controls */}
             <div className="lg:col-span-3 space-y-5">
-              <SectionTitle>Colours</SectionTitle>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <ColorInput
-                  label="Primary"
-                  value={formData.theme.primaryColor}
-                  onChange={(v) => handleColorChange("primaryColor", v)}
-                  disabled={loading}
-                />
-                <ColorInput
-                  label="Secondary"
-                  value={formData.theme.secondaryColor}
-                  onChange={(v) => handleColorChange("secondaryColor", v)}
-                  disabled={loading}
-                />
-                <ColorInput
-                  label="Accent"
-                  value={formData.theme.accentColor}
-                  onChange={(v) => handleColorChange("accentColor", v)}
-                  disabled={loading}
-                />
-                <ColorInput
-                  label="Background"
-                  value={formData.theme.backgroundColor}
-                  onChange={(v) => handleColorChange("backgroundColor", v)}
-                  disabled={loading}
-                />
-                <ColorInput
-                  label="Body Text"
-                  value={formData.theme.textColor}
-                  onChange={(v) => handleColorChange("textColor", v)}
-                  disabled={loading}
-                />
-                <ColorInput
-                  label="Header BG"
-                  value={formData.theme.headerBg}
-                  onChange={(v) => handleColorChange("headerBg", v)}
-                  disabled={loading}
-                />
-                <ColorInput
-                  label="Header Text"
-                  value={formData.theme.headerText}
-                  onChange={(v) => handleColorChange("headerText", v)}
-                  disabled={loading}
-                />
-              </div>
-
+              {/* Preset palettes */}
               <div className="pt-1">
-                <SectionTitle>Dark Mode Colours</SectionTitle>
-                <p className="text-xs text-admin-text-muted mt-0.5 mb-3">Applied when visitors enable dark mode on your storefront.</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <ColorInput
-                    label="Dark Primary"
-                    value={formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleDarkColorChange("primaryColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Secondary"
-                    value={formData.theme.dark?.secondaryColor ?? formData.theme.secondaryColor}
-                    onChange={(v) => handleDarkColorChange("secondaryColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Accent"
-                    value={formData.theme.dark?.accentColor ?? formData.theme.accentColor}
-                    onChange={(v) => handleDarkColorChange("accentColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Background"
-                    value={formData.theme.dark?.backgroundColor ?? "#111827"}
-                    onChange={(v) => handleDarkColorChange("backgroundColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Body Text"
-                    value={formData.theme.dark?.textColor ?? "#F9FAFB"}
-                    onChange={(v) => handleDarkColorChange("textColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Surface"
-                    value={formData.theme.dark?.surfaceColor ?? "#1F2937"}
-                    onChange={(v) => handleDarkColorChange("surfaceColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Border"
-                    value={formData.theme.dark?.borderColor ?? "#374151"}
-                    onChange={(v) => handleDarkColorChange("borderColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Header BG"
-                    value={formData.theme.dark?.headerBg ?? "#0F172A"}
-                    onChange={(v) => handleDarkColorChange("headerBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Dark Header Text"
-                    value={formData.theme.dark?.headerText ?? "#F8FAFC"}
-                    onChange={(v) => handleDarkColorChange("headerText", v)}
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              {/* Advanced Colors */}
-              <div className="pt-1">
-                <SectionTitle>Advanced Colours</SectionTitle>
+                <SectionTitle>Palette Presets</SectionTitle>
                 <p className="text-xs text-admin-text-muted mt-0.5 mb-3">
-                  Fine-tune individual UI zones. Leave blank to inherit the primary/secondary colours.
+                  One-click starting point. Replaces all colour fields. Tweak afterwards.
                 </p>
-
-                {/* Card Background */}
-                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Card Background</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
-                  <ColorInput
-                    label="Card BG (Light)"
-                    value={formData.theme.cardBg ?? formData.theme.backgroundColor}
-                    onChange={(v) => handleColorChange("cardBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Card BG (Dark)"
-                    value={formData.theme.dark?.cardBg ?? formData.theme.dark?.backgroundColor ?? "#111827"}
-                    onChange={(v) => handleDarkColorChange("cardBg", v)}
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Newsletter Section */}
-                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Newsletter Section</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
-                  <ColorInput
-                    label="BG (Light)"
-                    value={formData.theme.newsletterBg ?? formData.theme.primaryColor}
-                    onChange={(v) => handleColorChange("newsletterBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="BG (Dark)"
-                    value={formData.theme.dark?.newsletterBg ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleDarkColorChange("newsletterBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Text (Light)"
-                    value={formData.theme.newsletterText ?? "#FFFFFF"}
-                    onChange={(v) => handleColorChange("newsletterText", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Text (Dark)"
-                    value={formData.theme.dark?.newsletterText ?? "#FFFFFF"}
-                    onChange={(v) => handleDarkColorChange("newsletterText", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Button BG (Light)"
-                    value={formData.theme.newsletterBtnBg ?? "#FFFFFF"}
-                    onChange={(v) => handleColorChange("newsletterBtnBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Button BG (Dark)"
-                    value={formData.theme.dark?.newsletterBtnBg ?? "#1F2937"}
-                    onChange={(v) => handleDarkColorChange("newsletterBtnBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Button Text (Light)"
-                    value={formData.theme.newsletterBtnText ?? formData.theme.primaryColor}
-                    onChange={(v) => handleColorChange("newsletterBtnText", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Button Text (Dark)"
-                    value={formData.theme.dark?.newsletterBtnText ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleDarkColorChange("newsletterBtnText", v)}
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Products & Prices */}
-                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Products &amp; Prices</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-1">
-                  <ColorInput
-                    label="Price (Light)"
-                    value={formData.theme.priceColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleColorChange("priceColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Price (Dark)"
-                    value={formData.theme.dark?.priceColor ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleDarkColorChange("priceColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Sale Badge BG (Light)"
-                    value={formData.theme.saleBadgeBg ?? "#EF4444"}
-                    onChange={(v) => handleColorChange("saleBadgeBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Sale Badge BG (Dark)"
-                    value={formData.theme.dark?.saleBadgeBg ?? "#DC2626"}
-                    onChange={(v) => handleDarkColorChange("saleBadgeBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Sale Badge Text (Light)"
-                    value={formData.theme.saleBadgeText ?? "#FFFFFF"}
-                    onChange={(v) => handleColorChange("saleBadgeText", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Sale Badge Text (Dark)"
-                    value={formData.theme.dark?.saleBadgeText ?? "#FFFFFF"}
-                    onChange={(v) => handleDarkColorChange("saleBadgeText", v)}
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Footer */}
-                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Footer</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
-                  <ColorInput
-                    label="Footer BG (Light)"
-                    value={formData.theme.footerBg ?? formData.theme.headerBg}
-                    onChange={(v) => handleColorChange("footerBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Footer BG (Dark)"
-                    value={formData.theme.dark?.footerBg ?? formData.theme.dark?.headerBg ?? "#0F172A"}
-                    onChange={(v) => handleDarkColorChange("footerBg", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Footer Text (Light)"
-                    value={formData.theme.footerText ?? formData.theme.headerText}
-                    onChange={(v) => handleColorChange("footerText", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Footer Text (Dark)"
-                    value={formData.theme.dark?.footerText ?? formData.theme.dark?.headerText ?? "#F8FAFC"}
-                    onChange={(v) => handleDarkColorChange("footerText", v)}
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Links */}
-                <p className="text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2 mt-4">Links</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-1">
-                  <ColorInput
-                    label="Link (Light)"
-                    value={formData.theme.linkColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleColorChange("linkColor", v)}
-                    disabled={loading}
-                  />
-                  <ColorInput
-                    label="Link (Dark)"
-                    value={formData.theme.dark?.linkColor ?? formData.theme.dark?.primaryColor ?? formData.theme.primaryColor}
-                    onChange={(v) => handleDarkColorChange("linkColor", v)}
-                    disabled={loading}
-                  />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                  {THEME_PRESETS.map((preset) => {
+                    const swatches = getPresetSwatches(preset);
+                    const isActive = formData.theme.primaryColor === preset.light.primaryColor;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => applyPreset(preset)}
+                        disabled={loading}
+                        title={preset.description}
+                        className={`group text-left rounded-lg border p-3 transition-all hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          isActive
+                            ? "border-admin-text-primary ring-2 ring-admin-text-primary/20 bg-admin-chip"
+                            : "border-admin-border-md bg-admin-surface hover:border-admin-text-subtle"
+                        }`}
+                        style={{
+                          background: `linear-gradient(135deg, ${preset.light.backgroundColor} 0%, ${preset.light.surfaceColor} 100%)`,
+                        }}
+                      >
+                        <div className="flex items-center gap-1 mb-2">
+                          {swatches.map((c, i) => (
+                            <span
+                              key={i}
+                              className="w-5 h-5 rounded-full border border-white/80 shadow-sm"
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                        <div
+                          className="text-sm font-semibold leading-tight"
+                          style={{ color: preset.light.textColor }}
+                        >
+                          {preset.name}
+                        </div>
+                        <div
+                          className="text-[11px] mt-0.5 line-clamp-2"
+                          style={{ color: preset.light.textColor, opacity: 0.7 }}
+                        >
+                          {preset.description}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {(() => {
+                const groups = getTokensByGroup();
+                const orderedGroups = (Object.keys(THEME_TOKEN_GROUPS) as ThemeTokenGroup[])
+                  .filter((g) => groups[g].length > 0);
+
+                const resolveLight = (token: ThemeTokenDef): string => {
+                  const direct = (formData.theme as Record<string, unknown>)[token.key];
+                  if (typeof direct === "string" && direct) return direct;
+                  if (token.fallbackChain) {
+                    for (const fk of token.fallbackChain) {
+                      const v = (formData.theme as Record<string, unknown>)[fk];
+                      if (typeof v === "string" && v) return v;
+                    }
+                  }
+                  return token.lightDefault ?? "";
+                };
+
+                const resolveDark = (token: ThemeTokenDef): string => {
+                  const dark = formData.theme.dark as Record<string, unknown> | undefined;
+                  const direct = dark?.[token.key];
+                  if (typeof direct === "string" && direct) return direct;
+                  if (token.fallbackChain) {
+                    for (const fk of token.fallbackChain) {
+                      const v = dark?.[fk];
+                      if (typeof v === "string" && v) return v;
+                      const lightV = (formData.theme as Record<string, unknown>)[fk];
+                      if (typeof lightV === "string" && lightV) return lightV;
+                    }
+                  }
+                  if (token.darkDefault) return token.darkDefault;
+                  const lightDirect = (formData.theme as Record<string, unknown>)[token.key];
+                  if (typeof lightDirect === "string" && lightDirect) return lightDirect;
+                  return token.lightDefault ?? "";
+                };
+
+                return orderedGroups.map((groupKey) => {
+                  const meta = THEME_TOKEN_GROUPS[groupKey];
+                  const tokens = groups[groupKey];
+                  return (
+                    <div key={groupKey} className="pt-1">
+                      <SectionTitle>{meta.label}</SectionTitle>
+                      {meta.description && (
+                        <p className="text-xs text-admin-text-muted mt-0.5 mb-3">
+                          {meta.description}
+                        </p>
+                      )}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {tokens.map((token) => (
+                          <Fragment key={token.key}>
+                            {token.editableLight && (
+                              <ColorInput
+                                label={`${token.label} (Light)`}
+                                value={resolveLight(token)}
+                                onChange={(v) =>
+                                  handleColorChange(
+                                    token.key as keyof IStoreTheme,
+                                    v
+                                  )
+                                }
+                                disabled={loading}
+                              />
+                            )}
+                            {token.editableDark && (
+                              <ColorInput
+                                label={`${token.label} (Dark)`}
+                                value={resolveDark(token)}
+                                onChange={(v) =>
+                                  handleDarkColorChange(token.key, v)
+                                }
+                                disabled={loading}
+                              />
+                            )}
+                          </Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
 
               <div className="pt-1">
                 <SectionTitle>Typography &amp; Layout</SectionTitle>

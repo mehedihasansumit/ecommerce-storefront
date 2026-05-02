@@ -1,9 +1,14 @@
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `store-cache-${CACHE_VERSION}`;
 const ALL_CACHES = [STATIC_CACHE, DYNAMIC_CACHE];
 
 const PRECACHE_URLS = ["/", "/offline"];
+
+// --- Message ---
+self.addEventListener("message", (event) => {
+  if (event.data === "SKIP_WAITING") self.skipWaiting();
+});
 
 // --- Install ---
 self.addEventListener("install", (event) => {
@@ -53,9 +58,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Images → cache first with network fallback, store in dynamic cache
+  // Images → stale-while-revalidate so updated images surface on next visit
   if (request.destination === "image") {
-    event.respondWith(cacheFirst(request, DYNAMIC_CACHE));
+    event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE));
     return;
   }
 

@@ -1,45 +1,19 @@
-export const DEFAULT_THEME = {
-  primaryColor: "#3B82F6",
-  secondaryColor: "#10B981",
-  accentColor: "#F59E0B",
-  backgroundColor: "#FFFFFF",
-  textColor: "#111827",
-  headerBg: "#111827",
-  headerText: "#FFFFFF",
+import type { IStoreTheme } from "@/features/stores/types";
+import {
+  getDefaultLightTheme,
+  getDefaultDarkTheme,
+} from "@/features/stores/theme-tokens";
+
+// Source colors from THEME_TOKENS registry — single source of truth.
+// Required IStoreTheme fields are guaranteed by registry `lightDefault`s.
+// Adding a color in `theme-tokens.ts` automatically reflects here.
+export const DEFAULT_THEME: IStoreTheme = {
+  ...(getDefaultLightTheme() as Partial<IStoreTheme>),
   fontFamily: "Inter",
   borderRadius: "0.5rem",
-  layoutStyle: "grid" as const,
-  newsletterBg: undefined as string | undefined,
-  newsletterText: undefined as string | undefined,
-  newsletterBtnBg: undefined as string | undefined,
-  newsletterBtnText: undefined as string | undefined,
-  priceColor: undefined as string | undefined,
-  saleBadgeBg: undefined as string | undefined,
-  saleBadgeText: undefined as string | undefined,
-  footerBg: undefined as string | undefined,
-  footerText: undefined as string | undefined,
-  linkColor: undefined as string | undefined,
-  cardBg: undefined as string | undefined,
-  dark: {
-    backgroundColor: "#111827",
-    textColor: "#F9FAFB",
-    surfaceColor: "#1F2937",
-    borderColor: "#374151",
-    headerBg: "#0F172A",
-    headerText: "#F8FAFC",
-    newsletterBg: undefined as string | undefined,
-    newsletterText: undefined as string | undefined,
-    newsletterBtnBg: undefined as string | undefined,
-    newsletterBtnText: undefined as string | undefined,
-    priceColor: undefined as string | undefined,
-    saleBadgeBg: undefined as string | undefined,
-    saleBadgeText: undefined as string | undefined,
-    footerBg: undefined as string | undefined,
-    footerText: undefined as string | undefined,
-    linkColor: undefined as string | undefined,
-    cardBg: undefined as string | undefined,
-  },
-};
+  layoutStyle: "grid",
+  dark: getDefaultDarkTheme() as IStoreTheme["dark"],
+} as IStoreTheme;
 
 export const ITEMS_PER_PAGE = 12;
 

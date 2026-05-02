@@ -30,7 +30,7 @@ export async function generateMetadata({
   return createStoreMetadata(tenant, {
     title: t(product.seo.title, locale) || t(product.name, locale),
     description: t(product.seo.description, locale) || t(product.shortDescription, locale),
-    image: product.thumbnail || product.images[0]?.url,
+    image: product.thumbnail || product.images?.[0]?.url,
     path: `/products/${product.slug}`,
   }, locale);
 }
@@ -49,7 +49,7 @@ export default async function ProductDetailPage({
   const product = await ProductService.getBySlug(tenant._id, slug);
   if (!product) notFound();
 
-  const domain = tenant.domains[0] || "localhost:3000";
+  const domain = tenant.domains?.[0] || "localhost:3000";
   const storeUrl = `https://${domain}`;
 
   const productJsonLd = buildProductJsonLd(product, storeUrl, locale);
@@ -118,9 +118,9 @@ export default async function ProductDetailPage({
             </div>
           )}
 
-          {product.tags.length > 0 && (
+          {(product.tags?.length ?? 0) > 0 && (
             <div className="mt-8 flex flex-wrap gap-2">
-              {product.tags.map((tag) => (
+              {product.tags?.map((tag) => (
                 <span
                   key={tag}
                   className="px-3 py-1.5 bg-surface border border-border-subtle text-text-secondary text-xs font-medium hover:bg-border-subtle dark:hover:bg-gray-700 transition-colors cursor-default"

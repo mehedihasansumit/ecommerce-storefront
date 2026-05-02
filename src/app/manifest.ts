@@ -10,10 +10,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const bgColor = tenant?.theme?.backgroundColor ?? "#FFFFFF";
 
   return {
+    id: "/",
     name,
     short_name: shortName,
     description: `Shop at ${name}`,
     start_url: "/",
+    scope: "/",
     display: "standalone",
     background_color: bgColor,
     theme_color: themeColor,
@@ -23,6 +25,18 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       {
         src: "/icons/icon-192.png",
         sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },

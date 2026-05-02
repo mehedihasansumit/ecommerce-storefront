@@ -179,24 +179,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
 
       {/* Actions */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50"
-          >
-            {loading ? "Saving..." : isEdit ? "Save Changes" : "Create Category"}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2 border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover"
-          >
-            Cancel
-          </button>
-        </div>
-
-        {isEdit && (
+        {isEdit ? (
           <button
             type="button"
             onClick={handleDelete}
@@ -205,7 +188,26 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
           >
             Delete Category
           </button>
+        ) : (
+          <span />
         )}
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="px-6 py-2 border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50"
+          >
+            {loading ? "Saving..." : isEdit ? "Save Changes" : "Create Category"}
+          </button>
+        </div>
       </div>
     </form>
   );

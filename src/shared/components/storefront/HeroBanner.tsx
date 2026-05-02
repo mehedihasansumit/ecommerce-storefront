@@ -124,6 +124,7 @@ function RotatingLayout({
   };
 
   const banner = banners[current];
+  const showOverlay = banner.showOverlay !== false;
   const sharedHandlers = {
     onMouseEnter: () => setIsPaused(true),
     onMouseLeave: () => setIsPaused(false),
@@ -227,14 +228,25 @@ function RotatingLayout({
         </div>
       ))}
 
-      <div
-        className="absolute inset-0 z-[3]"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%), linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)",
-        }}
-      />
+      {showOverlay && (
+        <div
+          className="absolute inset-0 z-[3]"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%), linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)",
+          }}
+        />
+      )}
 
+      {!showOverlay && banner.linkUrl && (
+        <Link
+          href={banner.linkUrl}
+          className="absolute inset-0 z-[4]"
+          aria-label={t(banner.title, locale)}
+        />
+      )}
+
+      {showOverlay && (
       <div className="absolute inset-0 z-[4] flex items-center">
         <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="max-w-2xl">
@@ -298,6 +310,7 @@ function RotatingLayout({
           </div>
         </div>
       </div>
+      )}
 
       {banners.length > 1 && (
         <div className="absolute bottom-8 right-6 sm:right-8 lg:right-12 z-[4] hidden md:flex items-end gap-3 text-white">
@@ -373,6 +386,7 @@ function SplitLayout({
   shopNow,
   locale,
 }: LayoutProps) {
+  const showOverlay = banner.showOverlay !== false;
   return (
     <section
       className="relative w-full overflow-hidden bg-gray-950 flex flex-col md:flex-row min-h-[28rem] md:h-[38rem] lg:h-[44rem]"
@@ -416,6 +430,7 @@ function SplitLayout({
         className="relative flex-1 flex flex-col justify-center px-8 md:px-12 lg:px-16 py-10 md:py-0"
         style={{ backgroundColor: "var(--color-bg, #ffffff)" }}
       >
+        {showOverlay && (
         <div className="max-w-lg">
           <div
             className="h-1 w-12 mb-8 rounded-full transition-all duration-700 ease-out"
@@ -467,6 +482,7 @@ function SplitLayout({
             </div>
           )}
         </div>
+        )}
 
         {/* Navigation dots */}
         {banners.length > 1 && (
@@ -527,6 +543,7 @@ function CenteredLayout({
   shopNow,
   locale,
 }: LayoutProps) {
+  const showOverlay = banner.showOverlay !== false;
   return (
     <section
       className="relative w-full h-[32rem] md:h-[38rem] lg:h-[44rem] overflow-hidden bg-gray-950"
@@ -559,13 +576,22 @@ function CenteredLayout({
         </div>
       ))}
 
-      {/* Radial dark overlay — heavier in center-bottom */}
-      <div
-        className="absolute inset-0 z-[3]"
-        style={{ background: "radial-gradient(ellipse at 50% 60%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.1) 100%)" }}
-      />
+      {showOverlay && (
+        <div
+          className="absolute inset-0 z-[3]"
+          style={{ background: "radial-gradient(ellipse at 50% 60%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.1) 100%)" }}
+        />
+      )}
 
-      {/* Content — centered */}
+      {!showOverlay && banner.linkUrl && (
+        <Link
+          href={banner.linkUrl}
+          className="absolute inset-0 z-[4]"
+          aria-label={t(banner.title, locale)}
+        />
+      )}
+
+      {showOverlay && (
       <div className="absolute inset-0 z-[4] flex items-center justify-center text-center px-6">
         <div className="max-w-3xl">
           {/* Label chip */}
@@ -616,6 +642,7 @@ function CenteredLayout({
           )}
         </div>
       </div>
+      )}
 
       {/* Dot navigation */}
       {banners.length > 1 && (
@@ -672,6 +699,7 @@ function MinimalLayout({
   shopNow,
   locale,
 }: LayoutProps) {
+  const showOverlay = banner.showOverlay !== false;
   return (
     <section
       className="relative w-full h-[32rem] md:h-[38rem] lg:h-[52rem] overflow-hidden bg-gray-950"
@@ -704,13 +732,22 @@ function MinimalLayout({
         </div>
       ))}
 
-      {/* Bottom gradient only — full image visible above */}
-      <div
-        className="absolute inset-x-0 bottom-0 z-[3] h-2/5"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)" }}
-      />
+      {showOverlay && (
+        <div
+          className="absolute inset-x-0 bottom-0 z-[3] h-2/5"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)" }}
+        />
+      )}
 
-      {/* Text — bottom-anchored */}
+      {!showOverlay && banner.linkUrl && (
+        <Link
+          href={banner.linkUrl}
+          className="absolute inset-0 z-[4]"
+          aria-label={t(banner.title, locale)}
+        />
+      )}
+
+      {showOverlay && (
       <div className="absolute inset-x-0 bottom-0 z-[4] pb-14 px-6 sm:px-10 lg:px-14">
         <div className="max-w-7xl mx-auto flex items-end justify-between gap-8">
           <div className="max-w-2xl">
@@ -755,6 +792,7 @@ function MinimalLayout({
           )}
         </div>
       </div>
+      )}
 
       {/* Arrows + dots at bottom-left */}
       {banners.length > 1 && (
@@ -821,32 +859,44 @@ function GridLayout({ banners }: { banners: IHeroBanner[] }) {
               className="object-cover transition-transform duration-[8s] ease-out group-hover:scale-105"
             />
           )}
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)" }}
-          />
-          <div className="absolute inset-0 flex items-end p-8 md:p-10 lg:p-12">
-            <div className="max-w-md">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight mb-3">
-                {t(main.title, locale)}
-              </h1>
-              {t(main.subtitle, locale) && (
-                <p className="text-white/70 text-sm md:text-base mb-6 leading-relaxed">
-                  {t(main.subtitle, locale)}
-                </p>
-              )}
-              {main.linkUrl && (
-                <Link
-                  href={main.linkUrl}
-                  className="group/btn inline-flex items-center gap-2.5 px-6 py-3 text-sm font-semibold rounded-full text-white transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5"
-                  style={{ backgroundColor: "var(--color-primary)" }}
-                >
-                  {main.linkText || tr("shopNow")}
-                  <ArrowRight size={15} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
-                </Link>
-              )}
+          {main.showOverlay !== false && (
+            <div
+              className="absolute inset-0"
+              style={{ background: "linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)" }}
+            />
+          )}
+          {main.showOverlay !== false ? (
+            <div className="absolute inset-0 flex items-end p-8 md:p-10 lg:p-12">
+              <div className="max-w-md">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight mb-3">
+                  {t(main.title, locale)}
+                </h1>
+                {t(main.subtitle, locale) && (
+                  <p className="text-white/70 text-sm md:text-base mb-6 leading-relaxed">
+                    {t(main.subtitle, locale)}
+                  </p>
+                )}
+                {main.linkUrl && (
+                  <Link
+                    href={main.linkUrl}
+                    className="group/btn inline-flex items-center gap-2.5 px-6 py-3 text-sm font-semibold rounded-full text-white transition-all duration-300 hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5"
+                    style={{ backgroundColor: "var(--color-primary)" }}
+                  >
+                    {main.linkText || tr("shopNow")}
+                    <ArrowRight size={15} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            main.linkUrl && (
+              <Link
+                href={main.linkUrl}
+                className="absolute inset-0"
+                aria-label={t(main.title, locale)}
+              />
+            )
+          )}
         </div>
 
         {/* Right column — up to 2 stacked panels */}
@@ -863,10 +913,13 @@ function GridLayout({ banners }: { banners: IHeroBanner[] }) {
                     className="object-cover transition-transform duration-[8s] ease-out group-hover:scale-105"
                   />
                 )}
-                <div
-                  className="absolute inset-0"
-                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)" }}
-                />
+                {b.showOverlay !== false && (
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)" }}
+                  />
+                )}
+                {b.showOverlay !== false ? (
                 <div className="absolute inset-0 flex items-end p-5 md:p-6">
                   <div>
                     <p className="text-white font-semibold text-base md:text-lg leading-tight mb-1.5">
@@ -883,6 +936,15 @@ function GridLayout({ banners }: { banners: IHeroBanner[] }) {
                     )}
                   </div>
                 </div>
+                ) : (
+                  b.linkUrl && (
+                    <Link
+                      href={b.linkUrl}
+                      className="absolute inset-0"
+                      aria-label={t(b.title, locale)}
+                    />
+                  )
+                )}
               </div>
             ))}
             {/* Placeholder if only 1 banner provided */}

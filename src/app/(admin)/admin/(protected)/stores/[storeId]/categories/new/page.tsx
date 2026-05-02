@@ -2,6 +2,8 @@ import { StoreService } from "@/features/stores/service";
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
+import { PageHeader } from "@/shared/components/ui";
 
 export default async function NewCategoryPage({
   params,
@@ -14,16 +16,20 @@ export default async function NewCategoryPage({
   if (!store) notFound();
 
   return (
-    <div>
-      <div className="flex items-center gap-2 text-sm text-admin-text-muted mb-6">
-        <Link href={`/admin/stores/${storeId}/categories`} className="hover:text-gray-900">
-          Categories
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900">New Category</span>
-      </div>
-
-      <h1 className="text-2xl font-bold mb-6">Add New Category</h1>
+    <div className="max-w-3xl mx-auto">
+      <PageHeader
+        breadcrumbs={
+          <Link
+            href={`/admin/stores/${storeId}/categories`}
+            className="inline-flex items-center gap-1 text-xs text-admin-text-subtle hover:text-admin-text-primary transition-colors"
+          >
+            <ChevronLeft size={14} />
+            Categories
+          </Link>
+        }
+        title="Add New Category"
+        description="Group products under a localized category name."
+      />
 
       <CategoryForm storeId={storeId} supportedLanguages={store.supportedLanguages} />
     </div>

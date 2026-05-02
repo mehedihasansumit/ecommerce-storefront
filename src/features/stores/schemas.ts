@@ -60,6 +60,7 @@ export const updateStoreSchema = z.object({
         subtitle: localizedStringSchema,
         linkUrl: z.string().optional(),
         linkText: z.string().optional(),
+        showOverlay: z.boolean().optional(),
       })
     )
     .optional(),

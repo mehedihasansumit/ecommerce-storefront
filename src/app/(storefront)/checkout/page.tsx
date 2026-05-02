@@ -102,11 +102,13 @@ export default function CheckoutPage() {
     }
   }, []);
 
+  const [orderPlaced, setOrderPlaced] = useState(false);
+
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => { if (mounted) loadSavedAddresses(); }, [mounted, loadSavedAddresses]);
   useEffect(() => {
-    if (mounted && items.length === 0) router.replace("/cart");
-  }, [mounted, items.length, router]);
+    if (mounted && !orderPlaced && items.length === 0) router.replace("/cart");
+  }, [mounted, orderPlaced, items.length, router]);
 
   function handleAddressSelect(address: IAddress | null) {
     if (address) {
@@ -201,6 +203,7 @@ export default function CheckoutPage() {
         return;
       }
 
+      setOrderPlaced(true);
       clearCart();
       router.push(`/orders/${data.orderId}?confirmed=1`);
     } catch {

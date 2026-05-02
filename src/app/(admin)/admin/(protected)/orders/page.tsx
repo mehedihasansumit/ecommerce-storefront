@@ -18,7 +18,7 @@ import type { OrderStatus } from "@/features/orders/types";
 
 export const metadata: Metadata = { title: "All Orders" };
 
-const PAGE_SIZE = 20;
+const LIMIT = 10;
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
   pending:    "bg-yellow-100 text-yellow-800",
@@ -43,18 +43,18 @@ const ALL_STATUSES: OrderStatus[] = [
 export default async function AllOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; storeId?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; storeId?: string; offset?: string }>;
 }) {
   const adminUser = await getAdminDbUser();
   if (!adminUser || !hasPermission(adminUser, PERMISSIONS.ORDERS_VIEW)) redirect("/admin");
 
-  const { status, storeId: filterStore, page: pageParam } = await searchParams;
-  const page = Math.max(1, parseInt(pageParam ?? "1") || 1);
+  const { status, storeId: filterStore, offset: offsetParam } = await searchParams;
+  const offset = Math.max(0, parseInt(offsetParam ?? "0") || 0);
 
   const [{ orders, total }, stores] = await Promise.all([
     OrderRepository.findAll({
-      page,
-      limit: PAGE_SIZE,
+      offset,
+      limit: LIMIT,
       status: status || undefined,
       storeId: filterStore || undefined,
     }),
@@ -62,13 +62,18 @@ export default async function AllOrdersPage({
   ]);
 
   const storeMap = Object.fromEntries(stores.map((s) => [s._id, s.name]));
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const prevOffset = Math.max(0, offset - LIMIT);
+  const nextOffset = offset + LIMIT;
+  const hasPrev = offset > 0;
+  const hasNext = nextOffset < total;
+  const rangeStart = total === 0 ? 0 : offset + 1;
+  const rangeEnd = Math.min(offset + LIMIT, total);
 
   function href(params: Record<string, string | undefined>) {
     const merged: Record<string, string | undefined> = {
       status,
       storeId: filterStore,
-      page: undefined,
+      offset: undefined,
       ...params,
     };
     const qs = Object.entries(merged)
@@ -78,8 +83,8 @@ export default async function AllOrdersPage({
     return `/admin/orders${qs ? `?${qs}` : ""}`;
   }
 
-  function pageHref(p: number) {
-    return href({ page: String(p), status, storeId: filterStore });
+  function offsetHref(o: number) {
+    return href({ offset: o > 0 ? String(o) : undefined, status, storeId: filterStore });
   }
 
   return (
@@ -317,56 +322,30 @@ export default async function AllOrdersPage({
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {(hasPrev || hasNext) && (
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-admin-text-muted">
-                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
+                Showing {rangeStart}–{rangeEnd} of {total}
               </p>
               <div className="flex items-center gap-1">
                 <Link
-                  href={pageHref(page - 1)}
-                  aria-disabled={page <= 1}
+                  href={offsetHref(prevOffset)}
+                  aria-disabled={!hasPrev}
+                  aria-label="Previous page"
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    page <= 1
+                    !hasPrev
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-                  .reduce<(number | "…")[]>((acc, p, i, arr) => {
-                    if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("…");
-                    acc.push(p);
-                    return acc;
-                  }, [])
-                  .map((p, i) =>
-                    p === "…" ? (
-                      <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle">
-                        …
-                      </span>
-                    ) : (
-                      <Link
-                        key={p}
-                        href={pageHref(p as number)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
-                          page === p
-                            ? "bg-gray-900 text-white"
-                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
-                        }`}
-                      >
-                        {p}
-                      </Link>
-                    )
-                  )}
-
                 <Link
-                  href={pageHref(page + 1)}
-                  aria-disabled={page >= totalPages}
+                  href={offsetHref(nextOffset)}
+                  aria-disabled={!hasNext}
+                  aria-label="Next page"
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    page >= totalPages
+                    !hasNext
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
                   }`}

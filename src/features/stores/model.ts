@@ -78,6 +78,7 @@ const StoreSchema = new Schema<IStoreDocument>(
         subtitle: { type: Schema.Types.Mixed, default: {} },
         linkUrl: String,
         linkText: String,
+        showOverlay: { type: Boolean, default: true },
       },
     ],
 

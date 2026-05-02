@@ -170,11 +170,11 @@ function StatusTimeline({ order, t }: { order: IOrder; t: TFn }) {
                   isFirst
                     ? {
                         background: isCancelled
-                          ? "rgba(239,68,68,0.06)"
-                          : "color-mix(in srgb, var(--color-primary) 7%, transparent)",
+                          ? "rgba(239,68,68,0.1)"
+                          : "color-mix(in srgb, var(--color-primary) 12%, transparent)",
                         border: isCancelled
-                          ? "1px solid rgba(239,68,68,0.15)"
-                          : "1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)",
+                          ? "1px solid rgba(239,68,68,0.25)"
+                          : "1px solid color-mix(in srgb, var(--color-primary) 28%, transparent)",
                       }
                     : { background: "transparent" }
                 }
@@ -249,7 +249,7 @@ function SectionLabel({
       <div
         className="w-7 h-7 rounded-lg flex items-center justify-center"
         style={{
-          background: "color-mix(in srgb, var(--color-primary) 12%, transparent)",
+          background: "color-mix(in srgb, var(--color-primary) 16%, transparent)",
         }}
       >
         <Icon size={14} style={{ color: "var(--color-primary)" }} />
@@ -324,18 +324,18 @@ export default function OrderDetailPage({
       {/* ── Confirmation banner ── */}
       {confirmed && (
         <div
-          className="relative overflow-hidden rounded-2xl p-8 sm:p-10 text-center mb-6 animate-fade-in-up"
+          className="relative overflow-hidden rounded-2xl p-8 sm:p-10 text-center mb-6 animate-fade-in-up bg-bg"
           style={{
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, color-mix(in srgb, var(--color-primary) 4%, transparent) 100%)",
+            backgroundImage:
+              "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, color-mix(in srgb, var(--color-primary) 6%, transparent) 100%)",
             border:
-              "1px solid color-mix(in srgb, var(--color-primary) 22%, transparent)",
+              "1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)",
           }}
         >
           {/* decorative blobs */}
           <div
             aria-hidden
-            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-30 pointer-events-none"
+            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-40 dark:opacity-25 pointer-events-none"
             style={{
               background:
                 "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
@@ -343,7 +343,7 @@ export default function OrderDetailPage({
           />
           <div
             aria-hidden
-            className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full opacity-20 pointer-events-none"
+            className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full opacity-30 dark:opacity-20 pointer-events-none"
             style={{
               background:
                 "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
@@ -378,11 +378,10 @@ export default function OrderDetailPage({
 
             {/* order number chip */}
             <div
-              className="inline-flex flex-col items-center gap-1 px-5 py-3 rounded-xl mb-5"
+              className="inline-flex flex-col items-center gap-1 px-5 py-3 rounded-xl mb-5 bg-bg dark:bg-surface"
               style={{
-                background: "var(--color-bg)",
                 border:
-                  "1px dashed color-mix(in srgb, var(--color-primary) 35%, transparent)",
+                  "1px dashed color-mix(in srgb, var(--color-primary) 45%, transparent)",
               }}
             >
               <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
@@ -455,10 +454,10 @@ export default function OrderDetailPage({
             </div>
             <span
               className={`px-3 py-1.5 rounded-full text-xs font-semibold${isCancelled ? " bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400" : ""}`}
-            style={
+              style={
                 !isCancelled
                   ? {
-                      background: "color-mix(in srgb, var(--color-primary) 12%, transparent)",
+                      background: "color-mix(in srgb, var(--color-primary) 16%, transparent)",
                       color: "var(--color-primary)",
                     }
                   : undefined

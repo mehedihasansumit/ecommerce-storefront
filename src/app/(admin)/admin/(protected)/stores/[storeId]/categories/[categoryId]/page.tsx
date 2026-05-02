@@ -4,6 +4,8 @@ import { CategoryForm } from "@/features/categories/components/CategoryForm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tAdmin } from "@/shared/lib/i18n";
+import { ChevronLeft } from "lucide-react";
+import { PageHeader } from "@/shared/components/ui";
 
 export default async function EditCategoryPage({
   params,
@@ -20,17 +22,23 @@ export default async function EditCategoryPage({
     notFound();
   }
 
-  return (
-    <div>
-      <div className="flex items-center gap-2 text-sm text-admin-text-muted mb-6">
-        <Link href={`/admin/stores/${storeId}/categories`} className="hover:text-gray-900">
-          Categories
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900">{tAdmin(category.name)}</span>
-      </div>
+  const name = tAdmin(category.name);
 
-      <h1 className="text-2xl font-bold mb-6">Edit Category</h1>
+  return (
+    <div className="max-w-3xl mx-auto">
+      <PageHeader
+        breadcrumbs={
+          <Link
+            href={`/admin/stores/${storeId}/categories`}
+            className="inline-flex items-center gap-1 text-xs text-admin-text-subtle hover:text-admin-text-primary transition-colors"
+          >
+            <ChevronLeft size={14} />
+            Categories
+          </Link>
+        }
+        title={`Edit · ${name}`}
+        description="Update category name, slug, and visibility."
+      />
 
       <CategoryForm
         storeId={storeId}

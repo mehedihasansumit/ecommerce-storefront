@@ -108,46 +108,172 @@ export default async function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <div className="text-center mb-12 md:mb-14">
-            <h2 className="text-3xl font-semibold tracking-tight mb-3">{tr("shopByCategory")}</h2>
-            <p className="text-text-secondary max-w-md mx-auto">
-              {tr("shopByCategoryDesc") ||
-                "Explore our curated collections"}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 stagger-children">
-            {categories.map((category) => (
-              <Link
-                key={category._id}
-                href={`/categories/${category.slug}`}
-                className="group relative overflow-hidden bg-surface aspect-3/4 flex items-end"
-                style={{ borderRadius: "var(--border-radius)" }}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
+            <div className="max-w-xl">
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                  color: "var(--color-primary)",
+                }}
               >
-                {category.image && (
-                  <StoreImage
-                    src={category.image}
-                    alt={t(category.name, locale)}
-                    fill
-                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="absolute inset-0 object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-300" />
-                <div className="relative w-full p-5">
-                  <span className="text-white font-semibold text-lg block">
-                    {t(category.name, locale)}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-white/70 text-sm mt-1 group-hover:text-white/90 transition-colors">
-                    {tr("explore") || "Explore"}
-                    <ArrowRight
-                      size={14}
-                      className="transition-transform duration-200 group-hover:translate-x-1"
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--color-primary)" }}
+                />
+                {tr("collections") || "Collections"}
+              </div>
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-3">
+                {tr("shopByCategory")}
+              </h2>
+              <p className="text-text-secondary text-base">
+                {tr("shopByCategoryDesc") ||
+                  "Explore our curated collections"}
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="hidden md:inline-flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-foreground transition-colors group/all"
+            >
+              {tr("viewAll")}
+              <span
+                className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center transition-all group-hover/all:border-foreground group-hover/all:bg-foreground group-hover/all:text-background"
+              >
+                <ArrowRight
+                  size={14}
+                  className="transition-transform duration-300 group-hover/all:translate-x-0.5"
+                />
+              </span>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-3 md:gap-4 md:auto-rows-[minmax(0,1fr)] md:h-[560px] stagger-children">
+            {categories.slice(0, 5).map((category, idx) => {
+              const isFeatured = idx === 0;
+              return (
+                <Link
+                  key={category._id}
+                  href={`/categories/${category.slug}`}
+                  className={`group relative overflow-hidden bg-surface flex items-end ${
+                    isFeatured
+                      ? "col-span-2 md:row-span-2 aspect-square md:aspect-auto"
+                      : "aspect-3/4 md:aspect-auto"
+                  }`}
+                  style={{ borderRadius: "var(--border-radius)" }}
+                >
+                  {category.image && (
+                    <StoreImage
+                      src={category.image}
+                      alt={t(category.name, locale)}
+                      fill
+                      sizes={
+                        isFeatured
+                          ? "(max-width: 768px) 100vw, 50vw"
+                          : "(max-width: 768px) 50vw, 25vw"
+                      }
+                      className="absolute inset-0 object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
                     />
-                  </span>
-                </div>
-              </Link>
-            ))}
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5 transition-opacity duration-500 group-hover:from-black/90 group-hover:via-black/40" />
+                  <div
+                    className="absolute inset-0 ring-0 group-hover:ring-2 group-hover:ring-white/20 transition-all duration-300"
+                    style={{ borderRadius: "var(--border-radius)" }}
+                  />
+
+                  {isFeatured && (
+                    <div className="absolute top-4 left-4 md:top-5 md:left-5">
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider"
+                        style={{ color: "var(--color-primary)" }}
+                      >
+                        <Sparkles size={10} />
+                        {tr("featured") || "Featured"}
+                      </span>
+                    </div>
+                  )}
+
+                  <div
+                    className={`relative w-full ${
+                      isFeatured ? "p-5 md:p-7" : "p-4 md:p-5"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <span
+                        className={`text-white font-semibold block leading-tight transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-0.5 ${
+                          isFeatured
+                            ? "text-xl md:text-3xl"
+                            : "text-base md:text-lg"
+                        }`}
+                      >
+                        {t(category.name, locale)}
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-2 text-white/80 text-sm mt-2 group-hover:text-white transition-colors">
+                      <span className="font-medium">
+                        {tr("explore") || "Explore"}
+                      </span>
+                      <span className="w-7 h-7 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:bg-white group-hover:text-black">
+                        <ArrowRight
+                          size={13}
+                          className="transition-transform duration-300 group-hover:translate-x-0.5"
+                        />
+                      </span>
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {categories.length > 5 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-3 md:mt-4 stagger-children">
+              {categories.slice(5).map((category) => (
+                <Link
+                  key={category._id}
+                  href={`/categories/${category.slug}`}
+                  className="group relative overflow-hidden bg-surface aspect-3/4 flex items-end"
+                  style={{ borderRadius: "var(--border-radius)" }}
+                >
+                  {category.image && (
+                    <StoreImage
+                      src={category.image}
+                      alt={t(category.name, locale)}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className="absolute inset-0 object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5 group-hover:from-black/90 transition-colors duration-300" />
+                  <div className="relative w-full p-4 md:p-5">
+                    <span className="text-white font-semibold text-base md:text-lg block leading-tight">
+                      {t(category.name, locale)}
+                    </span>
+                    <span className="inline-flex items-center gap-2 text-white/80 text-sm mt-2 group-hover:text-white transition-colors">
+                      <span className="font-medium">
+                        {tr("explore") || "Explore"}
+                      </span>
+                      <ArrowRight
+                        size={13}
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                      />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 text-center md:hidden">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 text-sm font-medium"
+              style={{ color: "var(--color-primary)" }}
+            >
+              {tr("viewAll")}
+              <ArrowRight size={14} />
+            </Link>
           </div>
         </section>
       )}

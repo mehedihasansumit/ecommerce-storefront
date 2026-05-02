@@ -74,13 +74,13 @@ export const OrderRepository = {
   },
 
   async findAll({
-    page = 1,
+    offset = 0,
     limit = 20,
     status,
     paymentStatus,
     storeId,
   }: {
-    page?: number;
+    offset?: number;
     limit?: number;
     status?: string;
     paymentStatus?: string;
@@ -91,9 +91,8 @@ export const OrderRepository = {
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
     if (storeId) filter.storeId = storeId;
-    const skip = (page - 1) * limit;
     const [orders, total] = await Promise.all([
-      OrderModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      OrderModel.find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
       OrderModel.countDocuments(filter),
     ]);
     return { orders: orders.map(serialize), total };

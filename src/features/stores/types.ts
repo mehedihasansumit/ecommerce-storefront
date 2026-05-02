@@ -68,6 +68,7 @@ export interface IHeroBanner {
   subtitle?: LocalizedString;
   linkUrl?: string;
   linkText?: string;
+  showOverlay?: boolean;
 }
 
 export interface IStoreSeo {

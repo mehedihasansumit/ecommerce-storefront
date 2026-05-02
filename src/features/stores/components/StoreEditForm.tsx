@@ -76,6 +76,7 @@ interface BannerState {
   subtitle: LocalizedString;
   linkUrl: string;
   linkText: string;
+  showOverlay: boolean;
 }
 
 type Tab =
@@ -328,6 +329,7 @@ export default function StoreEditForm({
       subtitle: toLocalized(b.subtitle),
       linkUrl: b.linkUrl || "",
       linkText: b.linkText || "",
+      showOverlay: b.showOverlay ?? true,
     }))
   );
 
@@ -407,6 +409,7 @@ export default function StoreEditForm({
         subtitle: { en: "" },
         linkUrl: "",
         linkText: "",
+        showOverlay: true,
       },
     ]);
     setExpandedBanner(newIndex);
@@ -437,6 +440,12 @@ export default function StoreEditForm({
       prev.map((b, i) =>
         i === index ? { ...b, [field]: { ...b[field], [lang]: value } } : b
       )
+    );
+  };
+
+  const handleBannerOverlayToggle = (index: number, value: boolean) => {
+    setHeroBanners((prev) =>
+      prev.map((b, i) => (i === index ? { ...b, showOverlay: value } : b))
     );
   };
 
@@ -1230,78 +1239,100 @@ export default function StoreEditForm({
                             disabled={loading}
                           />
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <Field
-                              label={`Title (${LANGUAGE_LABELS[activeLang] || activeLang})`}
-                            >
-                              <input
-                                type="text"
-                                value={banner.title[activeLang] ?? ""}
-                                onChange={(e) =>
-                                  handleBannerLocalized(
-                                    index,
-                                    "title",
-                                    activeLang,
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="e.g. Summer Collection"
-                                className={inputCls}
-                                disabled={loading}
-                              />
-                            </Field>
-                            <Field
-                              label={`Subtitle (${LANGUAGE_LABELS[activeLang] || activeLang})`}
-                            >
-                              <input
-                                type="text"
-                                value={banner.subtitle[activeLang] ?? ""}
-                                onChange={(e) =>
-                                  handleBannerLocalized(
-                                    index,
-                                    "subtitle",
-                                    activeLang,
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="e.g. Up to 50% off"
-                                className={inputCls}
-                                disabled={loading}
-                              />
-                            </Field>
-                            <Field label="Button Text">
-                              <input
-                                type="text"
-                                value={banner.linkText}
-                                onChange={(e) =>
-                                  handleBannerField(
-                                    index,
-                                    "linkText",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="e.g. Shop Now"
-                                className={inputCls}
-                                disabled={loading}
-                              />
-                            </Field>
-                            <Field label="Button Link URL">
-                              <input
-                                type="text"
-                                value={banner.linkUrl}
-                                onChange={(e) =>
-                                  handleBannerField(
-                                    index,
-                                    "linkUrl",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="/products"
-                                className={inputCls}
-                                disabled={loading}
-                              />
-                            </Field>
-                          </div>
+                          <label className="flex items-center justify-between gap-3 cursor-pointer select-none p-3 rounded-lg bg-admin-surface-raised border border-admin-border">
+                            <div>
+                              <p className="text-sm font-medium text-admin-text-secondary">
+                                Show text overlay
+                              </p>
+                              <p className="text-xs text-admin-text-subtle mt-0.5">
+                                Toggle off to display image only — hides title, subtitle, and button.
+                              </p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={banner.showOverlay}
+                              onChange={(e) =>
+                                handleBannerOverlayToggle(index, e.target.checked)
+                              }
+                              disabled={loading}
+                              className="w-5 h-5 rounded border-admin-border-md text-gray-900 focus:ring-gray-500 shrink-0"
+                            />
+                          </label>
+
+                          {banner.showOverlay && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <Field
+                                label={`Title (${LANGUAGE_LABELS[activeLang] || activeLang})`}
+                              >
+                                <input
+                                  type="text"
+                                  value={banner.title[activeLang] ?? ""}
+                                  onChange={(e) =>
+                                    handleBannerLocalized(
+                                      index,
+                                      "title",
+                                      activeLang,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="e.g. Summer Collection"
+                                  className={inputCls}
+                                  disabled={loading}
+                                />
+                              </Field>
+                              <Field
+                                label={`Subtitle (${LANGUAGE_LABELS[activeLang] || activeLang})`}
+                              >
+                                <input
+                                  type="text"
+                                  value={banner.subtitle[activeLang] ?? ""}
+                                  onChange={(e) =>
+                                    handleBannerLocalized(
+                                      index,
+                                      "subtitle",
+                                      activeLang,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="e.g. Up to 50% off"
+                                  className={inputCls}
+                                  disabled={loading}
+                                />
+                              </Field>
+                              <Field label="Button Text">
+                                <input
+                                  type="text"
+                                  value={banner.linkText}
+                                  onChange={(e) =>
+                                    handleBannerField(
+                                      index,
+                                      "linkText",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="e.g. Shop Now"
+                                  className={inputCls}
+                                  disabled={loading}
+                                />
+                              </Field>
+                              <Field label="Button Link URL">
+                                <input
+                                  type="text"
+                                  value={banner.linkUrl}
+                                  onChange={(e) =>
+                                    handleBannerField(
+                                      index,
+                                      "linkUrl",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="/products"
+                                  className={inputCls}
+                                  disabled={loading}
+                                />
+                              </Field>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

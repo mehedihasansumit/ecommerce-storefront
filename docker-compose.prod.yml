@@ -1,0 +1,45 @@
+# Production stack: Next.js app + MongoDB + Garage S3.
+# All services run in HOST network mode — they reach each other via 127.0.0.1.
+# Operator MUST firewall ports 5000, 27017, 3900-3903 from public.
+# Only Nginx (manual on host) should expose 80/443.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ecommerce-website:latest
+    container_name: ecommerce-app
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env.production
+    depends_on:
+      - mongo
+      - garage
+
+  mongo:
+    image: mongo:7
+    container_name: ecommerce-mongo
+    restart: unless-stopped
+    network_mode: host
+    command: ["mongod", "--bind_ip", "127.0.0.1", "--port", "27017"]
+    volumes:
+      - mongo_data:/data/db
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    container_name: ecommerce-garage
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    environment:
+      GARAGE_CONFIG_FILE: /etc/garage.toml
+
+volumes:
+  mongo_data:
+  garage_meta:
+  garage_data:

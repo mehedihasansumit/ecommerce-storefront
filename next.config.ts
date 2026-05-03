@@ -23,6 +23,7 @@ const s3Pattern =
 const usingMediaProxy = !process.env.S3_PUBLIC_URL;
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   async headers() {
     return [
       {

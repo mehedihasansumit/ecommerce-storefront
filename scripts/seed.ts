@@ -1,8 +1,16 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+function encodeMongoUri(uri: string): string {
+  const match = uri.match(/^mongodb:\/\/([^:]+):([^@]+)@(.+)$/);
+  if (!match) return uri;
+  const [, username, password, rest] = match;
+  const encodedPassword = encodeURIComponent(password);
+  return `mongodb://${username}:${encodedPassword}@${rest}`;
+}
+
 const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/ecommerce-multitenant";
+  encodeMongoUri(process.env.MONGODB_URI || "mongodb://localhost:27017/ecommerce-multitenant");
 
 async function seed() {
   console.log("Connecting to MongoDB...");

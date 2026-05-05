@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import toast from "react-hot-toast";
 import {
   CheckCircle,
   Package,
@@ -17,8 +18,61 @@ import {
   MapPin,
   CreditCard,
   ArrowLeft,
+  Copy,
+  Phone,
 } from "lucide-react";
 import type { IOrder, IStatusHistoryEntry } from "@/features/orders/types";
+
+function CopyField({
+  label,
+  value,
+  icon: Icon,
+  copiedLabel,
+  copyLabel,
+}: {
+  label: string;
+  value: string;
+  icon: React.ElementType;
+  copiedLabel: string;
+  copyLabel: string;
+}) {
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(copiedLabel);
+    } catch {
+      toast.error("Copy failed");
+    }
+  }
+  return (
+    <div
+      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-bg dark:bg-surface"
+      style={{
+        border:
+          "1px dashed color-mix(in srgb, var(--color-primary) 40%, transparent)",
+      }}
+    >
+      <Icon size={13} style={{ color: "var(--color-primary)" }} className="shrink-0" />
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary shrink-0">
+        {label}
+      </span>
+      <span
+        className="text-xs font-bold tracking-wide truncate flex-1 text-left"
+        style={{ color: "var(--color-primary)" }}
+      >
+        {value}
+      </span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        aria-label={copyLabel}
+        className="p-1 rounded-md hover:bg-surface dark:hover:bg-bg transition-colors shrink-0"
+      >
+        <Copy size={12} className="text-text-secondary" />
+      </button>
+    </div>
+  );
+}
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -324,26 +378,17 @@ export default function OrderDetailPage({
       {/* ── Confirmation banner ── */}
       {confirmed && (
         <div
-          className="relative overflow-hidden rounded-2xl p-8 sm:p-10 text-center mb-6 animate-fade-in-up bg-bg"
+          className="relative overflow-hidden rounded-xl p-4 sm:p-5 mb-4 animate-fade-in-up bg-bg"
           style={{
             backgroundImage:
-              "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, color-mix(in srgb, var(--color-primary) 6%, transparent) 100%)",
+              "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent) 0%, color-mix(in srgb, var(--color-primary) 5%, transparent) 100%)",
             border:
-              "1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)",
+              "1px solid color-mix(in srgb, var(--color-primary) 28%, transparent)",
           }}
         >
-          {/* decorative blobs */}
           <div
             aria-hidden
-            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-40 dark:opacity-25 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full opacity-30 dark:opacity-20 pointer-events-none"
+            className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-30 dark:opacity-20 pointer-events-none"
             style={{
               background:
                 "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
@@ -351,63 +396,66 @@ export default function OrderDetailPage({
           />
 
           <div className="relative">
-            {/* check circle */}
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 animate-scale-in"
-              style={{
-                background: "var(--color-primary)",
-                boxShadow:
-                  "0 0 0 8px color-mix(in srgb, var(--color-primary) 14%, transparent), 0 10px 30px -8px color-mix(in srgb, var(--color-primary) 50%, transparent)",
-              }}
-            >
-              <CheckCircle size={40} color="#fff" strokeWidth={2.5} />
-            </div>
-
-            <h1
-              className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1.5"
-              style={{ color: "var(--color-primary)" }}
-            >
-              {t("congratulations")} <PartyPopper size={24} className="inline-block ml-1 align-middle" />
-            </h1>
-            <p className="text-base font-semibold text-[var(--color-text)] mb-1">
-              {t("orderPlaced")}
-            </p>
-            <p className="text-sm text-text-secondary mb-5">
-              {t("orderPlacedDesc", { phone: order.shippingAddress.phone })}
-            </p>
-
-            {/* order number chip */}
-            <div
-              className="inline-flex flex-col items-center gap-1 px-5 py-3 rounded-xl mb-5 bg-bg dark:bg-surface"
-              style={{
-                border:
-                  "1px dashed color-mix(in srgb, var(--color-primary) 45%, transparent)",
-              }}
-            >
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
-                {t("orderNumberLabel")}
-              </span>
-              <span
-                className="text-base font-bold tracking-wide"
-                style={{ color: "var(--color-primary)" }}
+            {/* header row: icon + text */}
+            <div className="flex items-center gap-3 mb-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 animate-scale-in"
+                style={{
+                  background: "var(--color-primary)",
+                  boxShadow:
+                    "0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent)",
+                }}
               >
-                {order.orderNumber}
-              </span>
+                <CheckCircle size={20} color="#fff" strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1
+                  className="text-base font-bold tracking-tight flex items-center gap-1"
+                  style={{ color: "var(--color-primary)" }}
+                >
+                  {t("orderPlaced")}
+                  <PartyPopper size={15} className="shrink-0" />
+                </h1>
+                <p className="text-xs text-text-secondary leading-snug truncate">
+                  {t("orderPlacedDesc", { phone: order.shippingAddress.phone })}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2.5">
+            {/* tracking credentials — compact pills */}
+            <div className="space-y-1.5 mb-3">
+              <CopyField
+                label={t("orderNumberLabel")}
+                value={order.orderNumber}
+                icon={Package}
+                copiedLabel={t("copied")}
+                copyLabel={t("copy")}
+              />
+              <CopyField
+                label={t("phoneLabelShort")}
+                value={order.shippingAddress.phone}
+                icon={Phone}
+                copiedLabel={t("copied")}
+                copyLabel={t("copy")}
+              />
+            </div>
+            <p className="text-[10px] text-text-tertiary mb-3 leading-snug">
+              {t("trackCredsDesc")}
+            </p>
+
+            <div className="flex items-center gap-2">
               <Link
-                href="/products"
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md"
+                href="/orders/track"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "var(--color-primary)" }}
               >
-                {t("continueShopping")}
+                {t("trackOrder")}
               </Link>
               <Link
-                href="/orders"
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold border border-border-subtle text-[var(--color-text)] bg-bg hover:bg-surface transition-colors"
+                href="/products"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border-subtle text-[var(--color-text)] bg-bg hover:bg-surface transition-colors"
               >
-                {t("trackOrder")}
+                {t("continueShopping")}
               </Link>
             </div>
           </div>

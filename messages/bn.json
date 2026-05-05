@@ -11,7 +11,8 @@
     "login": "লগইন",
     "logout": "লগআউট",
     "addresses": "ঠিকানা",
-    "callUs": "কল করুন"
+    "callUs": "কল করুন",
+    "trackOrder": "অর্ডার ট্র্যাক করুন"
   },
   "footer": {
     "quickLinks": "দ্রুত লিঙ্ক",
@@ -19,6 +20,7 @@
     "cart": "কার্ট",
     "myAccount": "আমার অ্যাকাউন্ট",
     "myOrders": "আমার অর্ডার",
+    "trackOrder": "অর্ডার ট্র্যাক করুন",
     "followUs": "আমাদের অনুসরণ করুন",
     "facebook": "ফেসবুক",
     "instagram": "ইনস্টাগ্রাম",
@@ -262,7 +264,28 @@
     "paymentPending": "অপেক্ষমাণ",
     "paymentPaid": "পরিশোধিত",
     "paymentFailed": "ব্যর্থ",
-    "paymentRefunded": "ফেরত দেওয়া হয়েছে"
+    "paymentRefunded": "ফেরত দেওয়া হয়েছে",
+    "trackLaterHint": "আপনার অর্ডার নম্বর ও ফোন সংরক্ষণ করুন — যেকোনো সময় /orders/track-এ ট্র্যাক করুন",
+    "trackCredsTitle": "অর্ডার ট্র্যাক করতে এগুলো সংরক্ষণ করুন",
+    "trackCredsDesc": "যেকোনো সময় অর্ডার দেখতে /orders/track-এ এই অর্ডার নম্বর ও ফোন ব্যবহার করুন।",
+    "phoneLabelShort": "ফোন",
+    "copy": "কপি",
+    "copied": "কপি হয়েছে!"
+  },
+  "orderTrack": {
+    "title": "আপনার অর্ডার ট্র্যাক করুন",
+    "description": "চেকআউটে ব্যবহৃত অর্ডার নম্বর অথবা ফোন নম্বর দিন।",
+    "orderNumberLabel": "অর্ডার নম্বর",
+    "orderNumberHint": "যেমন ORD-XXXXXXXX",
+    "phoneLabel": "ফোন নম্বর",
+    "phoneHint": "চেকআউটে ব্যবহৃত একই নম্বর",
+    "or": "অথবা",
+    "submit": "অর্ডার ট্র্যাক করুন",
+    "submitting": "খোঁজা হচ্ছে…",
+    "notFound": "এই তথ্যের সাথে মিলে এমন কোনো অর্ডার খুঁজে পাওয়া যায়নি। অনুগ্রহ করে আবার যাচাই করুন।",
+    "invalidInput": "অর্ডার নম্বর অথবা ফোন নম্বর দিন।",
+    "networkError": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
+    "resultsCount": "{count} টি অর্ডার পাওয়া গেছে"
   },
   "common": {
     "loading": "লোড হচ্ছে...",

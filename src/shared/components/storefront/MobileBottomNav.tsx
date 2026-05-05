@@ -133,6 +133,7 @@ export function MobileBottomNav() {
   const accountMenuItems = [
     { href: "/account",           icon: User,    label: t("myAccount") },
     { href: "/orders",            icon: Package, label: t("myOrders")  },
+    { href: "/orders/track",      icon: Search,  label: t("trackOrder") },
     { href: "/account/addresses", icon: MapPin,  label: t("addresses") },
   ];
 

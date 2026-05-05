@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/features/auth/service";
 import { z } from "zod";
+import { fa } from "zod/locales";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -32,7 +33,8 @@ export async function POST(request: NextRequest) {
       name: "admin-token",
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      // secure: process.env.NODE_ENV === "production",
+      secure:false, // Set to true in production
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",

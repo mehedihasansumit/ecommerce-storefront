@@ -34,6 +34,7 @@ export function Footer() {
     { href: "/cart", label: t("cart") },
     { href: "/account", label: t("myAccount") },
     { href: "/orders", label: t("myOrders") },
+    { href: "/orders/track", label: t("trackOrder") },
   ];
 
   const policyLinks = [

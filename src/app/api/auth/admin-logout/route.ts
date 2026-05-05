@@ -4,7 +4,8 @@ export async function POST() {
   const response = NextResponse.json({ success: true });
   response.cookies.set("admin-token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure:false, // Set to true in production
     sameSite: "lax",
     maxAge: 0,
     path: "/",

@@ -5,6 +5,7 @@ import { NotificationService } from "@/features/notifications/service";
 import type { IOrder, IOrderItem } from "./types";
 import type { CreateOrderInput } from "./schemas";
 import { tAdmin } from "@/shared/lib/i18n";
+import { normalizePhone } from "@/shared/lib/phone";
 
 function generateOrderNumber(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -119,6 +120,33 @@ export const OrderService = {
     const order = await OrderRepository.findById(orderId);
     if (!order || order.storeId !== storeId) return null;
     return order;
+  },
+
+  async getByOrderNumberAndPhone(
+    storeId: string,
+    orderNumber: string,
+    phone: string
+  ): Promise<IOrder | null> {
+    const trimmedNumber = orderNumber.trim().toUpperCase();
+    const trimmedPhone = phone.trim();
+    if (!trimmedNumber || !trimmedPhone) return null;
+
+    const order = await OrderRepository.findByOrderNumber(storeId, trimmedNumber);
+    if (!order) return null;
+
+    const normalized = normalizePhone(trimmedPhone);
+    const withoutPlus = normalized.replace(/^\+/, "");
+    const candidates = new Set([normalized, withoutPlus]);
+
+    const stored = [order.guestPhone, order.shippingAddress?.phone].filter(
+      (v): v is string => !!v
+    );
+    const matches = stored.some((p) => {
+      const n = normalizePhone(p);
+      return candidates.has(n) || candidates.has(n.replace(/^\+/, ""));
+    });
+
+    return matches ? order : null;
   },
 
   async getByStore(

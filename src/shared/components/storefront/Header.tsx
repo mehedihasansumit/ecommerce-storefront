@@ -249,6 +249,14 @@ export function Header() {
                         {t("myOrders") || "My Orders"}
                       </Link>
                       <Link
+                        href="/orders/track"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
+                      >
+                        <Search size={15} className="text-text-tertiary" />
+                        {t("trackOrder")}
+                      </Link>
+                      <Link
                         href="/account/addresses"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface transition-colors"
@@ -268,13 +276,22 @@ export function Header() {
                   )}
                 </>
               ) : (
-                <Link
-                  href="/account/login"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
-                >
-                  <User size={18} />
-                  <span className="hidden lg:inline">{t("login") || "Login"}</span>
-                </Link>
+                <div className="flex items-center gap-1">
+                  <Link
+                    href="/orders/track"
+                    className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
+                  >
+                    <Search size={16} />
+                    <span>{t("trackOrder")}</span>
+                  </Link>
+                  <Link
+                    href="/account/login"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
+                  >
+                    <User size={18} />
+                    <span className="hidden lg:inline">{t("login") || "Login"}</span>
+                  </Link>
+                </div>
               )}
             </div>
           </div>

@@ -11,7 +11,8 @@
     "login": "Login",
     "logout": "Logout",
     "addresses": "Addresses",
-    "callUs": "Call us"
+    "callUs": "Call us",
+    "trackOrder": "Track Order"
   },
   "footer": {
     "quickLinks": "Quick Links",
@@ -19,6 +20,7 @@
     "cart": "Cart",
     "myAccount": "My Account",
     "myOrders": "My Orders",
+    "trackOrder": "Track Order",
     "followUs": "Follow Us",
     "facebook": "Facebook",
     "instagram": "Instagram",
@@ -262,7 +264,28 @@
     "paymentPending": "Pending",
     "paymentPaid": "Paid",
     "paymentFailed": "Failed",
-    "paymentRefunded": "Refunded"
+    "paymentRefunded": "Refunded",
+    "trackLaterHint": "Save your order number and phone — track anytime at /orders/track",
+    "trackCredsTitle": "Save these to track your order",
+    "trackCredsDesc": "Use this order number and phone at /orders/track to check your order anytime.",
+    "phoneLabelShort": "Phone",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "orderTrack": {
+    "title": "Track Your Order",
+    "description": "Enter your order number or the phone number you used at checkout.",
+    "orderNumberLabel": "Order Number",
+    "orderNumberHint": "e.g. ORD-XXXXXXXX",
+    "phoneLabel": "Phone Number",
+    "phoneHint": "Same number used at checkout",
+    "or": "OR",
+    "submit": "Track Order",
+    "submitting": "Looking up…",
+    "notFound": "We couldn't find any order matching that. Please double-check and try again.",
+    "invalidInput": "Please enter an order number or phone number.",
+    "networkError": "Something went wrong. Please try again.",
+    "resultsCount": "{count} orders found"
   },
   "common": {
     "loading": "Loading...",

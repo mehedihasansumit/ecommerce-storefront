@@ -87,11 +87,12 @@ export function AddToCartSection({
 
   function handleAddToCart() {
     if (displayStock <= 0) return;
+    const resolvedThumbnail = activeVariant?.images?.[0]?.url || thumbnail;
     addItem({
       productId,
       productName,
       productSlug,
-      thumbnail,
+      thumbnail: resolvedThumbnail,
       variantSelections: selectedOptions,
       quantity,
       priceAtAdd: displayPrice,

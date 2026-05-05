@@ -8,6 +8,7 @@ import {
   LogOut,
   Package,
   MapPin,
+  LogIn,
 } from "lucide-react";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { StoreImage } from "@/shared/components/ui";
@@ -202,8 +203,8 @@ export function Header() {
               )}
             </Link>
 
-            {/* Account — desktop only */}
-            <div className="hidden sm:block relative" ref={userMenuRef}>
+            {/* Account — desktop only when logged in; logged-out shows on mobile too */}
+            <div className={`${userEmail ? "hidden sm:block" : "block"} relative`} ref={userMenuRef}>
               {userEmail ? (
                 <>
                   <button
@@ -287,8 +288,9 @@ export function Header() {
                   <Link
                     href="/account/login"
                     className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
+                    aria-label={t("login") || "Login"}
                   >
-                    <User size={18} />
+                    <LogIn size={18} />
                     <span className="hidden lg:inline">{t("login") || "Login"}</span>
                   </Link>
                 </div>

@@ -14,6 +14,7 @@ import {
   MapPin,
   LogOut,
   ChevronRight,
+  Truck,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/shared/context/CartContext";
@@ -121,13 +122,22 @@ export function MobileBottomNav() {
       href: "/cart",
       isActive: pathname === "/cart",
     },
-    {
-      id: "account",
-      icon: User,
-      label: userLoggedIn ? t("account") : t("login"),
-      href: userLoggedIn ? null : "/account/login",
-      isActive: pathname.startsWith("/account") || accountSheetOpen,
-    },
+    userLoggedIn
+      ? {
+          id: "account",
+          icon: User,
+          label: t("account"),
+          href: null,
+          isActive:
+            pathname.startsWith("/account") || accountSheetOpen,
+        }
+      : {
+          id: "track",
+          icon: Truck,
+          label: t("trackOrder"),
+          href: "/orders/track",
+          isActive: pathname.startsWith("/orders/track"),
+        },
   ];
 
   const accountMenuItems = [
@@ -181,8 +191,8 @@ export function MobileBottomNav() {
         </div>
       )}
 
-      {/* Account bottom sheet */}
-      {accountSheetOpen && (
+      {/* Account bottom sheet (logged-in only) */}
+      {accountSheetOpen && userLoggedIn && (
         <div className="fixed inset-0 z-[60] md:hidden">
           {/* Backdrop */}
           <div
@@ -312,22 +322,20 @@ export function MobileBottomNav() {
               );
             }
 
-            // Account tab — sheet when logged in, navigate when not
+            // Account tab — opens sheet (logged-in: menu, logged-out: track + login)
             if (tab.id === "account") {
-              if (userLoggedIn) {
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    className={baseClass}
-                    style={style}
-                    onClick={() => setAccountSheetOpen((v) => !v)}
-                    aria-label="Account"
-                  >
-                    {content}
-                  </button>
-                );
-              }
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={baseClass}
+                  style={style}
+                  onClick={() => setAccountSheetOpen((v) => !v)}
+                  aria-label="Account"
+                >
+                  {content}
+                </button>
+              );
             }
 
             // Regular nav link

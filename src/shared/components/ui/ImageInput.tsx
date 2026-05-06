@@ -181,10 +181,10 @@ export function ImageInput({
         </div>
       ) : (
         <Input
-          type="url"
+          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="https://…"
+          placeholder="https://… or /api/media/…"
           disabled={disabled}
         />
       )}

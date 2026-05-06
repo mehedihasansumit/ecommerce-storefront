@@ -26,7 +26,12 @@ export default function OfflinePage() {
           No internet connection. Check your network and try again.
         </p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            const back = document.referrer && !document.referrer.includes("/offline")
+              ? document.referrer
+              : "/";
+            window.location.href = back;
+          }}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors"
           style={{ backgroundColor: "var(--color-primary, #3B82F6)" }}
         >

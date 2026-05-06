@@ -224,7 +224,7 @@ export function ImageGalleryInput({
 
           <div className="flex gap-2">
             <Input
-              type="url"
+              type="text"
               value={urlDraft}
               onChange={(e) => setUrlDraft(e.target.value)}
               placeholder="…or paste image URL"

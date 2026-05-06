@@ -5,6 +5,7 @@ import { ProductForm } from "@/features/products/components/ProductForm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { tAdmin } from "@/shared/lib/i18n";
+import { PageHeader } from "@/shared/components/ui";
 
 export default async function EditProductPage({
   params,
@@ -23,15 +24,18 @@ export default async function EditProductPage({
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm text-admin-text-muted mb-6">
-        <Link href={`/admin/stores/${storeId}/products`} className="hover:text-admin-text-primary">
-          Products
-        </Link>
-        <span>/</span>
-        <span className="text-admin-text-primary">{tAdmin(product.name)}</span>
-      </div>
-
-      <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
+      <PageHeader
+        title="Edit Product"
+        breadcrumbs={
+          <nav className="flex items-center gap-2 text-sm text-gray-500">
+            <Link href={`/admin/stores/${storeId}/products`} className="hover:text-gray-900">
+              Products
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900">{tAdmin(product.name)}</span>
+          </nav>
+        }
+      />
 
       <ProductForm
         storeId={storeId}

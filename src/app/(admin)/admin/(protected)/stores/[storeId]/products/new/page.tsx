@@ -3,6 +3,7 @@ import { StoreService } from "@/features/stores/service";
 import { ProductForm } from "@/features/products/components/ProductForm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/shared/components/ui";
 
 export default async function NewProductPage({
   params,
@@ -19,15 +20,18 @@ export default async function NewProductPage({
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm text-admin-text-muted mb-6">
-        <Link href={`/admin/stores/${storeId}/products`} className="hover:text-gray-900">
-          Products
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900">New Product</span>
-      </div>
-
-      <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
+      <PageHeader
+        title="Add New Product"
+        breadcrumbs={
+          <nav className="flex items-center gap-2 text-sm text-gray-500">
+            <Link href={`/admin/stores/${storeId}/products`} className="hover:text-gray-900">
+              Products
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900">New Product</span>
+          </nav>
+        }
+      />
 
       <ProductForm
         storeId={storeId}

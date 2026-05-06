@@ -7,7 +7,20 @@ import type { IProduct, IProductOption, IProductVariant, IProductImage } from ".
 import type { ICategory } from "@/features/categories/types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
-import { ImageInput, ImageGalleryInput } from "@/shared/components/ui";
+import {
+  Alert,
+  Button,
+  Card,
+  CardHeader,
+  ConfirmDialog,
+  Field,
+  ImageGalleryInput,
+  ImageInput,
+  Input,
+  LangTabs,
+  Select,
+  Textarea,
+} from "@/shared/components/ui";
 
 interface ProductFormProps {
   storeId: string;
@@ -16,12 +29,11 @@ interface ProductFormProps {
   supportedLanguages?: string[];
 }
 
-const LANGUAGE_LABELS: Record<string, string> = {
+const LANG_LABELS: Record<string, string> = {
   en: "English",
   bn: "বাংলা",
 };
 
-// Cartesian product helper
 function cartesian(arrays: string[][]): string[][] {
   if (arrays.length === 0) return [[]];
   const [first, ...rest] = arrays;
@@ -51,7 +63,9 @@ function regenerateVariants(
     );
 
     const colorValue = optionValues["Color"];
-    const images = colorValue ? (colorImages[colorValue] ?? existingMatch?.images ?? []) : (existingMatch?.images ?? []);
+    const images = colorValue
+      ? (colorImages[colorValue] ?? existingMatch?.images ?? [])
+      : (existingMatch?.images ?? []);
 
     return {
       _id: existingMatch?._id,
@@ -65,15 +79,20 @@ function regenerateVariants(
   });
 }
 
-export function ProductForm({ storeId, categories, product, supportedLanguages = ["en"] }: ProductFormProps) {
+export function ProductForm({
+  storeId,
+  categories,
+  product,
+  supportedLanguages = ["en"],
+}: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!product;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeLang, setActiveLang] = useState(supportedLanguages[0] ?? "en");
 
-  // Localized text fields
   const [localizedName, setLocalizedName] = useState<LocalizedString>(
     () => toLocalized(product?.name)
   );
@@ -102,6 +121,8 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
     isFeatured: product?.isFeatured ?? false,
     tags: product?.tags.join(", ") ?? "",
   });
+
+  const [productImages, setProductImages] = useState<IProductImage[]>(product?.images ?? []);
 
   const [options, setOptions] = useState<IProductOption[]>(product?.options ?? []);
   const [variants, setVariants] = useState<IProductVariant[]>(product?.variants ?? []);
@@ -138,7 +159,6 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, colorImages]);
 
-  // --- Options management ---
   const addOption = () => {
     if (!newOptionName.trim()) return;
     if (options.some((o) => o.name === newOptionName.trim())) {
@@ -187,7 +207,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -210,6 +230,7 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
         .map((t) => t.trim())
         .filter(Boolean),
       categoryId: form.categoryId || undefined,
+      images: productImages,
       options,
       variants: variants.map((v) => ({
         ...v,
@@ -243,421 +264,410 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
   };
 
   const handleDelete = async () => {
-    if (!product || !confirm("Delete this product? This cannot be undone.")) return;
-    setLoading(true);
     try {
-      const res = await fetch(`/api/products/${product._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/products/${product!._id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       router.push(`/admin/stores/${storeId}/products`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Delete failed");
-      setLoading(false);
     }
   };
 
+  const langLabel = LANG_LABELS[activeLang] ?? activeLang.toUpperCase();
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="error">{error}</Alert>}
 
-      {/* Language Tabs */}
-      {supportedLanguages.length > 1 && (
-        <div className="flex gap-1 border-b border-admin-border">
-          {supportedLanguages.map((lang) => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => setActiveLang(lang)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                activeLang === lang
-                  ? "border-gray-900 text-admin-text-primary"
-                  : "border-transparent text-admin-text-muted hover:text-admin-text-secondary"
-              }`}
-            >
-              {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      )}
+      <LangTabs
+        languages={supportedLanguages}
+        active={activeLang}
+        onChange={setActiveLang}
+      />
 
       {/* Basic Info */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <h2 className="font-semibold text-admin-text-primary">
-          Basic Information
-          {supportedLanguages.length > 1 && (
-            <span className="ml-2 text-xs font-normal text-admin-text-subtle">
-              — {LANGUAGE_LABELS[activeLang] || activeLang}
-            </span>
-          )}
-        </h2>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Product Name *</label>
-          <input
-            type="text"
-            value={localizedName[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-            required={activeLang === (supportedLanguages[0] ?? "en")}
-          />
+      <Card>
+        <CardHeader
+          title={
+            supportedLanguages.length > 1 ? (
+              <>
+                Basic Information
+                <span className="ml-2 text-xs font-normal text-gray-400">— {langLabel}</span>
+              </>
+            ) : (
+              "Basic Information"
+            )
+          }
+        />
+        <div className="space-y-4">
+          <Field label="Product Name" required>
+            <Input
+              value={localizedName[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
+              required={activeLang === (supportedLanguages[0] ?? "en")}
+            />
+          </Field>
+          <Field label="Short Description">
+            <Input
+              value={localizedShortDesc[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedShortDesc, activeLang, e.target.value)}
+            />
+          </Field>
+          <Field label="Description">
+            <Textarea
+              value={localizedDesc[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
+              rows={4}
+            />
+          </Field>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Short Description</label>
-          <input
-            type="text"
-            value={localizedShortDesc[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedShortDesc, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            value={localizedDesc[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
-      </div>
+      </Card>
 
       {/* Pricing */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <h2 className="font-semibold text-admin-text-primary">Pricing</h2>
+      <Card>
+        <CardHeader title="Pricing" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Price *</label>
-            <input
+          <Field label="Price" required>
+            <Input
               type="number"
               min="0"
               step="0.01"
               value={form.price}
               onChange={(e) => set("price", e.target.value)}
-              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
               required
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Compare At Price</label>
-            <input
+          </Field>
+          <Field label="Compare At Price">
+            <Input
               type="number"
               min="0"
               step="0.01"
               value={form.compareAtPrice}
               onChange={(e) => set("compareAtPrice", e.target.value)}
-              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Cost Price</label>
-            <input
+          </Field>
+          <Field label="Cost Price">
+            <Input
               type="number"
               min="0"
               step="0.01"
               value={form.costPrice}
               onChange={(e) => set("costPrice", e.target.value)}
-              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
-          </div>
+          </Field>
         </div>
-      </div>
+      </Card>
 
       {/* Inventory */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <h2 className="font-semibold text-admin-text-primary">Inventory</h2>
+      <Card>
+        <CardHeader title="Inventory" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">SKU</label>
-            <input
+          <Field label="SKU">
+            <Input
               type="text"
               value={form.sku}
               onChange={(e) => set("sku", e.target.value)}
-              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Base Stock</label>
-            <input
+          </Field>
+          <Field label="Base Stock">
+            <Input
               type="number"
               min="0"
               value={form.stock}
               onChange={(e) => set("stock", e.target.value)}
-              className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
-          </div>
+          </Field>
         </div>
-      </div>
+      </Card>
 
       {/* SEO */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <h2 className="font-semibold text-admin-text-primary">
-          SEO
-          {supportedLanguages.length > 1 && (
-            <span className="ml-2 text-xs font-normal text-admin-text-subtle">
-              — {LANGUAGE_LABELS[activeLang] || activeLang}
-            </span>
-          )}
-        </h2>
-        <div>
-          <label className="block text-sm font-medium mb-1">Meta Title</label>
-          <input
-            type="text"
-            value={localizedSeoTitle[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedSeoTitle, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
+      <Card>
+        <CardHeader
+          title={
+            supportedLanguages.length > 1 ? (
+              <>
+                SEO
+                <span className="ml-2 text-xs font-normal text-gray-400">— {langLabel}</span>
+              </>
+            ) : (
+              "SEO"
+            )
+          }
+        />
+        <div className="space-y-4">
+          <Field label="Meta Title">
+            <Input
+              value={localizedSeoTitle[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedSeoTitle, activeLang, e.target.value)}
+            />
+          </Field>
+          <Field label="Meta Description">
+            <Textarea
+              value={localizedSeoDesc[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedSeoDesc, activeLang, e.target.value)}
+              rows={2}
+            />
+          </Field>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Meta Description</label>
-          <textarea
-            value={localizedSeoDesc[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedSeoDesc, activeLang, e.target.value)}
-            rows={2}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
-      </div>
+      </Card>
 
       {/* Organization */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <h2 className="font-semibold text-admin-text-primary">Organization</h2>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <select
-            value={form.categoryId}
-            onChange={(e) => set("categoryId", e.target.value)}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          >
-            <option value="">No category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {typeof cat.name === "string" ? cat.name : (cat.name.en ?? Object.values(cat.name)[0])}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-          <input
-            type="text"
-            value={form.tags}
-            onChange={(e) => set("tags", e.target.value)}
-            placeholder="casual, summer, sale"
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
-
-        <ImageInput
-          label="Thumbnail"
-          value={form.thumbnail}
-          onChange={(url) => set("thumbnail", url)}
-          storeId={storeId}
-          folder="products"
-          aspect="square"
-          hint="Main image shown in product listings."
-        />
-
-        <div className="flex gap-6">
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.isActive}
-              onChange={(e) => set("isActive", e.target.checked)}
-              className="w-4 h-4"
-            />
-            Active
-          </label>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.isFeatured}
-              onChange={(e) => set("isFeatured", e.target.checked)}
-              className="w-4 h-4"
-            />
-            Featured
-          </label>
-        </div>
-      </div>
-
-      {/* Options (variant axes) */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <div>
-          <h2 className="font-semibold text-admin-text-primary mb-1">Product Options</h2>
-          <p className="text-xs text-admin-text-muted">Define variant dimensions like Color and Size. Variant combinations are auto-generated below.</p>
-        </div>
-
-        {options.map((opt, optIdx) => (
-          <div key={optIdx} className="border border-admin-border rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-sm text-admin-text-primary">{opt.name}</span>
-              <button
-                type="button"
-                onClick={() => removeOption(optIdx)}
-                className="text-red-500 hover:text-red-700 p-1"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {opt.values.map((val, valIdx) => (
-                <span
-                  key={valIdx}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-admin-chip text-admin-text-secondary text-sm rounded-full"
-                >
-                  {val}
-                  <button
-                    type="button"
-                    onClick={() => removeValueFromOption(optIdx, valIdx)}
-                    className="text-admin-text-subtle hover:text-admin-text-secondary"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
+      <Card>
+        <CardHeader title="Organization" />
+        <div className="space-y-4">
+          <Field label="Category">
+            <Select
+              value={form.categoryId}
+              onChange={(e) => set("categoryId", e.target.value)}
+            >
+              <option value="">No category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {typeof cat.name === "string"
+                    ? cat.name
+                    : (cat.name.en ?? Object.values(cat.name)[0])}
+                </option>
               ))}
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newOptionValues[optIdx] ?? ""}
-                onChange={(e) =>
-                  setNewOptionValues((prev) => ({ ...prev, [optIdx]: e.target.value }))
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addValueToOption(optIdx);
-                  }
-                }}
-                placeholder={`Add ${opt.name} value...`}
-                className="flex-1 px-3 py-1.5 border border-admin-border-md rounded text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => addValueToOption(optIdx)}
-                className="px-3 py-1.5 bg-admin-chip text-admin-text-secondary text-sm rounded hover:bg-gray-200"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
-        ))}
-
-        <div className="flex gap-2 pt-1">
-          <input
-            type="text"
-            value={newOptionName}
-            onChange={(e) => setNewOptionName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addOption();
-              }
-            }}
-            placeholder="Option name (e.g., Color, Size, Material)..."
-            className="flex-1 px-3 py-2 border border-admin-border-md rounded text-sm"
+            </Select>
+          </Field>
+          <Field label="Tags" hint="Comma-separated values">
+            <Input
+              type="text"
+              value={form.tags}
+              onChange={(e) => set("tags", e.target.value)}
+              placeholder="casual, summer, sale"
+            />
+          </Field>
+          <ImageInput
+            label="Thumbnail"
+            value={form.thumbnail}
+            onChange={(url) => set("thumbnail", url)}
+            storeId={storeId}
+            folder="products"
+            aspect="square"
+            hint="Main image shown in product listings."
           />
-          <button
-            type="button"
-            onClick={addOption}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
-          >
-            + Add Option
-          </button>
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.isActive}
+                onChange={(e) => set("isActive", e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              Active
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.isFeatured}
+                onChange={(e) => set("isFeatured", e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              Featured
+            </label>
+          </div>
         </div>
-      </div>
+      </Card>
+
+      {/* Product Images — shown only when no variant combinations */}
+      {variants.length === 0 && (
+        <Card>
+          <CardHeader
+            title="Product Images"
+            description="Gallery images shown on the product detail page."
+          />
+          <ImageGalleryInput
+            value={productImages}
+            onChange={setProductImages}
+            storeId={storeId}
+            folder="products"
+            defaultAlt={typeof localizedName.en === "string" ? localizedName.en : ""}
+          />
+        </Card>
+      )}
+
+      {/* Product Options */}
+      <Card>
+        <CardHeader
+          title="Product Options"
+          description="Define variant dimensions like Color and Size. Combinations are auto-generated below."
+        />
+        <div className="space-y-4">
+          {options.map((opt, optIdx) => (
+            <div
+              key={optIdx}
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-sm">{opt.name}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeOption(optIdx)}
+                  aria-label={`Remove ${opt.name} option`}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {opt.values.map((val, valIdx) => (
+                  <span
+                    key={valIdx}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-sm rounded-full"
+                  >
+                    {val}
+                    <button
+                      type="button"
+                      onClick={() => removeValueFromOption(optIdx, valIdx)}
+                      aria-label={`Remove ${val}`}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  value={newOptionValues[optIdx] ?? ""}
+                  onChange={(e) =>
+                    setNewOptionValues((prev) => ({ ...prev, [optIdx]: e.target.value }))
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addValueToOption(optIdx);
+                    }
+                  }}
+                  placeholder={`Add ${opt.name} value...`}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => addValueToOption(optIdx)}
+                  aria-label="Add value"
+                >
+                  <Plus size={14} />
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          <div className="flex gap-2 pt-1">
+            <Input
+              value={newOptionName}
+              onChange={(e) => setNewOptionName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addOption();
+                }
+              }}
+              placeholder="Option name (e.g., Color, Size, Material)..."
+            />
+            <Button variant="primary" size="sm" onClick={addOption}>
+              + Add Option
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       {/* Color Images */}
       {colorOption && colorOption.values.length > 0 && (
-        <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-          <div>
-            <h2 className="font-semibold text-admin-text-primary mb-1">Color Images</h2>
-            <p className="text-xs text-admin-text-muted">Add images per color. These will show in the gallery when that color is selected.</p>
+        <Card>
+          <CardHeader
+            title="Color Images"
+            description="Add images per color. These show in the gallery when that color is selected."
+          />
+          <div className="space-y-4">
+            {colorOption.values.map((color) => (
+              <div
+                key={color}
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
+              >
+                <h3 className="font-medium text-sm">{color}</h3>
+                <ImageGalleryInput
+                  value={(colorImages[color] ?? []).map((img) => ({
+                    ...img,
+                    alt: img.alt || color,
+                  }))}
+                  onChange={(images) => setColorGallery(color, images)}
+                  storeId={storeId}
+                  folder="products"
+                  defaultAlt={color}
+                />
+              </div>
+            ))}
           </div>
-
-          {colorOption.values.map((color) => (
-            <div key={color} className="border border-admin-border rounded-lg p-4 space-y-3">
-              <h3 className="font-medium text-sm text-admin-text-primary">{color}</h3>
-              <ImageGalleryInput
-                value={(colorImages[color] ?? []).map((img) => ({
-                  ...img,
-                  alt: img.alt || color,
-                }))}
-                onChange={(images) => setColorGallery(color, images)}
-                storeId={storeId}
-                folder="products"
-                defaultAlt={color}
-              />
-            </div>
-          ))}
-        </div>
+        </Card>
       )}
 
       {/* Variants Table */}
       {variants.length > 0 && (
-        <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-          <div>
-            <h2 className="font-semibold text-admin-text-primary mb-1">Variant Combinations</h2>
-            <p className="text-xs text-admin-text-muted">Auto-generated from your options. Set price, stock, and SKU per combination.</p>
-          </div>
-
+        <Card>
+          <CardHeader
+            title="Variant Combinations"
+            description="Auto-generated from your options. Set price, stock, and SKU per combination."
+          />
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-admin-surface-raised border-b border-admin-border">
+                <tr className="border-b border-gray-200 dark:border-gray-700">
                   {options.map((opt) => (
-                    <th key={opt.name} className="px-3 py-2 text-left font-medium text-admin-text-secondary">
+                    <th
+                      key={opt.name}
+                      className="px-3 py-2 text-left font-medium text-gray-500"
+                    >
                       {opt.name}
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-left font-medium text-admin-text-secondary">Price</th>
-                  <th className="px-3 py-2 text-left font-medium text-admin-text-secondary">Stock</th>
-                  <th className="px-3 py-2 text-left font-medium text-admin-text-secondary">SKU</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-500">Price</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-500">Stock</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-500">SKU</th>
                 </tr>
               </thead>
               <tbody>
                 {variants.map((variant, idx) => (
-                  <tr key={idx} className="border-b border-admin-border hover:bg-admin-surface-hover">
+                  <tr
+                    key={idx}
+                    className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  >
                     {options.map((opt) => (
-                      <td key={opt.name} className="px-3 py-2 text-admin-text-secondary font-medium">
+                      <td key={opt.name} className="px-3 py-2 font-medium text-gray-700 dark:text-gray-300">
                         {variant.optionValues[opt.name]}
                       </td>
                     ))}
                     <td className="px-3 py-2">
-                      <input
+                      <Input
                         type="number"
                         min="0"
                         step="0.01"
                         value={variant.price}
                         onChange={(e) => updateVariant(idx, "price", Number(e.target.value))}
-                        className="w-24 px-2 py-1 border border-admin-border-md rounded text-sm"
+                        className="w-24"
                       />
                     </td>
                     <td className="px-3 py-2">
-                      <input
+                      <Input
                         type="number"
                         min="0"
                         value={variant.stock}
                         onChange={(e) => updateVariant(idx, "stock", Number(e.target.value))}
-                        className="w-20 px-2 py-1 border border-admin-border-md rounded text-sm"
+                        className="w-20"
                       />
                     </td>
                     <td className="px-3 py-2">
-                      <input
+                      <Input
                         type="text"
                         value={variant.sku}
                         onChange={(e) => updateVariant(idx, "sku", e.target.value)}
                         placeholder="SKU"
-                        className="w-32 px-2 py-1 border border-admin-border-md rounded text-sm"
+                        className="w-32"
                       />
                     </td>
                   </tr>
@@ -665,39 +675,43 @@ export function ProductForm({ storeId, categories, product, supportedLanguages =
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Actions */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50"
-          >
-            {loading ? "Saving..." : isEdit ? "Save Changes" : "Create Product"}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2 border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover"
-          >
+          <Button type="button" variant="secondary" onClick={() => router.back()}>
             Cancel
-          </button>
+          </Button>
+          {isEdit && (
+            <Button
+              type="button"
+              variant="danger-outline"
+              onClick={() => setDeleteOpen(true)}
+              disabled={loading}
+            >
+              Delete Product
+            </Button>
+          )}
         </div>
 
-        {isEdit && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={loading}
-            className="px-4 py-2 text-red-600 border border-red-200 text-sm font-medium rounded-lg hover:bg-red-50 disabled:opacity-50"
-          >
-            Delete Product
-          </button>
-        )}
+        <Button type="submit" variant="primary" loading={loading}>
+          {isEdit ? "Save Changes" : "Create Product"}
+        </Button>
       </div>
+
+      {isEdit && (
+        <ConfirmDialog
+          open={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={handleDelete}
+          title="Delete Product"
+          description="This will permanently delete the product and cannot be undone."
+          confirmLabel="Delete"
+          tone="danger"
+        />
+      )}
     </form>
   );
 }

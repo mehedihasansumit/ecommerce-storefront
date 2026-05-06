@@ -5,7 +5,18 @@ import { useRouter } from "next/navigation";
 import type { ICategory } from "../types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
-import { ImageInput } from "@/shared/components/ui";
+import {
+  Alert,
+  Button,
+  Card,
+  CardHeader,
+  ConfirmDialog,
+  Field,
+  ImageInput,
+  Input,
+  LangTabs,
+  Textarea,
+} from "@/shared/components/ui";
 
 interface CategoryFormProps {
   storeId: string;
@@ -13,20 +24,24 @@ interface CategoryFormProps {
   supportedLanguages?: string[];
 }
 
-const LANGUAGE_LABELS: Record<string, string> = {
+const LANG_LABELS: Record<string, string> = {
   en: "English",
   bn: "বাংলা",
 };
 
-export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }: CategoryFormProps) {
+export function CategoryForm({
+  storeId,
+  category,
+  supportedLanguages = ["en"],
+}: CategoryFormProps) {
   const router = useRouter();
   const isEdit = !!category;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeLang, setActiveLang] = useState(supportedLanguages[0] ?? "en");
 
-  // Localized fields
   const [localizedName, setLocalizedName] = useState<LocalizedString>(
     () => toLocalized(category?.name)
   );
@@ -48,7 +63,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
   const set = (field: string, value: unknown) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -61,10 +76,7 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
     };
 
     try {
-      const url = isEdit
-        ? `/api/categories/${category._id}`
-        : `/api/categories`;
-
+      const url = isEdit ? `/api/categories/${category._id}` : `/api/categories`;
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,131 +96,108 @@ export function CategoryForm({ storeId, category, supportedLanguages = ["en"] }:
   };
 
   const handleDelete = async () => {
-    if (!category || !confirm("Delete this category? This cannot be undone.")) return;
-    setLoading(true);
     try {
-      const res = await fetch(`/api/categories/${category._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/categories/${category!._id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       router.push(`/admin/stores/${storeId}/categories`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Delete failed");
-      setLoading(false);
     }
   };
 
+  const langLabel = LANG_LABELS[activeLang] ?? activeLang.toUpperCase();
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="error">{error}</Alert>}
 
-      {/* Language Tabs */}
-      {supportedLanguages.length > 1 && (
-        <div className="flex gap-1 border-b border-admin-border">
-          {supportedLanguages.map((lang) => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => setActiveLang(lang)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                activeLang === lang
-                  ? "border-gray-900 text-admin-text-primary"
-                  : "border-transparent text-admin-text-muted hover:text-admin-text-secondary"
-              }`}
-            >
-              {LANGUAGE_LABELS[lang] || lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      )}
+      <LangTabs
+        languages={supportedLanguages}
+        active={activeLang}
+        onChange={setActiveLang}
+      />
 
-      {/* Basic Info */}
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 space-y-4">
-        <h2 className="font-semibold text-admin-text-primary">
-          Category Information
-          {supportedLanguages.length > 1 && (
-            <span className="ml-2 text-xs font-normal text-admin-text-subtle">
-              — {LANGUAGE_LABELS[activeLang] || activeLang}
-            </span>
-          )}
-        </h2>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Category Name *</label>
-          <input
-            type="text"
-            value={localizedName[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-            required={activeLang === (supportedLanguages[0] ?? "en")}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            value={localizedDesc[activeLang] ?? ""}
-            onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-        </div>
-
-        <ImageInput
-          label="Image"
-          value={form.image}
-          onChange={(url) => set("image", url)}
-          storeId={storeId}
-          folder="categories"
-          aspect="16/9"
+      <Card>
+        <CardHeader
+          title={
+            supportedLanguages.length > 1 ? (
+              <>
+                Category Information
+                <span className="ml-2 text-xs font-normal text-gray-400">— {langLabel}</span>
+              </>
+            ) : (
+              "Category Information"
+            )
+          }
         />
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Sort Order</label>
-          <input
-            type="number"
-            value={form.sortOrder}
-            onChange={(e) => set("sortOrder", e.target.value)}
-            className="w-full px-3 py-2 border border-admin-border-md rounded-lg text-sm focus:outline-none focus:border-gray-500"
+        <div className="space-y-4">
+          <Field label="Category Name" required>
+            <Input
+              value={localizedName[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedName, activeLang, e.target.value)}
+              required={activeLang === (supportedLanguages[0] ?? "en")}
+            />
+          </Field>
+          <Field label="Description">
+            <Textarea
+              value={localizedDesc[activeLang] ?? ""}
+              onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
+              rows={4}
+            />
+          </Field>
+          <ImageInput
+            label="Image"
+            value={form.image}
+            onChange={(url) => set("image", url)}
+            storeId={storeId}
+            folder="categories"
+            aspect="16/9"
           />
+          <Field label="Sort Order" hint="Lower numbers appear first.">
+            <Input
+              type="number"
+              value={form.sortOrder}
+              onChange={(e) => set("sortOrder", e.target.value)}
+            />
+          </Field>
         </div>
-      </div>
+      </Card>
 
       {/* Actions */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        {isEdit ? (
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={loading}
-            className="px-4 py-2 text-red-600 border border-red-200 text-sm font-medium rounded-lg hover:bg-red-50 disabled:opacity-50"
-          >
-            Delete Category
-          </button>
-        ) : (
-          <span />
-        )}
-
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2 border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover"
-          >
+          <Button type="button" variant="secondary" onClick={() => router.back()}>
             Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50"
-          >
-            {loading ? "Saving..." : isEdit ? "Save Changes" : "Create Category"}
-          </button>
+          </Button>
+          {isEdit && (
+            <Button
+              type="button"
+              variant="danger-outline"
+              onClick={() => setDeleteOpen(true)}
+              disabled={loading}
+            >
+              Delete Category
+            </Button>
+          )}
         </div>
+
+        <Button type="submit" variant="primary" loading={loading}>
+          {isEdit ? "Save Changes" : "Create Category"}
+        </Button>
       </div>
+
+      {isEdit && (
+        <ConfirmDialog
+          open={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={handleDelete}
+          title="Delete Category"
+          description="This will permanently delete the category and cannot be undone."
+          confirmLabel="Delete"
+          tone="danger"
+        />
+      )}
     </form>
   );
 }

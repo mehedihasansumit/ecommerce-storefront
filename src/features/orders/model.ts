@@ -17,6 +17,7 @@ const OrderSchema = new Schema<IOrderDocument>(
     items: [
       {
         productId: { type: Schema.Types.ObjectId, ref: "Product" },
+        variantId: { type: String, default: "" },
         productName: String,
         productSlug: { type: String, default: "" },
         variantSelections: { type: Map, of: String },
@@ -72,6 +73,22 @@ const OrderSchema = new Schema<IOrderDocument>(
       },
     ],
 
+    refundRequest: {
+      status: {
+        type: String,
+        enum: ["pending", "approved", "rejected", "processed"],
+        default: null,
+      },
+      reason: { type: String, default: "" },
+      requestedAt: { type: Date },
+      adminNote: { type: String, default: "" },
+      reviewedAt: { type: Date },
+      reviewedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
+      refundAmount: { type: Number, default: 0 },
+      gatewayRefundId: { type: String, default: "" },
+      processedAt: { type: Date },
+    },
+
     notes: { type: String, default: "" },
     clientIp: { type: String, default: "" },
   },
@@ -83,6 +100,7 @@ OrderSchema.index({ storeId: 1, guestPhone: 1, createdAt: -1 });
 OrderSchema.index({ storeId: 1, orderNumber: 1 }, { unique: true });
 OrderSchema.index({ storeId: 1, status: 1 });
 OrderSchema.index({ storeId: 1, clientIp: 1, createdAt: -1 });
+OrderSchema.index({ storeId: 1, "refundRequest.status": 1 });
 
 export const OrderModel: Model<IOrderDocument> =
   mongoose.models.Order ||

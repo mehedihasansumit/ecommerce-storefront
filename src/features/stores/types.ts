@@ -119,6 +119,13 @@ export interface IStorePointsConfig {
   pointsPerBdt: number;
 }
 
+export interface IStoreRefundPolicy {
+  enabled: boolean;
+  windowDays: number;
+  description: string;
+  autoApprove: boolean;
+}
+
 export interface IStore {
   _id: string;
   name: string;
@@ -136,6 +143,7 @@ export interface IStore {
   socialLinks: IStoreSocialLinks;
   socialOrdering: IStoreSocialOrdering;
   pointsConfig: IStorePointsConfig;
+  refundPolicy: IStoreRefundPolicy;
   supportedLanguages: string[];
   defaultLanguage: string;
   createdAt: Date;

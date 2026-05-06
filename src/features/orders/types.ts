@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 
 export interface IOrderItem {
   productId: string;
+  variantId?: string;
   productName: string;
   productSlug: string;
   variantSelections: Record<string, string>;
@@ -35,6 +36,20 @@ export interface IStatusHistoryEntry {
   note?: string;
 }
 
+export type RefundRequestStatus = "pending" | "approved" | "rejected" | "processed";
+
+export interface IRefundRequest {
+  status: RefundRequestStatus;
+  reason: string;
+  requestedAt: Date;
+  adminNote?: string;
+  reviewedAt?: Date;
+  reviewedBy?: string;
+  refundAmount: number;
+  gatewayRefundId?: string;
+  processedAt?: Date;
+}
+
 export interface IOrder {
   _id: string;
   storeId: string;
@@ -55,6 +70,7 @@ export interface IOrder {
   paymentIntentId: string;
   status: OrderStatus;
   statusHistory: IStatusHistoryEntry[];
+  refundRequest?: IRefundRequest;
   notes: string;
   clientIp?: string;
   createdAt: Date;
@@ -63,6 +79,7 @@ export interface IOrder {
 
 export interface IOrderItemDocument {
   productId: Types.ObjectId;
+  variantId?: string;
   productName: string;
   productSlug: string;
   variantSelections: Map<string, string>;

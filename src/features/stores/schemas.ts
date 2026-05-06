@@ -122,6 +122,14 @@ export const updateStoreSchema = z.object({
       pointsPerBdt: z.number().int().min(1).optional(),
     })
     .optional(),
+  refundPolicy: z
+    .object({
+      enabled: z.boolean().optional(),
+      windowDays: z.number().int().min(1).max(365).optional(),
+      description: z.string().max(1000).optional(),
+      autoApprove: z.boolean().optional(),
+    })
+    .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),
 });

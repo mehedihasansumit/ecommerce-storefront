@@ -137,6 +137,13 @@ const StoreSchema = new Schema<IStoreDocument>(
       pointsPerBdt: { type: Number, default: 10 },
     },
 
+    refundPolicy: {
+      enabled: { type: Boolean, default: false },
+      windowDays: { type: Number, default: 7 },
+      description: { type: String, default: "" },
+      autoApprove: { type: Boolean, default: false },
+    },
+
     supportedLanguages: {
       type: [String],
       default: ["en"],

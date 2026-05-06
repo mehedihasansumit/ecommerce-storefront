@@ -62,6 +62,30 @@ export function orderStatusEmail(
   `;
 }
 
+export function refundStatusEmail(
+  orderNumber: string,
+  status: "pending" | "approved" | "rejected" | "processed",
+  storeName: string,
+  adminNote?: string,
+  refundAmount?: number
+): string {
+  const statusMessages: Record<typeof status, string> = {
+    pending: "We have received your refund request and it is being reviewed.",
+    approved: "Your refund request has been approved and is being processed.",
+    rejected: `Your refund request has been declined.${adminNote ? ` Reason: ${adminNote}` : ""}`,
+    processed: `Your refund of ${refundAmount ? `৳${refundAmount.toLocaleString()}` : "the full amount"} has been processed. Please allow 3-7 business days.`,
+  };
+
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Refund Update — ${orderNumber}</h2>
+      <p>${statusMessages[status]}</p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+      <p style="color: #888; font-size: 12px;">From ${storeName}</p>
+    </div>
+  `;
+}
+
 export function announcementEmail(title: string, message: string, storeName: string): string {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">

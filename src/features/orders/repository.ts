@@ -1,6 +1,6 @@
 import dbConnect from "@/shared/lib/db";
 import { OrderModel } from "./model";
-import type { IOrder } from "./types";
+import type { IOrder, IRefundRequest, RefundRequestStatus } from "./types";
 import { normalizePhone } from "@/shared/lib/phone";
 
 function serialize(doc: unknown): IOrder {
@@ -249,6 +249,92 @@ export const OrderRepository = {
         status,
         $push: { statusHistory: { status, changedAt: new Date(), note } },
       },
+      { new: true }
+    ).lean();
+    return order ? serialize(order) : null;
+  },
+
+  async createRefundRequest(
+    orderId: string,
+    data: { reason: string; refundAmount: number; requestedAt: Date }
+  ): Promise<IOrder | null> {
+    await dbConnect();
+    const order = await OrderModel.findByIdAndUpdate(
+      orderId,
+      {
+        refundRequest: {
+          status: "pending",
+          reason: data.reason,
+          refundAmount: data.refundAmount,
+          requestedAt: data.requestedAt,
+          adminNote: "",
+          gatewayRefundId: "",
+        },
+      },
+      { new: true }
+    ).lean();
+    return order ? serialize(order) : null;
+  },
+
+  async reviewRefundRequest(
+    orderId: string,
+    data: {
+      status: RefundRequestStatus;
+      adminNote?: string;
+      reviewedBy: string;
+      reviewedAt: Date;
+      refundAmount: number;
+      processedAt?: Date;
+      gatewayRefundId?: string;
+    }
+  ): Promise<IOrder | null> {
+    await dbConnect();
+    const update: Record<string, unknown> = {
+      "refundRequest.status": data.status,
+      "refundRequest.adminNote": data.adminNote ?? "",
+      "refundRequest.reviewedBy": data.reviewedBy,
+      "refundRequest.reviewedAt": data.reviewedAt,
+      "refundRequest.refundAmount": data.refundAmount,
+    };
+    if (data.status === "processed") {
+      update["refundRequest.processedAt"] = data.processedAt ?? new Date();
+      update["refundRequest.gatewayRefundId"] = data.gatewayRefundId ?? "";
+      update.paymentStatus = "refunded";
+    }
+    const order = await OrderModel.findByIdAndUpdate(
+      orderId,
+      { $set: update },
+      { new: true }
+    ).lean();
+    return order ? serialize(order) : null;
+  },
+
+  async findByStoreWithRefundRequests(
+    storeId: string,
+    {
+      status,
+      page = 1,
+      limit = 20,
+    }: { status?: RefundRequestStatus; page?: number; limit?: number } = {}
+  ): Promise<{ orders: IOrder[]; total: number }> {
+    await dbConnect();
+    const filter: Record<string, unknown> = {
+      storeId,
+      "refundRequest.status": status ?? { $ne: null },
+    };
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+      OrderModel.find(filter).sort({ "refundRequest.requestedAt": -1 }).skip(skip).limit(limit).lean(),
+      OrderModel.countDocuments(filter),
+    ]);
+    return { orders: orders.map(serialize), total };
+  },
+
+  async cancelRefundRequest(orderId: string): Promise<IOrder | null> {
+    await dbConnect();
+    const order = await OrderModel.findByIdAndUpdate(
+      orderId,
+      { $unset: { refundRequest: "" } },
       { new: true }
     ).lean();
     return order ? serialize(order) : null;

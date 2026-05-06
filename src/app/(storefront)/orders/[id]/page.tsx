@@ -20,8 +20,9 @@ import {
   ArrowLeft,
   Copy,
   Phone,
+  RotateCcw,
 } from "lucide-react";
-import type { IOrder, IStatusHistoryEntry } from "@/features/orders/types";
+import type { IOrder, IStatusHistoryEntry, RefundRequestStatus } from "@/features/orders/types";
 
 function CopyField({
   label,
@@ -315,6 +316,181 @@ function SectionLabel({
   );
 }
 
+// ─── Refund Request Panel ──────────────────────────────────────────────────────
+
+const REFUND_STATUS_BADGE: Record<RefundRequestStatus, { label: string; cls: string }> = {
+  pending:   { label: "Awaiting review", cls: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" },
+  approved:  { label: "Approved – processing", cls: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300" },
+  rejected:  { label: "Declined", cls: "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400" },
+  processed: { label: "Refund processed", cls: "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300" },
+};
+
+function RefundRequestPanel({
+  order,
+  onRefresh,
+}: {
+  order: IOrder;
+  onRefresh: () => void;
+}) {
+  const [showForm, setShowForm] = useState(false);
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const refund = order.refundRequest;
+
+  async function submitRefund() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/orders/${order._id}/refund`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      toast.success("Refund request submitted");
+      setShowForm(false);
+      onRefresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function cancelRefund() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/orders/${order._id}/refund`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      toast.success("Refund request cancelled");
+      onRefresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div
+      className="bg-bg rounded-2xl border shadow-sm p-5"
+      style={{ borderColor: "color-mix(in srgb, var(--color-primary) 25%, var(--color-border-subtle))" }}
+    >
+      <SectionLabel icon={RotateCcw} label="Refund Request" />
+
+      {error && (
+        <p className="text-xs text-red-600 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2 mb-3">
+          {error}
+        </p>
+      )}
+
+      {!refund && !showForm && (
+        <div className="space-y-3">
+          <p className="text-sm text-text-secondary">
+            This order was cancelled. If you already paid, you can request a refund.
+          </p>
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "var(--color-primary)" }}
+          >
+            <RotateCcw size={14} />
+            Request a Refund
+          </button>
+        </div>
+      )}
+
+      {showForm && !refund && (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
+              Reason for refund <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              placeholder="Please describe why you are requesting a refund (min 10 characters)..."
+              className="w-full text-sm rounded-xl border border-border-subtle bg-surface px-3 py-2.5 text-[var(--color-text)] placeholder:text-text-tertiary resize-none focus:outline-none focus:ring-2"
+              style={{ "--tw-ring-color": "color-mix(in srgb, var(--color-primary) 40%, transparent)" } as React.CSSProperties}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={submitRefund}
+              disabled={loading || reason.length < 10}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              {loading ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+              Submit Request
+            </button>
+            <button
+              onClick={() => { setShowForm(false); setError(""); }}
+              className="px-4 py-2 rounded-xl text-sm font-medium border border-border-subtle text-text-secondary hover:bg-surface transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {refund && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-text-secondary">Status</span>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${REFUND_STATUS_BADGE[refund.status].cls}`}>
+              {REFUND_STATUS_BADGE[refund.status].label}
+            </span>
+          </div>
+          <div className="text-sm text-text-secondary">
+            <span className="font-medium">Your reason: </span>
+            {refund.reason}
+          </div>
+          {refund.refundAmount > 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-secondary">Refund amount</span>
+              <span className="font-semibold" style={{ color: "var(--color-primary)" }}>
+                ৳{refund.refundAmount.toLocaleString()}
+              </span>
+            </div>
+          )}
+          {refund.adminNote && refund.status === "rejected" && (
+            <div className="text-sm text-text-secondary bg-red-50 dark:bg-red-950/20 rounded-lg px-3 py-2">
+              <span className="font-medium">Store note: </span>
+              {refund.adminNote}
+            </div>
+          )}
+          {refund.status === "pending" && (
+            <button
+              onClick={cancelRefund}
+              disabled={loading}
+              className="text-xs text-text-tertiary underline hover:text-text-secondary transition-colors"
+            >
+              {loading ? "Cancelling..." : "Cancel request"}
+            </button>
+          )}
+          {refund.status === "rejected" && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              <RotateCcw size={14} />
+              Request Again
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function OrderDetailPage({
@@ -325,27 +501,34 @@ export default function OrderDetailPage({
   searchParams: Promise<{ confirmed?: string }>;
 }) {
   const t = useTranslations("orderDetail");
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [order, setOrder] = useState<IOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
+  async function loadOrder(id: string) {
+    try {
+      const res = await fetch(`/api/orders/${id}`);
+      const data = await res.json();
+      if (!res.ok) setError(data.error || t("notFound"));
+      else setOrder(data.order);
+    } catch {
+      setError(t("failedToLoad"));
+    }
+  }
+
   useEffect(() => {
     async function load() {
       const [{ id }, sp] = await Promise.all([params, searchParams]);
       setConfirmed(sp.confirmed === "1");
-      try {
-        const res = await fetch(`/api/orders/${id}`);
-        const data = await res.json();
-        if (!res.ok) setError(data.error || t("notFound"));
-        else setOrder(data.order);
-      } catch {
-        setError(t("failedToLoad"));
-      } finally {
-        setLoading(false);
-      }
+      setOrderId(id);
+      setLoading(true);
+      await loadOrder(id);
+      setLoading(false);
     }
     load();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, searchParams, t]);
 
   if (loading) {
@@ -635,6 +818,14 @@ export default function OrderDetailPage({
             </div>
           </div>
         </div>
+
+        {/* ── Refund Request Panel ── */}
+        {order.status === "cancelled" && order.paymentStatus === "paid" && orderId && (
+          <RefundRequestPanel
+            order={order}
+            onRefresh={() => orderId && loadOrder(orderId)}
+          />
+        )}
 
         {/* ── CTA ── */}
         <div className="pt-2 pb-4 text-center">

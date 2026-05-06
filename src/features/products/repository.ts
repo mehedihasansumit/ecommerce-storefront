@@ -136,6 +136,34 @@ export const ProductRepository = {
     await ProductModel.findByIdAndUpdate(id, { averageRating, reviewCount });
   },
 
+  async decreaseStock(id: string, quantity: number): Promise<void> {
+    await dbConnect();
+    await ProductModel.findByIdAndUpdate(id, { $inc: { stock: -quantity } });
+  },
+
+  async increaseStock(id: string, quantity: number): Promise<void> {
+    await dbConnect();
+    await ProductModel.findByIdAndUpdate(id, { $inc: { stock: quantity } });
+  },
+
+  async decreaseVariantStock(productId: string, variantId: string, quantity: number): Promise<void> {
+    await dbConnect();
+    await ProductModel.findByIdAndUpdate(
+      productId,
+      { $inc: { "variants.$[v].stock": -quantity } },
+      { arrayFilters: [{ "v._id": variantId }] }
+    );
+  },
+
+  async increaseVariantStock(productId: string, variantId: string, quantity: number): Promise<void> {
+    await dbConnect();
+    await ProductModel.findByIdAndUpdate(
+      productId,
+      { $inc: { "variants.$[v].stock": quantity } },
+      { arrayFilters: [{ "v._id": variantId }] }
+    );
+  },
+
   async countByCategoryIds(
     storeId: string,
     categoryIds: string[]

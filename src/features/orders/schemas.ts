@@ -29,3 +29,15 @@ export const createOrderSchema = z.object({
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+
+export const createRefundRequestSchema = z.object({
+  reason: z.string().min(10, "Please describe the reason (min 10 chars)").max(500),
+});
+export type CreateRefundRequestInput = z.infer<typeof createRefundRequestSchema>;
+
+export const reviewRefundRequestSchema = z.object({
+  action: z.enum(["approved", "rejected", "processed"]),
+  adminNote: z.string().max(500).optional(),
+  refundAmount: z.number().positive().optional(),
+});
+export type ReviewRefundRequestInput = z.infer<typeof reviewRefundRequestSchema>;

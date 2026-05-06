@@ -23,6 +23,8 @@ export const PERMISSIONS = {
   REVIEWS_MODERATE: "reviews.moderate",
   POINTS_VIEW: "points.view",
   POINTS_MANAGE: "points.manage",
+  REFUNDS_VIEW: "refunds.view",
+  REFUNDS_MANAGE: "refunds.manage",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -52,6 +54,8 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "reviews.moderate": "Moderate Reviews",
   "points.view": "View Loyalty Points",
   "points.manage": "Manage Loyalty Points Config",
+  "refunds.view": "View Refund Requests",
+  "refunds.manage": "Approve / Reject Refunds",
 };
 
 export const PERMISSION_GROUPS = [
@@ -115,6 +119,10 @@ export const PERMISSION_GROUPS = [
   {
     label: "Loyalty Points",
     permissions: [PERMISSIONS.POINTS_VIEW, PERMISSIONS.POINTS_MANAGE],
+  },
+  {
+    label: "Refunds",
+    permissions: [PERMISSIONS.REFUNDS_VIEW, PERMISSIONS.REFUNDS_MANAGE],
   },
 ] as const;
 

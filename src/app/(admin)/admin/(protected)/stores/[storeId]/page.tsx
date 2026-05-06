@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Settings2,
   Type,
+  RotateCcw,
 } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -159,6 +160,7 @@ export default async function StoreDetailPage({
     hasPermission(adminUser, PERMISSIONS.REVIEWS_MODERATE);
   const canViewPoints = hasPermission(adminUser, PERMISSIONS.POINTS_VIEW);
   const canManagePoints = hasPermission(adminUser, PERMISSIONS.POINTS_MANAGE);
+  const canViewRefunds = hasPermission(adminUser, PERMISSIONS.REFUNDS_VIEW);
 
   const modules = [
     canViewProducts && {
@@ -230,6 +232,13 @@ export default async function StoreDetailPage({
       label: "Loyalty Points",
       description: "Balances, ledger & rules",
       accent: "pink" as ModuleAccent,
+    },
+    canViewRefunds && {
+      href: `/admin/stores/${storeId}/refunds`,
+      icon: RotateCcw,
+      label: "Refunds",
+      description: "Manage refund requests",
+      accent: "rose" as ModuleAccent,
     },
   ].filter(Boolean) as {
     href: string;

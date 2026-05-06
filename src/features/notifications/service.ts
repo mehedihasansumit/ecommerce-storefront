@@ -6,7 +6,7 @@ import type {
   NotificationChannel,
 } from "./types";
 import type { CreateAnnouncementInput } from "./schemas";
-import { sendEmail, orderConfirmationEmail, orderStatusEmail, announcementEmail } from "@/shared/lib/email";
+import { sendEmail, orderConfirmationEmail, orderStatusEmail, announcementEmail, refundStatusEmail } from "@/shared/lib/email";
 import { SubscriberService } from "@/features/subscribers/service";
 import { sendSms } from "@/shared/lib/sms";
 import { UserModel } from "@/features/auth/model";
@@ -102,6 +102,14 @@ export const NotificationService = {
         if (options.type === "order_update" && options.metadata?.orderNumber) {
           if (options.metadata?.isNewOrder) {
             html = orderConfirmationEmail(options.metadata.orderNumber as string, storeName);
+          } else if (options.metadata?.refundStatus) {
+            html = refundStatusEmail(
+              options.metadata.orderNumber as string,
+              options.metadata.refundStatus as "pending" | "approved" | "rejected" | "processed",
+              storeName,
+              options.metadata.adminNote as string | undefined,
+              options.metadata.refundAmount as number | undefined
+            );
           } else {
             html = orderStatusEmail(
               options.metadata.orderNumber as string,

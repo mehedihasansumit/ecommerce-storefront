@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight, Coins } from "lucide-react";
 import { AuthService } from "@/features/auth/service";
 import { OrderService } from "@/features/orders/service";
+import { StoreService } from "@/features/stores/service";
 import { CustomersSearch } from "./CustomersSearch";
 
 export const metadata: Metadata = { title: "Customers" };
@@ -46,7 +48,7 @@ export default async function StoreCustomersPage({
     rawStatus === "active" || rawStatus === "inactive" ? rawStatus : "all";
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
-  const [{ customers, total }, orderStats] = await Promise.all([
+  const [{ customers, total }, orderStats, store] = await Promise.all([
     AuthService.getCustomersByStore(storeId, {
       page,
       limit: PAGE_SIZE,
@@ -54,7 +56,10 @@ export default async function StoreCustomersPage({
       status,
     }),
     OrderService.getCustomerOrderStats(storeId),
+    StoreService.getById(storeId),
   ]);
+
+  if (!store) notFound();
 
   const statsMap = new Map(orderStats.map((s) => [s.userId, s]));
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -62,6 +67,17 @@ export default async function StoreCustomersPage({
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Customers</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

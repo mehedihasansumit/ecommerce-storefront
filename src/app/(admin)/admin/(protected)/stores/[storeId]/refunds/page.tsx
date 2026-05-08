@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RotateCcw, ArrowLeft, ExternalLink } from "lucide-react";
+import { RotateCcw, ChevronRight, ExternalLink } from "lucide-react";
 import { OrderService } from "@/features/orders/service";
+import { StoreService } from "@/features/stores/service";
 import type { RefundRequestStatus } from "@/features/orders/types";
 
 const STATUS_TABS: { label: string; value: RefundRequestStatus | "all" }[] = [
@@ -31,26 +32,39 @@ export default async function RefundsPage({
   const status = (sp.status as RefundRequestStatus | undefined) ?? undefined;
   const page = Number(sp.page ?? "1");
 
-  const { orders, total } = await OrderService.getRefundQueue(storeId, {
-    status,
-    page,
-    limit: 20,
-  });
+  const [{ orders, total }, store] = await Promise.all([
+    OrderService.getRefundQueue(storeId, { status, page, limit: 20 }),
+    StoreService.getById(storeId),
+  ]);
 
   if (!orders && total === undefined) notFound();
+  if (!store) notFound();
 
   const totalPages = Math.ceil(total / 20);
 
   return (
     <div className="space-y-5">
       <div>
-        <Link
-          href={`/admin/stores/${storeId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-admin-text-muted hover:text-admin-text-secondary transition-colors mb-3"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Store
-        </Link>
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+          <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">
+            Dashboard
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">
+            Stores
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link
+            href={`/admin/stores/${storeId}`}
+            className="hover:text-admin-text-secondary transition-colors"
+          >
+            {store.name}
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <span className="text-admin-text-secondary font-medium">Refund Requests</span>
+        </nav>
+
         <div className="flex items-center gap-3">
           <RotateCcw className="w-5 h-5 text-admin-text-subtle" />
           <h1 className="text-2xl font-bold tracking-tight text-admin-text-primary">
@@ -102,7 +116,7 @@ export default async function RefundsPage({
                   <th className="text-left px-4 py-3">Reason</th>
                   <th className="text-left px-4 py-3">Requested</th>
                   <th className="text-left px-4 py-3">Status</th>
-                  <th className="text-left px-4 py-3">Actions</th>
+                  <th className="text-left px-4 py-3">Actions </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-admin-border">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import {
   Sparkles,
   Coins,
@@ -14,6 +14,7 @@ import {
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { PointService } from "@/features/points/service";
+import { StoreService } from "@/features/stores/service";
 import { PointsCustomerSearch } from "./PointsCustomerSearch";
 
 const PAGE_SIZE = 15;
@@ -69,7 +70,7 @@ export default async function StorePointsPage({
 
   const canManage = hasPermission(adminUser, PERMISSIONS.POINTS_MANAGE);
 
-  const [stats, { customers, total, totalPages }, ledger, config] =
+  const [stats, { customers, total, totalPages }, ledger, config, store] =
     await Promise.all([
       PointService.getStoreStats(storeId),
       PointService.getTopCustomers(storeId, {
@@ -79,12 +80,26 @@ export default async function StorePointsPage({
       }),
       PointService.getStoreLedger(storeId, 1, LEDGER_SIZE),
       PointService.getConfig(storeId),
+      StoreService.getById(storeId),
     ]);
+
+  if (!store) notFound();
 
   const currentPage = Math.min(page, totalPages);
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Loyalty Points</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

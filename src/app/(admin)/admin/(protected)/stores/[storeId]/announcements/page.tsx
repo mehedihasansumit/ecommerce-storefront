@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Plus, Megaphone, Radio, Clock, XCircle } from "lucide-react";
+import { redirect, notFound } from "next/navigation";
+import { Plus, Megaphone, Radio, Clock, XCircle, ChevronRight } from "lucide-react";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { NotificationService } from "@/features/notifications/service";
+import { StoreService } from "@/features/stores/service";
 import { AnnouncementTable } from "@/features/notifications/components/AnnouncementTable";
 import type { IAnnouncement } from "@/features/notifications/types";
 
@@ -39,7 +40,12 @@ export default async function AnnouncementsPage({
 
   const canCreate = hasPermission(adminUser, PERMISSIONS.ANNOUNCEMENTS_CREATE);
 
-  const { announcements } = await NotificationService.listAnnouncements(storeId);
+  const [{ announcements }, store] = await Promise.all([
+    NotificationService.listAnnouncements(storeId),
+    StoreService.getById(storeId),
+  ]);
+
+  if (!store) notFound();
 
   // Compute stats from full list
   const stats = announcements.reduce(
@@ -70,6 +76,17 @@ export default async function AnnouncementsPage({
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Announcements</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Plus, Ticket, CheckCircle, Clock, XCircle } from "lucide-react";
+import { redirect, notFound } from "next/navigation";
+import { Plus, Ticket, CheckCircle, Clock, XCircle, ChevronRight } from "lucide-react";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { CouponService } from "@/features/coupons/service";
+import { StoreService } from "@/features/stores/service";
 import { CouponTable } from "@/features/coupons/components/CouponTable";
 import type { ICoupon } from "@/features/coupons/types";
 
@@ -41,7 +42,12 @@ export default async function CouponsPage({
   const canCreate = hasPermission(adminUser, PERMISSIONS.COUPONS_CREATE);
 
   // Fetch all coupons (coupons per store are few)
-  const { coupons } = await CouponService.listByStore(storeId, { limit: 500 });
+  const [{ coupons }, store] = await Promise.all([
+    CouponService.listByStore(storeId, { limit: 500 }),
+    StoreService.getById(storeId),
+  ]);
+
+  if (!store) notFound();
 
   // Compute stats from full list
   const stats = coupons.reduce(
@@ -73,6 +79,17 @@ export default async function CouponsPage({
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Coupons</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

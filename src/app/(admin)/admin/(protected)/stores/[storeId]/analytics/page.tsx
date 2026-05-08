@@ -14,6 +14,7 @@ import {
   ExternalLink,
   ShoppingCart,
   Receipt,
+  ChevronRight,
 } from "lucide-react";
 import { DateRangeFilter } from "./DateRangeFilter";
 
@@ -66,6 +67,17 @@ export default async function AnalyticsPage({
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Analytics</span>
+      </nav>
+
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>

@@ -1,9 +1,10 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { ReviewService } from "@/features/reviews/service";
+import { StoreService } from "@/features/stores/service";
 import { ReviewModerationTable } from "./ReviewModerationTable";
 
 const PAGE_SIZE = 20;
@@ -32,28 +33,39 @@ export default async function AdminReviewsPage({
   if (filter === "approved") isApproved = true;
   else if (filter === "pending") isApproved = false;
 
-  const { reviews, total, totalPages } = await ReviewService.getByStore(storeId, {
-    page,
-    limit: PAGE_SIZE,
-    isApproved,
-  });
+  const [{ reviews, total, totalPages }, pendingResult, store] = await Promise.all([
+    ReviewService.getByStore(storeId, {
+      page,
+      limit: PAGE_SIZE,
+      isApproved,
+    }),
+    ReviewService.getByStore(storeId, {
+      page: 1,
+      limit: 1,
+      isApproved: false,
+    }),
+    StoreService.getById(storeId),
+  ]);
 
-  const pendingCount = await ReviewService.getByStore(storeId, {
-    page: 1,
-    limit: 1,
-    isApproved: false,
-  }).then((r) => r.total);
+  if (!store) notFound();
+
+  const pendingCount = pendingResult.total;
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Reviews</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link
-          href={`/admin/stores/${storeId}`}
-          className="text-admin-text-subtle hover:text-admin-text-secondary transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Link>
         <div>
           <h1 className="text-2xl font-bold text-admin-text-primary">Customer Reviews</h1>
           <p className="text-sm text-admin-text-muted mt-0.5">

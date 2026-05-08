@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { Package, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { ProductService } from "@/features/products/service";
 import { CategoryService } from "@/features/categories/service";
+import { StoreService } from "@/features/stores/service";
 import { tAdmin } from "@/shared/lib/i18n";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
@@ -51,7 +52,7 @@ export default async function StoreProductsPage({
     rawStatus === "active" || rawStatus === "inactive" ? rawStatus : "all";
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
-  const [result, categories] = await Promise.all([
+  const [result, categories, store] = await Promise.all([
     ProductService.getByStore(storeId, {
       page,
       limit: PAGE_SIZE,
@@ -60,7 +61,10 @@ export default async function StoreProductsPage({
       status,
     }),
     CategoryService.getByStore(storeId),
+    StoreService.getById(storeId),
   ]);
+
+  if (!store) notFound();
 
   const { data: products, total, totalPages } = result;
   const currentPage = Math.min(page, Math.max(1, totalPages));
@@ -74,6 +78,17 @@ export default async function StoreProductsPage({
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Products</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -144,7 +159,7 @@ export default async function StoreProductsPage({
         <>
           <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px]">
+              <table className="w-full min-w-175">
                 <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
@@ -207,7 +222,7 @@ export default async function StoreProductsPage({
                               </div>
                             )}
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-admin-text-primary truncate max-w-[180px]">
+                              <p className="text-sm font-medium text-admin-text-primary truncate max-w-45">
                                 {name}
                               </p>
                               {product.isFeatured && (

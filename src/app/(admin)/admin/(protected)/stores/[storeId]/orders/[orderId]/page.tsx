@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
+  ChevronRight,
   User,
   MapPin,
   CreditCard,
@@ -16,6 +16,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { OrderService } from "@/features/orders/service";
+import { StoreService } from "@/features/stores/service";
 import { OrderStatusUpdater } from "./OrderStatusUpdater";
 import { RefundReviewer } from "./RefundReviewer";
 import type { OrderStatus, PaymentStatus, RefundRequestStatus } from "@/features/orders/types";
@@ -83,8 +84,12 @@ export default async function OrderDetailPage({
   params: Promise<{ storeId: string; orderId: string }>;
 }) {
   const { storeId, orderId } = await params;
-  const order = await OrderService.getById(storeId, orderId);
+  const [order, store] = await Promise.all([
+    OrderService.getById(storeId, orderId),
+    StoreService.getById(storeId),
+  ]);
   if (!order) notFound();
+  if (!store) notFound();
 
   const sameIpOrders = order.clientIp
     ? await OrderService.getByIp(storeId, order.clientIp, order._id)
@@ -96,13 +101,17 @@ export default async function OrderDetailPage({
     <div className="space-y-5">
       {/* ── Header ── */}
       <div>
-        <Link
-          href={`/admin/stores/${storeId}/orders`}
-          className="inline-flex items-center gap-1.5 text-sm text-admin-text-muted hover:text-admin-text-secondary transition-colors mb-3"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Orders
-        </Link>
+        <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+          <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link href={`/admin/stores/${storeId}/orders`} className="hover:text-admin-text-secondary transition-colors">Orders</Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <span className="text-admin-text-secondary font-medium">{order.orderNumber}</span>
+        </nav>
 
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>

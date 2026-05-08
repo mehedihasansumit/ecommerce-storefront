@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { FolderOpen, Package, ChevronRight } from "lucide-react";
 import { CategoryService } from "@/features/categories/service";
 import { ProductService } from "@/features/products/service";
+import { StoreService } from "@/features/stores/service";
 import { tAdmin } from "@/shared/lib/i18n";
 import { DeleteCategoryButton } from "./DeleteCategoryButton";
 
@@ -24,7 +26,12 @@ export default async function StoreCategoriesPage({
   const status: Status =
     rawStatus === "active" || rawStatus === "inactive" ? rawStatus : "all";
 
-  const categories = await CategoryService.getByStore(storeId, status);
+  const [categories, store] = await Promise.all([
+    CategoryService.getByStore(storeId, status),
+    StoreService.getById(storeId),
+  ]);
+
+  if (!store) notFound();
 
   // Product counts per category
   const categoryIds = categories.map((c) => c._id);
@@ -40,6 +47,17 @@ export default async function StoreCategoriesPage({
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
+        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
+        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-admin-text-secondary font-medium">Categories</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -95,7 +113,7 @@ export default async function StoreCategoriesPage({
       ) : (
         <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
+            <table className="w-full min-w-150">
               <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                 <tr>
                   <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">

@@ -144,7 +144,7 @@ export default async function AdminDashboardPage() {
           {canCreateStore && (
             <Link
               href="/admin/stores/new"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               <Plus size={15} />
               <span className="hidden sm:inline">New Store</span>

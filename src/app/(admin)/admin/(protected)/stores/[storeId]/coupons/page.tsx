@@ -84,7 +84,7 @@ export default async function CouponsPage({
         {canCreate && (
           <Link
             href={`/admin/stores/${storeId}/coupons/new`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Coupon

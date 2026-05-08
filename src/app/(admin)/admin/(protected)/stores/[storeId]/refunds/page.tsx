@@ -102,7 +102,7 @@ export default async function RefundsPage({
                   <th className="text-left px-4 py-3">Reason</th>
                   <th className="text-left px-4 py-3">Requested</th>
                   <th className="text-left px-4 py-3">Status</th>
-                  <th className="px-4 py-3" />
+                  <th className="text-left px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-admin-border">

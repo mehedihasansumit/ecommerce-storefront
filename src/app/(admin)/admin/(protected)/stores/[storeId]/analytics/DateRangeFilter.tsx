@@ -71,18 +71,18 @@ export function DateRangeFilter({ storeId, from, to }: Props) {
           type="date"
           value={localFrom}
           onChange={(e) => setLocalFrom(e.target.value)}
-          className="text-xs border border-admin-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
+          className="text-xs border border-admin-border rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
         />
         <span className="text-gray-300 text-sm">—</span>
         <input
           type="date"
           value={localTo}
           onChange={(e) => setLocalTo(e.target.value)}
-          className="text-xs border border-admin-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
+          className="text-xs border border-admin-border rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
         />
         <button
           type="submit"
-          className="px-3 py-1.5 text-xs bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium shrink-0"
+          className="px-6 py-2 text-xs bg-gray-900 dark:bg-gray-700 p-2 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium shrink-0"
         >
           Apply
         </button>

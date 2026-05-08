@@ -19,6 +19,7 @@ import {
   ChevronUp,
   MessageCircle,
   Sparkles,
+  RotateCcw,
 } from "lucide-react";
 import type { IStore, HeroLayoutStyle, IStoreTheme } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
@@ -86,7 +87,8 @@ type Tab =
   | "contact"
   | "socialOrdering"
   | "seo"
-  | "loyalty";
+  | "loyalty"
+  | "refundPolicy";
 
 const STORE_TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "general", label: "General", icon: Settings },
@@ -95,6 +97,7 @@ const STORE_TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "contact", label: "Contact", icon: Phone },
   { id: "socialOrdering", label: "Social Ordering", icon: MessageCircle },
   { id: "seo", label: "SEO", icon: Search },
+  { id: "refundPolicy", label: "Refund Policy", icon: RotateCcw },
 ];
 
 const LOYALTY_TAB: { id: Tab; label: string; icon: React.ElementType } = {
@@ -320,6 +323,12 @@ export default function StoreEditForm({
       pointsPerBdt:
         store.pointsConfig?.pointsPerBdt ?? DEFAULT_POINTS_CONFIG.pointsPerBdt,
     },
+    refundPolicy: {
+      enabled: store.refundPolicy?.enabled ?? false,
+      windowDays: store.refundPolicy?.windowDays ?? 7,
+      description: store.refundPolicy?.description ?? "",
+      autoApprove: store.refundPolicy?.autoApprove ?? false,
+    },
   });
 
   const [heroBanners, setHeroBanners] = useState<BannerState[]>(
@@ -485,6 +494,7 @@ export default function StoreEditForm({
         };
         payload.supportedLanguages = formData.supportedLanguages;
         payload.defaultLanguage = formData.defaultLanguage;
+        payload.refundPolicy = formData.refundPolicy;
       }
       if (canManagePoints) {
         payload.pointsConfig = formData.pointsConfig;
@@ -1960,6 +1970,169 @@ export default function StoreEditForm({
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── REFUND POLICY TAB ── */}
+        {activeTab === "refundPolicy" && (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 space-y-5">
+              <div>
+                <SectionTitle>Refund Policy Settings</SectionTitle>
+                <p className="text-xs text-admin-text-subtle mt-1">
+                  Control whether customers can request refunds and how they are handled.
+                </p>
+              </div>
+
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-admin-border bg-admin-surface-raised cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={formData.refundPolicy.enabled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      refundPolicy: { ...prev.refundPolicy, enabled: e.target.checked },
+                    }))
+                  }
+                  disabled={loading}
+                  className="w-5 h-5 rounded border-admin-border-md text-admin-text-primary focus:ring-gray-900 mt-0.5"
+                />
+                <div>
+                  <p className="text-sm font-medium text-admin-text-secondary">
+                    Enable refund requests
+                  </p>
+                  <p className="text-xs text-admin-text-subtle mt-0.5">
+                    When on, customers can submit refund requests from their order history.
+                  </p>
+                </div>
+              </label>
+
+              {formData.refundPolicy.enabled && (
+                <div className="space-y-4 pl-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field
+                      label="Refund window (days)"
+                      hint="Orders older than this cannot be refunded"
+                    >
+                      <input
+                        type="number"
+                        min={1}
+                        max={365}
+                        value={formData.refundPolicy.windowDays}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            refundPolicy: {
+                              ...prev.refundPolicy,
+                              windowDays: Math.max(1, parseInt(e.target.value || "1", 10)),
+                            },
+                          }))
+                        }
+                        className={inputCls}
+                        disabled={loading}
+                      />
+                    </Field>
+
+                    <div className="flex flex-col justify-end pb-0.5">
+                      <label className="flex items-start gap-3 p-4 rounded-xl border border-admin-border bg-admin-surface-raised cursor-pointer select-none h-full">
+                        <input
+                          type="checkbox"
+                          checked={formData.refundPolicy.autoApprove}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              refundPolicy: {
+                                ...prev.refundPolicy,
+                                autoApprove: e.target.checked,
+                              },
+                            }))
+                          }
+                          disabled={loading}
+                          className="w-5 h-5 rounded border-admin-border-md text-admin-text-primary focus:ring-gray-900 mt-0.5"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-admin-text-secondary">
+                            Auto-approve refunds
+                          </p>
+                          <p className="text-xs text-admin-text-subtle mt-0.5">
+                            Approve requests automatically without manual review.
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <Field
+                    label="Policy description"
+                    hint="Shown to customers before they submit a refund request"
+                  >
+                    <textarea
+                      value={formData.refundPolicy.description}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          refundPolicy: {
+                            ...prev.refundPolicy,
+                            description: e.target.value,
+                          },
+                        }))
+                      }
+                      className={`${inputCls} resize-none`}
+                      rows={4}
+                      disabled={loading}
+                      placeholder="Items must be unused and in original packaging. Refunds are processed within 5–7 business days."
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+
+            {/* Preview */}
+            <div className="lg:col-span-2">
+              <SectionTitle>Policy Summary</SectionTitle>
+              <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${formData.refundPolicy.enabled ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-400"}`}>
+                    <RotateCcw size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-admin-text-secondary">
+                      {formData.refundPolicy.enabled ? "Refunds enabled" : "Refunds disabled"}
+                    </p>
+                    <p className="text-xs text-admin-text-muted">
+                      {formData.refundPolicy.enabled
+                        ? `${formData.refundPolicy.windowDays}-day window`
+                        : "Customers cannot request refunds"}
+                    </p>
+                  </div>
+                </div>
+                {formData.refundPolicy.enabled && (
+                  <>
+                    <div className="border-t border-admin-border" />
+                    <div className="text-xs text-admin-text-secondary space-y-1.5">
+                      <div className="flex justify-between">
+                        <span className="text-admin-text-subtle">Window</span>
+                        <span className="font-medium">{formData.refundPolicy.windowDays} days</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-admin-text-subtle">Auto-approve</span>
+                        <span className={`font-medium ${formData.refundPolicy.autoApprove ? "text-emerald-600" : "text-admin-text-secondary"}`}>
+                          {formData.refundPolicy.autoApprove ? "Yes" : "No — manual review"}
+                        </span>
+                      </div>
+                      {formData.refundPolicy.description && (
+                        <div className="pt-1">
+                          <p className="text-admin-text-subtle mb-1">Policy text</p>
+                          <p className="text-admin-text-secondary leading-relaxed line-clamp-4">
+                            {formData.refundPolicy.description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

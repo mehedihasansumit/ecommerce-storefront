@@ -50,7 +50,7 @@ export default async function StoreCategoriesPage({
         </div>
         <Link
           href={`/admin/stores/${storeId}/categories/new`}
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
         >
           + New Category
         </Link>
@@ -62,11 +62,10 @@ export default async function StoreCategoriesPage({
           <Link
             key={s}
             href={buildHref(storeId, s)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
-              status === s
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
                 ? "bg-gray-900 text-white border-gray-900"
                 : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-            }`}
+              }`}
           >
             {s}
           </Link>
@@ -117,7 +116,9 @@ export default async function StoreCategoriesPage({
                   <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Status
                   </th>
-                  <th className="px-5 py-3" />
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-admin-border">
@@ -186,16 +187,14 @@ export default async function StoreCategoriesPage({
                       {/* Status */}
                       <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                            cat.isActive
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${cat.isActive
                               ? "bg-green-100 text-green-700"
                               : "bg-admin-chip text-admin-text-muted"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              cat.isActive ? "bg-green-500" : "bg-gray-400"
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${cat.isActive ? "bg-green-500" : "bg-gray-400"
+                              }`}
                           />
                           {cat.isActive ? "Active" : "Inactive"}
                         </span>
@@ -203,7 +202,7 @@ export default async function StoreCategoriesPage({
 
                       {/* Actions */}
                       <td className="px-5 py-4">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1">
                           <Link
                             href={`/admin/stores/${storeId}/categories/${cat._id}`}
                             className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors"

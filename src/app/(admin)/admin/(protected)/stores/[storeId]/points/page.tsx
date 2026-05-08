@@ -105,7 +105,7 @@ export default async function StorePointsPage({
         {canManage && (
           <Link
             href={`/admin/stores/${storeId}#loyalty-points`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-300 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
           >
             <Settings className="w-4 h-4" />
             Configure
@@ -214,7 +214,9 @@ export default async function StorePointsPage({
                     <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       ≈ BDT
                     </th>
-                    <th className="px-5 py-3" />
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -246,7 +248,7 @@ export default async function StorePointsPage({
                         <td className="px-5 py-4 text-right">
                           <Link
                             href={`/admin/stores/${storeId}/points/${c._id}`}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
+                            className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
                           >
                             View ledger
                           </Link>
@@ -268,22 +270,20 @@ export default async function StorePointsPage({
                 <Link
                   href={buildHref(storeId, { q, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    currentPage <= 1
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
                       ? "opacity-30 pointer-events-none border-admin-border"
                       : "border-admin-border hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
                 <Link
                   href={buildHref(storeId, { q, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    currentPage >= totalPages
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-admin-border"
                       : "border-admin-border hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -312,11 +312,10 @@ export default async function StorePointsPage({
                     className="flex items-center gap-4 px-5 py-3.5 hover:bg-admin-surface-hover transition-colors"
                   >
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        positive
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${positive
                           ? "bg-emerald-50 text-emerald-600"
                           : "bg-rose-50 text-rose-600"
-                      }`}
+                        }`}
                     >
                       <Icon size={15} />
                     </div>
@@ -329,9 +328,8 @@ export default async function StorePointsPage({
                       </p>
                     </div>
                     <span
-                      className={`text-sm font-semibold ${
-                        positive ? "text-emerald-600" : "text-rose-600"
-                      }`}
+                      className={`text-sm font-semibold ${positive ? "text-emerald-600" : "text-rose-600"
+                        }`}
                     >
                       {positive ? "+" : ""}
                       {t.amount.toLocaleString()}

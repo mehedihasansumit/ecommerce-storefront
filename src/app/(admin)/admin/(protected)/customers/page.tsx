@@ -81,11 +81,10 @@ export default async function AllCustomersPage({
           <div className="flex flex-wrap gap-1.5">
             <Link
               href={buildHref({ store: undefined, page: 1 })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                !storeFilter
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!storeFilter
                   ? "bg-gray-900 text-white border-gray-900"
                   : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
+                }`}
             >
               All Stores
             </Link>
@@ -93,11 +92,10 @@ export default async function AllCustomersPage({
               <Link
                 key={s._id}
                 href={buildHref({ store: s._id, page: 1 })}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                  storeFilter === s._id
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${storeFilter === s._id
                     ? "bg-gray-900 text-white border-gray-900"
                     : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-                }`}
+                  }`}
               >
                 {s.name}
               </Link>
@@ -111,11 +109,10 @@ export default async function AllCustomersPage({
             <Link
               key={s}
               href={buildHref({ status: s, page: 1 })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
-                status === s
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
                   ? "bg-gray-900 text-white border-gray-900"
                   : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
+                }`}
             >
               {s}
             </Link>
@@ -158,9 +155,8 @@ export default async function AllCustomersPage({
                       )}
                     </div>
                     <span
-                      className={`ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${
-                        customer.isActive ? "bg-green-100 text-green-700" : "bg-admin-chip text-admin-text-muted"
-                      }`}
+                      className={`ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${customer.isActive ? "bg-green-100 text-green-700" : "bg-admin-chip text-admin-text-muted"
+                        }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${customer.isActive ? "bg-green-500" : "bg-gray-400"}`} />
                       {customer.isActive ? "Active" : "Inactive"}
@@ -235,7 +231,9 @@ export default async function AllCustomersPage({
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Joined
                     </th>
-                    <th className="px-5 py-3" />
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -305,16 +303,14 @@ export default async function AllCustomersPage({
 
                         <td className="px-5 py-4">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                              customer.isActive
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${customer.isActive
                                 ? "bg-green-100 text-green-700"
                                 : "bg-admin-chip text-admin-text-muted"
-                            }`}
+                              }`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                customer.isActive ? "bg-green-500" : "bg-gray-400"
-                              }`}
+                              className={`w-1.5 h-1.5 rounded-full ${customer.isActive ? "bg-green-500" : "bg-gray-400"
+                                }`}
                             />
                             {customer.isActive ? "Active" : "Inactive"}
                           </span>
@@ -330,7 +326,7 @@ export default async function AllCustomersPage({
                           {store && (
                             <Link
                               href={`/admin/stores/${store._id}/customers`}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
+                              className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
                             >
                               View in Store
                             </Link>
@@ -355,11 +351,10 @@ export default async function AllCustomersPage({
                 <Link
                   href={buildHref({ page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    currentPage <= 1
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
@@ -383,11 +378,10 @@ export default async function AllCustomersPage({
                       <Link
                         key={item}
                         href={buildHref({ page: item as number })}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
-                          currentPage === item
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
                             ? "bg-gray-900 text-white"
                             : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
-                        }`}
+                          }`}
                       >
                         {item}
                       </Link>
@@ -397,11 +391,10 @@ export default async function AllCustomersPage({
                 <Link
                   href={buildHref({ page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    currentPage >= totalPages
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Link>

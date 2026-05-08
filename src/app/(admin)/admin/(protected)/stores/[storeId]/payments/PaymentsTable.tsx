@@ -167,7 +167,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
 
                   {/* Customer */}
                   <td className="px-5 py-4">
-                    <p className="text-sm font-medium text-gray-900">{order.shippingAddress.name}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300">{order.shippingAddress.name}</p>
                     <p className="text-xs text-admin-text-subtle">{order.shippingAddress.phone}</p>
                   </td>
 
@@ -232,7 +232,7 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   </td>
 
                   {/* Total */}
-                  <td className="px-5 py-4 text-sm font-semibold text-right text-gray-900">
+                  <td className="px-5 py-4 text-sm font-semibold text-right text-gray-900 dark:text-gray-300">
                     ৳{order.total.toLocaleString()}
                   </td>
 

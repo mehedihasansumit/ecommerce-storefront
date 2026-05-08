@@ -127,7 +127,7 @@ export function ReviewModerationTable({
               return (
                 <tr key={review._id} className="hover:bg-admin-surface-hover transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900 text-sm">
+                    <p className="font-medium text-gray-900 dark:text-gray-300 text-sm">
                       {review.reviewerName || "Customer"}
                     </p>
                   </td>
@@ -136,7 +136,7 @@ export function ReviewModerationTable({
                   </td>
                   <td className="px-4 py-3 max-w-xs">
                     {review.title && (
-                      <p className="font-medium text-gray-800 truncate">{review.title}</p>
+                      <p className="font-medium text-gray-800 dark:text-gray-300 truncate">{review.title}</p>
                     )}
                     {review.comment && (
                       <p className="text-admin-text-muted text-xs truncate mt-0.5">{review.comment}</p>

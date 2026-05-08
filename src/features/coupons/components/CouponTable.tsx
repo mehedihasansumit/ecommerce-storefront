@@ -24,19 +24,19 @@ function getCouponStatus(coupon: ICoupon): CouponStatus {
 }
 
 const STATUS_STYLES: Record<CouponStatus, string> = {
-  active:    "bg-green-100 text-green-700",
+  active: "bg-green-100 text-green-700",
   scheduled: "bg-blue-100 text-blue-700",
-  expired:   "bg-red-100 text-red-700",
+  expired: "bg-red-100 text-red-700",
   exhausted: "bg-orange-100 text-orange-700",
-  inactive:  "bg-admin-chip text-admin-text-muted",
+  inactive: "bg-admin-chip text-admin-text-muted",
 };
 
 const STATUS_DOT: Record<CouponStatus, string> = {
-  active:    "bg-green-500",
+  active: "bg-green-500",
   scheduled: "bg-blue-500",
-  expired:   "bg-red-400",
+  expired: "bg-red-400",
   exhausted: "bg-orange-400",
-  inactive:  "bg-gray-400",
+  inactive: "bg-gray-400",
 };
 
 export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: Props) {
@@ -92,7 +92,7 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
               <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Min Order</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Valid</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Status</th>
-              <th className="px-5 py-3" />
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-admin-border">
@@ -141,13 +141,12 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                     {usagePct !== null && (
                       <div className="mt-1.5 w-20 h-1.5 bg-admin-chip rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${
-                            usagePct >= 100
+                          className={`h-full rounded-full transition-all ${usagePct >= 100
                               ? "bg-red-400"
                               : usagePct >= 75
-                              ? "bg-orange-400"
-                              : "bg-green-400"
-                          }`}
+                                ? "bg-orange-400"
+                                : "bg-green-400"
+                            }`}
                           style={{ width: `${usagePct}%` }}
                         />
                       </div>
@@ -202,7 +201,7 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
 
                   {/* Actions */}
                   <td className="px-5 py-4">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-start gap-1">
                       <Link
                         href={`/admin/stores/${storeId}/coupons/${coupon._id}`}
                         className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors"

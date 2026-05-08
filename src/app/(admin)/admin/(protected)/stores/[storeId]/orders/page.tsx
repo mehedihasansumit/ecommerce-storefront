@@ -90,7 +90,7 @@ export default async function StoreOrdersPage({
         </div>
         <Link
           href={`/admin/stores/${storeId}/orders/new`}
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
         >
           + Create Order
         </Link>
@@ -105,8 +105,8 @@ export default async function StoreOrdersPage({
             <Link
               href={buildHref(storeId, { q, payment })}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!status
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                 }`}
             >
               All orders
@@ -116,8 +116,8 @@ export default async function StoreOrdersPage({
                 key={s}
                 href={buildHref(storeId, { q, status: s, payment })}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
-                    ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                   }`}
               >
                 {s}
@@ -130,8 +130,8 @@ export default async function StoreOrdersPage({
             <Link
               href={buildHref(storeId, { q, status })}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!payment
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                 }`}
             >
               All payments
@@ -141,8 +141,8 @@ export default async function StoreOrdersPage({
                 key={s}
                 href={buildHref(storeId, { q, status, payment: s })}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${payment === s
-                    ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
                   }`}
               >
                 {s}
@@ -197,7 +197,9 @@ export default async function StoreOrdersPage({
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Date
                     </th>
-                    <th className="px-5 py-3" />
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -301,7 +303,7 @@ export default async function StoreOrdersPage({
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/stores/${storeId}/orders/${order._id}`}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg"
+                          className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg"
                         >
                           View
                         </Link>
@@ -325,8 +327,8 @@ export default async function StoreOrdersPage({
                   href={buildHref(storeId, { q, status, payment, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
-                      : "border-admin-border-md hover:bg-admin-chip"
+                    ? "opacity-30 pointer-events-none border-admin-border-md"
+                    : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -354,8 +356,8 @@ export default async function StoreOrdersPage({
                         key={item}
                         href={buildHref(storeId, { q, status, payment, page: item as number })}
                         className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
-                            ? "bg-gray-900 text-white"
-                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
+                          ? "bg-gray-900 text-white"
+                          : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                           }`}
                       >
                         {item}
@@ -367,8 +369,8 @@ export default async function StoreOrdersPage({
                   href={buildHref(storeId, { q, status, payment, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
-                      : "border-admin-border-md hover:bg-admin-chip"
+                    ? "opacity-30 pointer-events-none border-admin-border-md"
+                    : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
                   <ChevronRight className="w-4 h-4" />

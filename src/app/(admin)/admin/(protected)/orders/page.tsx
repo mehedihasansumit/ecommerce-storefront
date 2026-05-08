@@ -21,18 +21,18 @@ export const metadata: Metadata = { title: "All Orders" };
 const LIMIT = 10;
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  pending:    "bg-yellow-100 text-yellow-800",
-  confirmed:  "bg-blue-100 text-blue-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  confirmed: "bg-blue-100 text-blue-800",
   processing: "bg-purple-100 text-purple-800",
-  shipped:    "bg-indigo-100 text-indigo-800",
-  delivered:  "bg-green-100 text-green-800",
-  cancelled:  "bg-red-100 text-red-800",
+  shipped: "bg-indigo-100 text-indigo-800",
+  delivered: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
 };
 
 const PAYMENT_STYLES: Record<string, string> = {
-  pending:  "bg-yellow-100 text-yellow-800",
-  paid:     "bg-green-100 text-green-800",
-  failed:   "bg-red-100 text-red-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  paid: "bg-green-100 text-green-800",
+  failed: "bg-red-100 text-red-800",
   refunded: "bg-admin-chip text-admin-text-secondary",
 };
 
@@ -103,11 +103,10 @@ export default async function AllOrdersPage({
       <div className="flex gap-1.5 flex-wrap mb-3">
         <Link
           href={href({ status: undefined })}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-            !status
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!status
               ? "bg-gray-900 text-white border-gray-900"
               : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-          }`}
+            }`}
         >
           All Status
         </Link>
@@ -115,11 +114,10 @@ export default async function AllOrdersPage({
           <Link
             key={s}
             href={href({ status: s })}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${
-              status === s
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${status === s
                 ? "bg-gray-900 text-white border-gray-900"
                 : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-            }`}
+              }`}
           >
             {s}
           </Link>
@@ -131,11 +129,10 @@ export default async function AllOrdersPage({
         <div className="flex gap-1.5 flex-wrap mb-6">
           <Link
             href={href({ storeId: undefined })}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              !filterStore
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!filterStore
                 ? "bg-gray-700 text-white border-gray-700"
                 : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-            }`}
+              }`}
           >
             All Stores
           </Link>
@@ -143,11 +140,10 @@ export default async function AllOrdersPage({
             <Link
               key={s._id}
               href={href({ storeId: s._id })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                filterStore === s._id
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${filterStore === s._id
                   ? "bg-gray-700 text-white border-gray-700"
                   : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
+                }`}
             >
               {s.name}
             </Link>
@@ -177,9 +173,8 @@ export default async function AllOrdersPage({
                     <p className="text-xs text-admin-text-muted mt-0.5">{storeMap[order.storeId] ?? "—"}</p>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize shrink-0 ${
-                      STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
-                    }`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize shrink-0 ${STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
+                      }`}
                   >
                     {order.status === "pending" && <Clock className="w-3 h-3" />}
                     {order.status === "delivered" && <CheckCircle className="w-3 h-3" />}
@@ -204,9 +199,8 @@ export default async function AllOrdersPage({
 
                 <div className="flex items-center justify-between pt-2 border-t border-admin-border">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                      PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
-                    }`}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
+                      }`}
                   >
                     {order.paymentStatus}
                   </span>
@@ -242,7 +236,7 @@ export default async function AllOrdersPage({
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Status</th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Payment</th>
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Date</th>
-                    <th className="px-5 py-3" />
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -275,9 +269,8 @@ export default async function AllOrdersPage({
                       </td>
                       <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                            STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
+                            }`}
                         >
                           {order.status === "pending" && <Clock className="w-3 h-3" />}
                           {order.status === "delivered" && <CheckCircle className="w-3 h-3" />}
@@ -288,9 +281,8 @@ export default async function AllOrdersPage({
                       </td>
                       <td className="px-5 py-4">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                            PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
-                          }`}
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
+                            }`}
                         >
                           {order.paymentStatus}
                         </span>
@@ -309,7 +301,7 @@ export default async function AllOrdersPage({
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/stores/${order.storeId}/orders/${order._id}`}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg"
+                          className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg"
                         >
                           View
                         </Link>
@@ -332,11 +324,10 @@ export default async function AllOrdersPage({
                   href={offsetHref(prevOffset)}
                   aria-disabled={!hasPrev}
                   aria-label="Previous page"
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    !hasPrev
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${!hasPrev
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
@@ -344,11 +335,10 @@ export default async function AllOrdersPage({
                   href={offsetHref(nextOffset)}
                   aria-disabled={!hasNext}
                   aria-label="Next page"
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    !hasNext
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${!hasNext
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Link>

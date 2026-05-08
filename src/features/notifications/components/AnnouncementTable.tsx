@@ -24,24 +24,24 @@ function getAnnouncementStatus(a: IAnnouncement): AnnouncementStatus {
 }
 
 const STATUS_STYLES: Record<AnnouncementStatus, string> = {
-  live:      "bg-green-100 text-green-700",
+  live: "bg-green-100 text-green-700",
   scheduled: "bg-blue-100 text-blue-700",
-  expired:   "bg-red-100 text-red-700",
-  inactive:  "bg-admin-chip text-admin-text-muted",
+  expired: "bg-red-100 text-red-700",
+  inactive: "bg-admin-chip text-admin-text-muted",
 };
 
 const STATUS_DOT: Record<AnnouncementStatus, string> = {
-  live:      "bg-green-500",
+  live: "bg-green-500",
   scheduled: "bg-blue-500",
-  expired:   "bg-red-400",
-  inactive:  "bg-gray-400",
+  expired: "bg-red-400",
+  inactive: "bg-gray-400",
 };
 
 const DISPLAY_TYPE_LABELS: Record<string, string> = {
   banner: "Banner",
-  modal:  "Modal",
-  bar:    "Top Bar",
-  float:  "Float",
+  modal: "Modal",
+  bar: "Top Bar",
+  float: "Float",
 };
 
 export function AnnouncementTable({ announcements: initial, storeId, filterStatus }: Props) {
@@ -108,7 +108,9 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
               <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Broadcast
               </th>
-              <th className="px-5 py-3" />
+              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-admin-border">
@@ -226,7 +228,7 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
 
                   {/* Actions */}
                   <td className="px-5 py-4">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-start gap-1">
                       <Link
                         href={`/admin/stores/${storeId}/announcements/${a._id}`}
                         className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors"

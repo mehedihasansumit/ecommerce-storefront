@@ -82,7 +82,7 @@ export default async function StoreProductsPage({
         </div>
         <Link
           href={`/admin/stores/${storeId}/products/new`}
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
         >
           + New Product
         </Link>
@@ -106,11 +106,10 @@ export default async function StoreProductsPage({
             <Link
               key={s}
               href={buildHref(storeId, { q, category, status: s })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
-                status === s
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
                   ? "bg-gray-900 text-white border-gray-900"
                   : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
+                }`}
             >
               {s}
             </Link>
@@ -129,8 +128,8 @@ export default async function StoreProductsPage({
             {q
               ? `No products match "${q}".`
               : status !== "all"
-              ? `No ${status} products.`
-              : "Add your first product to get started."}
+                ? `No ${status} products.`
+                : "Add your first product to get started."}
           </p>
           {!q && status === "all" && (
             <Link
@@ -169,7 +168,9 @@ export default async function StoreProductsPage({
                     <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Added
                     </th>
-                    <th className="px-5 py-3" />
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -248,13 +249,12 @@ export default async function StoreProductsPage({
                         {/* Stock */}
                         <td className="px-5 py-4">
                           <span
-                            className={`text-sm font-medium ${
-                              product.stock === 0
+                            className={`text-sm font-medium ${product.stock === 0
                                 ? "text-red-600"
                                 : isLowStock
-                                ? "text-amber-600"
-                                : "text-admin-text-secondary"
-                            }`}
+                                  ? "text-amber-600"
+                                  : "text-admin-text-secondary"
+                              }`}
                           >
                             {product.stock}
                           </span>
@@ -273,16 +273,14 @@ export default async function StoreProductsPage({
                         {/* Status */}
                         <td className="px-5 py-4">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                              product.isActive
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${product.isActive
                                 ? "bg-green-100 text-green-700"
                                 : "bg-admin-chip text-admin-text-muted"
-                            }`}
+                              }`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                product.isActive ? "bg-green-500" : "bg-gray-400"
-                              }`}
+                              className={`w-1.5 h-1.5 rounded-full ${product.isActive ? "bg-green-500" : "bg-gray-400"
+                                }`}
                             />
                             {product.isActive ? "Active" : "Inactive"}
                           </span>
@@ -299,7 +297,7 @@ export default async function StoreProductsPage({
 
                         {/* Actions */}
                         <td className="px-5 py-4">
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-1">
                             <Link
                               href={`/admin/stores/${storeId}/products/${product._id}`}
                               className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors"
@@ -333,11 +331,10 @@ export default async function StoreProductsPage({
                 <Link
                   href={buildHref(storeId, { q, category, status, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    currentPage <= 1
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
@@ -364,11 +361,10 @@ export default async function StoreProductsPage({
                       <Link
                         key={item}
                         href={buildHref(storeId, { q, category, status, page: item as number })}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
-                          currentPage === item
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
                             ? "bg-gray-900 text-white"
                             : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
-                        }`}
+                          }`}
                       >
                         {item}
                       </Link>
@@ -378,11 +374,10 @@ export default async function StoreProductsPage({
                 <Link
                   href={buildHref(storeId, { q, category, status, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
-                    currentPage >= totalPages
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Link>

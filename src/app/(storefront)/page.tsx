@@ -149,123 +149,32 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-3 md:gap-4 md:auto-rows-[minmax(0,1fr)] md:h-[560px] stagger-children">
-            {categories.slice(0, 5).map((category, idx) => {
-              const isFeatured = idx === 0;
-              return (
-                <Link
-                  key={category._id}
-                  href={`/categories/${category.slug}`}
-                  className={`group relative overflow-hidden bg-surface flex items-end ${
-                    isFeatured
-                      ? "col-span-2 md:row-span-2 aspect-square md:aspect-auto"
-                      : "aspect-3/4 md:aspect-auto"
-                  }`}
-                  style={{ borderRadius: "var(--border-radius)" }}
-                >
+          <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-1 stagger-children scrollbar-hide">
+            {categories.map((category) => (
+              <Link
+                key={category._id}
+                href={`/categories/${category.slug}`}
+                className="p-2 group shrink-0 flex flex-col items-center gap-3 w-20 md:w-24"
+              >
+                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-surface transition-all duration-500 ease-(--ease-out-expo) group-hover:scale-105 ring-2 ring-transparent group-hover:ring-primary ring-offset-2 ring-offset-background">
                   {category.image && (
                     <StoreImage
                       src={category.image}
                       alt={t(category.name, locale)}
                       fill
-                      sizes={
-                        isFeatured
-                          ? "(max-width: 768px) 100vw, 50vw"
-                          : "(max-width: 768px) 50vw, 25vw"
-                      }
-                      className="absolute inset-0 object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
+                      sizes="96px"
+                      className="object-cover transition-transform duration-700 ease-(--ease-out-expo) group-hover:scale-110"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5 transition-opacity duration-500 group-hover:from-black/90 group-hover:via-black/40" />
-                  <div
-                    className="absolute inset-0 ring-0 group-hover:ring-2 group-hover:ring-white/20 transition-all duration-300"
-                    style={{ borderRadius: "var(--border-radius)" }}
-                  />
-
-                  {isFeatured && (
-                    <div className="absolute top-4 left-4 md:top-5 md:left-5">
-                      <span
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider"
-                        style={{ color: "var(--color-primary)" }}
-                      >
-                        <Sparkles size={10} />
-                        {tr("featured") || "Featured"}
-                      </span>
-                    </div>
-                  )}
-
-                  <div
-                    className={`relative w-full ${
-                      isFeatured ? "p-5 md:p-7" : "p-4 md:p-5"
-                    }`}
-                  >
-                    <div className="overflow-hidden">
-                      <span
-                        className={`text-white font-semibold block leading-tight transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-0.5 ${
-                          isFeatured
-                            ? "text-xl md:text-3xl"
-                            : "text-base md:text-lg"
-                        }`}
-                      >
-                        {t(category.name, locale)}
-                      </span>
-                    </div>
-                    <span className="inline-flex items-center gap-2 text-white/80 text-sm mt-2 group-hover:text-white transition-colors">
-                      <span className="font-medium">
-                        {tr("explore") || "Explore"}
-                      </span>
-                      <span className="w-7 h-7 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:bg-white group-hover:text-black">
-                        <ArrowRight
-                          size={13}
-                          className="transition-transform duration-300 group-hover:translate-x-0.5"
-                        />
-                      </span>
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+                </div>
+                <span className="text-xs md:text-sm font-medium text-center leading-tight line-clamp-2 transition-colors group-hover:text-primary">
+                  {t(category.name, locale)}
+                </span>
+              </Link>
+            ))}
           </div>
 
-          {categories.length > 5 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-3 md:mt-4 stagger-children">
-              {categories.slice(5).map((category) => (
-                <Link
-                  key={category._id}
-                  href={`/categories/${category.slug}`}
-                  className="group relative overflow-hidden bg-surface aspect-3/4 flex items-end"
-                  style={{ borderRadius: "var(--border-radius)" }}
-                >
-                  {category.image && (
-                    <StoreImage
-                      src={category.image}
-                      alt={t(category.name, locale)}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                      className="absolute inset-0 object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5 group-hover:from-black/90 transition-colors duration-300" />
-                  <div className="relative w-full p-4 md:p-5">
-                    <span className="text-white font-semibold text-base md:text-lg block leading-tight">
-                      {t(category.name, locale)}
-                    </span>
-                    <span className="inline-flex items-center gap-2 text-white/80 text-sm mt-2 group-hover:text-white transition-colors">
-                      <span className="font-medium">
-                        {tr("explore") || "Explore"}
-                      </span>
-                      <ArrowRight
-                        size={13}
-                        className="transition-transform duration-300 group-hover:translate-x-1"
-                      />
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 text-center md:hidden">
+          <div className="mt-10 text-center md:hidden">
             <Link
               href="/products"
               className="inline-flex items-center gap-2 text-sm font-medium"
@@ -280,7 +189,7 @@ export default async function HomePage() {
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
-        <section className="py-12 md:py-16">
+        <section className=" py-4 md:py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>

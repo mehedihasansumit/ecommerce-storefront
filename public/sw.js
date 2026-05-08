@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v1.1.26";
+const CACHE_VERSION = "v1.1.39";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `store-cache-${CACHE_VERSION}`;
 const ALL_CACHES = [STATIC_CACHE, DYNAMIC_CACHE];

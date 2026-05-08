@@ -126,31 +126,31 @@ export function Header() {
                   <StoreImage
                     src={tenant.logo}
                     alt={tenant.name}
-                    width={160}
-                    height={40}
-                    priority
-                    sizes="160px"
-                    className="block dark:hidden h-7 md:h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
+                    width={200}
+                    height={50}
+                    // priority
+                    // sizes="160px"
+                    className="block dark:hidden w-14 md:w-16 transition-transform duration-200 group-hover:scale-105"
                   />
                   <StoreImage
                     src={tenant.logoDark}
                     alt={tenant.name}
-                    width={160}
-                    height={40}
-                    priority
-                    sizes="160px"
-                    className="hidden dark:block h-7 md:h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
+                    width={200}
+                    height={50}
+                    // priority
+                    // sizes="160px"
+                    className="hidden dark:block w-14 md:w-16 transition-transform duration-200 group-hover:scale-105"
                   />
                 </>
               ) : (
                 <StoreImage
                   src={tenant.logo}
                   alt={tenant.name}
-                  width={160}
-                  height={40}
-                  priority
-                  sizes="160px"
-                  className="h-7 md:h-8 w-auto max-w-[120px] sm:max-w-none transition-transform duration-200 group-hover:scale-105"
+                  width={200}
+                  height={50}
+                  // priority
+                  // sizes="160px"
+                  className="w-14 md:w-16 transition-transform duration-200 group-hover:scale-105"
                 />
               )
             ) : (

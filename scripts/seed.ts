@@ -220,10 +220,76 @@ async function seed() {
       createdAt: new Date(),
       updatedAt: new Date(),
     },
+    {
+      name: "Lour Haus",
+      slug: "lour-haus",
+      domains: ["lourhaus.localhost", "www.lourhaus.com"],
+      isActive: true,
+      logo:        "/lour-haus/lh-dial-light.svg",
+      logoDark:    "/lour-haus/lh-dial-dark.svg",
+      favicon:     "/lour-haus/favicon-light.svg",
+      faviconDark: "/lour-haus/favicon-dark.svg",
+      theme: {
+        primaryColor:   "#1a1714",
+        secondaryColor: "#3a332e",
+        accentColor:    "#c8b89a",
+        backgroundColor:"#faf6ee",
+        textColor:      "#1a1714",
+        headerBg:       "#1a1714",
+        headerText:     "#faf6ee",
+        fontFamily:     "Inter",
+        borderRadius:   "0rem",
+        layoutStyle:    "grid",
+        footerBg:       "#1a1714",
+        footerText:     "#faf6ee",
+        dark: {
+          backgroundColor: "#1a1714",
+          textColor:       "#faf6ee",
+          headerBg:        "#0d0b09",
+          headerText:      "#faf6ee",
+          footerBg:        "#0d0b09",
+          footerText:      "#faf6ee",
+        },
+      },
+      heroBanners: [
+        {
+          image: "",
+          title: "Architecture, quietly made.",
+          subtitle: "Dhaka · Chittagong",
+          linkUrl: "/products",
+          linkText: "View Projects",
+        },
+      ],
+      seo: {
+        title: "Lour Haus — Architecture Studio",
+        description: "Architecture studio based in Dhaka and Chittagong. Buildings, quietly made.",
+        keywords: ["architecture", "studio", "dhaka", "chittagong", "lour haus"],
+        ogImage: "",
+      },
+      payment: {
+        provider: "sslcommerz",
+        stripePublicKey: "",
+        stripeSecretKey: "",
+        sslcommerzStoreId: "",
+        sslcommerzStorePassword: "",
+        currency: "BDT",
+      },
+      contact: {
+        email: "hello@lourhaus.com",
+        phone: "+880-1700-000000",
+        address: "Dhaka, Bangladesh",
+      },
+      socialLinks: { facebook: "", instagram: "", twitter: "" },
+      supportedLanguages: ["en", "bn"],
+      defaultLanguage: "en",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
   ]);
 
   const storeIds = Object.values(stores.insertedIds);
   console.log(`Created ${storeIds.length} stores.`);
+  console.log("  → Add to /etc/hosts: 127.0.0.1 lourhaus.localhost");
 
   // ── Categories ──────────────────────────────────────────────
   const shirtsId = storeIds[0];

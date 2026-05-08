@@ -40,6 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
   const locale = await getLocale();
   const favicon = tenant.favicon || tenant.logo;
+  const faviconDark = tenant.faviconDark;
   return {
     title: localizedValue(tenant.seo.title, locale, tenant.name),
     description: localizedValue(
@@ -48,9 +49,14 @@ export async function generateMetadata(): Promise<Metadata> {
       `Shop at ${tenant.name}`
     ),
     icons: {
-      icon: favicon || "/favicon.ico",
+      icon: faviconDark
+        ? [
+            { url: favicon || "/favicon.ico", media: "(prefers-color-scheme: light)", type: "image/svg+xml" },
+            { url: faviconDark, media: "(prefers-color-scheme: dark)", type: "image/svg+xml" },
+          ]
+        : favicon || "/favicon.ico",
       shortcut: favicon || "/favicon.ico",
-      apple: "/icons/apple-touch-icon.png",
+      apple: faviconDark ?? favicon ?? "/icons/apple-touch-icon.png",
     },
     appleWebApp: {
       capable: true,

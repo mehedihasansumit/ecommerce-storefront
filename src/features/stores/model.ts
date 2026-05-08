@@ -9,7 +9,9 @@ const StoreSchema = new Schema<IStoreDocument>(
     isActive: { type: Boolean, default: true },
 
     logo: { type: String, default: "" },
+    logoDark: { type: String, default: "" },
     favicon: { type: String, default: "" },
+    faviconDark: { type: String, default: "" },
 
     // NOTE: Color fields mirror `THEME_TOKENS` in ./theme-tokens.ts.
     // Add new colors there too (registry drives form, CSS vars, defaults, Zod).

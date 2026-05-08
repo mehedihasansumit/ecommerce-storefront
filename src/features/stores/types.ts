@@ -133,7 +133,9 @@ export interface IStore {
   domains: string[];
   isActive: boolean;
   logo: string;
+  logoDark?: string;
   favicon: string;
+  faviconDark?: string;
   theme: IStoreTheme;
   heroLayout?: HeroLayoutStyle;
   heroBanners: IHeroBanner[];

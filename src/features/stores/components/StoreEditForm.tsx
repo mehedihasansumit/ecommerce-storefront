@@ -286,7 +286,9 @@ export default function StoreEditForm({
     },
     isActive: store.isActive,
     logo: store.logo || "",
+    logoDark: store.logoDark || "",
     favicon: store.favicon || "",
+    faviconDark: store.faviconDark || "",
     contact: {
       email: store.contact?.email || "",
       phone: store.contact?.phone || "",
@@ -481,7 +483,9 @@ export default function StoreEditForm({
         payload.theme = formData.theme;
         payload.isActive = formData.isActive;
         payload.logo = formData.logo;
+        payload.logoDark = formData.logoDark;
         payload.favicon = formData.favicon;
+        payload.faviconDark = formData.faviconDark;
         payload.heroLayout = formData.heroLayout;
         payload.heroBanners = heroBanners;
         payload.contact = formData.contact;
@@ -624,7 +628,7 @@ export default function StoreEditForm({
                 <SectionTitle>Branding</SectionTitle>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <ImageInput
-                    label="Logo"
+                    label="Logo (light)"
                     value={formData.logo}
                     onChange={(url) =>
                       setFormData((prev) => ({ ...prev, logo: url }))
@@ -632,11 +636,23 @@ export default function StoreEditForm({
                     storeId={store._id}
                     folder="stores"
                     aspect="auto"
-                    hint="Shown in storefront header."
+                    hint="Shown in storefront header (light mode)."
                     disabled={loading}
                   />
                   <ImageInput
-                    label="Favicon"
+                    label="Logo (dark)"
+                    value={formData.logoDark}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, logoDark: url }))
+                    }
+                    storeId={store._id}
+                    folder="stores"
+                    aspect="auto"
+                    hint="Optional. Swapped in when dark mode is active."
+                    disabled={loading}
+                  />
+                  <ImageInput
+                    label="Favicon (light)"
                     value={formData.favicon}
                     onChange={(url) =>
                       setFormData((prev) => ({ ...prev, favicon: url }))
@@ -644,7 +660,19 @@ export default function StoreEditForm({
                     storeId={store._id}
                     folder="stores"
                     aspect="square"
-                    hint="Browser tab icon. Square PNG/ICO."
+                    hint="Browser tab icon — light OS theme."
+                    disabled={loading}
+                  />
+                  <ImageInput
+                    label="Favicon (dark)"
+                    value={formData.faviconDark}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, faviconDark: url }))
+                    }
+                    storeId={store._id}
+                    folder="stores"
+                    aspect="square"
+                    hint="Optional. Browser tab icon — dark OS theme."
                     disabled={loading}
                   />
                 </div>

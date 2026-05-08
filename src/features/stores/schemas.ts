@@ -49,7 +49,9 @@ export const updateStoreSchema = z.object({
   domains: z.array(z.string()).optional(),
   isActive: z.boolean().optional(),
   logo: z.string().optional(),
+  logoDark: z.string().optional(),
   favicon: z.string().optional(),
+  faviconDark: z.string().optional(),
   theme: storeThemeSchema.optional(),
   heroLayout: z.enum(["slider", "split", "centered", "grid", "minimal", "image"]).optional(),
   heroBanners: z

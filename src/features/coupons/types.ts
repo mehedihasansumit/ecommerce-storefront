@@ -22,27 +22,6 @@ export interface ICoupon {
   updatedAt: Date;
 }
 
-export interface ICouponDocument {
-  _id: import("mongoose").Types.ObjectId;
-  storeId: import("mongoose").Types.ObjectId;
-  code: string;
-  description: string;
-  type: CouponType;
-  value: number;
-  minOrderAmount: number;
-  maxDiscountAmount: number | null;
-  validFrom: Date;
-  validUntil: Date;
-  usageLimit: number | null;
-  usedCount: number;
-  perCustomerLimit: number;
-  applicableProducts: import("mongoose").Types.ObjectId[];
-  applicableCategories: import("mongoose").Types.ObjectId[];
-  requiresLogin: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export interface ICouponUsage {
   _id: string;

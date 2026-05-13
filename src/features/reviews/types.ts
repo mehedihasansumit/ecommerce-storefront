@@ -1,5 +1,3 @@
-import { Types } from "mongoose";
-
 export interface IReview {
   _id: string;
   storeId: string;
@@ -14,9 +12,3 @@ export interface IReview {
   updatedAt: Date;
 }
 
-export interface IReviewDocument extends Omit<IReview, "_id" | "storeId" | "productId" | "userId"> {
-  _id: Types.ObjectId;
-  storeId: Types.ObjectId;
-  productId: Types.ObjectId;
-  userId: Types.ObjectId;
-}

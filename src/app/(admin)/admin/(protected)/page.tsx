@@ -8,12 +8,13 @@ import {
   Plus,
   ExternalLink,
 } from "lucide-react";
+import { and, count, desc, eq, inArray, sql, sum, type SQL } from "drizzle-orm";
 import { StoreService } from "@/features/stores/service";
-import { ProductModel } from "@/features/products/model";
-import { OrderModel } from "@/features/orders/model";
+import { db } from "@/db/client";
+import { products } from "@/db/schema/products";
+import { orders } from "@/db/schema/orders";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
-import dbConnect from "@/shared/lib/db";
 import type { OrderStatus } from "@/features/orders/types";
 
 export const metadata: Metadata = { title: "Admin Dashboard" };
@@ -43,18 +44,14 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
 };
 
 export default async function AdminDashboardPage() {
-  await dbConnect();
-
   const adminUser = await getAdminDbUser();
   const isSuperAdmin = adminUser?.role.isSuperAdmin ?? false;
 
-  // Resolve permissions
   const canViewOrders = isSuperAdmin || (adminUser ? hasPermission(adminUser, PERMISSIONS.ORDERS_VIEW) : false);
   const canViewPayments = isSuperAdmin || (adminUser ? hasPermission(adminUser, PERMISSIONS.PAYMENTS_VIEW) : false);
   const canCreateStore = isSuperAdmin || (adminUser ? hasPermission(adminUser, PERMISSIONS.STORES_CREATE) : false);
   const canEditStore = isSuperAdmin || (adminUser ? hasPermission(adminUser, PERMISSIONS.STORES_EDIT) : false);
 
-  // Visible stores: superadmin sees all, others filtered by assignedStores
   const assignedStores: string[] = adminUser?.assignedStores ?? [];
   const allStores = await StoreService.getAll();
   const visibleStores = isSuperAdmin
@@ -64,69 +61,74 @@ export default async function AdminDashboardPage() {
       );
 
   const storeIds = visibleStores.map((s) => s._id);
-  const storeIdFilter =
-    storeIds.length > 0 ? { storeId: { $in: storeIds } } : {};
+  const productScope: SQL | undefined = storeIds.length > 0 ? inArray(products.storeId, storeIds) : undefined;
+  const orderScope: SQL | undefined = storeIds.length > 0 ? inArray(orders.storeId, storeIds) : undefined;
 
-  // Conditionally fetch based on permissions
   const [
-    productCount,
-    orderCount,
-    revenueAgg,
-    recentOrdersDocs,
+    productCountRow,
+    orderCountRow,
+    revenueRow,
+    recentOrderRows,
     storeStats,
-    pendingCount,
+    pendingCountRow,
   ] = await Promise.all([
-    ProductModel.countDocuments(storeIdFilter),
-    canViewOrders ? OrderModel.countDocuments(storeIdFilter) : Promise.resolve(null),
+    db.select({ c: count() }).from(products).where(productScope),
+    canViewOrders ? db.select({ c: count() }).from(orders).where(orderScope) : Promise.resolve(null),
     canViewPayments
-      ? OrderModel.aggregate([
-          { $match: { ...storeIdFilter, paymentStatus: "paid" } },
-          { $group: { _id: null, total: { $sum: "$total" } } },
-        ])
+      ? db
+          .select({ total: sum(orders.total) })
+          .from(orders)
+          .where(orderScope ? and(orderScope, eq(orders.paymentStatus, "paid")) : eq(orders.paymentStatus, "paid"))
       : Promise.resolve(null),
     canViewOrders
-      ? OrderModel.find(storeIdFilter).sort({ createdAt: -1 }).limit(10).lean()
+      ? db.select().from(orders).where(orderScope).orderBy(desc(orders.createdAt)).limit(10)
       : Promise.resolve(null),
-    canViewPayments
-      ? OrderModel.aggregate([
-          { $match: storeIdFilter },
-          {
-            $group: {
-              _id: "$storeId",
-              orderCount: { $sum: 1 },
-              revenue: { $sum: "$total" },
-            },
-          },
-        ])
-      : canViewOrders
-      ? OrderModel.aggregate([
-          { $match: storeIdFilter },
-          { $group: { _id: "$storeId", orderCount: { $sum: 1 } } },
-        ])
+    canViewOrders || canViewPayments
+      ? db
+          .select({
+            storeId: orders.storeId,
+            orderCount: count(),
+            revenue: sum(orders.total),
+          })
+          .from(orders)
+          .where(orderScope)
+          .groupBy(orders.storeId)
       : Promise.resolve(null),
     canViewOrders
-      ? OrderModel.countDocuments({ ...storeIdFilter, status: "pending" })
+      ? db
+          .select({ c: count() })
+          .from(orders)
+          .where(orderScope ? and(orderScope, eq(orders.status, "pending")) : eq(orders.status, "pending"))
       : Promise.resolve(null),
   ]);
 
-  const totalRevenue: number = revenueAgg?.[0]?.total ?? 0;
+  const productCount = Number(productCountRow[0]?.c ?? 0);
+  const orderCount = orderCountRow ? Number(orderCountRow[0]?.c ?? 0) : null;
+  const totalRevenue = revenueRow ? Number(revenueRow[0]?.total ?? 0) : 0;
+  const pendingCount = pendingCountRow ? Number(pendingCountRow[0]?.c ?? 0) : null;
 
   const storeStatsMap = Object.fromEntries(
-    (storeStats ?? []).map(
-      (s: { _id: { toString(): string }; orderCount?: number; revenue?: number }) => [
-        s._id.toString(),
-        { orderCount: s.orderCount ?? 0, revenue: s.revenue ?? 0 },
-      ]
-    )
+    (storeStats ?? []).map((s) => [
+      s.storeId,
+      { orderCount: Number(s.orderCount ?? 0), revenue: Number(s.revenue ?? 0) },
+    ])
   );
 
-  const storeNameMap = Object.fromEntries(
-    visibleStores.map((s) => [s._id, s.name])
-  );
+  const storeNameMap = Object.fromEntries(visibleStores.map((s) => [s._id, s.name]));
 
-  const recentOrders = recentOrdersDocs
-    ? JSON.parse(JSON.stringify(recentOrdersDocs))
-    : [];
+  const recentOrders = (recentOrderRows ?? []).map((o) => ({
+    _id: o.id,
+    orderNumber: o.orderNumber,
+    storeId: o.storeId,
+    shippingAddress: o.shippingAddress as { name?: string },
+    guestPhone: o.guestPhone ?? undefined,
+    guestEmail: o.guestEmail ?? undefined,
+    items: { length: 0 },
+    total: Number(o.total),
+    status: o.status as OrderStatus,
+    createdAt: o.createdAt.toISOString(),
+  }));
+  void sql;
 
   return (
     <div className="space-y-8">

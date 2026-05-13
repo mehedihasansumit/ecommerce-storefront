@@ -1,54 +1,73 @@
-import dbConnect from "@/shared/lib/db";
-import { Types } from "mongoose";
-import { PointTransactionModel } from "./model";
-import type { IPointTransaction } from "./types";
+import { and, count, desc, eq, gt, lt, sql, sum } from "drizzle-orm";
+import { db } from "@/db/client";
+import { pointTransactions, type PointTransaction } from "@/db/schema/points";
+import type { IPointTransaction, PointReason } from "./types";
+
+function toIPointTransaction(row: PointTransaction): IPointTransaction {
+  return {
+    _id: row.id,
+    storeId: row.storeId,
+    userId: row.userId,
+    amount: row.amount,
+    reason: row.reason as PointReason,
+    reviewId: row.reviewId,
+    couponId: row.couponId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function toInsert(data: Partial<IPointTransaction>): typeof pointTransactions.$inferInsert {
+  const { _id, createdAt, updatedAt, ...rest } = data;
+  void _id;
+  void createdAt;
+  void updatedAt;
+  return rest as typeof pointTransactions.$inferInsert;
+}
 
 export const PointRepository = {
   async create(data: Partial<IPointTransaction>): Promise<IPointTransaction> {
-    await dbConnect();
-    const doc = await PointTransactionModel.create(data);
-    return JSON.parse(JSON.stringify(doc));
+    const [row] = await db.insert(pointTransactions).values(toInsert(data)).returning();
+    return toIPointTransaction(row);
   },
 
   async findByUser(
     storeId: string,
     userId: string,
-    { page, limit }: { page: number; limit: number }
+    { page, limit }: { page: number; limit: number },
   ): Promise<{ transactions: IPointTransaction[]; total: number }> {
-    await dbConnect();
+    const where = and(eq(pointTransactions.storeId, storeId), eq(pointTransactions.userId, userId));
     const skip = (page - 1) * limit;
-    const [transactions, total] = await Promise.all([
-      PointTransactionModel.find({ storeId, userId })
-        .sort({ createdAt: -1 })
-        .skip(skip)
+    const [rows, [{ total }]] = await Promise.all([
+      db
+        .select()
+        .from(pointTransactions)
+        .where(where)
+        .orderBy(desc(pointTransactions.createdAt))
         .limit(limit)
-        .lean(),
-      PointTransactionModel.countDocuments({ storeId, userId }),
+        .offset(skip),
+      db.select({ total: count() }).from(pointTransactions).where(where),
     ]);
-    return {
-      transactions: JSON.parse(JSON.stringify(transactions)),
-      total,
-    };
+    return { transactions: rows.map(toIPointTransaction), total: Number(total) };
   },
 
   async findByStore(
     storeId: string,
-    { page, limit }: { page: number; limit: number }
+    { page, limit }: { page: number; limit: number },
   ): Promise<{ transactions: IPointTransaction[]; total: number }> {
-    await dbConnect();
+    const where = eq(pointTransactions.storeId, storeId);
     const skip = (page - 1) * limit;
-    const [transactions, total] = await Promise.all([
-      PointTransactionModel.find({ storeId })
-        .sort({ createdAt: -1 })
-        .skip(skip)
+    const [rows, [{ total }]] = await Promise.all([
+      db
+        .select()
+        .from(pointTransactions)
+        .where(where)
+        .orderBy(desc(pointTransactions.createdAt))
         .limit(limit)
-        .lean(),
-      PointTransactionModel.countDocuments({ storeId }),
+        .offset(skip),
+      db.select({ total: count() }).from(pointTransactions).where(where),
     ]);
-    return {
-      transactions: JSON.parse(JSON.stringify(transactions)),
-      total,
-    };
+    return { transactions: rows.map(toIPointTransaction), total: Number(total) };
   },
 
   async getStoreStats(storeId: string): Promise<{
@@ -56,38 +75,30 @@ export const PointRepository = {
     totalRedeemed: number;
     transactionCount: number;
   }> {
-    await dbConnect();
-    const result = await PointTransactionModel.aggregate<{
-      _id: null;
-      earned: number;
-      redeemed: number;
-      count: number;
-    }>([
-      { $match: { storeId: new Types.ObjectId(storeId) } },
-      {
-        $group: {
-          _id: null,
-          earned: {
-            $sum: { $cond: [{ $gt: ["$amount", 0] }, "$amount", 0] },
-          },
-          redeemed: {
-            $sum: { $cond: [{ $lt: ["$amount", 0] }, { $abs: "$amount" }, 0] },
-          },
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-    const row = result[0];
+    const [row] = await db
+      .select({
+        earned: sum(sql<number>`CASE WHEN ${pointTransactions.amount} > 0 THEN ${pointTransactions.amount} ELSE 0 END`),
+        redeemed: sum(sql<number>`CASE WHEN ${pointTransactions.amount} < 0 THEN -${pointTransactions.amount} ELSE 0 END`),
+        cnt: count(),
+      })
+      .from(pointTransactions)
+      .where(eq(pointTransactions.storeId, storeId));
     return {
-      totalEarned: row?.earned ?? 0,
-      totalRedeemed: row?.redeemed ?? 0,
-      transactionCount: row?.count ?? 0,
+      totalEarned: Number(row?.earned ?? 0),
+      totalRedeemed: Number(row?.redeemed ?? 0),
+      transactionCount: Number(row?.cnt ?? 0),
     };
   },
 
   async existsForReview(reviewId: string): Promise<boolean> {
-    await dbConnect();
-    const doc = await PointTransactionModel.findOne({ reviewId }).lean();
-    return doc !== null;
+    const [row] = await db
+      .select({ id: pointTransactions.id })
+      .from(pointTransactions)
+      .where(eq(pointTransactions.reviewId, reviewId))
+      .limit(1);
+    return row !== undefined;
   },
 };
+
+void gt;
+void lt;

@@ -43,17 +43,13 @@ export const RoleService = {
   },
 
   async delete(id: string): Promise<void> {
-    // Block deletion if any admins are assigned to this role
-    const { AdminUserModel } = await import("@/features/auth/model");
-    const { default: dbConnect } = await import("@/shared/lib/db");
-    await dbConnect();
-    const count = await AdminUserModel.countDocuments({ roleId: id });
+    const { AuthRepository } = await import("@/features/auth/repository");
+    const count = await AuthRepository.countAdminsByRoleId(id);
     if (count > 0) {
       throw new Error(
-        `Cannot delete this role — ${count} admin${count > 1 ? "s are" : " is"} still assigned to it. Reassign them first.`
+        `Cannot delete this role — ${count} admin${count > 1 ? "s are" : " is"} still assigned to it. Reassign them first.`,
       );
     }
-
     const deleted = await RoleRepository.delete(id);
     if (!deleted) throw new Error("Role not found");
   },

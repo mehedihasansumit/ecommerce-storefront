@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface IProductOption {
@@ -59,8 +58,3 @@ export interface IProduct {
   updatedAt: Date;
 }
 
-export interface IProductDocument extends Omit<IProduct, "_id" | "storeId" | "categoryId"> {
-  _id: Types.ObjectId;
-  storeId: Types.ObjectId;
-  categoryId: Types.ObjectId;
-}

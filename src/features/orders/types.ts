@@ -1,5 +1,3 @@
-import { Types } from "mongoose";
-
 export interface IOrderItem {
   productId: string;
   variantId?: string;
@@ -77,21 +75,3 @@ export interface IOrder {
   updatedAt: Date;
 }
 
-export interface IOrderItemDocument {
-  productId: Types.ObjectId;
-  variantId?: string;
-  productName: string;
-  productSlug: string;
-  variantSelections: Map<string, string>;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
-export interface IOrderDocument
-  extends Omit<IOrder, "_id" | "storeId" | "userId" | "items"> {
-  _id: Types.ObjectId;
-  storeId: Types.ObjectId;
-  userId: Types.ObjectId | null;
-  items: IOrderItemDocument[];
-}

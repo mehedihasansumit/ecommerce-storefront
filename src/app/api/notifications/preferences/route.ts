@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { eq } from "drizzle-orm";
 import {
   successResponse,
   errorResponse,
@@ -6,9 +7,9 @@ import {
 } from "@/shared/lib/api-response";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
-import { UserModel } from "@/features/auth/model";
+import { db } from "@/db/client";
+import { users } from "@/db/schema/auth";
 import type { JwtCustomerPayload } from "@/features/auth/types";
-import dbConnect from "@/shared/lib/db";
 
 export async function GET() {
   try {
@@ -19,13 +20,17 @@ export async function GET() {
     if (!payload || payload.type !== "customer") return unauthorizedResponse();
     const { userId } = payload as JwtCustomerPayload;
 
-    await dbConnect();
-    const user = await UserModel.findById(userId, {
-      notificationPreferences: 1,
-    }).lean();
+    const [user] = await db
+      .select({ notificationPreferences: users.notificationPreferences })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
-    const prefs = (user as { notificationPreferences?: { email?: boolean; sms?: boolean; inApp?: boolean } })
-      ?.notificationPreferences ?? { email: true, sms: false, inApp: true };
+    const prefs = (user?.notificationPreferences as { email?: boolean; sms?: boolean; inApp?: boolean } | null) ?? {
+      email: true,
+      sms: false,
+      inApp: true,
+    };
 
     return successResponse({ preferences: prefs });
   } catch {
@@ -44,19 +49,14 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const { email, sms, inApp } = body;
+    const prefs = { email: email ?? true, sms: sms ?? false, inApp: inApp ?? true };
 
-    await dbConnect();
-    await UserModel.findByIdAndUpdate(userId, {
-      notificationPreferences: {
-        email: email ?? true,
-        sms: sms ?? false,
-        inApp: inApp ?? true,
-      },
-    });
+    await db
+      .update(users)
+      .set({ notificationPreferences: prefs, updatedAt: new Date() })
+      .where(eq(users.id, userId));
 
-    return successResponse({
-      preferences: { email: email ?? true, sms: sms ?? false, inApp: inApp ?? true },
-    });
+    return successResponse({ preferences: prefs });
   } catch {
     return errorResponse("Internal server error", 500);
   }

@@ -1,6 +1,6 @@
-# Production stack: Next.js app + MongoDB + Garage S3.
+# Production stack: Next.js app + Postgres + Garage S3.
 # All services run in HOST network mode — they reach each other via 127.0.0.1.
-# Operator MUST firewall ports 5000, 27017, 3900-3903 from public.
+# Operator MUST firewall ports 5000, 5432, 3900-3903 from public.
 # Only Nginx (manual on host) should expose 80/443.
 
 services:
@@ -15,17 +15,51 @@ services:
     env_file:
       - .env.production
     depends_on:
-      - mongo
+      - postgres
       - garage
 
-  mongo:
-    image: mongo:7
-    container_name: ecommerce-mongo
+  postgres:
+    image: postgres:16-alpine
+    container_name: ecommerce-postgres
     restart: unless-stopped
     network_mode: host
-    command: ["mongod", "--bind_ip", "127.0.0.1", "--port", "27017"]
+    environment:
+      POSTGRES_USER: ecommerce
+      POSTGRES_PASSWORD: ecommerce
+      POSTGRES_DB: ecommerce
+    command:
+      - "postgres"
+      - "-c"
+      - "listen_addresses=127.0.0.1"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=512MB"
+      - "-c"
+      - "work_mem=4MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "max_connections=30"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "wal_compression=on"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "log_min_duration_statement=500"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecommerce -d ecommerce"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   garage:
     image: dxflrs/garage:v1.0.1
@@ -40,6 +74,6 @@ services:
       GARAGE_CONFIG_FILE: /etc/garage.toml
 
 volumes:
-  mongo_data:
+  postgres_data:
   garage_meta:
   garage_data:

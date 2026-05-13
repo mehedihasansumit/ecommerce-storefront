@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface ICategory {
@@ -15,8 +14,3 @@ export interface ICategory {
   updatedAt: Date;
 }
 
-export interface ICategoryDocument extends Omit<ICategory, "_id" | "storeId" | "parentId"> {
-  _id: Types.ObjectId;
-  storeId: Types.ObjectId;
-  parentId: Types.ObjectId | null;
-}

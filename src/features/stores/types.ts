@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import type { LocalizedString } from "@/shared/types/i18n";
 
 export interface IStoreDarkTheme {
@@ -152,6 +151,3 @@ export interface IStore {
   updatedAt: Date;
 }
 
-export interface IStoreDocument extends Omit<IStore, "_id"> {
-  _id: Types.ObjectId;
-}

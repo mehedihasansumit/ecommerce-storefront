@@ -1,5 +1,3 @@
-import type { Types } from "mongoose";
-
 export type ActivityEventType = "product_view" | "search" | "add_to_cart";
 
 export interface IActivityEvent {
@@ -16,19 +14,6 @@ export interface IActivityEvent {
   updatedAt: string;
 }
 
-export interface IActivityEventDocument {
-  _id: Types.ObjectId;
-  storeId: Types.ObjectId;
-  eventType: ActivityEventType;
-  productId?: Types.ObjectId | null;
-  productName?: string;
-  categoryId?: Types.ObjectId | null;
-  searchQuery?: string;
-  sessionId?: string;
-  userId?: Types.ObjectId | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export interface TopProduct {
   productId: string;

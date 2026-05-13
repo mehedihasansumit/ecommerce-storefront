@@ -1,45 +1,62 @@
-import dbConnect from "@/shared/lib/db";
-import { RoleModel } from "./model";
+import { asc, eq } from "drizzle-orm";
+import { db } from "@/db/client";
+import { roles, type Role } from "@/db/schema/roles";
+import type { Permission } from "@/shared/lib/permissions";
 import type { IRole } from "./types";
 
-function serialize(doc: unknown): IRole {
-  return JSON.parse(JSON.stringify(doc));
+function toIRole(row: Role): IRole {
+  return {
+    _id: row.id,
+    name: row.name,
+    description: row.description ?? "",
+    permissions: row.permissions as Permission[],
+    isSuperAdmin: row.isSuperAdmin,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function toInsert(data: Partial<IRole>): typeof roles.$inferInsert {
+  const { _id, createdAt, updatedAt, ...rest } = data;
+  void _id;
+  void createdAt;
+  void updatedAt;
+  return rest as typeof roles.$inferInsert;
 }
 
 export const RoleRepository = {
   async findAll(): Promise<IRole[]> {
-    await dbConnect();
-    const roles = await RoleModel.find().sort({ name: 1 }).lean();
-    return roles.map(serialize);
+    const rows = await db.select().from(roles).orderBy(asc(roles.name));
+    return rows.map(toIRole);
   },
 
   async findById(id: string): Promise<IRole | null> {
-    await dbConnect();
-    const role = await RoleModel.findById(id).lean();
-    return role ? serialize(role) : null;
+    const [row] = await db.select().from(roles).where(eq(roles.id, id)).limit(1);
+    return row ? toIRole(row) : null;
   },
 
   async findByName(name: string): Promise<IRole | null> {
-    await dbConnect();
-    const role = await RoleModel.findOne({ name }).lean();
-    return role ? serialize(role) : null;
+    const [row] = await db.select().from(roles).where(eq(roles.name, name)).limit(1);
+    return row ? toIRole(row) : null;
   },
 
   async create(data: Partial<IRole>): Promise<IRole> {
-    await dbConnect();
-    const role = await RoleModel.create(data);
-    return serialize(role.toObject());
+    const [row] = await db.insert(roles).values(toInsert(data)).returning();
+    return toIRole(row);
   },
 
   async update(id: string, data: Partial<IRole>): Promise<IRole | null> {
-    await dbConnect();
-    const role = await RoleModel.findByIdAndUpdate(id, data, { new: true }).lean();
-    return role ? serialize(role) : null;
+    const insert = toInsert(data);
+    const [row] = await db
+      .update(roles)
+      .set({ ...insert, updatedAt: new Date() })
+      .where(eq(roles.id, id))
+      .returning();
+    return row ? toIRole(row) : null;
   },
 
   async delete(id: string): Promise<boolean> {
-    await dbConnect();
-    const result = await RoleModel.findByIdAndDelete(id);
-    return !!result;
+    const result = await db.delete(roles).where(eq(roles.id, id)).returning({ id: roles.id });
+    return result.length > 0;
   },
 };

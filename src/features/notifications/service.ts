@@ -9,9 +9,8 @@ import type { CreateAnnouncementInput } from "./schemas";
 import { sendEmail, orderConfirmationEmail, orderStatusEmail, announcementEmail, refundStatusEmail } from "@/shared/lib/email";
 import { SubscriberService } from "@/features/subscribers/service";
 import { sendSms } from "@/shared/lib/sms";
-import { UserModel } from "@/features/auth/model";
-import { StoreModel } from "@/features/stores/model";
-import dbConnect from "@/shared/lib/db";
+import { AuthRepository } from "@/features/auth/repository";
+import { StoreRepository } from "@/features/stores/repository";
 
 interface NotifyOptions {
   type: NotificationType;
@@ -22,31 +21,20 @@ interface NotifyOptions {
 }
 
 async function getStoreName(storeId: string): Promise<string> {
-  await dbConnect();
-  const store = await StoreModel.findById(storeId, { name: 1 }).lean();
-  return (store as { name?: string })?.name ?? "Store";
+  const store = await StoreRepository.findById(storeId);
+  return store?.name ?? "Store";
 }
 
 async function getUserPrefsAndContact(userId: string) {
-  await dbConnect();
-  const user = await UserModel.findById(userId, {
-    email: 1,
-    phone: 1,
-    notificationPreferences: 1,
-  }).lean();
+  const user = await AuthRepository.findUserById(userId);
   if (!user) return null;
-  const u = user as {
-    email?: string;
-    phone?: string;
-    notificationPreferences?: { email?: boolean; sms?: boolean; inApp?: boolean };
-  };
   return {
-    email: u.email ?? "",
-    phone: u.phone ?? "",
+    email: user.email ?? "",
+    phone: user.phone ?? "",
     prefs: {
-      email: u.notificationPreferences?.email ?? true,
-      sms: u.notificationPreferences?.sms ?? false,
-      inApp: u.notificationPreferences?.inApp ?? true,
+      email: user.notificationPreferences?.email ?? true,
+      sms: user.notificationPreferences?.sms ?? false,
+      inApp: user.notificationPreferences?.inApp ?? true,
     },
   };
 }

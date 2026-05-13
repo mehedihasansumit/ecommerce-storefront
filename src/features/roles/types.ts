@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import type { Permission } from "@/shared/lib/permissions";
 
 export interface IRole {
@@ -11,6 +10,3 @@ export interface IRole {
   updatedAt: Date;
 }
 
-export interface IRoleDocument extends Omit<IRole, "_id"> {
-  _id: Types.ObjectId;
-}

@@ -48,9 +48,7 @@ export async function PUT(
         return forbiddenResponse("Missing permission: stores.edit");
     }
 
-    // Strip undefined values — MongoDB does not accept undefined in $set
-    const cleanData = JSON.parse(JSON.stringify(validated));
-    const store = await StoreService.update(storeId, cleanData);
+    const store = await StoreService.update(storeId, validated);
     if (!store) return notFoundResponse("Store not found");
     return successResponse(store);
   } catch (error) {

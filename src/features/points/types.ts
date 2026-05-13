@@ -1,5 +1,3 @@
-import { Types } from "mongoose";
-
 export type PointReason = "review_approved" | "redemption";
 
 export interface IPointTransaction {
@@ -14,14 +12,6 @@ export interface IPointTransaction {
   updatedAt: Date;
 }
 
-export interface IPointTransactionDocument
-  extends Omit<IPointTransaction, "_id" | "storeId" | "userId" | "reviewId" | "couponId"> {
-  _id: Types.ObjectId;
-  storeId: Types.ObjectId;
-  userId: Types.ObjectId;
-  reviewId: Types.ObjectId | null;
-  couponId: Types.ObjectId | null;
-}
 
 export const POINTS_PER_REVIEW = 10;
 export const MIN_REDEMPTION_POINTS = 100;

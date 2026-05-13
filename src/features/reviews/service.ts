@@ -1,8 +1,7 @@
 import { ReviewRepository } from "./repository";
 import { ProductRepository } from "@/features/products/repository";
+import { OrderRepository } from "@/features/orders/repository";
 import { PointService } from "@/features/points/service";
-import { OrderModel } from "@/features/orders/model";
-import dbConnect from "@/shared/lib/db";
 import type { IReview } from "./types";
 import type { CreateReviewInput } from "./schemas";
 
@@ -16,31 +15,16 @@ export const ReviewService = {
     storeId: string,
     userId: string,
     reviewerName: string,
-    input: CreateReviewInput
+    input: CreateReviewInput,
   ): Promise<IReview> {
-    // Check for duplicate
-    const existing = await ReviewRepository.findByUserAndProduct(
-      storeId,
-      userId,
-      input.productId
-    );
+    const existing = await ReviewRepository.findByUserAndProduct(storeId, userId, input.productId);
     if (existing) {
       throw new Error("You have already reviewed this product");
     }
 
-    // Verify purchase (any non-cancelled order)
-    await dbConnect();
-    const purchasedOrder = await OrderModel.findOne({
-      storeId,
-      userId,
-      status: { $nin: ["cancelled"] },
-      "items.productId": input.productId,
-    }).lean();
-
-    if (!purchasedOrder) {
-      throw new Error(
-        "You must purchase this product before reviewing it"
-      );
+    const purchased = await OrderRepository.userHasPurchased(storeId, userId, input.productId);
+    if (!purchased) {
+      throw new Error("You must purchase this product before reviewing it");
     }
 
     return ReviewRepository.create({
@@ -86,42 +70,32 @@ export const ReviewService = {
     storeId: string,
     productId: string,
     page: number,
-    limit: number
+    limit: number,
   ): Promise<{ reviews: IReview[]; total: number; totalPages: number }> {
-    const { reviews, total } = await ReviewRepository.findApprovedByProduct(
-      storeId,
-      productId,
-      { page, limit }
-    );
+    const { reviews, total } = await ReviewRepository.findApprovedByProduct(storeId, productId, {
+      page,
+      limit,
+    });
     return { reviews, total, totalPages: Math.ceil(total / limit) };
   },
 
   async getEligibility(
     storeId: string,
     userId: string,
-    productId: string
+    productId: string,
   ): Promise<{ canReview: boolean; alreadyReviewed: boolean; hasPurchased: boolean }> {
-    await dbConnect();
-    const [existing, purchasedOrder] = await Promise.all([
+    const [existing, hasPurchased] = await Promise.all([
       ReviewRepository.findByUserAndProduct(storeId, userId, productId),
-      OrderModel.findOne({
-        storeId,
-        userId,
-        status: { $nin: ["cancelled"] },
-        "items.productId": productId,
-      }).lean(),
+      OrderRepository.userHasPurchased(storeId, userId, productId),
     ]);
-
     const alreadyReviewed = !!existing;
-    const hasPurchased = !!purchasedOrder;
     const canReview = hasPurchased && !alreadyReviewed;
-
     return { canReview, alreadyReviewed, hasPurchased };
   },
 
   async getByStore(
     storeId: string,
-    options: { page: number; limit: number; isApproved?: boolean }
+    options: { page: number; limit: number; isApproved?: boolean },
   ): Promise<{ reviews: IReview[]; total: number; totalPages: number }> {
     const { reviews, total } = await ReviewRepository.findByStore(storeId, options);
     return { reviews, total, totalPages: Math.ceil(total / options.limit) };

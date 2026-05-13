@@ -15,20 +15,6 @@ export interface INotification {
   createdAt: Date;
 }
 
-export interface INotificationDocument {
-  _id: import("mongoose").Types.ObjectId;
-  storeId: import("mongoose").Types.ObjectId;
-  userId: import("mongoose").Types.ObjectId | null;
-  type: NotificationType;
-  title: string;
-  message: string;
-  channel: NotificationChannel;
-  isRead: boolean;
-  readAt: Date | null;
-  metadata: Record<string, unknown>;
-  createdAt: Date;
-}
-
 // Announcements = store-wide banners/alerts displayed on the storefront
 export type AnnouncementDisplayType = "banner" | "modal" | "bar" | "float";
 export type AnnouncementStatus = "active" | "inactive" | "scheduled";
@@ -55,24 +41,3 @@ export interface IAnnouncement {
   updatedAt: Date;
 }
 
-export interface IAnnouncementDocument {
-  _id: import("mongoose").Types.ObjectId;
-  storeId: import("mongoose").Types.ObjectId;
-  title: string;
-  message: string;
-  displayType: AnnouncementDisplayType;
-  backgroundColor: string;
-  textColor: string;
-  linkUrl: string;
-  linkText: string;
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  dismissible: boolean;
-  priority: number;
-  createdBy: import("mongoose").Types.ObjectId;
-  broadcastSentAt?: Date | null;
-  broadcastCount?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}

@@ -1,110 +1,134 @@
-import { Types } from "mongoose";
-import dbConnect from "@/shared/lib/db";
-import { ReviewModel } from "./model";
+import { and, avg, count, desc, eq, sql } from "drizzle-orm";
+import { db } from "@/db/client";
+import { reviews, type Review } from "@/db/schema/reviews";
 import type { IReview } from "./types";
 
-function serialize(doc: unknown): IReview {
-  return JSON.parse(JSON.stringify(doc));
+function toIReview(row: Review): IReview {
+  return {
+    _id: row.id,
+    storeId: row.storeId,
+    productId: row.productId,
+    userId: row.userId,
+    rating: row.rating,
+    title: row.title ?? "",
+    comment: row.comment ?? "",
+    reviewerName: row.reviewerName ?? "",
+    isApproved: row.isApproved,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function toInsert(data: Partial<IReview>): typeof reviews.$inferInsert {
+  const { _id, createdAt, updatedAt, ...rest } = data;
+  void _id;
+  void createdAt;
+  void updatedAt;
+  return rest as typeof reviews.$inferInsert;
 }
 
 export const ReviewRepository = {
   async create(data: Partial<IReview>): Promise<IReview> {
-    await dbConnect();
-    const doc = await ReviewModel.create(data);
-    return serialize(doc.toObject());
+    const [row] = await db.insert(reviews).values(toInsert(data)).returning();
+    return toIReview(row);
   },
 
   async findApprovedByProduct(
     storeId: string,
     productId: string,
-    { page, limit }: { page: number; limit: number }
+    { page, limit }: { page: number; limit: number },
   ): Promise<{ reviews: IReview[]; total: number }> {
-    await dbConnect();
+    const where = and(
+      eq(reviews.storeId, storeId),
+      eq(reviews.productId, productId),
+      eq(reviews.isApproved, true),
+    );
     const skip = (page - 1) * limit;
-    const filter = { storeId, productId, isApproved: true };
-    const [reviews, total] = await Promise.all([
-      ReviewModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      ReviewModel.countDocuments(filter),
+    const [rows, [{ total }]] = await Promise.all([
+      db.select().from(reviews).where(where).orderBy(desc(reviews.createdAt)).limit(limit).offset(skip),
+      db.select({ total: count() }).from(reviews).where(where),
     ]);
-    return { reviews: reviews.map(serialize), total };
+    return { reviews: rows.map(toIReview), total: Number(total) };
   },
 
   async findByUserAndProduct(
     storeId: string,
     userId: string,
-    productId: string
+    productId: string,
   ): Promise<IReview | null> {
-    await dbConnect();
-    const doc = await ReviewModel.findOne({ storeId, userId, productId }).lean();
-    return doc ? serialize(doc) : null;
+    const [row] = await db
+      .select()
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.storeId, storeId),
+          eq(reviews.userId, userId),
+          eq(reviews.productId, productId),
+        ),
+      )
+      .limit(1);
+    return row ? toIReview(row) : null;
   },
 
   async findByStore(
     storeId: string,
-    {
-      page,
-      limit,
-      isApproved,
-    }: { page: number; limit: number; isApproved?: boolean }
+    { page, limit, isApproved }: { page: number; limit: number; isApproved?: boolean },
   ): Promise<{ reviews: IReview[]; total: number }> {
-    await dbConnect();
-    const filter: Record<string, unknown> = { storeId };
-    if (isApproved !== undefined) filter.isApproved = isApproved;
+    const conds = [eq(reviews.storeId, storeId)];
+    if (isApproved !== undefined) conds.push(eq(reviews.isApproved, isApproved));
+    const where = and(...conds);
     const skip = (page - 1) * limit;
-    const [reviews, total] = await Promise.all([
-      ReviewModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      ReviewModel.countDocuments(filter),
+    const [rows, [{ total }]] = await Promise.all([
+      db.select().from(reviews).where(where).orderBy(desc(reviews.createdAt)).limit(limit).offset(skip),
+      db.select({ total: count() }).from(reviews).where(where),
     ]);
-    return { reviews: reviews.map(serialize), total };
+    return { reviews: rows.map(toIReview), total: Number(total) };
   },
 
   async findById(id: string): Promise<IReview | null> {
-    await dbConnect();
-    const doc = await ReviewModel.findById(id).lean();
-    return doc ? serialize(doc) : null;
+    const [row] = await db.select().from(reviews).where(eq(reviews.id, id)).limit(1);
+    return row ? toIReview(row) : null;
   },
 
   async setApproved(id: string, isApproved: boolean): Promise<IReview | null> {
-    await dbConnect();
-    const doc = await ReviewModel.findByIdAndUpdate(
-      id,
-      { isApproved },
-      { new: true }
-    ).lean();
-    return doc ? serialize(doc) : null;
+    const [row] = await db
+      .update(reviews)
+      .set({ isApproved, updatedAt: new Date() })
+      .where(eq(reviews.id, id))
+      .returning();
+    return row ? toIReview(row) : null;
   },
 
   async delete(id: string): Promise<boolean> {
-    await dbConnect();
-    const result = await ReviewModel.findByIdAndDelete(id);
-    return !!result;
+    const result = await db
+      .delete(reviews)
+      .where(eq(reviews.id, id))
+      .returning({ id: reviews.id });
+    return result.length > 0;
   },
 
   async getProductRatingStats(
     storeId: string,
-    productId: string
+    productId: string,
   ): Promise<{ averageRating: number; reviewCount: number }> {
-    await dbConnect();
-    const results = await ReviewModel.aggregate([
-      {
-        $match: {
-          storeId: new Types.ObjectId(storeId),
-          productId: new Types.ObjectId(productId),
-          isApproved: true,
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: "$rating" },
-          reviewCount: { $sum: 1 },
-        },
-      },
-    ]);
-    if (!results.length) return { averageRating: 0, reviewCount: 0 };
+    const [row] = await db
+      .select({ avg: avg(reviews.rating), cnt: count() })
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.storeId, storeId),
+          eq(reviews.productId, productId),
+          eq(reviews.isApproved, true),
+        ),
+      );
+    const avgValue = Number(row?.avg ?? 0);
+    const cnt = Number(row?.cnt ?? 0);
+    if (cnt === 0) return { averageRating: 0, reviewCount: 0 };
     return {
-      averageRating: Math.round((results[0].averageRating as number) * 10) / 10,
-      reviewCount: results[0].reviewCount as number,
+      averageRating: Math.round(avgValue * 10) / 10,
+      reviewCount: cnt,
     };
   },
 };
+
+void sql;

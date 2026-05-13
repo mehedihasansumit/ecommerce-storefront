@@ -26,7 +26,7 @@ export default function AdminError({
         </h2>
         <p className="text-admin-text-muted text-sm mb-6">
           {isDbError
-            ? "Could not connect to the database. Make sure MongoDB is running."
+            ? "Could not connect to the database. Make sure Postgres is running."
             : error.message}
         </p>
         <button

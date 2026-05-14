@@ -38,6 +38,7 @@ export const products = pgTable(
     sku: text("sku"),
     barcode: text("barcode"),
     tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
+    thumbnail: text("thumbnail"),
     options: jsonb("options").notNull().default([]),
     isActive: boolean("is_active").notNull().default(true),
     isFeatured: boolean("is_featured").notNull().default(false),

@@ -41,6 +41,10 @@ function cartesian(arrays: string[][]): string[][] {
   return first.flatMap((val) => restProduct.map((combo) => [val, ...combo]));
 }
 
+function getColorOptionName(options: IProductOption[]): string | undefined {
+  return options.find((o) => o.name.toLowerCase() === "color")?.name;
+}
+
 function regenerateVariants(
   newOptions: IProductOption[],
   existing: IProductVariant[],
@@ -50,6 +54,7 @@ function regenerateVariants(
   const nonEmpty = newOptions.filter((o) => o.values.length > 0);
   if (nonEmpty.length === 0) return [];
 
+  const colorOptName = getColorOptionName(newOptions);
   const combos = cartesian(nonEmpty.map((o) => o.values));
   return combos.map((combo) => {
     const optionValues: Record<string, string> = {};
@@ -62,7 +67,7 @@ function regenerateVariants(
       (v) => JSON.stringify(v.optionValues) === key
     );
 
-    const colorValue = optionValues["Color"];
+    const colorValue = colorOptName ? optionValues[colorOptName] : undefined;
     const images = colorValue
       ? (colorImages[colorValue] ?? existingMatch?.images ?? [])
       : (existingMatch?.images ?? []);
@@ -129,13 +134,16 @@ export function ProductForm({
 
   const [colorImages, setColorImages] = useState<Record<string, IProductImage[]>>(() => {
     const initial: Record<string, IProductImage[]> = {};
-    if (product?.variants) {
-      product.variants.forEach((v) => {
-        const color = v.optionValues && v.optionValues["Color"];
-        if (color && v.images.length > 0) {
-          initial[color] = v.images;
-        }
-      });
+    if (product?.variants && product.options) {
+      const colorOptName = getColorOptionName(product.options);
+      if (colorOptName) {
+        product.variants.forEach((v) => {
+          const color = v.optionValues?.[colorOptName];
+          if (color && v.images.length > 0) {
+            initial[color] = v.images;
+          }
+        });
+      }
     }
     return initial;
   });
@@ -232,15 +240,19 @@ export function ProductForm({
       categoryId: form.categoryId || undefined,
       images: productImages,
       options,
-      variants: variants.map((v) => ({
-        ...v,
-        price: Number(v.price),
-        compareAtPrice: Number(v.compareAtPrice ?? 0),
-        stock: Number(v.stock),
-        images: v.optionValues?.Color
-          ? (colorImages[v.optionValues.Color] ?? v.images ?? [])
-          : (v.images ?? []),
-      })),
+      variants: variants.map((v) => {
+        const colorOptName = getColorOptionName(options);
+        const colorVal = colorOptName ? v.optionValues?.[colorOptName] : undefined;
+        return {
+          ...v,
+          price: Number(v.price),
+          compareAtPrice: Number(v.compareAtPrice ?? 0),
+          stock: Number(v.stock),
+          images: colorVal
+            ? (colorImages[colorVal] ?? v.images ?? [])
+            : (v.images ?? []),
+        };
+      }),
     };
 
     try {

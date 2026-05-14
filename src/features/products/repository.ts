@@ -48,6 +48,9 @@ function toIProduct(
   variantImagesByVariantId: Map<string, ProductImage[]>,
 ): IProduct {
   const images = productImageList.filter((img) => img.variantId === null).map(toIImage);
+  const firstVariantImgUrl = variantList.length > 0
+    ? variantImagesByVariantId.get(variantList[0].id)?.[0]?.url
+    : undefined;
   return {
     _id: row.id,
     storeId: row.storeId,
@@ -63,7 +66,7 @@ function toIProduct(
     stock: row.stock,
     trackInventory: row.trackInventory,
     images,
-    thumbnail: images[0]?.url ?? "",
+    thumbnail: row.thumbnail ?? images[0]?.url ?? firstVariantImgUrl ?? "",
     categoryId: row.categoryId ?? "",
     tags: row.tags,
     options: (row.options as IProductOption[]) ?? [],
@@ -142,9 +145,9 @@ function toInsert(data: Partial<IProduct>): typeof products.$inferInsert {
   void createdAt;
   void updatedAt;
   void images;
-  void thumbnail;
   void variants;
   const out: Record<string, unknown> = { ...rest };
+  if (thumbnail !== undefined) out.thumbnail = thumbnail || null;
   if (price !== undefined) out.price = String(price);
   if (compareAtPrice !== undefined) out.compareAtPrice = String(compareAtPrice);
   if (costPrice !== undefined) out.costPrice = String(costPrice);
@@ -248,7 +251,6 @@ export const ProductRepository = {
       const [row] = await tx.insert(products).values(toInsert(data)).returning();
 
       const variants = data.variants ?? [];
-      const variantIdMap = new Map<string, string>();
       if (variants.length > 0) {
         const inserted = await tx
           .insert(productVariants)
@@ -262,10 +264,24 @@ export const ProductRepository = {
               sku: v.sku || null,
             })),
           )
-          .returning({ id: productVariants.id, sku: productVariants.sku });
+          .returning({ id: productVariants.id });
+
+        const variantImgs: (typeof productImages.$inferInsert)[] = [];
         inserted.forEach((ins, i) => {
-          if (variants[i].sku) variantIdMap.set(variants[i].sku, ins.id);
+          (variants[i].images ?? []).forEach((img) => {
+            variantImgs.push({
+              productId: row.id,
+              variantId: ins.id,
+              url: img.url,
+              alt: img.alt ?? null,
+              key: img.key ?? null,
+              width: img.width ?? null,
+              height: img.height ?? null,
+              variants: img.variants ?? null,
+            });
+          });
         });
+        if (variantImgs.length > 0) await tx.insert(productImages).values(variantImgs);
       }
 
       const imgs = (data.images ?? []).map((img) => ({
@@ -298,16 +314,36 @@ export const ProductRepository = {
       if (data.variants !== undefined) {
         await tx.delete(productVariants).where(eq(productVariants.productId, row.id));
         if (data.variants.length > 0) {
-          await tx.insert(productVariants).values(
-            data.variants.map((v) => ({
-              productId: row.id,
-              optionValues: v.optionValues,
-              price: v.price !== undefined ? String(v.price) : null,
-              compareAtPrice: v.compareAtPrice !== undefined ? String(v.compareAtPrice) : null,
-              stock: v.stock,
-              sku: v.sku || null,
-            })),
-          );
+          const insertedVariants = await tx
+            .insert(productVariants)
+            .values(
+              data.variants.map((v) => ({
+                productId: row.id,
+                optionValues: v.optionValues,
+                price: v.price !== undefined ? String(v.price) : null,
+                compareAtPrice: v.compareAtPrice !== undefined ? String(v.compareAtPrice) : null,
+                stock: v.stock,
+                sku: v.sku || null,
+              })),
+            )
+            .returning({ id: productVariants.id });
+
+          const variantImgs: (typeof productImages.$inferInsert)[] = [];
+          insertedVariants.forEach((ins, i) => {
+            (data.variants![i].images ?? []).forEach((img) => {
+              variantImgs.push({
+                productId: row.id,
+                variantId: ins.id,
+                url: img.url,
+                alt: img.alt ?? null,
+                key: img.key ?? null,
+                width: img.width ?? null,
+                height: img.height ?? null,
+                variants: img.variants ?? null,
+              });
+            });
+          });
+          if (variantImgs.length > 0) await tx.insert(productImages).values(variantImgs);
         }
       }
       if (data.images !== undefined) {

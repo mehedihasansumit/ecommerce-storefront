@@ -137,6 +137,8 @@ export interface IStore {
   faviconDark?: string;
   theme: IStoreTheme;
   heroLayout?: HeroLayoutStyle;
+  heroContained?: boolean;
+  heroBorderRadius?: string;
   heroBanners: IHeroBanner[];
   seo: IStoreSeo;
   payment: IStorePayment;

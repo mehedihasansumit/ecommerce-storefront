@@ -313,6 +313,8 @@ export default function StoreEditForm({
       },
     },
     heroLayout: (store.heroLayout || "slider") as HeroLayoutStyle,
+    heroContained: store.heroContained ?? false,
+    heroBorderRadius: store.heroBorderRadius ?? "",
     supportedLanguages: supportedLangs,
     defaultLanguage: store.defaultLanguage || "en",
     pointsConfig: {
@@ -487,6 +489,8 @@ export default function StoreEditForm({
         payload.favicon = formData.favicon;
         payload.faviconDark = formData.faviconDark;
         payload.heroLayout = formData.heroLayout;
+        payload.heroContained = formData.heroContained;
+        payload.heroBorderRadius = formData.heroBorderRadius;
         payload.heroBanners = heroBanners;
         payload.contact = formData.contact;
         payload.socialOrdering = formData.socialOrdering;
@@ -1155,6 +1159,76 @@ export default function StoreEditForm({
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            <div className="border-t border-admin-border" />
+
+            {/* ── Banner Frame ── */}
+            <div>
+              <SectionTitle>Banner Frame</SectionTitle>
+              <p className="text-xs text-admin-text-subtle mt-0.5 mb-3">
+                Control banner width and corner rounding.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-admin-text-secondary uppercase tracking-wider mb-2">
+                    Width
+                  </label>
+                  <div className="inline-flex p-1 rounded-lg bg-admin-surface-raised border border-admin-border">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, heroContained: false }))
+                      }
+                      disabled={loading}
+                      className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors disabled:opacity-50 ${
+                        !formData.heroContained
+                          ? "bg-gray-900 text-white"
+                          : "text-admin-text-secondary hover:text-admin-text-primary"
+                      }`}
+                    >
+                      Full-width
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, heroContained: true }))
+                      }
+                      disabled={loading}
+                      className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors disabled:opacity-50 ${
+                        formData.heroContained
+                          ? "bg-gray-900 text-white"
+                          : "text-admin-text-secondary hover:text-admin-text-primary"
+                      }`}
+                    >
+                      Container
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-admin-text-subtle mt-1.5">
+                    {formData.heroContained
+                      ? "Banner is bounded by the page container with side padding."
+                      : "Banner spans full viewport edge-to-edge."}
+                  </p>
+                </div>
+                <Field label="Border Radius">
+                  <input
+                    type="text"
+                    value={formData.heroBorderRadius}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        heroBorderRadius: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. 12px, 1rem, 0"
+                    className={inputCls}
+                    disabled={loading}
+                  />
+                  <p className="text-[11px] text-admin-text-subtle mt-1.5">
+                    Leave empty for sharp corners.
+                  </p>
+                </Field>
               </div>
             </div>
 

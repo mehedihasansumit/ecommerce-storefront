@@ -52,7 +52,12 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero Banner */}
-      <HeroBanner banners={tenant.heroBanners} layout={tenant.heroLayout} />
+      <HeroBanner
+        banners={tenant.heroBanners}
+        layout={tenant.heroLayout}
+        contained={tenant.heroContained}
+        borderRadius={tenant.heroBorderRadius}
+      />
 
       {/* Trust badges */}
       <section className="border-b border-border-subtle">
@@ -163,7 +168,7 @@ export default async function HomePage() {
                       alt={t(category.name, locale)}
                       fill
                       sizes="96px"
-                      className="object-cover transition-transform duration-700 ease-(--ease-out-expo) group-hover:scale-110"
+                      className="object-contain p-2 transition-transform duration-700 ease-(--ease-out-expo) group-hover:scale-110"
                     />
                   )}
                 </div>

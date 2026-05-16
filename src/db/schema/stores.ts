@@ -16,6 +16,8 @@ export const stores = pgTable(
     faviconDark: text("favicon_dark"),
     theme: jsonb("theme").notNull().default({}),
     heroLayout: text("hero_layout"),
+    heroContained: boolean("hero_contained").notNull().default(false),
+    heroBorderRadius: text("hero_border_radius"),
     heroBanners: jsonb("hero_banners").notNull().default([]),
     seo: jsonb("seo").notNull().default({}),
     payment: jsonb("payment").notNull().default({}),

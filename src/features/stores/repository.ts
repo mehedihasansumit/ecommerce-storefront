@@ -28,6 +28,8 @@ function toIStore(row: Store): IStore {
     faviconDark: row.faviconDark ?? undefined,
     theme: row.theme as IStoreTheme,
     heroLayout: (row.heroLayout ?? undefined) as HeroLayoutStyle | undefined,
+    heroContained: row.heroContained ?? false,
+    heroBorderRadius: row.heroBorderRadius ?? undefined,
     heroBanners: (row.heroBanners as IHeroBanner[]) ?? [],
     seo: row.seo as IStoreSeo,
     payment: row.payment as IStorePayment,

@@ -15,6 +15,13 @@
       "when": 1778699055756,
       "tag": "0001_product_thumbnail",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778945871988,
+      "tag": "0002_youthful_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

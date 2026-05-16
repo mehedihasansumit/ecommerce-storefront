@@ -14,18 +14,43 @@ const SWIPE_THRESHOLD = 50;
 interface HeroBannerProps {
   banners: IHeroBanner[];
   layout?: HeroLayoutStyle;
+  contained?: boolean;
+  borderRadius?: string;
 }
 
-export function HeroBanner({ banners, layout = "slider" }: HeroBannerProps) {
-  const locale = useLocale();
-  const activeBanners = banners?.filter((b) => t(b.title, locale)) || [];
+export function HeroBanner({
+  banners,
+  layout = "slider",
+  contained = false,
+  borderRadius,
+}: HeroBannerProps) {
+  const activeBanners = banners?.filter((b) => b.image) || [];
 
   if (activeBanners.length === 0) return null;
 
-  if (layout === "grid") return <GridLayout banners={activeBanners} />;
-  if (layout === "image") return <ImageOnlyLayout banners={activeBanners} />;
+  const sectionStyle: React.CSSProperties | undefined = borderRadius
+    ? { borderRadius }
+    : undefined;
 
-  return <RotatingLayout banners={activeBanners} layout={layout} />;
+  let inner: React.ReactElement;
+  if (layout === "grid") {
+    inner = <GridLayout banners={activeBanners} sectionStyle={sectionStyle} />;
+  } else if (layout === "image") {
+    inner = <ImageOnlyLayout banners={activeBanners} sectionStyle={sectionStyle} />;
+  } else {
+    inner = (
+      <RotatingLayout
+        banners={activeBanners}
+        layout={layout}
+        sectionStyle={sectionStyle}
+      />
+    );
+  }
+
+  if (contained) {
+    return <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{inner}</div>;
+  }
+  return inner;
 }
 
 // ── Shared rotating layout (slider / split / centered / minimal) ──────────────
@@ -33,9 +58,11 @@ export function HeroBanner({ banners, layout = "slider" }: HeroBannerProps) {
 function RotatingLayout({
   banners,
   layout,
+  sectionStyle,
 }: {
   banners: IHeroBanner[];
   layout: HeroLayoutStyle;
+  sectionStyle?: React.CSSProperties;
 }) {
   const tr = useTranslations("heroBanner");
   const locale = useLocale();
@@ -150,6 +177,7 @@ function RotatingLayout({
         sharedHandlers={sharedHandlers}
         shopNow={tr("shopNow")}
         locale={locale}
+        sectionStyle={sectionStyle}
       />
     );
   }
@@ -169,6 +197,7 @@ function RotatingLayout({
         sharedHandlers={sharedHandlers}
         shopNow={tr("shopNow")}
         locale={locale}
+        sectionStyle={sectionStyle}
       />
     );
   }
@@ -188,6 +217,7 @@ function RotatingLayout({
         sharedHandlers={sharedHandlers}
         shopNow={tr("shopNow")}
         locale={locale}
+        sectionStyle={sectionStyle}
       />
     );
   }
@@ -199,6 +229,7 @@ function RotatingLayout({
   return (
     <section
       className="relative w-full h-[32rem] md:h-[38rem] lg:h-[44rem] overflow-hidden bg-gray-950"
+      style={sectionStyle}
       {...sharedHandlers}
     >
       {banners.map((b, i) => (
@@ -368,6 +399,7 @@ interface LayoutProps {
   sharedHandlers: object;
   shopNow: string;
   locale: string;
+  sectionStyle?: React.CSSProperties;
 }
 
 // ── Split layout ──────────────────────────────────────────────────────────────
@@ -385,11 +417,13 @@ function SplitLayout({
   sharedHandlers,
   shopNow,
   locale,
+  sectionStyle,
 }: LayoutProps) {
   const showOverlay = banner.showOverlay !== false;
   return (
     <section
       className="relative w-full overflow-hidden bg-gray-950 flex flex-col md:flex-row min-h-[28rem] md:h-[38rem] lg:h-[44rem]"
+      style={sectionStyle}
       {...sharedHandlers}
     >
       {/* Image side (left) */}
@@ -542,11 +576,13 @@ function CenteredLayout({
   sharedHandlers,
   shopNow,
   locale,
+  sectionStyle,
 }: LayoutProps) {
   const showOverlay = banner.showOverlay !== false;
   return (
     <section
       className="relative w-full h-[32rem] md:h-[38rem] lg:h-[44rem] overflow-hidden bg-gray-950"
+      style={sectionStyle}
       {...sharedHandlers}
     >
       {banners.map((b, i) => (
@@ -698,11 +734,13 @@ function MinimalLayout({
   sharedHandlers,
   shopNow,
   locale,
+  sectionStyle,
 }: LayoutProps) {
   const showOverlay = banner.showOverlay !== false;
   return (
     <section
       className="relative w-full h-[32rem] md:h-[38rem] lg:h-[52rem] overflow-hidden bg-gray-950"
+      style={sectionStyle}
       {...sharedHandlers}
     >
       {banners.map((b, i) => (
@@ -837,7 +875,13 @@ function MinimalLayout({
 
 // ── Grid layout (static, shows multiple banners simultaneously) ───────────────
 
-function GridLayout({ banners }: { banners: IHeroBanner[] }) {
+function GridLayout({
+  banners,
+  sectionStyle,
+}: {
+  banners: IHeroBanner[];
+  sectionStyle?: React.CSSProperties;
+}) {
   const tr = useTranslations("heroBanner");
   const locale = useLocale();
 
@@ -845,7 +889,7 @@ function GridLayout({ banners }: { banners: IHeroBanner[] }) {
   const side = banners.slice(1, 3);
 
   return (
-    <section className="w-full overflow-hidden">
+    <section className="w-full overflow-hidden" style={sectionStyle}>
       <div className="flex flex-col md:flex-row h-auto md:h-[38rem] lg:h-[44rem] gap-1">
         {/* Large left panel */}
         <div className="relative flex-[2] min-h-[22rem] md:min-h-0 overflow-hidden group bg-gray-900">
@@ -960,13 +1004,20 @@ function GridLayout({ banners }: { banners: IHeroBanner[] }) {
 
 // ── Image Only layout (pure banner, no text/overlay) ─────────────────────────
 
-function ImageOnlyLayout({ banners }: { banners: IHeroBanner[] }) {
+function ImageOnlyLayout({
+  banners,
+  sectionStyle,
+}: {
+  banners: IHeroBanner[];
+  sectionStyle?: React.CSSProperties;
+}) {
   const locale = useLocale();
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [aspect, setAspect] = useState<number | null>(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
@@ -1010,7 +1061,11 @@ function ImageOnlyLayout({ banners }: { banners: IHeroBanner[] }) {
 
   return (
     <section
-      className="relative w-full h-[28rem] md:h-[38rem] lg:h-[50rem] overflow-hidden bg-gray-950"
+      className="relative w-full overflow-hidden bg-gray-950"
+      style={{
+        ...sectionStyle,
+        aspectRatio: aspect ?? (16 / 9),
+      }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={(e) => {
@@ -1025,7 +1080,7 @@ function ImageOnlyLayout({ banners }: { banners: IHeroBanner[] }) {
         setIsPaused(false);
       }}
     >
-      {/* Pure images — zero overlay, zero text */}
+      {/* Pure images — zero overlay, zero text. First banner sets section aspect. */}
       {banners.map((b, i) => (
         <div
           key={i}
@@ -1046,7 +1101,17 @@ function ImageOnlyLayout({ banners }: { banners: IHeroBanner[] }) {
               fill
               priority={i === 0}
               sizes="100vw"
-              className={`object-cover transition-transform duration-[25s] ease-out ${i === current ? "scale-105" : "scale-100"}`}
+              className={`object-contain transition-transform duration-[25s] ease-out ${i === current ? "scale-105" : "scale-100"}`}
+              onLoad={
+                i === 0
+                  ? (e) => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      if (img.naturalWidth && img.naturalHeight) {
+                        setAspect(img.naturalWidth / img.naturalHeight);
+                      }
+                    }
+                  : undefined
+              }
             />
           )}
           {b.linkUrl && (

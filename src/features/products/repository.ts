@@ -11,6 +11,7 @@ import {
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
 import type {
+  IPricingTier,
   IProduct,
   IProductImage,
   IProductOption,
@@ -71,6 +72,7 @@ function toIProduct(
     tags: row.tags,
     options: (row.options as IProductOption[]) ?? [],
     variants: variantList.map((v) => toIVariant(v, variantImagesByVariantId.get(v.id) ?? [])),
+    pricingTiers: (row.pricingTiers as IPricingTier[]) ?? [],
     isActive: row.isActive,
     isFeatured: row.isFeatured,
     seo: (row.seo as IProductSeo) ?? { title: {}, description: {} },

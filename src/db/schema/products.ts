@@ -40,6 +40,10 @@ export const products = pgTable(
     tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
     thumbnail: text("thumbnail"),
     options: jsonb("options").notNull().default([]),
+    pricingTiers: jsonb("pricing_tiers")
+      .$type<Array<{ quantity: number; totalPrice: number }>>()
+      .notNull()
+      .default([]),
     isActive: boolean("is_active").notNull().default(true),
     isFeatured: boolean("is_featured").notNull().default(false),
     seo: jsonb("seo").notNull().default({}),

@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { X, Plus, Trash2 } from "lucide-react";
-import type { IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
+import type { IPricingTier, IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
 import type { ICategory } from "@/features/categories/types";
+import { PricingTiersInput } from "./PricingTiersInput";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
 import {
@@ -131,6 +132,7 @@ export function ProductForm({
 
   const [options, setOptions] = useState<IProductOption[]>(product?.options ?? []);
   const [variants, setVariants] = useState<IProductVariant[]>(product?.variants ?? []);
+  const [pricingTiers, setPricingTiers] = useState<IPricingTier[]>(product?.pricingTiers ?? []);
 
   const [colorImages, setColorImages] = useState<Record<string, IProductImage[]>>(() => {
     const initial: Record<string, IProductImage[]> = {};
@@ -240,6 +242,9 @@ export function ProductForm({
       categoryId: form.categoryId || undefined,
       images: productImages,
       options,
+      pricingTiers: pricingTiers
+        .map((t) => ({ quantity: Number(t.quantity), totalPrice: Number(t.totalPrice) }))
+        .filter((t) => t.quantity > 0 && t.totalPrice > 0),
       variants: variants.map((v) => {
         const colorOptName = getColorOptionName(options);
         const colorVal = colorOptName ? v.optionValues?.[colorOptName] : undefined;
@@ -369,6 +374,15 @@ export function ProductForm({
             />
           </Field>
         </div>
+      </Card>
+
+      {/* Bulk Pricing */}
+      <Card>
+        <CardHeader
+          title="Bulk Pricing"
+          description="Offer better total prices when buying multiples (e.g., 1 = ৳150, 2 = ৳250, 3 = ৳350). Tiers count across all variants of this product."
+        />
+        <PricingTiersInput value={pricingTiers} onChange={setPricingTiers} />
       </Card>
 
       {/* Inventory */}

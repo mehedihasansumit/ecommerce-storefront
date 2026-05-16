@@ -8,8 +8,10 @@ import type { IStoreSocialOrdering } from "@/features/stores/types";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { AddToCartSection } from "./AddToCartSection";
 import { SocialOrderButtons } from "./SocialOrderButtons";
+import { BulkPricingTable } from "./BulkPricingTable";
 import { t } from "@/shared/lib/i18n";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
+import { getBulkLineTotal, normalizeTiers } from "@/shared/lib/pricing";
 
 interface ProductDetailClientProps {
   product: IProduct;
@@ -48,6 +50,14 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
   const discountPercent = hasDiscount
     ? Math.round(((displayCompareAt - displayPrice) / displayCompareAt) * 100)
     : 0;
+
+  const tiers = normalizeTiers(product.pricingTiers);
+  const hasTiers = tiers.length > 0;
+  // Tiers always use product.price as base (variant price overrides are ignored
+  // for tier math so the bundle total remains consistent across mixed variants).
+  const previewLineTotal = hasTiers
+    ? getBulkLineTotal(product.price, quantity, tiers)
+    : displayPrice * quantity;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
@@ -120,6 +130,22 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
           </p>
         )}
 
+        {hasTiers && (
+          <div className="mb-6">
+            <BulkPricingTable
+              tiers={tiers}
+              basePrice={product.price}
+              currentQuantity={quantity}
+            />
+            <p className="mt-3 text-sm text-text-secondary">
+              <span className="font-medium text-[var(--color-text)]">
+                ৳{previewLineTotal.toLocaleString()}
+              </span>{" "}
+              for {quantity} {quantity === 1 ? "piece" : "pieces"}
+            </p>
+          </div>
+        )}
+
         <div className="border-t border-border-subtle pt-6 space-y-6">
           {/* Stock */}
           <div>
@@ -155,6 +181,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
             stock={product.stock}
             options={product.options ?? []}
             variants={product.variants ?? []}
+            pricingTiers={product.pricingTiers ?? []}
             addToCartLabel={tr("addToCart")}
             outOfStockLabel={tr("outOfStock")}
             onVariantChange={setActiveVariant}

@@ -7,6 +7,13 @@ import type { IOrder, IOrderItem, RefundRequestStatus } from "./types";
 import type { CreateOrderInput, CreateRefundRequestInput, ReviewRefundRequestInput } from "./schemas";
 import { tAdmin } from "@/shared/lib/i18n";
 import { normalizePhone } from "@/shared/lib/phone";
+import {
+  allocateBulkLineTotals,
+  getBulkUnitPrice,
+  normalizeTiers,
+  round2,
+} from "@/shared/lib/pricing";
+import type { IProduct, IProductVariant } from "@/features/products/types";
 
 function generateOrderNumber(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -19,28 +26,38 @@ function generateOrderNumber(): string {
 
 export const OrderService = {
   async create(storeId: string, input: CreateOrderInput, userId?: string, clientIp?: string): Promise<IOrder> {
-    // Validate products and build order items using server-side prices
-    const orderItems: IOrderItem[] = [];
-    let subtotal = 0;
+    // Validate products, resolve variants, then apply bulk pricing tiers
+    // grouping by productId across all input lines (variants share the tier).
+    type Resolved = {
+      product: IProduct;
+      activeVariant: IProductVariant | null;
+      quantity: number;
+      lineIndex: number;
+    };
+    const resolved: Resolved[] = [];
+    const productCache = new Map<string, IProduct>();
 
-    const productDetails: { productId: string; variantId?: string; quantity: number; price: number; categoryId?: string }[] = [];
-
-    for (const lineItem of input.items) {
-      const product = await ProductRepository.findById(lineItem.productId);
-      if (!product || product.storeId !== storeId) {
-        throw new Error(`Product not found: ${lineItem.productId}`);
+    for (let i = 0; i < input.items.length; i++) {
+      const lineItem = input.items[i];
+      let product = productCache.get(lineItem.productId) ?? null;
+      if (!product) {
+        const fetched = await ProductRepository.findById(lineItem.productId);
+        if (!fetched || fetched.storeId !== storeId) {
+          throw new Error(`Product not found: ${lineItem.productId}`);
+        }
+        product = fetched;
+        productCache.set(product._id, product);
       }
 
       const hasVariantSelections =
         lineItem.variantSelections && Object.keys(lineItem.variantSelections).length > 0;
 
-      let activeVariant: (typeof product.variants)[number] | null = null;
-
+      let activeVariant: IProductVariant | null = null;
       if (hasVariantSelections && product.variants?.length > 0) {
         activeVariant = product.variants.find((v) =>
           Object.entries(lineItem.variantSelections).every(
-            ([k, val]) => v.optionValues?.[k] === val
-          )
+            ([k, val]) => v.optionValues?.[k] === val,
+          ),
         ) ?? null;
 
         if (!activeVariant) {
@@ -49,35 +66,74 @@ export const OrderService = {
         if (activeVariant.stock < lineItem.quantity) {
           throw new Error(`Insufficient stock for: ${tAdmin(product.name)}`);
         }
-      } else {
-        if (product.stock < lineItem.quantity) {
-          throw new Error(`Insufficient stock for: ${tAdmin(product.name)}`);
-        }
+      } else if (product.stock < lineItem.quantity) {
+        throw new Error(`Insufficient stock for: ${tAdmin(product.name)}`);
       }
 
-      const unitPrice = activeVariant?.price ?? product.price;
-      const variantId = activeVariant?._id?.toString();
-      const totalPrice = unitPrice * lineItem.quantity;
+      resolved.push({ product, activeVariant, quantity: lineItem.quantity, lineIndex: i });
+    }
 
-      orderItems.push({
-        productId: product._id,
-        variantId,
-        productName: tAdmin(product.name),
-        productSlug: product.slug,
-        variantSelections: lineItem.variantSelections,
-        quantity: lineItem.quantity,
-        unitPrice,
-        totalPrice,
-      });
-      subtotal += totalPrice;
-      productDetails.push({
-        productId: product._id,
-        variantId,
-        quantity: lineItem.quantity,
-        price: unitPrice,
-        categoryId: product.categoryId?.toString(),
+    // Group resolved lines by productId for tier qty aggregation.
+    const linesByProduct = new Map<string, Resolved[]>();
+    for (const r of resolved) {
+      const list = linesByProduct.get(r.product._id) ?? [];
+      list.push(r);
+      linesByProduct.set(r.product._id, list);
+    }
+
+    // Compute per-line unit + total price. Tiers apply at product level; when present
+    // they use product.price as base and override any variant price overrides so the
+    // bundle total stays consistent across mixed-variant lines.
+    const orderItems: IOrderItem[] = new Array(resolved.length);
+    const productDetails: { productId: string; variantId?: string; quantity: number; price: number; categoryId?: string }[] = new Array(resolved.length);
+    let subtotal = 0;
+
+    for (const [, group] of linesByProduct) {
+      const product = group[0].product;
+      const tiers = normalizeTiers(product.pricingTiers);
+      const qtys = group.map((g) => g.quantity);
+
+      let lineTotals: number[];
+      let unitPrices: number[];
+      if (tiers.length > 0) {
+        lineTotals = allocateBulkLineTotals(product.price, qtys, tiers);
+        const effectiveUnit = getBulkUnitPrice(
+          product.price,
+          qtys.reduce((s, q) => s + q, 0),
+          tiers,
+        );
+        unitPrices = qtys.map(() => round2(effectiveUnit));
+      } else {
+        unitPrices = group.map((g) => g.activeVariant?.price ?? product.price);
+        lineTotals = group.map((g, i) => round2(unitPrices[i] * g.quantity));
+      }
+
+      group.forEach((g, i) => {
+        const variantId = g.activeVariant?._id?.toString();
+        const unitPrice = unitPrices[i];
+        const totalPrice = lineTotals[i];
+
+        orderItems[g.lineIndex] = {
+          productId: product._id,
+          variantId,
+          productName: tAdmin(product.name),
+          productSlug: product.slug,
+          variantSelections: input.items[g.lineIndex].variantSelections,
+          quantity: g.quantity,
+          unitPrice,
+          totalPrice,
+        };
+        productDetails[g.lineIndex] = {
+          productId: product._id,
+          variantId,
+          quantity: g.quantity,
+          price: unitPrice,
+          categoryId: product.categoryId?.toString(),
+        };
+        subtotal += totalPrice;
       });
     }
+    subtotal = round2(subtotal);
 
     // Validate and apply coupon if provided
     let discount = 0;

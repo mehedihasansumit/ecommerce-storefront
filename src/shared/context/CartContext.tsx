@@ -4,11 +4,19 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   useCallback,
   type ReactNode,
 } from "react";
 import { useTenant } from "@/shared/hooks/useTenant";
+import {
+  allocateBulkLineTotals,
+  getBulkUnitPrice,
+  normalizeTiers,
+  round2,
+  type PricingTier,
+} from "@/shared/lib/pricing";
 
 export interface LocalCartItem {
   productId: string;
@@ -18,6 +26,15 @@ export interface LocalCartItem {
   variantSelections: Record<string, string>;
   quantity: number;
   priceAtAdd: number;
+  pricingTiers?: PricingTier[];
+  productBasePrice?: number;
+}
+
+export interface CartLineComputed {
+  unitPrice: number;
+  lineTotal: number;
+  appliedTierQty: number | null;
+  appliedTierTotal: number | null;
 }
 
 interface LocalCart {
@@ -40,6 +57,8 @@ interface CartContextValue {
   total: number;
   couponLoading: boolean;
   couponError: string;
+  computedLines: CartLineComputed[];
+  getLineByItem: (item: LocalCartItem) => CartLineComputed;
   addItem: (item: LocalCartItem) => void;
   updateQuantity: (
     productId: string,
@@ -174,6 +193,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             items: items.map((i) => ({
               productId: i.productId,
               quantity: i.quantity,
+              // Server re-applies tier math; sent value is a hint only.
               price: i.priceAtAdd,
             })),
           }),
@@ -212,12 +232,79 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = items.reduce(
-    (sum, i) => sum + i.priceAtAdd * i.quantity,
-    0
+
+  // Derive per-line unit + total prices applying bulk tiers across same-product
+  // lines (mixing variants of the same product counts toward one bundle).
+  const computedLines = useMemo<CartLineComputed[]>(() => {
+    const lines: CartLineComputed[] = new Array(items.length);
+    const indicesByProduct = new Map<string, number[]>();
+    items.forEach((it, i) => {
+      const list = indicesByProduct.get(it.productId) ?? [];
+      list.push(i);
+      indicesByProduct.set(it.productId, list);
+    });
+
+    for (const [, idxs] of indicesByProduct) {
+      const sample = items[idxs[0]];
+      const tiers = normalizeTiers(sample.pricingTiers);
+      const basePrice = sample.productBasePrice ?? sample.priceAtAdd;
+      const qtys = idxs.map((i) => items[i].quantity);
+      const totalQty = qtys.reduce((s, q) => s + q, 0);
+
+      if (tiers.length > 0) {
+        const unit = round2(getBulkUnitPrice(basePrice, totalQty, tiers));
+        const lineTotals = allocateBulkLineTotals(basePrice, qtys, tiers);
+        let appliedTierQty: number | null = null;
+        let appliedTierTotal: number | null = null;
+        for (const t of tiers) {
+          if (t.quantity <= totalQty) {
+            appliedTierQty = t.quantity;
+            appliedTierTotal = t.totalPrice;
+          } else break;
+        }
+        idxs.forEach((i, k) => {
+          lines[i] = {
+            unitPrice: unit,
+            lineTotal: lineTotals[k],
+            appliedTierQty,
+            appliedTierTotal,
+          };
+        });
+      } else {
+        idxs.forEach((i) => {
+          const it = items[i];
+          lines[i] = {
+            unitPrice: it.priceAtAdd,
+            lineTotal: round2(it.priceAtAdd * it.quantity),
+            appliedTierQty: null,
+            appliedTierTotal: null,
+          };
+        });
+      }
+    }
+    return lines;
+  }, [items]);
+
+  const subtotal = round2(
+    computedLines.reduce((sum, l) => sum + l.lineTotal, 0),
   );
   const discount = coupon?.discount ?? 0;
   const total = Math.max(0, subtotal - discount);
+
+  const getLineByItem = useCallback(
+    (item: LocalCartItem): CartLineComputed => {
+      const idx = items.findIndex((i) => isSameItem(i, item));
+      return (
+        computedLines[idx] ?? {
+          unitPrice: item.priceAtAdd,
+          lineTotal: item.priceAtAdd * item.quantity,
+          appliedTierQty: null,
+          appliedTierTotal: null,
+        }
+      );
+    },
+    [items, computedLines],
+  );
 
   return (
     <CartContext.Provider
@@ -230,6 +317,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         total,
         couponLoading,
         couponError,
+        computedLines,
+        getLineByItem,
         addItem,
         updateQuantity,
         removeItem,

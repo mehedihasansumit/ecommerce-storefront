@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
@@ -25,12 +24,23 @@ export function CartItemRow({
   quantity,
   variantSelections,
 }: CartItemRowProps) {
-  const { updateQuantity, removeItem } = useCart();
-  const [qty, setQty] = useState(quantity);
+  const { updateQuantity, removeItem, getLineByItem } = useCart();
+  const qty = quantity;
+  const line = getLineByItem({
+    productId,
+    productName,
+    productSlug,
+    thumbnail,
+    variantSelections,
+    quantity,
+    priceAtAdd,
+  });
+  const unitPrice = line.unitPrice;
+  const lineTotal = line.lineTotal;
+  const hasTier = line.appliedTierQty !== null;
 
   function handleUpdate(newQty: number) {
     const next = Math.max(0, newQty);
-    setQty(next);
     if (next <= 0) {
       removeItem(productId, variantSelections);
     } else {
@@ -124,11 +134,24 @@ export function CartItemRow({
           {/* Line total */}
           <div className="text-right">
             <p className="text-sm font-bold" style={{ color: "var(--color-price)" }}>
-              ৳{(priceAtAdd * qty).toLocaleString()}
+              ৳{lineTotal.toLocaleString()}
             </p>
             {qty > 1 && (
               <p className="text-[11px] text-text-tertiary">
-                ৳{priceAtAdd.toLocaleString()} each
+                ৳{unitPrice.toFixed(2)} each
+              </p>
+            )}
+            {hasTier && (
+              <p
+                className="mt-1 inline-block text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-primary) 12%, transparent)",
+                  color: "var(--color-primary)",
+                }}
+              >
+                Bulk: {line.appliedTierQty} for ৳
+                {line.appliedTierTotal?.toLocaleString()}
               </p>
             )}
           </div>

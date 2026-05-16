@@ -7,6 +7,7 @@ import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { ZodError } from "zod";
+import { getBulkUnitPrice, normalizeTiers } from "@/shared/lib/pricing";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,17 +24,34 @@ export async function POST(request: NextRequest) {
       userId = (payload as JwtCustomerPayload).userId;
     }
 
-    // Enrich cart items with server-side prices and category info
+    // Enrich cart items with server-side prices, applying bulk pricing tiers per
+    // product (aggregated qty across all variant lines).
+    const qtyByProduct = new Map<string, number>();
+    for (const item of validated.items) {
+      qtyByProduct.set(
+        item.productId,
+        (qtyByProduct.get(item.productId) ?? 0) + item.quantity,
+      );
+    }
+    const productCache = new Map<string, Awaited<ReturnType<typeof ProductRepository.findById>>>();
     const enrichedItems = await Promise.all(
       validated.items.map(async (item) => {
-        const product = await ProductRepository.findById(item.productId);
+        let product = productCache.get(item.productId);
+        if (product === undefined) {
+          product = await ProductRepository.findById(item.productId);
+          productCache.set(item.productId, product);
+        }
         if (!product || product.storeId !== storeId) {
           throw new Error(`Product not found: ${item.productId}`);
         }
+        const tiers = normalizeTiers(product.pricingTiers);
+        const effectiveUnit = tiers.length > 0
+          ? getBulkUnitPrice(product.price, qtyByProduct.get(item.productId) ?? item.quantity, tiers)
+          : product.price;
         return {
           productId: item.productId,
           quantity: item.quantity,
-          price: product.price,
+          price: effectiveUnit,
           categoryId: product.categoryId?.toString(),
         };
       })

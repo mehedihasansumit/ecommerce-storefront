@@ -29,6 +29,11 @@ export interface IProductSeo {
   description: LocalizedString;
 }
 
+export interface IPricingTier {
+  quantity: number;
+  totalPrice: number;
+}
+
 export interface IProduct {
   _id: string;
   storeId: string;
@@ -49,6 +54,7 @@ export interface IProduct {
   tags: string[];
   options: IProductOption[];
   variants: IProductVariant[];
+  pricingTiers: IPricingTier[];
   isActive: boolean;
   isFeatured: boolean;
   seo: IProductSeo;

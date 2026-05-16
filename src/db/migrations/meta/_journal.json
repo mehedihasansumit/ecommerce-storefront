@@ -22,6 +22,13 @@
       "when": 1778945871988,
       "tag": "0002_youthful_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778957883778,
+      "tag": "0003_acoustic_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }

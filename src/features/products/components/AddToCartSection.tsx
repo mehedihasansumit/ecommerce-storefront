@@ -3,8 +3,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/shared/context/CartContext";
-import type { IProductOption, IProductVariant } from "../types";
+import type { IPricingTier, IProductOption, IProductVariant } from "../types";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
+import { getBulkUnitPrice, normalizeTiers } from "@/shared/lib/pricing";
 
 interface AddToCartSectionProps {
   productId: string;
@@ -15,6 +16,7 @@ interface AddToCartSectionProps {
   stock: number;
   options: IProductOption[];
   variants: IProductVariant[];
+  pricingTiers?: IPricingTier[];
   addToCartLabel: string;
   outOfStockLabel: string;
   onVariantChange?: (variant: IProductVariant | null) => void;
@@ -32,6 +34,7 @@ export function AddToCartSection({
   stock,
   options,
   variants,
+  pricingTiers,
   addToCartLabel,
   outOfStockLabel,
   onVariantChange,
@@ -88,6 +91,13 @@ export function AddToCartSection({
   function handleAddToCart() {
     if (displayStock <= 0) return;
     const resolvedThumbnail = activeVariant?.images?.[0]?.url || thumbnail;
+    const tiers = normalizeTiers(pricingTiers);
+    // Snapshot the tier-aware unit price using product.price as base (tiers
+    // override variant price overrides for consistency). Cart context still
+    // re-derives across all variant lines for the same product on each render.
+    const priceAtAdd = tiers.length > 0
+      ? getBulkUnitPrice(price, quantity, tiers)
+      : displayPrice;
     addItem({
       productId,
       productName,
@@ -95,7 +105,9 @@ export function AddToCartSection({
       thumbnail: resolvedThumbnail,
       variantSelections: selectedOptions,
       quantity,
-      priceAtAdd: displayPrice,
+      priceAtAdd,
+      pricingTiers: tiers,
+      productBasePrice: price,
     });
     track({
       eventType: "add_to_cart",

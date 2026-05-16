@@ -14,6 +14,31 @@ const productOptionSchema = z.object({
   values: z.array(z.string().min(1)).min(1),
 });
 
+const pricingTierSchema = z.object({
+  quantity: z.number().int().positive(),
+  totalPrice: z.number().positive(),
+});
+
+const pricingTiersSchema = z
+  .array(pricingTierSchema)
+  .max(20)
+  .optional()
+  .default([])
+  .refine(
+    (tiers) => {
+      const qtys = tiers.map((t) => t.quantity);
+      return new Set(qtys).size === qtys.length;
+    },
+    { message: "Tier quantities must be unique" },
+  )
+  .refine(
+    (tiers) => {
+      const sorted = [...tiers].sort((a, b) => a.quantity - b.quantity);
+      return sorted.every((t, i) => i === 0 || t.quantity > sorted[i - 1].quantity);
+    },
+    { message: "Tier quantities must be ascending" },
+  );
+
 const productVariantSchema = z.object({
   _id: z.string().optional(),
   optionValues: z.record(z.string(), z.string()),
@@ -60,6 +85,7 @@ export const createProductSchema = z.object({
   tags: z.array(z.string()).optional(),
   options: z.array(productOptionSchema).optional().default([]),
   variants: z.array(productVariantSchema).optional().default([]),
+  pricingTiers: pricingTiersSchema,
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   seo: z

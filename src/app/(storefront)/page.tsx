@@ -50,7 +50,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div>
+    <div className="pt-4">
       {/* Hero Banner */}
       <HeroBanner
         banners={tenant.heroBanners}

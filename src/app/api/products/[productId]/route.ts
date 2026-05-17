@@ -52,7 +52,6 @@ export async function PUT(
     if (!product) return errorResponse("Product not found", 404);
     return successResponse(product);
   } catch (err) {
-    console.error("Error updating product:", err);
     if (err instanceof ZodError) {
       return errorResponse(err.issues[0]?.message ?? "Invalid input data", 400);
     }

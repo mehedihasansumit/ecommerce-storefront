@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Sparkles } from "lucide-react";
 import type { IPricingTier, IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
 import type { ICategory } from "@/features/categories/types";
 import { PricingTiersInput } from "./PricingTiersInput";
+import { generateBaseSku, generateVariantSku } from "../sku";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
 import {
@@ -217,6 +218,27 @@ export function ProductForm({
     });
   };
 
+  const selectedCategoryName = categories.find((c) => c._id === form.categoryId)?.name;
+
+  const generateBaseSkuHandler = () => {
+    const base = generateBaseSku(localizedName, selectedCategoryName);
+    set("sku", base);
+    setVariants((prev) =>
+      prev.map((v) => ({
+        ...v,
+        sku: v.sku?.trim() ? v.sku : generateVariantSku(base, v.optionValues),
+      })),
+    );
+  };
+
+  const generateAllVariantSkus = () => {
+    const base = form.sku?.trim() || generateBaseSku(localizedName, selectedCategoryName);
+    if (!form.sku?.trim()) set("sku", base);
+    setVariants((prev) =>
+      prev.map((v) => ({ ...v, sku: generateVariantSku(base, v.optionValues) })),
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -389,12 +411,23 @@ export function ProductForm({
       <Card>
         <CardHeader title="Inventory" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="SKU">
-            <Input
-              type="text"
-              value={form.sku}
-              onChange={(e) => set("sku", e.target.value)}
-            />
+          <Field label="SKU" hint="Leave empty to auto-generate on save.">
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={form.sku}
+                onChange={(e) => set("sku", e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={generateBaseSkuHandler}
+                leftIcon={<Sparkles size={14} />}
+              >
+                Generate
+              </Button>
+            </div>
           </Field>
           <Field label="Base Stock">
             <Input
@@ -639,6 +672,17 @@ export function ProductForm({
           <CardHeader
             title="Variant Combinations"
             description="Auto-generated from your options. Set price, stock, and SKU per combination."
+            action={
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={generateAllVariantSkus}
+                leftIcon={<Sparkles size={14} />}
+              >
+                Generate SKUs
+              </Button>
+            }
           />
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">

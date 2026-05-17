@@ -139,6 +139,7 @@ export function ProductImageGallery({ images, thumbnail, productName }: ProductI
             <StoreImage
               src={currentSrc}
               variants={current?.variants}
+              blurDataURL={current?.blurDataURL}
               alt={current?.alt || productName}
               fill
               priority
@@ -192,6 +193,7 @@ export function ProductImageGallery({ images, thumbnail, productName }: ProductI
                 <StoreImage
                   src={img.url}
                   variants={img.variants}
+                  blurDataURL={img.blurDataURL}
                   alt={img.alt || productName}
                   fill
                   sizes="120px"
@@ -301,6 +303,7 @@ export function ProductImageGallery({ images, thumbnail, productName }: ProductI
                 <StoreImage
                   src={currentSrc}
                   variants={current?.variants}
+                  blurDataURL={current?.blurDataURL}
                   alt={current?.alt || productName}
                   fill
                   sizes="85vw"

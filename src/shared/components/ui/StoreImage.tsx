@@ -6,10 +6,11 @@ import type { ImageProps } from "next/image";
 type Variants = Record<string, string>;
 
 interface StoreImageProps
-  extends Omit<ImageProps, "src" | "loader" | "placeholder"> {
+  extends Omit<ImageProps, "src" | "loader" | "placeholder" | "blurDataURL"> {
   src: string;
   variants?: Variants;
   alt: string;
+  blurDataURL?: string;
 }
 
 /**
@@ -23,11 +24,15 @@ export function StoreImage({
   src,
   variants,
   alt,
+  blurDataURL,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
   quality = 85,
   ...rest
 }: StoreImageProps) {
   const hasVariants = variants && Object.keys(variants).length > 0;
+  const placeholderProps = blurDataURL
+    ? ({ placeholder: "blur" as const, blurDataURL })
+    : {};
 
   if (!hasVariants) {
     return (
@@ -37,6 +42,7 @@ export function StoreImage({
         sizes={sizes}
         quality={quality}
         decoding="async"
+        {...placeholderProps}
         {...rest}
       />
     );
@@ -50,6 +56,7 @@ export function StoreImage({
       quality={quality}
       decoding="async"
       loader={({ width }) => pickVariant(src, variants, width)}
+      {...placeholderProps}
       {...rest}
     />
   );

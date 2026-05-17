@@ -22,6 +22,7 @@ export interface IProductImage {
   width?: number;
   height?: number;
   variants?: Record<string, string>;
+  blurDataURL?: string;
 }
 
 export interface IProductSeo {

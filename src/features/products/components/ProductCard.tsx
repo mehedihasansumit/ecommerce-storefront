@@ -40,6 +40,7 @@ export function ProductCard({ product }: { product: IProduct }) {
           <StoreImage
             src={product.thumbnail || product.images[0].url}
             variants={product.images[0]?.variants}
+            blurDataURL={product.images[0]?.blurDataURL}
             alt={product.images[0]?.alt || productName}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

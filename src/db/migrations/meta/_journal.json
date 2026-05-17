@@ -29,6 +29,20 @@
       "when": 1778957883778,
       "tag": "0003_acoustic_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779032910062,
+      "tag": "0004_nice_princess_powerful",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779034145556,
+      "tag": "0005_stale_master_mold",
+      "breakpoints": true
     }
   ]
 }

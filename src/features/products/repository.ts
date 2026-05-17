@@ -27,6 +27,7 @@ function toIImage(row: ProductImage): IProductImage {
     width: row.width ?? undefined,
     height: row.height ?? undefined,
     variants: (row.variants as Record<string, string>) ?? undefined,
+    blurDataURL: row.blurDataUrl ?? undefined,
   };
 }
 
@@ -280,6 +281,7 @@ export const ProductRepository = {
               width: img.width ?? null,
               height: img.height ?? null,
               variants: img.variants ?? null,
+              blurDataUrl: img.blurDataURL ?? null,
             });
           });
         });
@@ -295,6 +297,7 @@ export const ProductRepository = {
         width: img.width ?? null,
         height: img.height ?? null,
         variants: img.variants ?? null,
+        blurDataUrl: img.blurDataURL ?? null,
       }));
       if (imgs.length > 0) await tx.insert(productImages).values(imgs);
 
@@ -342,6 +345,7 @@ export const ProductRepository = {
                 width: img.width ?? null,
                 height: img.height ?? null,
                 variants: img.variants ?? null,
+                blurDataUrl: img.blurDataURL ?? null,
               });
             });
           });
@@ -363,6 +367,7 @@ export const ProductRepository = {
               width: img.width ?? null,
               height: img.height ?? null,
               variants: img.variants ?? null,
+              blurDataUrl: img.blurDataURL ?? null,
             })),
           );
         }

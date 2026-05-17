@@ -7,6 +7,7 @@ const productImageSchema = z.object({
   width: z.number().int().positive().optional(),
   height: z.number().int().positive().optional(),
   variants: z.record(z.string(), z.string()).optional(),
+  blurDataURL: z.string().optional(),
 });
 
 const productOptionSchema = z.object({

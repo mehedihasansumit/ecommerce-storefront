@@ -14,6 +14,7 @@ export interface UploadedImage {
   width?: number;
   height?: number;
   variants?: Record<string, string>;
+  blurDataURL?: string;
 }
 
 interface ImageInputProps {
@@ -65,6 +66,7 @@ export function ImageInput({
         width: data.width,
         height: data.height,
         variants: data.variants,
+        blurDataURL: data.blurDataURL,
       });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");

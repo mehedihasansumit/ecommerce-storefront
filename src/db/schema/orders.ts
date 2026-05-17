@@ -77,7 +77,7 @@ export const orderItems = pgTable(
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     variantId: uuid("variant_id").references(() => productVariants.id, {
-      onDelete: "restrict",
+      onDelete: "set null",
     }),
     productName: text("product_name").notNull(),
     productSlug: text("product_slug").notNull(),

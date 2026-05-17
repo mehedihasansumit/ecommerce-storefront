@@ -18,7 +18,7 @@ import {
 const ALLOWED_FOLDERS = ["products", "categories", "stores", "banners"] as const;
 type Folder = (typeof ALLOWED_FOLDERS)[number];
 
-const VARIANT_WIDTHS = [400, 800, 1200] as const;
+const VARIANT_WIDTHS = [400, 800, 1200, 2000] as const;
 
 const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 5 * 1024 * 1024;
 
@@ -57,18 +57,30 @@ export async function POST(request: NextRequest) {
     const originalKey = generateFileKey(storeId, folder, file.name);
     const originalUrl = await uploadFile(originalKey, buffer, file.type);
 
-    const variants: Record<string, string> = {};
-    for (const w of VARIANT_WIDTHS) {
-      if (w >= metadata.width) continue;
-      const vKey = variantKey(originalKey, `w${w}`);
-      const vBuffer = await sharp(buffer)
+    const [variantsResult, blurBuffer] = await Promise.all([
+      (async () => {
+        const variants: Record<string, string> = {};
+        for (const w of VARIANT_WIDTHS) {
+          if (w >= metadata.width!) continue;
+          const vKey = variantKey(originalKey, `w${w}`);
+          const vBuffer = await sharp(buffer)
+            .rotate()
+            .resize({ width: w, withoutEnlargement: true })
+            .webp({ quality: 82 })
+            .toBuffer();
+          await uploadFile(vKey, vBuffer, "image/webp");
+          variants[`w${w}`] = publicUrlFor(vKey);
+        }
+        return variants;
+      })(),
+      sharp(buffer)
         .rotate()
-        .resize({ width: w, withoutEnlargement: true })
-        .webp({ quality: 82 })
-        .toBuffer();
-      await uploadFile(vKey, vBuffer, "image/webp");
-      variants[`w${w}`] = publicUrlFor(vKey);
-    }
+        .resize({ width: 24, withoutEnlargement: true })
+        .webp({ quality: 50 })
+        .toBuffer(),
+    ]);
+
+    const blurDataURL = `data:image/webp;base64,${blurBuffer.toString("base64")}`;
 
     return NextResponse.json(
       {
@@ -76,7 +88,8 @@ export async function POST(request: NextRequest) {
         key: originalKey,
         width: metadata.width,
         height: metadata.height,
-        variants,
+        variants: variantsResult,
+        blurDataURL,
       },
       { status: 201 }
     );

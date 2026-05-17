@@ -14,6 +14,7 @@ export interface GalleryImage {
   width?: number;
   height?: number;
   variants?: Record<string, string>;
+  blurDataURL?: string;
 }
 
 interface ImageGalleryInputProps {
@@ -54,24 +55,28 @@ export function ImageGalleryInput({
     try {
       for (const file of files) {
         if (typeof max === "number" && value.length + added.length >= max) break;
-        const body = new FormData();
-        body.append("file", file);
-        body.append("storeId", storeId);
-        body.append("folder", folder);
-        const res = await fetch("/api/upload", { method: "POST", body });
-        const data = await res.json();
-        if (!res.ok) {
-          toast.error(data.error || `Failed: ${file.name}`);
-          continue;
+        try {
+          const body = new FormData();
+          body.append("file", file);
+          body.append("storeId", storeId);
+          body.append("folder", folder);
+          const res = await fetch("/api/upload", { method: "POST", body });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data?.error || `Failed: ${file.name}`);
+          }
+          added.push({
+            url: data.url,
+            alt: defaultAlt,
+            key: data.key,
+            width: data.width,
+            height: data.height,
+            variants: data.variants,
+            blurDataURL: data.blurDataURL,
+          });
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : `Failed: ${file.name}`);
         }
-        added.push({
-          url: data.url,
-          alt: defaultAlt,
-          key: data.key,
-          width: data.width,
-          height: data.height,
-          variants: data.variants,
-        });
       }
       if (added.length) onChange([...value, ...added]);
     } finally {

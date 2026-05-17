@@ -106,6 +106,7 @@ export const productImages = pgTable(
     width: integer("width"),
     height: integer("height"),
     variants: jsonb("variants"),
+    blurDataUrl: text("blur_data_url"),
     sortOrder: integer("sort_order").notNull().default(0),
     ...timestamps,
   },

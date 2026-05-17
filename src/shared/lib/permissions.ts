@@ -25,6 +25,10 @@ export const PERMISSIONS = {
   POINTS_MANAGE: "points.manage",
   REFUNDS_VIEW: "refunds.view",
   REFUNDS_MANAGE: "refunds.manage",
+  CAMPAIGNS_VIEW: "campaigns.view",
+  CAMPAIGNS_CREATE: "campaigns.create",
+  CAMPAIGNS_EDIT: "campaigns.edit",
+  CAMPAIGNS_DELETE: "campaigns.delete",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -56,6 +60,10 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "points.manage": "Manage Loyalty Points Config",
   "refunds.view": "View Refund Requests",
   "refunds.manage": "Approve / Reject Refunds",
+  "campaigns.view": "View Campaigns",
+  "campaigns.create": "Create Campaigns",
+  "campaigns.edit": "Edit Campaigns",
+  "campaigns.delete": "Delete Campaigns",
 };
 
 export const PERMISSION_GROUPS = [
@@ -123,6 +131,15 @@ export const PERMISSION_GROUPS = [
   {
     label: "Refunds",
     permissions: [PERMISSIONS.REFUNDS_VIEW, PERMISSIONS.REFUNDS_MANAGE],
+  },
+  {
+    label: "Campaigns",
+    permissions: [
+      PERMISSIONS.CAMPAIGNS_VIEW,
+      PERMISSIONS.CAMPAIGNS_CREATE,
+      PERMISSIONS.CAMPAIGNS_EDIT,
+      PERMISSIONS.CAMPAIGNS_DELETE,
+    ],
   },
 ] as const;
 

@@ -11,3 +11,4 @@ export * from "./notifications";
 export * from "./analytics";
 export * from "./points";
 export * from "./subscribers";
+export * from "./campaigns";

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Loader2, X, Tag, ArrowRight, ArrowLeft, Truck, Lock } from "lucide-react";
+import { ShoppingBag, Loader2, X, Tag, ArrowRight, ArrowLeft, Truck, Lock, Gift, Sparkles } from "lucide-react";
 import { useCart } from "@/shared/context/CartContext";
 import { CartItemRow } from "@/features/cart/components/CartItemRow";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useTenant } from "@/shared/hooks/useTenant";
+import { t as tLocalized } from "@/shared/lib/i18n";
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -14,7 +15,12 @@ export default function CartPage() {
     items,
     subtotal,
     coupon,
-    discount,
+    couponDiscount,
+    campaignDiscount,
+    appliedCampaigns,
+    campaignFreeItems,
+    campaignFreeShipping,
+    campaignSuggestions,
     total,
     couponLoading,
     couponError,
@@ -22,6 +28,7 @@ export default function CartPage() {
     removeCoupon,
   } = useCart();
   const tenant = useTenant();
+  const locale = useLocale();
 
   useEffect(() => {
     document.title = `Cart | ${tenant?.name ?? "Store"}`;
@@ -147,18 +154,71 @@ export default function CartPage() {
                 </span>
                 <span className="font-medium shrink-0 text-[var(--color-text)]">৳{subtotal.toLocaleString()}</span>
               </div>
-              {discount > 0 && (
+              {couponDiscount > 0 && (
                 <div className="flex items-center justify-between gap-3" style={{ color: "#16a34a" }}>
                   <span className="flex items-center gap-1.5">
                     <Tag size={13} />
                     Coupon ({coupon?.code})
                   </span>
-                  <span className="font-medium shrink-0">-৳{discount.toLocaleString()}</span>
+                  <span className="font-medium shrink-0">-৳{couponDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {appliedCampaigns.map((c) => (
+                <div
+                  key={c.campaignId}
+                  className="flex items-start justify-between gap-3"
+                  style={{ color: "#16a34a" }}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles size={13} />
+                    {tLocalized(c.campaignName, locale)}
+                  </span>
+                  {c.discountAmount > 0 && (
+                    <span className="font-medium shrink-0">
+                      -৳{c.discountAmount.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              ))}
+              {campaignFreeItems.length > 0 && (
+                <div className="rounded-lg border border-border-subtle p-2.5 space-y-1.5">
+                  {campaignFreeItems.map((f, i) => (
+                    <div
+                      key={`${f.productId}-${i}`}
+                      className="flex items-center justify-between gap-2 text-xs"
+                    >
+                      <span className="flex items-center gap-1.5 text-text-secondary">
+                        <Gift size={12} style={{ color: "var(--color-primary)" }} />
+                        Free × {f.qty}
+                      </span>
+                      <span style={{ color: "#16a34a" }} className="font-medium">
+                        FREE
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {campaignSuggestions.length > 0 && (
+                <div
+                  className="rounded-lg p-2.5 text-xs space-y-1"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
+                    color: "var(--color-text)",
+                  }}
+                >
+                  {campaignSuggestions.map((s) => (
+                    <div key={s.campaignId} className="flex items-start gap-1.5">
+                      <Sparkles size={12} className="mt-0.5 shrink-0" style={{ color: "var(--color-primary)" }} />
+                      <span>{s.message}</span>
+                    </div>
+                  ))}
                 </div>
               )}
               <div className="flex items-center justify-between gap-3 text-text-secondary">
                 <span>{t("shipping")}</span>
-                <span className="shrink-0 font-semibold" style={{ color: "#16a34a" }}>Free</span>
+                <span className="shrink-0 font-semibold" style={{ color: "#16a34a" }}>
+                  {campaignFreeShipping ? "Free (campaign)" : "Free"}
+                </span>
               </div>
             </div>
 

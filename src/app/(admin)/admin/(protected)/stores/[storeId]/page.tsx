@@ -18,6 +18,7 @@ import {
   Settings2,
   Type,
   RotateCcw,
+  Gift,
 } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -133,6 +134,7 @@ export default async function StoreDetailPage({
     PERMISSIONS.REVIEWS_MODERATE,
     PERMISSIONS.POINTS_VIEW,
     PERMISSIONS.POINTS_MANAGE,
+    PERMISSIONS.CAMPAIGNS_VIEW,
   ].some((p) => hasPermission(adminUser, p));
   if (!hasAnyAccess) redirect("/admin");
 
@@ -161,6 +163,7 @@ export default async function StoreDetailPage({
   const canViewPoints = hasPermission(adminUser, PERMISSIONS.POINTS_VIEW);
   const canManagePoints = hasPermission(adminUser, PERMISSIONS.POINTS_MANAGE);
   const canViewRefunds = hasPermission(adminUser, PERMISSIONS.REFUNDS_VIEW);
+  const canViewCampaigns = hasPermission(adminUser, PERMISSIONS.CAMPAIGNS_VIEW);
 
   const modules = [
     canViewProducts && {
@@ -204,6 +207,13 @@ export default async function StoreDetailPage({
       label: "Coupons",
       description: "Discounts & promo codes",
       accent: "rose" as ModuleAccent,
+    },
+    canViewCampaigns && {
+      href: `/admin/stores/${storeId}/campaigns`,
+      icon: Gift,
+      label: "Campaigns",
+      description: "BOGO, bundles & free gifts",
+      accent: "violet" as ModuleAccent,
     },
     canViewAnnouncements && {
       href: `/admin/stores/${storeId}/announcements`,

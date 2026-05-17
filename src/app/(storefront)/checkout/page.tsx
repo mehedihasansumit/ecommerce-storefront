@@ -15,8 +15,11 @@ import {
   Tag,
   Lock,
   Truck,
+  Gift,
+  Sparkles,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { t as tLocalized } from "@/shared/lib/i18n";
 import { AddressSelector } from "@/features/auth/components/AddressSelector";
 import type { IAddress } from "@/features/auth/types";
 import { useTenant } from "@/shared/hooks/useTenant";
@@ -52,8 +55,20 @@ const inputReadOnly = `${inputBase} border-border-subtle bg-surface text-text-se
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const router = useRouter();
-  const { items, subtotal, coupon, discount, total, clearCart } = useCart();
+  const {
+    items,
+    subtotal,
+    coupon,
+    couponDiscount,
+    campaignDiscount,
+    appliedCampaigns,
+    campaignFreeItems,
+    campaignFreeShipping,
+    total,
+    clearCart,
+  } = useCart();
   const tenant = useTenant();
+  const locale = useLocale();
 
   useEffect(() => {
     document.title = `Checkout | ${tenant?.name ?? "Store"}`;
@@ -457,19 +472,49 @@ export default function CheckoutPage() {
                   <span>{t("subtotal")}</span>
                   <span className="shrink-0 font-medium">৳{subtotal.toLocaleString()}</span>
                 </div>
-                {discount > 0 && (
+                {couponDiscount > 0 && (
                   <div className="flex items-center justify-between gap-3 text-green-600 dark:text-green-400">
                     <span className="flex items-center gap-1.5 truncate">
                       <Tag size={12} /> {coupon?.code}
                     </span>
-                    <span className="shrink-0 font-medium">-৳{discount.toLocaleString()}</span>
+                    <span className="shrink-0 font-medium">-৳{couponDiscount.toLocaleString()}</span>
                   </div>
                 )}
+                {appliedCampaigns.map((c) => (
+                  <div
+                    key={c.campaignId}
+                    className="flex items-center justify-between gap-3 text-green-600 dark:text-green-400"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Sparkles size={12} /> {tLocalized(c.campaignName, locale)}
+                    </span>
+                    {c.discountAmount > 0 && (
+                      <span className="shrink-0 font-medium">
+                        -৳{c.discountAmount.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                ))}
+                {campaignFreeItems.map((f, i) => (
+                  <div
+                    key={`${f.productId}-${i}`}
+                    className="flex items-center justify-between gap-3 text-text-secondary"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Gift size={12} style={{ color: "var(--color-primary)" }} /> Free gift × {f.qty}
+                    </span>
+                    <span className="shrink-0 font-medium text-green-600 dark:text-green-400">
+                      FREE
+                    </span>
+                  </div>
+                ))}
                 <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span className="flex items-center gap-1.5">
                     <Truck size={13} />{t("shipping")}
                   </span>
-                  <span className="shrink-0 font-medium text-green-600 dark:text-green-400">Free</span>
+                  <span className="shrink-0 font-medium text-green-600 dark:text-green-400">
+                    {campaignFreeShipping ? "Free (campaign)" : "Free"}
+                  </span>
                 </div>
 
                 <div className="pt-3 mt-1 border-t border-border-subtle flex items-center justify-between gap-3">

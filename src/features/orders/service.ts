@@ -1,6 +1,7 @@
 import { OrderRepository } from "./repository";
 import { ProductRepository } from "@/features/products/repository";
 import { CouponService } from "@/features/coupons/service";
+import { CampaignService } from "@/features/campaigns/service";
 import { NotificationService } from "@/features/notifications/service";
 import { StoreService } from "@/features/stores/service";
 import type { IOrder, IOrderItem, RefundRequestStatus } from "./types";
@@ -155,30 +156,59 @@ export const OrderService = {
       couponId = validation.couponId;
     }
 
+    // Evaluate campaigns (server-authoritative). Reserve usage slots atomically
+    // so concurrent orders can't exceed usageLimit.
+    const campaignEval = await CampaignService.evaluateCart(
+      storeId,
+      userId,
+      productDetails.map((d) => ({
+        productId: d.productId,
+        variantId: d.variantId,
+        categoryId: d.categoryId,
+        quantity: d.quantity,
+        unitPrice: d.price,
+      })),
+    );
+
+    const campaignIdsToReserve = campaignEval.appliedCampaigns.map((c) => c.campaignId);
+    const { reserved, failed } = await CampaignService.reserveUsageSlots(campaignIdsToReserve);
+    if (failed.length > 0) {
+      await CampaignService.releaseUsageSlots(reserved);
+      throw new Error("A campaign reached its usage limit. Please refresh and try again.");
+    }
+    const campaignDiscount = campaignEval.discountTotal;
+    discount = round2(discount + campaignDiscount);
+
     const total = Math.max(0, subtotal - discount);
     const orderNumber = generateOrderNumber();
 
-    const order = await OrderRepository.create({
-      storeId,
-      orderNumber,
-      userId: userId || null,
-      guestPhone: input.shippingAddress.phone,
-      guestEmail: input.guestEmail || undefined,
-      items: orderItems,
-      subtotal,
-      shippingCost: 0,
-      tax: 0,
-      discount,
-      couponCode,
-      total,
-      shippingAddress: input.shippingAddress,
-      paymentMethod: input.paymentMethod,
-      paymentStatus: "pending",
-      paymentIntentId: "",
-      status: "pending",
-      notes: input.notes ?? "",
-      clientIp: clientIp || "",
-    });
+    let order: IOrder;
+    try {
+      order = await OrderRepository.create({
+        storeId,
+        orderNumber,
+        userId: userId || null,
+        guestPhone: input.shippingAddress.phone,
+        guestEmail: input.guestEmail || undefined,
+        items: orderItems,
+        subtotal,
+        shippingCost: 0,
+        tax: 0,
+        discount,
+        couponCode,
+        total,
+        shippingAddress: input.shippingAddress,
+        paymentMethod: input.paymentMethod,
+        paymentStatus: "pending",
+        paymentIntentId: "",
+        status: "pending",
+        notes: input.notes ?? "",
+        clientIp: clientIp || "",
+      });
+    } catch (err) {
+      await CampaignService.releaseUsageSlots(reserved);
+      throw err;
+    }
 
     // Decrement stock for each ordered item
     for (const detail of productDetails) {
@@ -192,6 +222,22 @@ export const OrderService = {
     // Record coupon usage after order is created
     if (couponId) {
       await CouponService.apply(couponId, userId || "", order._id, storeId);
+    }
+
+    // Record campaign redemptions (usage slot was reserved above)
+    for (const applied of campaignEval.appliedCampaigns) {
+      try {
+        await CampaignService.recordRedemption(
+          applied.campaignId,
+          storeId,
+          order._id,
+          userId || null,
+          applied.discountAmount,
+          applied.rewardsApplied,
+        );
+      } catch {
+        // Redemption record is observational; reservation already committed
+      }
     }
 
     // Send order confirmation notification

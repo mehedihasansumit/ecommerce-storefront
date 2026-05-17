@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useCallback,
   type ReactNode,
@@ -17,6 +18,12 @@ import {
   round2,
   type PricingTier,
 } from "@/shared/lib/pricing";
+import type {
+  AppliedCampaign,
+  AppliedFreeItem,
+  CampaignEvaluationResult,
+  NearMissSuggestion,
+} from "@/features/campaigns/types";
 
 export interface LocalCartItem {
   productId: string;
@@ -54,6 +61,13 @@ interface CartContextValue {
   subtotal: number;
   coupon: CouponDetails | null;
   discount: number;
+  couponDiscount: number;
+  campaignDiscount: number;
+  appliedCampaigns: AppliedCampaign[];
+  campaignFreeItems: AppliedFreeItem[];
+  campaignFreeShipping: boolean;
+  campaignSuggestions: NearMissSuggestion[];
+  campaignLoading: boolean;
   total: number;
   couponLoading: boolean;
   couponError: string;
@@ -95,6 +109,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [coupon, setCoupon] = useState<CouponDetails | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
+  const [appliedCampaigns, setAppliedCampaigns] = useState<AppliedCampaign[]>([]);
+  const [campaignFreeItems, setCampaignFreeItems] = useState<AppliedFreeItem[]>([]);
+  const [campaignDiscount, setCampaignDiscount] = useState(0);
+  const [campaignFreeShipping, setCampaignFreeShipping] = useState(false);
+  const [campaignSuggestions, setCampaignSuggestions] = useState<NearMissSuggestion[]>([]);
+  const [campaignLoading, setCampaignLoading] = useState(false);
+  const evalAbortRef = useRef<AbortController | null>(null);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -173,6 +194,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
     setCoupon(null);
     setCouponError("");
+    setAppliedCampaigns([]);
+    setCampaignFreeItems([]);
+    setCampaignDiscount(0);
+    setCampaignFreeShipping(false);
+    setCampaignSuggestions([]);
     localStorage.removeItem(CART_KEY);
   }, []);
 
@@ -288,8 +314,88 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const subtotal = round2(
     computedLines.reduce((sum, l) => sum + l.lineTotal, 0),
   );
-  const discount = coupon?.discount ?? 0;
-  const total = Math.max(0, subtotal - discount);
+  const couponDiscount = coupon?.discount ?? 0;
+  const discount = round2(couponDiscount + campaignDiscount);
+  const total = Math.max(0, round2(subtotal - discount));
+
+  // Debounced campaign evaluation. Re-evaluates whenever cart items change.
+  // Server is authoritative at order placement; this provides a live preview.
+  const itemsSignature = useMemo(
+    () =>
+      JSON.stringify(
+        items
+          .map((i) => [
+            i.productId,
+            i.quantity,
+            JSON.stringify(i.variantSelections ?? {}),
+          ])
+          .sort((a, b) => (a[0] as string).localeCompare(b[0] as string)),
+      ),
+    [items],
+  );
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (items.length === 0) {
+      setAppliedCampaigns([]);
+      setCampaignFreeItems([]);
+      setCampaignDiscount(0);
+      setCampaignFreeShipping(false);
+      setCampaignSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      evalAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      evalAbortRef.current = ctrl;
+      setCampaignLoading(true);
+      try {
+        const res = await fetch("/api/campaigns/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((i) => ({
+              productId: i.productId,
+              quantity: i.quantity,
+              ...(i.variantSelections && Object.keys(i.variantSelections).length > 0
+                ? { variantSelections: i.variantSelections }
+                : {}),
+            })),
+            shippingCost: 0,
+          }),
+          signal: ctrl.signal,
+        });
+        if (!res.ok) {
+          setAppliedCampaigns([]);
+          setCampaignFreeItems([]);
+          setCampaignDiscount(0);
+          setCampaignFreeShipping(false);
+          setCampaignSuggestions([]);
+          return;
+        }
+        const json = await res.json();
+        const data: CampaignEvaluationResult = json.data ?? json;
+        setAppliedCampaigns(data.appliedCampaigns ?? []);
+        setCampaignFreeItems(data.freeItems ?? []);
+        setCampaignDiscount(round2(data.discountTotal ?? 0));
+        setCampaignFreeShipping(!!data.freeShipping);
+        setCampaignSuggestions(data.suggestions ?? []);
+      } catch (err) {
+        if ((err as { name?: string })?.name === "AbortError") return;
+        setAppliedCampaigns([]);
+        setCampaignFreeItems([]);
+        setCampaignDiscount(0);
+        setCampaignFreeShipping(false);
+        setCampaignSuggestions([]);
+      } finally {
+        if (evalAbortRef.current === ctrl) {
+          setCampaignLoading(false);
+        }
+      }
+    }, 350);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemsSignature, hydrated]);
 
   const getLineByItem = useCallback(
     (item: LocalCartItem): CartLineComputed => {
@@ -314,6 +420,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         subtotal,
         coupon,
         discount,
+        couponDiscount,
+        campaignDiscount,
+        appliedCampaigns,
+        campaignFreeItems,
+        campaignFreeShipping,
+        campaignSuggestions,
+        campaignLoading,
         total,
         couponLoading,
         couponError,

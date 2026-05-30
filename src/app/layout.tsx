@@ -41,6 +41,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const favicon = tenant.favicon || tenant.logo;
   const faviconDark = tenant.faviconDark;
+  const mimeFor = (url: string): string => {
+    const clean = url.split("?")[0].toLowerCase();
+    if (clean.endsWith(".svg")) return "image/svg+xml";
+    if (clean.endsWith(".png")) return "image/png";
+    if (clean.endsWith(".jpg") || clean.endsWith(".jpeg")) return "image/jpeg";
+    if (clean.endsWith(".webp")) return "image/webp";
+    if (clean.endsWith(".ico")) return "image/x-icon";
+    return "image/png";
+  };
   return {
     title: localizedValue(tenant.seo.title, locale, tenant.name),
     description: localizedValue(
@@ -51,8 +60,8 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: faviconDark
         ? [
-            { url: favicon || "/favicon.ico", media: "(prefers-color-scheme: light)", type: "image/svg+xml" },
-            { url: faviconDark, media: "(prefers-color-scheme: dark)", type: "image/svg+xml" },
+            { url: favicon || "/favicon.ico", media: "(prefers-color-scheme: light)", type: mimeFor(favicon || "/favicon.ico") },
+            { url: faviconDark, media: "(prefers-color-scheme: dark)", type: mimeFor(faviconDark) },
           ]
         : favicon || "/favicon.ico",
       shortcut: favicon || "/favicon.ico",

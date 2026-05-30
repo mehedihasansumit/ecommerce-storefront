@@ -99,23 +99,33 @@ export function buildBreadcrumbJsonLd(
 
 export function buildOrganizationJsonLd(store: IStore) {
   const domain = store.domains?.[0] || "localhost:3000";
+  const baseUrl = `https://${domain}`;
+  const logo = store.logo
+    ? store.logo.startsWith("http")
+      ? store.logo
+      : `${baseUrl}${store.logo.startsWith("/") ? "" : "/"}${store.logo}`
+    : undefined;
+
+  const sameAs = [
+    store.socialLinks?.facebook,
+    store.socialLinks?.instagram,
+    store.socialLinks?.twitter,
+  ].filter(Boolean);
+
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: store.name,
-    url: `https://${domain}`,
-    logo: store.logo,
-    contactPoint: store.contact.email
-      ? {
-          "@type": "ContactPoint",
-          email: store.contact.email,
-          telephone: store.contact.phone,
-        }
-      : undefined,
-    sameAs: [
-      store.socialLinks.facebook,
-      store.socialLinks.instagram,
-      store.socialLinks.twitter,
-    ].filter(Boolean),
+    url: baseUrl,
+    ...(logo && { logo }),
+    ...(store.contact?.email && {
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: store.contact.email,
+        ...(store.contact.phone && { telephone: store.contact.phone }),
+      },
+    }),
+    ...(sameAs.length && { sameAs }),
   };
 }

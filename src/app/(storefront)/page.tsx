@@ -3,7 +3,7 @@ import { ProductService } from "@/features/products/service";
 import { CategoryService } from "@/features/categories/service";
 import { HeroBanner } from "@/shared/components/storefront/HeroBanner";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
-import { createStoreMetadata } from "@/shared/lib/seo";
+import { createStoreMetadata, buildOrganizationJsonLd } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -49,8 +49,14 @@ export default async function HomePage() {
     CategoryService.getByStore(tenant._id),
   ]);
 
+  const orgJsonLd = buildOrganizationJsonLd(tenant);
+
   return (
     <div className="pt-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
       {/* Hero Banner */}
       <HeroBanner
         banners={tenant.heroBanners}

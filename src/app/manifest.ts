@@ -9,6 +9,9 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const themeColor = tenant?.theme?.primaryColor ?? "#3B82F6";
   const bgColor = tenant?.theme?.backgroundColor ?? "#FFFFFF";
 
+  const largeIcon = tenant?.logo || tenant?.favicon || "/icons/icon-512.png";
+  const smallIcon = tenant?.favicon || tenant?.logo || "/icons/icon-192.png";
+
   return {
     id: "/",
     name,
@@ -23,25 +26,25 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     categories: ["shopping"],
     icons: [
       {
-        src: "/icons/icon-192.png",
+        src: smallIcon,
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-192.png",
+        src: smallIcon,
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/icons/icon-512.png",
+        src: largeIcon,
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: largeIcon,
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

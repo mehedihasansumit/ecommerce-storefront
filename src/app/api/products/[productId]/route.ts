@@ -55,6 +55,9 @@ export async function PUT(
     if (err instanceof ZodError) {
       return errorResponse(err.issues[0]?.message ?? "Invalid input data", 400);
     }
+    if (err && typeof err === "object" && "code" in err && err.code === "23505") {
+      return errorResponse("Duplicate SKU. Each variant must have a unique SKU.", 409);
+    }
     return errorResponse("Internal server error", 500);
   }
 }

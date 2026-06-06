@@ -6,7 +6,7 @@ import { X, Plus, Trash2, Sparkles } from "lucide-react";
 import type { IPricingTier, IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
 import type { ICategory } from "@/features/categories/types";
 import { PricingTiersInput } from "./PricingTiersInput";
-import { generateBaseSku, generateVariantSku } from "../sku";
+import { generateBaseSku, generateVariantSku, dedupeVariantSkus } from "../sku";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
 import {
@@ -235,10 +235,12 @@ export function ProductForm({
     const base = generateBaseSku(localizedName, selectedCategoryName);
     set("sku", base);
     setVariants((prev) =>
-      prev.map((v) => ({
-        ...v,
-        sku: v.sku?.trim() ? v.sku : generateVariantSku(base, v.optionValues),
-      })),
+      dedupeVariantSkus(
+        prev.map((v) => ({
+          ...v,
+          sku: v.sku?.trim() ? v.sku : generateVariantSku(base, v.optionValues),
+        })),
+      ),
     );
   };
 
@@ -246,7 +248,9 @@ export function ProductForm({
     const base = form.sku?.trim() || generateBaseSku(localizedName, selectedCategoryName);
     if (!form.sku?.trim()) set("sku", base);
     setVariants((prev) =>
-      prev.map((v) => ({ ...v, sku: generateVariantSku(base, v.optionValues) })),
+      dedupeVariantSkus(
+        prev.map((v) => ({ ...v, sku: generateVariantSku(base, v.optionValues) })),
+      ),
     );
   };
 

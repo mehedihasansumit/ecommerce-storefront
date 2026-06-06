@@ -1,6 +1,6 @@
 import { ProductRepository } from "./repository";
 import { CategoryRepository } from "@/features/categories/repository";
-import { generateBaseSku, generateVariantSku } from "./sku";
+import { generateBaseSku, generateVariantSku, dedupeVariantSkus } from "./sku";
 import type { IProduct } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
@@ -61,10 +61,12 @@ export const ProductService = {
       ? (await CategoryRepository.findById(data.categoryId))?.name
       : undefined;
     const baseSku = (data.sku && data.sku.trim()) || generateBaseSku(data.name, categoryName);
-    const variants = (data.variants ?? []).map((v) => ({
-      ...v,
-      sku: (v.sku && v.sku.trim()) || generateVariantSku(baseSku, v.optionValues),
-    }));
+    const variants = dedupeVariantSkus(
+      (data.variants ?? []).map((v) => ({
+        ...v,
+        sku: (v.sku && v.sku.trim()) || generateVariantSku(baseSku, v.optionValues),
+      })),
+    );
     return ProductRepository.create({
       ...data,
       sku: baseSku,
@@ -83,11 +85,16 @@ export const ProductService = {
         data.slug = await uniqueSlug(existing.storeId, data.name, id);
       }
     }
-    if (data.variants && data.sku) {
-      data.variants = data.variants.map((v) => ({
-        ...v,
-        sku: (v.sku && v.sku.trim()) || generateVariantSku(data.sku!, v.optionValues),
-      }));
+    if (data.variants) {
+      const base = data.sku?.trim();
+      data.variants = dedupeVariantSkus(
+        data.variants.map((v) => ({
+          ...v,
+          sku:
+            (v.sku && v.sku.trim()) ||
+            (base ? generateVariantSku(base, v.optionValues) : ""),
+        })),
+      );
     }
     return ProductRepository.update(id, data);
   },

@@ -17,9 +17,12 @@ import {
   Globe,
   ChevronDown,
   ChevronUp,
+  ArrowUp,
+  ArrowDown,
   MessageCircle,
   Sparkles,
   RotateCcw,
+  Info,
 } from "lucide-react";
 import type { IStore, HeroLayoutStyle, IStoreTheme } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
@@ -431,6 +434,19 @@ export default function StoreEditForm({
   const handleRemoveBanner = (index: number) => {
     setHeroBanners((prev) => prev.filter((_, i) => i !== index));
     setExpandedBanner(null);
+  };
+
+  const handleMoveBanner = (index: number, direction: "up" | "down") => {
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (target < 0 || target >= heroBanners.length) return;
+    setHeroBanners((prev) => {
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+    setExpandedBanner((cur) =>
+      cur === index ? target : cur === target ? index : cur
+    );
   };
 
   const handleBannerField = (
@@ -1241,6 +1257,18 @@ export default function StoreEditForm({
               </button>
             </div>
 
+            {/* Recommended dimensions hint */}
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-blue-50 border border-blue-100 text-xs text-blue-800">
+              <Info size={14} className="mt-0.5 shrink-0 text-blue-500" />
+              <p>
+                Recommended banner size:{" "}
+                <span className="font-semibold">1920 × 1080 px</span> (16:9).
+                Use a high-quality JPG or WebP under 300&nbsp;KB. Keep important
+                content (text, logo) in the center &mdash; edges may be cropped
+                on mobile.
+              </p>
+            </div>
+
             {/* Language tabs */}
             {multiLang && (
               <div className="flex gap-1 border-b border-admin-border">
@@ -1290,22 +1318,46 @@ export default function StoreEditForm({
                           setExpandedBanner(isExpanded ? null : index)
                         }
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-gray-200 flex items-center justify-center text-xs font-bold text-admin-text-secondary">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                          <div className="w-7 h-7 shrink-0 rounded-lg bg-gray-200 flex items-center justify-center text-xs font-bold text-admin-text-secondary">
                             {index + 1}
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-admin-text-secondary">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-admin-text-secondary truncate">
                               {hasTitle || `Banner ${index + 1}`}
                             </p>
                             {banner.image && (
-                              <p className="text-xs text-admin-text-subtle truncate max-w-xs">
+                              <p className="text-xs text-admin-text-subtle truncate">
                                 {banner.image}
                               </p>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0 pl-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveBanner(index, "up");
+                            }}
+                            disabled={loading || index === 0}
+                            aria-label="Move banner up"
+                            className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <ArrowUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveBanner(index, "down");
+                            }}
+                            disabled={loading || index === heroBanners.length - 1}
+                            aria-label="Move banner down"
+                            className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <ArrowDown size={14} />
+                          </button>
                           <button
                             type="button"
                             onClick={(e) => {

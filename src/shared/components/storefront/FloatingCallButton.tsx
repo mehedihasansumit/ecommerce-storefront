@@ -48,11 +48,11 @@ export function FloatingCallButton() {
       {open && (
         <>
           <div
-            className="fixed inset-0 z-[39]"
+            className="fixed inset-0 z-39"
             onClick={() => setOpen(false)}
           />
           <div
-            className="fixed right-4 z-40 rounded-2xl shadow-xl overflow-hidden animate-fade-in-up md:bottom-20 bottom-[8.5rem]"
+            className="fixed right-4 z-40 rounded-2xl shadow-xl overflow-hidden animate-fade-in-up md:bottom-20 bottom-34"
             style={{
               backgroundColor: "var(--color-card-bg)",
               border: "1px solid var(--color-border-subtle)",

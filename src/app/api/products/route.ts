@@ -51,6 +51,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(product, { status: 201 });
   } catch (err) {
     if (err instanceof ZodError) return errorResponse(err.issues[0].message, 400);
+    if (err && typeof err === "object" && "code" in err && err.code === "23505") {
+      return errorResponse("Duplicate SKU. Each variant must have a unique SKU.", 409);
+    }
     return errorResponse("Internal server error", 500);
   }
 }

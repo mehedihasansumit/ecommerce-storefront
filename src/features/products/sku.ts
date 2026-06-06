@@ -7,8 +7,17 @@ function asString(v: string | LocalizedString | undefined | null): string {
 }
 
 function abbrev(s: string, len: number): string {
-  const cleaned = s.replace(/[^a-zA-Z0-9]+/g, "").toUpperCase();
-  return cleaned.slice(0, len) || "X";
+  const words = s.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+  if (words.length <= 1) {
+    return (words[0] ?? "").toUpperCase().slice(0, len) || "X";
+  }
+  // Multi-word: start with each word's initial, then backfill from word
+  // bodies so "Olive Green" → "OGL" stays distinct from "Olive" → "OLI".
+  let out = words.map((w) => w[0]).join("").toUpperCase();
+  for (let i = 0; out.length < len && i < words.length; i++) {
+    out += words[i].slice(1).toUpperCase();
+  }
+  return out.slice(0, len) || "X";
 }
 
 const SUFFIX_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -39,4 +48,26 @@ export function generateVariantSku(
     .filter(Boolean)
     .map((v) => abbrev(v, 3));
   return [baseSku, ...parts].filter(Boolean).join("-");
+}
+
+/**
+ * Ensures variant SKUs are unique within a product. Two distinct option
+ * values can abbreviate to the same suffix (e.g. "Olive Green" and "Olive"
+ * both → "OLI"), which would violate the (productId, sku) unique index.
+ * Collisions get a numeric suffix: SKU, SKU-2, SKU-3, ...
+ */
+export function dedupeVariantSkus<T extends { sku?: string }>(variants: T[]): T[] {
+  const seen = new Set<string>();
+  return variants.map((v) => {
+    const base = (v.sku ?? "").trim();
+    if (!base) return v;
+    let candidate = base;
+    let suffix = 2;
+    while (seen.has(candidate)) {
+      candidate = `${base}-${suffix}`;
+      suffix++;
+    }
+    seen.add(candidate);
+    return { ...v, sku: candidate };
+  });
 }

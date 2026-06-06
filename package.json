@@ -16,6 +16,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1022.0",
     "@swc/helpers": "0.5.21",
+    "@tiptap/extension-link": "^3.26.0",
+    "@tiptap/react": "^3.26.0",
+    "@tiptap/starter-kit": "^3.26.0",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.2",
@@ -27,6 +30,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hot-toast": "^2.6.0",
+    "sanitize-html": "^2.17.4",
     "sharp": "^0.34.5",
     "slugify": "^1.6.9",
     "zod": "^4.3.6"
@@ -38,6 +42,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.1",
     "dotenv": "^17.4.1",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",

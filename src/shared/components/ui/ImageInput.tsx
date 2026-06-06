@@ -26,6 +26,7 @@ interface ImageInputProps {
   hint?: string;
   error?: string;
   aspect?: "square" | "16/9" | "auto";
+  kind?: "favicon";
   disabled?: boolean;
 }
 
@@ -44,6 +45,7 @@ export function ImageInput({
   hint,
   error,
   aspect = "auto",
+  kind,
   disabled,
 }: ImageInputProps) {
   const [mode, setMode] = useState<Mode>(value ? "url" : "upload");
@@ -58,6 +60,7 @@ export function ImageInput({
       body.append("file", file);
       body.append("storeId", storeId);
       body.append("folder", folder);
+      if (kind) body.append("kind", kind);
       const res = await fetch("/api/upload", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");

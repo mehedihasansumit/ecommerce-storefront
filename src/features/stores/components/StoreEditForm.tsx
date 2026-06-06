@@ -656,7 +656,7 @@ export default function StoreEditForm({
                     disabled={loading}
                   />
                   <ImageInput
-                    label="Favicon (light)"
+                    label="Favicon"
                     value={formData.favicon}
                     onChange={(url) =>
                       setFormData((prev) => ({ ...prev, favicon: url }))
@@ -664,19 +664,8 @@ export default function StoreEditForm({
                     storeId={store._id}
                     folder="stores"
                     aspect="square"
-                    hint="Browser tab icon — light OS theme."
-                    disabled={loading}
-                  />
-                  <ImageInput
-                    label="Favicon (dark)"
-                    value={formData.faviconDark}
-                    onChange={(url) =>
-                      setFormData((prev) => ({ ...prev, faviconDark: url }))
-                    }
-                    storeId={store._id}
-                    folder="stores"
-                    aspect="square"
-                    hint="Optional. Browser tab icon — dark OS theme."
+                    kind="favicon"
+                    hint="Browser tab icon. Any image — auto-fit to a 256×256 square PNG."
                     disabled={loading}
                   />
                 </div>

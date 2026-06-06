@@ -5,7 +5,10 @@ FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci \
+ && npm install --no-save --no-audit --no-fund \
+      --os=linux --cpu=x64 --libc=musl \
+      @next/swc-linux-x64-musl@"$(node -p "require('next/package.json').version")"
 
 # ---------- builder ----------
 FROM node:22-alpine AS builder

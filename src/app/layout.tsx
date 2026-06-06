@@ -39,8 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
     return { title: "E-Commerce Platform" };
   }
   const locale = await getLocale();
-  const favicon = tenant.favicon || tenant.logo;
-  const faviconDark = tenant.faviconDark;
+  const favicon = tenant.favicon || tenant.logo || "/favicon.ico";
   const mimeFor = (url: string): string => {
     const clean = url.split("?")[0].toLowerCase();
     if (clean.endsWith(".svg")) return "image/svg+xml";
@@ -58,14 +57,9 @@ export async function generateMetadata(): Promise<Metadata> {
       `Shop at ${tenant.name}`
     ),
     icons: {
-      icon: faviconDark
-        ? [
-            { url: favicon || "/favicon.ico", media: "(prefers-color-scheme: light)", type: mimeFor(favicon || "/favicon.ico") },
-            { url: faviconDark, media: "(prefers-color-scheme: dark)", type: mimeFor(faviconDark) },
-          ]
-        : favicon || "/favicon.ico",
-      shortcut: favicon || "/favicon.ico",
-      apple: faviconDark ?? favicon ?? "/icons/apple-touch-icon.png",
+      icon: { url: favicon, type: mimeFor(favicon) },
+      shortcut: favicon,
+      apple: favicon,
     },
     appleWebApp: {
       capable: true,

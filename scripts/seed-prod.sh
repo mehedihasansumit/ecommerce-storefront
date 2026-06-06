@@ -40,6 +40,7 @@ rsync -az -e "ssh $SSH_OPTS" \
   --include="package.json" \
   --include="package-lock.json" \
   --include="tsconfig.json" \
+  --include="drizzle.config.ts" \
   --exclude="*" \
   "$REPO_ROOT/" "$VPS_USER@$VPS_HOST:$VPS_PATH/"
 
@@ -53,5 +54,5 @@ docker run --rm \
   -v "\$PWD":/app \
   -w /app \
   node:22-alpine \
-  sh -c "apk add --no-cache libc6-compat >/dev/null && npm ci --no-audit --no-fund && npx tsx src/db/seed.ts"
+  sh -c "apk add --no-cache libc6-compat >/dev/null && npm ci --no-audit --no-fund && npx drizzle-kit migrate && npx tsx src/db/seed.ts"
 EOF

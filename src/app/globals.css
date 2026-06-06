@@ -326,3 +326,59 @@ a {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Rich-text content (product descriptions) — shared by the TipTap editor and
+   the storefront renderer. Scoped so it doesn't leak into the rest of the UI. */
+.rte-content {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.rte-content > :first-child {
+  margin-top: 0;
+}
+.rte-content > :last-child {
+  margin-bottom: 0;
+}
+.rte-content p {
+  margin: 0.75em 0;
+}
+.rte-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1.25em 0 0.5em;
+}
+.rte-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1em 0 0.4em;
+}
+.rte-content ul,
+.rte-content ol {
+  margin: 0.75em 0;
+  padding-left: 1.5rem;
+}
+.rte-content ul {
+  list-style: disc;
+}
+.rte-content ol {
+  list-style: decimal;
+}
+.rte-content li {
+  margin: 0.25em 0;
+}
+.rte-content li > p {
+  margin: 0;
+}
+.rte-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rte-content strong {
+  font-weight: 600;
+}
+.rte-content em {
+  font-style: italic;
+}

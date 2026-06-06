@@ -20,6 +20,7 @@ import {
   ImageInput,
   Input,
   LangTabs,
+  RichTextEditor,
   Select,
   Textarea,
 } from "@/shared/components/ui";
@@ -47,6 +48,17 @@ function getColorOptionName(options: IProductOption[]): string | undefined {
   return options.find((o) => o.name.toLowerCase() === "color")?.name;
 }
 
+// Key-order-independent compare: Postgres jsonb does not preserve key order,
+// so optionValues reloaded from DB may have reordered keys vs. regenerated combos.
+function sameOptionValues(
+  a: Record<string, string>,
+  b: Record<string, string>
+): boolean {
+  const ak = Object.keys(a);
+  if (ak.length !== Object.keys(b).length) return false;
+  return ak.every((k) => a[k] === b[k]);
+}
+
 function regenerateVariants(
   newOptions: IProductOption[],
   existing: IProductVariant[],
@@ -64,9 +76,8 @@ function regenerateVariants(
       optionValues[opt.name] = combo[i];
     });
 
-    const key = JSON.stringify(optionValues);
-    const existingMatch = existing.find(
-      (v) => JSON.stringify(v.optionValues) === key
+    const existingMatch = existing.find((v) =>
+      sameOptionValues(v.optionValues, optionValues)
     );
 
     const colorValue = colorOptName ? optionValues[colorOptName] : undefined;
@@ -353,11 +364,10 @@ export function ProductForm({
               onChange={(e) => setLocalized(setLocalizedShortDesc, activeLang, e.target.value)}
             />
           </Field>
-          <Field label="Description">
-            <Textarea
+          <Field label="Description" hint="Use the toolbar to format — headings, lists, bold, links.">
+            <RichTextEditor
               value={localizedDesc[activeLang] ?? ""}
-              onChange={(e) => setLocalized(setLocalizedDesc, activeLang, e.target.value)}
-              rows={4}
+              onChange={(html) => setLocalized(setLocalizedDesc, activeLang, html)}
             />
           </Field>
         </div>

@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     const file = form.get("file");
     const storeId = String(form.get("storeId") || "");
     const folder = String(form.get("folder") || "") as Folder;
+    const kind = String(form.get("kind") || "");
 
     if (!(file instanceof File)) return errorResponse("file is required", 400);
     if (!storeId) return errorResponse("storeId is required", 400);
@@ -52,6 +53,24 @@ export async function POST(request: NextRequest) {
     const metadata = await image.metadata();
     if (!metadata.width || !metadata.height) {
       return errorResponse("unreadable image", 400);
+    }
+
+    if (kind === "favicon") {
+      const SIZE = 256;
+      const out = await sharp(buffer)
+        .rotate()
+        .resize(SIZE, SIZE, {
+          fit: "contain",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer();
+      const key = generateFileKey(storeId, folder, "favicon.png");
+      const url = await uploadFile(key, out, "image/png");
+      return NextResponse.json(
+        { url, key, width: SIZE, height: SIZE, variants: {}, blurDataURL: "" },
+        { status: 201 }
+      );
     }
 
     const originalKey = generateFileKey(storeId, folder, file.name);

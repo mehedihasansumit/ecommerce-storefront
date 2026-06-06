@@ -3,6 +3,7 @@ export type { ButtonVariant, ButtonSize } from "./Button";
 
 export { Input } from "./Input";
 export { Textarea } from "./Textarea";
+export { RichTextEditor } from "./RichTextEditor";
 export { Select } from "./Select";
 export { Field } from "./Field";
 

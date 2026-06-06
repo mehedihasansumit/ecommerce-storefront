@@ -56,7 +56,7 @@ async function main() {
     {
       slug: "shirts-hub",
       name: "Shirts Hub",
-      domains: ["shirts.localhost", "www.shirts.com"],
+      domains: ["shirts.localhost", "www.lourhaus.com"],
       theme: {
         primaryColor: "#2563EB",
         secondaryColor: "#3B82F6",

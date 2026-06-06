@@ -13,6 +13,8 @@ import { ChevronRight, Truck, RotateCcw, Shield } from "lucide-react";
 import { ProductDetailClient } from "@/features/products/components/ProductDetailClient";
 import { ReviewSection } from "@/features/reviews/components/ReviewSection";
 import { t } from "@/shared/lib/i18n";
+import { isHtml, plainTextToHtml } from "@/shared/lib/html";
+import { sanitizeDescription } from "@/shared/lib/sanitize";
 
 export async function generateMetadata({
   params,
@@ -112,9 +114,16 @@ export default async function ProductDetailPage({
           {t(product.description, locale) && (
             <div className="max-w-3xl">
               <h2 className="text-xl font-semibold mb-6">{tr("description")}</h2>
-              <div className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                {t(product.description, locale)}
-              </div>
+              <div
+                className="rte-content text-text-secondary leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeDescription(
+                    isHtml(t(product.description, locale))
+                      ? t(product.description, locale)
+                      : plainTextToHtml(t(product.description, locale))
+                  ),
+                }}
+              />
             </div>
           )}
 

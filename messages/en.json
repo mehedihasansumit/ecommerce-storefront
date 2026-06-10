@@ -90,6 +90,7 @@
     "inStock": "In Stock ({available} available)",
     "outOfStock": "Out of Stock",
     "addToCart": "Add to Cart",
+    "selectOptions": "Select Options",
     "description": "Description",
     "price": "Price",
     "compareAt": "Compare At",

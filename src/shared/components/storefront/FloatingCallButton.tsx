@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Phone, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTenant } from "@/shared/hooks/useTenant";
@@ -8,6 +9,7 @@ import { useTenant } from "@/shared/hooks/useTenant";
 export function FloatingCallButton() {
   const tenant = useTenant();
   const t = useTranslations("header");
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const phones: string[] = [
@@ -16,6 +18,12 @@ export function FloatingCallButton() {
   ].filter((v, i, a) => a.indexOf(v) === i); // dedupe
 
   if (phones.length === 0) return null;
+
+  // Hidden on product detail pages — the mobile sticky buy bar occupies the same
+  // bottom-right area, and call/WhatsApp is reachable via the variant sheet there.
+  const isProductDetail =
+    pathname.startsWith("/products/") && pathname !== "/products";
+  if (isProductDetail) return null;
 
   const single = phones.length === 1;
 

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Star } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import type { IProduct, IProductVariant } from "../types";
+import type { IProduct, IProductImage } from "../types";
 import type { IStoreSocialOrdering } from "@/features/stores/types";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { AddToCartSection } from "./AddToCartSection";
+import { MobileBuyBar } from "./MobileBuyBar";
 import { SocialOrderButtons } from "./SocialOrderButtons";
 import { BulkPricingTable } from "./BulkPricingTable";
 import { t } from "@/shared/lib/i18n";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
+import { useProductSelection } from "../hooks/useProductSelection";
 import { getBulkLineTotal, normalizeTiers } from "@/shared/lib/pricing";
 
 interface ProductDetailClientProps {
@@ -22,9 +24,9 @@ interface ProductDetailClientProps {
 export function ProductDetailClient({ product, socialOrdering, productUrl }: ProductDetailClientProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
-  const [activeVariant, setActiveVariant] = useState<IProductVariant | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const selection = useProductSelection(product);
+  const { activeVariant, quantity, selectedOptions, displayPrice, displayStock, setOptions } =
+    selection;
   const track = useTrackEvent();
 
   useEffect(() => {
@@ -37,13 +39,51 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const galleryImages =
-    activeVariant?.images && activeVariant.images.length > 0
-      ? activeVariant.images
-      : product.images;
+  // Unified gallery: product images first, then every variant's images, deduped by url.
+  // Each image is tagged with the variant optionValues it belongs to (null = product-level)
+  // so clicking a variant image can auto-select that variant.
+  const { galleryImages, optionValuesByIndex } = useMemo(() => {
+    const images: IProductImage[] = [];
+    const optionValuesByIndex: (Record<string, string> | null)[] = [];
+    const seen = new Set<string>();
+    const push = (img: IProductImage, ov: Record<string, string> | null) => {
+      if (!img?.url || seen.has(img.url)) return;
+      seen.add(img.url);
+      images.push(img);
+      optionValuesByIndex.push(ov);
+    };
+    (product.images ?? []).forEach((img) => push(img, null));
+    (product.variants ?? []).forEach((v) =>
+      (v.images ?? []).forEach((img) => push(img, v.optionValues))
+    );
+    return { galleryImages: images, optionValuesByIndex };
+  }, [product.images, product.variants]);
 
-  const displayPrice = activeVariant?.price ?? product.price;
-  const displayStock = activeVariant?.stock ?? product.stock;
+  const [galleryIndex, setGalleryIndex] = useState(0);
+
+  const matchesVariant = (
+    ov: Record<string, string> | null,
+    target: Record<string, string>
+  ) => !!ov && Object.entries(target).every(([k, val]) => ov[k] === val);
+
+  // Variant chosen via chips → move the hero image to that variant's first image, unless
+  // the current image already belongs to it (avoids jumping between its images). Done as an
+  // "adjust state during render" sync (no effect) keyed on the active variant changing.
+  const [prevVariantKey, setPrevVariantKey] = useState<string | null>(null);
+  const variantKey = activeVariant ? JSON.stringify(activeVariant.optionValues) : null;
+  if (variantKey !== prevVariantKey) {
+    setPrevVariantKey(variantKey);
+    if (
+      activeVariant &&
+      !matchesVariant(optionValuesByIndex[galleryIndex], activeVariant.optionValues)
+    ) {
+      const idx = optionValuesByIndex.findIndex((ov) =>
+        matchesVariant(ov, activeVariant.optionValues)
+      );
+      if (idx >= 0) setGalleryIndex(idx);
+    }
+  }
+
   const displayCompareAt = activeVariant?.compareAtPrice ?? product.compareAtPrice;
 
   const hasDiscount = displayCompareAt > 0 && displayCompareAt > displayPrice;
@@ -64,8 +104,14 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
       {/* Images */}
       <ProductImageGallery
         images={galleryImages}
-        thumbnail={activeVariant?.images?.length ? undefined : product.thumbnail}
+        thumbnail={optionValuesByIndex[0] === null ? product.thumbnail : undefined}
         productName={t(product.name, locale)}
+        selectedIndex={galleryIndex}
+        onSelect={(i) => {
+          setGalleryIndex(i);
+          const ov = optionValuesByIndex[i];
+          if (ov) setOptions(ov);
+        }}
       />
 
       {/* Product Info */}
@@ -172,36 +218,39 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
             )}
           </div>
 
-          <AddToCartSection
-            productId={product._id}
-            productName={t(product.name, locale)}
-            productSlug={product.slug}
-            thumbnail={product.thumbnail}
-            price={product.price}
-            stock={product.stock}
-            options={product.options ?? []}
-            variants={product.variants ?? []}
-            pricingTiers={product.pricingTiers ?? []}
-            addToCartLabel={tr("addToCart")}
-            outOfStockLabel={tr("outOfStock")}
-            onVariantChange={setActiveVariant}
-            onQuantityChange={setQuantity}
-            onSelectedOptionsChange={setSelectedOptions}
-            categoryId={product.categoryId ?? undefined}
-          />
-
-          {socialOrdering && productUrl && (
-            <SocialOrderButtons
-              socialOrdering={socialOrdering}
-              productName={t(product.name, locale)}
-              productPrice={displayPrice}
-              productUrl={productUrl}
-              quantity={quantity}
-              selectedOptions={selectedOptions}
+          {/* Desktop: inline selector + social buttons */}
+          <div className="hidden md:block space-y-6">
+            <AddToCartSection
+              options={product.options ?? []}
+              selection={selection}
+              addToCartLabel={tr("addToCart")}
+              outOfStockLabel={tr("outOfStock")}
             />
-          )}
+
+            {socialOrdering && productUrl && (
+              <SocialOrderButtons
+                socialOrdering={socialOrdering}
+                productName={t(product.name, locale)}
+                productPrice={displayPrice}
+                productUrl={productUrl}
+                quantity={quantity}
+                selectedOptions={selectedOptions}
+              />
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Mobile: sticky buy bar + variant sheet */}
+      <MobileBuyBar
+        product={product}
+        selection={selection}
+        socialOrdering={socialOrdering}
+        productUrl={productUrl}
+        addToCartLabel={tr("addToCart")}
+        outOfStockLabel={tr("outOfStock")}
+        selectOptionsLabel={tr("selectOptions")}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ export { Alert } from "./Alert";
 export { Badge } from "./Badge";
 
 export { Modal } from "./Modal";
+export { BottomSheet } from "./BottomSheet";
 export { ConfirmDialog } from "./ConfirmDialog";
 
 export { EmptyState } from "./EmptyState";

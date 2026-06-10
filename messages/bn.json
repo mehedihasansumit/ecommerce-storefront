@@ -90,6 +90,7 @@
     "inStock": "স্টকে আছে ({available} উপলব্ধ)",
     "outOfStock": "স্টক খালি",
     "addToCart": "কার্টে যোগ করুন",
+    "selectOptions": "অপশন নির্বাচন করুন",
     "description": "বর্ণনা",
     "price": "মূল্য",
     "compareAt": "তুলনা করুন",

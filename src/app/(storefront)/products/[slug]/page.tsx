@@ -72,7 +72,7 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 md:pb-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs text-text-tertiary mb-8">
           <Link href="/" className="hover:text-[var(--color-text)] transition-colors">

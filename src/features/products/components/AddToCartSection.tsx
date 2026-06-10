@@ -1,171 +1,57 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
-import { useCart } from "@/shared/context/CartContext";
-import type { IPricingTier, IProductOption, IProductVariant } from "../types";
-import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
-import { getBulkUnitPrice, normalizeTiers } from "@/shared/lib/pricing";
+import type { IProductOption } from "../types";
+import type { ProductSelection } from "../hooks/useProductSelection";
+import { VariantOptions } from "./VariantOptions";
 
 interface AddToCartSectionProps {
-  productId: string;
-  productName: string;
-  productSlug: string;
-  thumbnail: string;
-  price: number;
-  stock: number;
   options: IProductOption[];
-  variants: IProductVariant[];
-  pricingTiers?: IPricingTier[];
+  selection: ProductSelection;
   addToCartLabel: string;
   outOfStockLabel: string;
-  onVariantChange?: (variant: IProductVariant | null) => void;
-  onQuantityChange?: (quantity: number) => void;
-  onSelectedOptionsChange?: (options: Record<string, string>) => void;
-  categoryId?: string;
 }
 
+/**
+ * Desktop inline variant selector + quantity + add-to-cart. Controlled by the shared
+ * useProductSelection hook (state lives in ProductDetailClient). On mobile this is hidden
+ * in favour of MobileBuyBar.
+ */
 export function AddToCartSection({
-  productId,
-  productName,
-  productSlug,
-  thumbnail,
-  price,
-  stock,
   options,
-  variants,
-  pricingTiers,
+  selection,
   addToCartLabel,
   outOfStockLabel,
-  onVariantChange,
-  onQuantityChange,
-  onSelectedOptionsChange,
-  categoryId,
 }: AddToCartSectionProps) {
-  const { addItem } = useCart();
-  const track = useTrackEvent();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
-    () => Object.fromEntries(options.map((o) => [o.name, o.values[0] ?? ""]))
+  const {
+    selectedOptions,
+    setOption,
+    quantity,
+    setQuantity,
+    displayStock,
+    isValueAvailable,
+    addToCart,
+  } = selection;
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
+    null
   );
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  const activeVariant = useMemo(() => {
-    if (variants.length === 0 || options.length === 0) return null;
-    return (
-      variants.find((v) =>
-        Object.entries(selectedOptions).every(
-          ([k, val]) => v.optionValues?.[k] === val
-        )
-      ) ?? null
-    );
-  }, [selectedOptions, variants, options]);
-
-  const displayPrice = activeVariant?.price ?? price;
-  const displayStock = activeVariant?.stock ?? stock;
-
-  useEffect(() => {
-    onVariantChange?.(activeVariant);
-  }, [activeVariant]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    onQuantityChange?.(quantity);
-  }, [quantity]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    onSelectedOptionsChange?.(selectedOptions);
-  }, [selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  function isValueAvailable(optionName: string, value: string): boolean {
-    if (variants.length === 0) return true;
-    return variants.some(
-      (v) =>
-        v.optionValues?.[optionName] === value &&
-        Object.entries(selectedOptions)
-          .filter(([k]) => k !== optionName)
-          .every(([k, val]) => v.optionValues?.[k] === val) &&
-        (v.stock ?? 0) > 0
-    );
-  }
 
   function handleAddToCart() {
     if (displayStock <= 0) return;
-    const resolvedThumbnail = activeVariant?.images?.[0]?.url || thumbnail;
-    const tiers = normalizeTiers(pricingTiers);
-    // Snapshot the tier-aware unit price using product.price as base (tiers
-    // override variant price overrides for consistency). Cart context still
-    // re-derives across all variant lines for the same product on each render.
-    const priceAtAdd = tiers.length > 0
-      ? getBulkUnitPrice(price, quantity, tiers)
-      : displayPrice;
-    addItem({
-      productId,
-      productName,
-      productSlug,
-      thumbnail: resolvedThumbnail,
-      variantSelections: selectedOptions,
-      quantity,
-      priceAtAdd,
-      pricingTiers: tiers,
-      productBasePrice: price,
-    });
-    track({
-      eventType: "add_to_cart",
-      productId,
-      productName,
-      categoryId,
-    });
+    addToCart();
     setMessage({ type: "success", text: "Added to cart!" });
     setTimeout(() => setMessage(null), 3000);
   }
 
   return (
     <div className="space-y-6">
-      {/* Options */}
-      {options.length > 0 && (
-        <div className="space-y-4">
-          {options.map((option) => (
-            <div key={option.name}>
-              <label className="block text-xs font-semibold uppercase tracking-wide mb-2.5 text-text-secondary">
-                {option.name}
-                {selectedOptions[option.name] && (
-                  <span className="font-normal text-text-secondary ml-1">
-                    — {selectedOptions[option.name]}
-                  </span>
-                )}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {option.values.map((value) => {
-                  const available = isValueAvailable(option.name, value);
-                  const selected = selectedOptions[option.name] === value;
-                  return (
-                    <button
-                      key={value}
-                      onClick={() =>
-                        setSelectedOptions((prev) => ({ ...prev, [option.name]: value }))
-                      }
-                      disabled={!available}
-                      className={`px-4 py-2.5 border text-sm font-medium transition-all duration-200 ${
-                        selected
-                          ? "border-[var(--color-primary)] text-[var(--color-primary)]"
-                          : available
-                          ? "border-border-subtle text-text-secondary hover:border-primary/40 hover:shadow-sm"
-                          : "border-border-subtle text-text-tertiary cursor-not-allowed line-through"
-                      }`}
-                      style={{
-                        borderRadius: "var(--border-radius)",
-                        ...(selected ? { backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)" } : undefined),
-                      }}
-                    >
-                      {value}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <VariantOptions
+        options={options}
+        selectedOptions={selectedOptions}
+        onSelect={setOption}
+        isValueAvailable={isValueAvailable}
+      />
 
       {/* Quantity + Add to Cart */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -174,6 +60,7 @@ export function AddToCartSection({
           style={{ borderRadius: "var(--border-radius)" }}
         >
           <button
+            type="button"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             disabled={quantity <= 1}
             className="px-4 py-3 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors disabled:opacity-40"
@@ -184,6 +71,7 @@ export function AddToCartSection({
             {quantity}
           </span>
           <button
+            type="button"
             onClick={() => setQuantity((q) => Math.min(displayStock, q + 1))}
             disabled={quantity >= displayStock}
             className="px-4 py-3 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors disabled:opacity-40"
@@ -193,6 +81,7 @@ export function AddToCartSection({
         </div>
 
         <button
+          type="button"
           onClick={handleAddToCart}
           className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 text-white font-semibold transition-all duration-200 hover:brightness-105 hover:shadow-[var(--shadow-md)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{

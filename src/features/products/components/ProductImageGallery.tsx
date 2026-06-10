@@ -9,10 +9,28 @@ interface ProductImageGalleryProps {
   images: IProductImage[];
   thumbnail?: string;
   productName: string;
+  /** Controlled active index. When provided the parent owns selection. */
+  selectedIndex?: number;
+  /** Called whenever the active image changes (thumbnail click, lightbox nav, keys). */
+  onSelect?: (index: number) => void;
 }
 
-export function ProductImageGallery({ images, thumbnail, productName }: ProductImageGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+export function ProductImageGallery({
+  images,
+  thumbnail,
+  productName,
+  selectedIndex: controlledIndex,
+  onSelect,
+}: ProductImageGalleryProps) {
+  const [internalIndex, setInternalIndex] = useState(0);
+  const selectedIndex = controlledIndex ?? internalIndex;
+  const setIndex = useCallback(
+    (index: number) => {
+      onSelect?.(index);
+      if (controlledIndex == null) setInternalIndex(index);
+    },
+    [onSelect, controlledIndex]
+  );
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 50, y: 50 });
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -41,10 +59,10 @@ export function ProductImageGallery({ images, thumbnail, productName }: ProductI
   }, []);
 
   const changeImage = useCallback((index: number) => {
-    setSelectedIndex(index);
+    setIndex(index);
     setLbZoom(1);
     setPanPos({ x: 0, y: 0 });
-  }, []);
+  }, [setIndex]);
 
   // Wheel zoom in lightbox — passive: false so we can preventDefault
   useEffect(() => {
@@ -179,7 +197,7 @@ export function ProductImageGallery({ images, thumbnail, productName }: ProductI
             {images.map((img, i) => (
               <button
                 key={i}
-                onClick={() => setSelectedIndex(i)}
+                onClick={() => setIndex(i)}
                 className={`relative aspect-square overflow-hidden transition-all duration-200 ${
                   i === selectedIndex
                     ? "ring-2 ring-offset-2 opacity-100"

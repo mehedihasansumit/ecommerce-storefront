@@ -1,6 +1,7 @@
 import { ProductRepository } from "./repository";
 import { CategoryRepository } from "@/features/categories/repository";
 import { generateBaseSku, generateVariantSku, dedupeVariantSkus } from "./sku";
+import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
 import type { IProduct } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
@@ -9,6 +10,20 @@ import slugify from "slugify";
 function baseSlug(name: string | LocalizedString): string {
   const raw = typeof name === "string" ? name : (name.en ?? Object.values(name)[0] ?? "product");
   return slugify(raw, { lower: true, strict: true });
+}
+
+/** All image URLs/keys a product references (main + variant images + thumbnail). */
+function productBlobValues(p: IProduct): string[] {
+  const out: string[] = [];
+  if (p.thumbnail) out.push(p.thumbnail);
+  const pushImg = (img: IProduct["images"][number]) => {
+    if (img.key) out.push(img.key);
+    if (img.url) out.push(img.url);
+    if (img.variants) out.push(...Object.values(img.variants));
+  };
+  for (const img of p.images ?? []) pushImg(img);
+  for (const v of p.variants ?? []) for (const img of v.images ?? []) pushImg(img);
+  return out;
 }
 
 async function uniqueSlug(
@@ -79,11 +94,9 @@ export const ProductService = {
   },
 
   async update(id: string, data: Partial<IProduct>): Promise<IProduct | null> {
-    if (data.name) {
-      const existing = await ProductRepository.findById(id);
-      if (existing) {
-        data.slug = await uniqueSlug(existing.storeId, data.name, id);
-      }
+    const existing = await ProductRepository.findById(id);
+    if (existing && data.name) {
+      data.slug = await uniqueSlug(existing.storeId, data.name, id);
     }
     if (data.variants) {
       const base = data.sku?.trim();
@@ -96,11 +109,24 @@ export const ProductService = {
         })),
       );
     }
-    return ProductRepository.update(id, data);
+    const updated = await ProductRepository.update(id, data);
+    if (existing && updated) {
+      // Remove blobs dropped by this update (kept images are protected).
+      await deleteUnreferencedBlobs(
+        productBlobValues(existing),
+        productBlobValues(updated),
+      ).catch(() => {});
+    }
+    return updated;
   },
 
   async delete(id: string): Promise<boolean> {
-    return ProductRepository.delete(id);
+    const existing = await ProductRepository.findById(id);
+    const ok = await ProductRepository.delete(id);
+    if (ok && existing) {
+      await deleteUnreferencedBlobs(productBlobValues(existing)).catch(() => {});
+    }
+    return ok;
   },
 
   async getCountsByCategoryIds(

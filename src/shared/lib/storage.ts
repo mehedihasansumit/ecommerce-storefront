@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { randomBytes } from "crypto";
 
@@ -93,4 +94,110 @@ export function variantKey(originalKey: string, suffix: string): string {
   const dot = originalKey.lastIndexOf(".");
   const base = dot >= 0 ? originalKey.slice(0, dot) : originalKey;
   return `${base}-${suffix}.webp`;
+}
+
+export interface StoredBlob {
+  key: string;
+  size: number;
+  lastModified?: Date;
+}
+
+/**
+ * Lists all objects in the bucket, optionally under a key prefix (e.g. `${storeId}/`).
+ * Handles pagination via ContinuationToken.
+ */
+export async function listFiles(prefix?: string): Promise<StoredBlob[]> {
+  const out: StoredBlob[] = [];
+  let token: string | undefined;
+  do {
+    const res = await s3Client.send(
+      new ListObjectsV2Command({
+        Bucket: BUCKET,
+        Prefix: prefix,
+        ContinuationToken: token,
+      })
+    );
+    for (const obj of res.Contents ?? []) {
+      if (!obj.Key) continue;
+      out.push({
+        key: obj.Key,
+        size: obj.Size ?? 0,
+        lastModified: obj.LastModified,
+      });
+    }
+    token = res.IsTruncated ? res.NextContinuationToken : undefined;
+  } while (token);
+  return out;
+}
+
+/**
+ * Inverse of publicUrlFor: converts a stored URL or bare key back to an object key.
+ * Returns null for external URLs (not served from our bucket) or empty/data values.
+ */
+export function urlToKey(value: string): string | null {
+  if (!value) return null;
+  const v = value.trim();
+  if (!v || v.startsWith("data:")) return null;
+
+  // Next.js media proxy form: /api/media/{key}
+  const mediaIdx = v.indexOf("/api/media/");
+  if (mediaIdx >= 0) {
+    return decodeURIComponent(v.slice(mediaIdx + "/api/media/".length)) || null;
+  }
+
+  // CDN form: {CDN_URL}/{key}
+  if (CDN_URL && v.startsWith(`${CDN_URL}/`)) {
+    return decodeURIComponent(v.slice(CDN_URL.length + 1)) || null;
+  }
+
+  // Bare key form: {storeUuid}/folder/file
+  if (!v.includes("://") && /^[0-9a-f-]{36}\//i.test(v)) {
+    return v;
+  }
+
+  return null;
+}
+
+const VARIANT_SUFFIXES = ["w400", "w800", "w1200", "w2000"] as const;
+
+/** Best-effort delete of an object key plus its responsive variants. Never throws. */
+export async function deleteBlobWithVariants(key: string): Promise<void> {
+  await Promise.allSettled([
+    deleteFile(key),
+    ...VARIANT_SUFFIXES.map((s) => deleteFile(variantKey(key, s))),
+  ]);
+}
+
+/**
+ * Best-effort cleanup of blobs that are no longer referenced.
+ *
+ * Resolves each value in `removed` to an object key (via urlToKey) and deletes it
+ * along with its variants — unless the same key still appears in `keep` (i.e. the
+ * image was retained across an update). Non-bucket URLs and empty values are ignored.
+ * Never throws; intended to run after a successful DB write.
+ */
+export async function deleteUnreferencedBlobs(
+  removed: Iterable<string>,
+  keep: Iterable<string> = []
+): Promise<void> {
+  const keepKeys = new Set<string>();
+  for (const v of keep) {
+    const k = urlToKey(v);
+    if (k) keepKeys.add(k);
+  }
+  const toDelete = new Set<string>();
+  for (const v of removed) {
+    const k = urlToKey(v);
+    if (k && !keepKeys.has(k)) toDelete.add(k);
+  }
+  await Promise.allSettled(
+    Array.from(toDelete).map((k) => deleteBlobWithVariants(k))
+  );
+}
+
+/** Best-effort delete of every object under a key prefix (e.g. `${storeId}/`). Returns count deleted. */
+export async function deleteBlobsByPrefix(prefix: string): Promise<number> {
+  const blobs = await listFiles(prefix);
+  const res = await Promise.allSettled(blobs.map((b) => deleteFile(b.key)));
+  return res.filter((r) => r.status === "fulfilled").length;
 }

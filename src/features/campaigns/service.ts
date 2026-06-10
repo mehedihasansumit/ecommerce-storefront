@@ -2,6 +2,7 @@ import { CampaignRepository } from "./repository";
 import { evaluateCart as engineEvaluate } from "./engine";
 import { ProductRepository } from "@/features/products/repository";
 import { OrderRepository } from "@/features/orders/repository";
+import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
 import type {
   AppliedFreeItem,
   CampaignEvaluationResult,
@@ -33,13 +34,24 @@ export const CampaignService = {
       const dupe = await CampaignRepository.findBySlug(storeId, input.slug);
       if (dupe) throw new Error("Campaign slug already exists for this store");
     }
-    return CampaignRepository.update(campaignId, input);
+    const updated = await CampaignRepository.update(campaignId, input);
+    if (updated) {
+      await deleteUnreferencedBlobs(
+        [campaign.bannerImage ?? ""],
+        [updated.bannerImage ?? ""],
+      ).catch(() => {});
+    }
+    return updated;
   },
 
   async delete(storeId: string, campaignId: string): Promise<boolean> {
     const campaign = await CampaignRepository.findById(campaignId);
     if (!campaign || campaign.storeId !== storeId) return false;
-    return CampaignRepository.delete(campaignId);
+    const ok = await CampaignRepository.delete(campaignId);
+    if (ok && campaign.bannerImage) {
+      await deleteUnreferencedBlobs([campaign.bannerImage]).catch(() => {});
+    }
+    return ok;
   },
 
   async getById(storeId: string, campaignId: string): Promise<ICampaign | null> {

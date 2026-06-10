@@ -1,4 +1,5 @@
 import { CategoryRepository } from "./repository";
+import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
 import type { ICategory } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import slugify from "slugify";
@@ -36,10 +37,22 @@ export const CategoryService = {
     if (data.name) {
       data.slug = nameToSlug(data.name);
     }
-    return CategoryRepository.update(id, data);
+    // Only need the old image when the image field is being changed.
+    const before =
+      data.image !== undefined ? await CategoryRepository.findById(id) : null;
+    const updated = await CategoryRepository.update(id, data);
+    if (before && updated) {
+      await deleteUnreferencedBlobs([before.image], [updated.image]).catch(() => {});
+    }
+    return updated;
   },
 
   async delete(id: string): Promise<boolean> {
-    return CategoryRepository.delete(id);
+    const before = await CategoryRepository.findById(id);
+    const ok = await CategoryRepository.delete(id);
+    if (ok && before?.image) {
+      await deleteUnreferencedBlobs([before.image]).catch(() => {});
+    }
+    return ok;
   },
 };

@@ -9,6 +9,7 @@ import {
   Users,
   UserCog,
   Shield,
+  HardDrive,
 } from "lucide-react";
 import { AdminLogoutButton } from "./AdminLogoutButton";
 import { ThemeToggle } from "@/shared/components/ui";
@@ -47,6 +48,7 @@ export function AdminSidebar({
   const superItems = [
     { href: "/admin/roles", icon: Shield, label: "Roles", show: isSuperAdmin },
     { href: "/admin/admins", icon: UserCog, label: "Admins", show: isSuperAdmin },
+    { href: "/admin/maintenance", icon: HardDrive, label: "Storage Cleanup", show: isSuperAdmin },
   ].filter((i) => i.show);
 
   const initials = adminName

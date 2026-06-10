@@ -1,6 +1,19 @@
 import { StoreRepository } from "./repository";
+import { deleteUnreferencedBlobs, deleteBlobsByPrefix } from "@/shared/lib/storage";
 import type { IStore } from "./types";
 import slugify from "slugify";
+
+/** All image URLs/keys a store references directly (logos, favicons, banners, OG image). */
+function storeBlobValues(s: IStore): string[] {
+  const out: string[] = [];
+  for (const v of [s.logo, s.logoDark, s.favicon, s.faviconDark, s.seo?.ogImage]) {
+    if (v) out.push(v);
+  }
+  for (const b of s.heroBanners ?? []) {
+    if (b.image) out.push(b.image);
+  }
+  return out;
+}
 
 export const StoreService = {
   async resolveByDomain(domain: string): Promise<IStore | null> {
@@ -35,10 +48,23 @@ export const StoreService = {
   },
 
   async update(id: string, data: Record<string, unknown>): Promise<IStore | null> {
-    return StoreRepository.update(id, data);
+    const before = await StoreRepository.findById(id);
+    const updated = await StoreRepository.update(id, data);
+    if (before && updated) {
+      await deleteUnreferencedBlobs(
+        storeBlobValues(before),
+        storeBlobValues(updated),
+      ).catch(() => {});
+    }
+    return updated;
   },
 
   async delete(id: string): Promise<boolean> {
-    return StoreRepository.delete(id);
+    const ok = await StoreRepository.delete(id);
+    if (ok) {
+      // Store gone — wipe every blob under its prefix (logos, products, categories, campaigns).
+      await deleteBlobsByPrefix(`${id}/`).catch(() => {});
+    }
+    return ok;
   },
 };

@@ -1,9 +1,10 @@
 import bcrypt from "bcryptjs";
 import { AuthRepository } from "./repository";
 import { signToken } from "@/shared/lib/auth";
+import { keyFromUrl, deleteFile } from "@/shared/lib/storage";
 import { RoleRepository } from "@/features/roles/repository";
 import type { Permission } from "@/shared/lib/permissions";
-import type { IUser, IAdminUser, IAdminUserWithRole, IAddress, JwtCustomerPayload, JwtAdminPayload } from "./types";
+import type { IUser, IAdminUser, IAdminUserWithRole, IAddress, IAvatarPosition, JwtCustomerPayload, JwtAdminPayload } from "./types";
 import type { AddressInput, CreateAdminInput, UpdateAdminInput } from "./schemas";
 
 /** Populate the admin's role, returning IAdminUserWithRole */
@@ -270,5 +271,35 @@ export const AuthService = {
     const updated = await AuthRepository.setDefaultAddress(storeId, userId, addressId);
     if (!updated) throw new Error("Address not found");
     return updated.addresses;
+  },
+
+  async updateCustomerProfile(
+    userId: string,
+    data: { avatarUrl: string; avatarPosition: IAvatarPosition }
+  ): Promise<Omit<IUser, "passwordHash">> {
+    const current = await AuthRepository.findUserById(userId);
+    if (!current) throw new Error("User not found");
+
+    const updated = await AuthRepository.updateUser(userId, {
+      avatarUrl: data.avatarUrl,
+      avatarPosition: data.avatarPosition,
+    });
+    if (!updated) throw new Error("Failed to update profile");
+
+    // Best-effort cleanup of the replaced avatar file.
+    if (current.avatarUrl && current.avatarUrl !== data.avatarUrl) {
+      const oldKey = keyFromUrl(current.avatarUrl);
+      if (oldKey) {
+        try {
+          await deleteFile(oldKey);
+        } catch {
+          // ignore — orphaned file is harmless
+        }
+      }
+    }
+
+    const { passwordHash: _pw, ...safe } = updated;
+    void _pw;
+    return safe;
   },
 };

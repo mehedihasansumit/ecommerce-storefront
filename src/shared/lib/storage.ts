@@ -42,6 +42,16 @@ export function publicUrlFor(key: string): string {
   return `/api/media/${key}`;
 }
 
+/** Inverse of publicUrlFor — extract the storage key from a public URL, or null. */
+export function keyFromUrl(url: string): string | null {
+  if (!url) return null;
+  if (CDN_URL && url.startsWith(`${CDN_URL}/`)) return url.slice(CDN_URL.length + 1);
+  const marker = "/api/media/";
+  const idx = url.indexOf(marker);
+  if (idx >= 0) return url.slice(idx + marker.length);
+  return null;
+}
+
 export async function uploadFile(
   key: string,
   body: Buffer,

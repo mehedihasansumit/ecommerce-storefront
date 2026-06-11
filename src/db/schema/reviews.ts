@@ -21,6 +21,7 @@ export const reviews = pgTable(
     rating: integer("rating").notNull(),
     title: text("title"),
     comment: text("comment"),
+    images: text("images").array().notNull().default(sql`'{}'::text[]`),
     reviewerName: text("reviewer_name"),
     isApproved: boolean("is_approved").notNull().default(false),
     ...timestamps,

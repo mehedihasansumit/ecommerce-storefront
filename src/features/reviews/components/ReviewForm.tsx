@@ -1,21 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { Star } from "lucide-react";
+import { useRef, useState } from "react";
+import { Star, ImagePlus, X, Loader2 } from "lucide-react";
 
 interface ReviewFormProps {
   productId: string;
   onSuccess?: () => void;
 }
 
+const MAX_IMAGES = 5;
+
 export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (files.length === 0) return;
+
+    const room = MAX_IMAGES - images.length;
+    if (room <= 0) {
+      setError(`You can attach at most ${MAX_IMAGES} photos`);
+      return;
+    }
+    const selected = files.slice(0, room);
+    setError(null);
+
+    for (const file of selected) {
+      setUploading((n) => n + 1);
+      try {
+        const body = new FormData();
+        body.append("file", file);
+        const res = await fetch("/api/reviews/upload", { method: "POST", body });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error ?? "Failed to upload image");
+          continue;
+        }
+        setImages((prev) => [...prev, data.url as string]);
+      } catch {
+        setError("Failed to upload image. Please try again.");
+      } finally {
+        setUploading((n) => n - 1);
+      }
+    }
+  }
+
+  function removeImage(url: string) {
+    setImages((prev) => prev.filter((u) => u !== url));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,7 +77,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, rating, title, comment }),
+        body: JSON.stringify({ productId, rating, title, comment, images }),
       });
 
       const data = await res.json();
@@ -128,17 +170,69 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
         />
       </div>
 
+      {/* Photos */}
+      <div>
+        <label className="block text-sm text-text-secondary mb-1.5">
+          Photos <span className="text-text-tertiary">(optional, up to {MAX_IMAGES})</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {images.map((url) => (
+            <div key={url} className="relative w-16 h-16">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt="Review photo"
+                className="w-16 h-16 object-cover rounded-lg border border-border-subtle"
+              />
+              <button
+                type="button"
+                onClick={() => removeImage(url)}
+                aria-label="Remove photo"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-black/70 text-white hover:bg-black"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+
+          {uploading > 0 && (
+            <div className="w-16 h-16 flex items-center justify-center rounded-lg border border-border-subtle bg-bg">
+              <Loader2 className="w-5 h-5 animate-spin text-text-tertiary" />
+            </div>
+          )}
+
+          {images.length + uploading < MAX_IMAGES && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Add photos"
+              className="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border-subtle text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              <ImagePlus className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFiles}
+          className="hidden"
+        />
+      </div>
+
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || uploading > 0}
         className="px-5 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-opacity"
         style={{ backgroundColor: "var(--color-primary)" }}
       >
-        {submitting ? "Submitting…" : "Submit Review"}
+        {submitting ? "Submitting…" : uploading > 0 ? "Uploading photos…" : "Submit Review"}
       </button>
     </form>
   );

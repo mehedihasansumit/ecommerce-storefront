@@ -5,6 +5,11 @@ export const createReviewSchema = z.object({
   rating: z.number().int().min(1, "Rating must be at least 1").max(5, "Rating must be at most 5"),
   title: z.string().min(1, "Title is required").max(100),
   comment: z.string().max(2000).optional().default(""),
+  images: z
+    .array(z.string().url().or(z.string().startsWith("/api/media/")))
+    .max(5, "At most 5 images allowed")
+    .optional()
+    .default([]),
 });
 
 export const updateReviewSchema = z.object({

@@ -1,9 +1,12 @@
 import { and, avg, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { reviews, type Review } from "@/db/schema/reviews";
+import { users } from "@/db/schema/auth";
 import type { IReview } from "./types";
 
-function toIReview(row: Review): IReview {
+type ReviewAuthor = { avatarUrl: string | null; avatarPosition: unknown } | null;
+
+function toIReview(row: Review, author: ReviewAuthor = null): IReview {
   return {
     _id: row.id,
     storeId: row.storeId,
@@ -12,7 +15,10 @@ function toIReview(row: Review): IReview {
     rating: row.rating,
     title: row.title ?? "",
     comment: row.comment ?? "",
+    images: row.images ?? [],
     reviewerName: row.reviewerName ?? "",
+    reviewerAvatarUrl: author?.avatarUrl ?? null,
+    reviewerAvatarPosition: (author?.avatarPosition as IReview["reviewerAvatarPosition"]) ?? null,
     isApproved: row.isApproved,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -45,10 +51,26 @@ export const ReviewRepository = {
     );
     const skip = (page - 1) * limit;
     const [rows, [{ total }]] = await Promise.all([
-      db.select().from(reviews).where(where).orderBy(desc(reviews.createdAt)).limit(limit).offset(skip),
+      db
+        .select({
+          review: reviews,
+          avatarUrl: users.avatarUrl,
+          avatarPosition: users.avatarPosition,
+        })
+        .from(reviews)
+        .leftJoin(users, eq(users.id, reviews.userId))
+        .where(where)
+        .orderBy(desc(reviews.createdAt))
+        .limit(limit)
+        .offset(skip),
       db.select({ total: count() }).from(reviews).where(where),
     ]);
-    return { reviews: rows.map(toIReview), total: Number(total) };
+    return {
+      reviews: rows.map((r) =>
+        toIReview(r.review, { avatarUrl: r.avatarUrl, avatarPosition: r.avatarPosition }),
+      ),
+      total: Number(total),
+    };
   },
 
   async findByUserAndProduct(
@@ -82,7 +104,7 @@ export const ReviewRepository = {
       db.select().from(reviews).where(where).orderBy(desc(reviews.createdAt)).limit(limit).offset(skip),
       db.select({ total: count() }).from(reviews).where(where),
     ]);
-    return { reviews: rows.map(toIReview), total: Number(total) };
+    return { reviews: rows.map((row) => toIReview(row)), total: Number(total) };
   },
 
   async findById(id: string): Promise<IReview | null> {

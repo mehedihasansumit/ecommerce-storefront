@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { ReviewStars } from "./ReviewStars";
+import { Avatar } from "@/shared/components/ui";
 import type { IReview } from "../types";
 
 interface ReviewListProps {
@@ -31,8 +33,18 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   const hasMore = reviews.length < total;
+
+  useEffect(() => {
+    if (!lightbox) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setLightbox(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
 
   async function loadMore() {
     setLoading(true);
@@ -79,9 +91,32 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
                     {review.comment}
                   </p>
                 )}
+                {review.images && review.images.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {review.images.map((url) => (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => setLightbox(url)}
+                        className="w-16 h-16 rounded-lg overflow-hidden border border-border-subtle focus:outline-none focus-visible:ring-2"
+                        style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
+                        aria-label="View review photo"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="Review photo" loading="lazy" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-text-tertiary">
+              <Avatar
+                src={review.reviewerAvatarUrl}
+                position={review.reviewerAvatarPosition}
+                name={review.reviewerName || "Customer"}
+                size="sm"
+              />
               <span className="font-medium text-text-secondary">{review.reviewerName || "Customer"}</span>
               <span>·</span>
               <span>{timeAgo(review.createdAt)}</span>
@@ -99,6 +134,31 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
         >
           {loading ? "Loading…" : `Load more reviews (${total - reviews.length} remaining)`}
         </button>
+      )}
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-in-up"
+          onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            aria-label="Close"
+            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightbox}
+            alt="Review photo"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+          />
+        </div>
       )}
     </div>
   );

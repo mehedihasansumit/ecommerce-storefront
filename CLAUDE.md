@@ -1,11 +1,11 @@
 # Multi-Tenant E-Commerce Platform
 
 ## Project Overview
-A single Next.js application serving multiple e-commerce websites dynamically based on domain name. Each domain gets its own theme, branding, product catalog, and storefront - managed from one admin dashboard and one MongoDB database.
+A single Next.js application serving multiple e-commerce websites dynamically based on domain name. Each domain gets its own theme, branding, product catalog, and storefront - managed from one admin dashboard and one PostgreSQL database.
 
 ## Tech Stack
 - **Framework:** Next.js 16 (App Router, TypeScript strict mode, React 19)
-- **Database:** MongoDB with Mongoose ODM
+- **Database:** PostgreSQL with Drizzle ORM (`drizzle-orm/postgres-js`, driver: `postgres`). Migrations via `drizzle-kit`. `casing: "snake_case"` — TS camelCase ↔ DB snake_case is automatic.
 - **Styling:** Tailwind CSS v4 + CSS custom properties for dynamic theming
 - **Auth:** JWT via `jose` (Edge-compatible) + `bcryptjs` for password hashing
 - **Payment:** Stripe + SSLCommerz (per-store configuration); WhatsApp / Messenger order handoff
@@ -25,18 +25,20 @@ A single Next.js application serving multiple e-commerce websites dynamically ba
 API Route (app/api/) → Service (business logic) → Repository (DB queries)
      ↑                      ↑                          ↑
   Thin handler          Orchestrates              Only place that
-  validates input,      business rules,           touches Mongoose
-  calls service,        calls repository          models directly
+  validates input,      business rules,           runs Drizzle
+  calls service,        calls repository          queries
   returns response
 ```
 
 - **API Routes:** Thin handlers - validate input with Zod, call service, return response. NO business logic here.
-- **Services:** Business logic layer - orchestrates operations, calls repositories. Never touches Mongoose directly.
-- **Repositories:** Data access layer - the ONLY place that queries Mongoose models. Returns plain objects (`.lean()`).
+- **Services:** Business logic layer - orchestrates operations, calls repositories. Never runs Drizzle queries directly.
+- **Repositories:** Data access layer - the ONLY place that runs Drizzle queries (`db.select/insert/update/delete`). Returns plain objects mapped to `I*` interfaces.
 - **Schemas (Zod):** Input validation schemas for API requests.
-- **Models (Mongoose):** Database schema definitions only. No business logic in models.
+- **Drizzle table schemas:** Defined under `src/db/schema/*.ts` (one file per domain). No business logic. `src/db/schema/index.ts` re-exports all tables.
 
 ## Project Structure (MUST follow this layout)
+
+> **Data layer note:** Tables are NOT defined per-feature. All Drizzle table schemas live in `src/db/schema/*.ts` (e.g. `auth.ts`, `products.ts`, `reviews.ts`); migrations live in `src/db/migrations/`. The `model.ts` entries shown below are legacy/aspirational — in practice a feature owns `repository.ts`, `service.ts`, `schemas.ts`, `types.ts`, `components/`, and reads its table from `src/db/schema`. The repository maps Drizzle rows → `I*` interfaces (note: `_id` in interfaces maps to the row `id` column).
 
 ```
 ecommerce-website/
@@ -57,6 +59,17 @@ ecommerce-website/
 │   ├── i18n/                                 # next-intl configuration
 │   │   ├── routing.ts                        # Locales + defaultLocale (en, bn)
 │   │   └── request.ts                        # Server-side locale resolver
+│   │
+│   ├── db/                                   # Drizzle data layer
+│   │   ├── client.ts                         # Postgres-js client + drizzle() singleton (snake_case)
+│   │   ├── seed.ts                           # `npm run db:seed`
+│   │   ├── schema/                           # Table definitions (one file per domain)
+│   │   │   ├── index.ts                      # Re-exports every table
+│   │   │   ├── auth.ts                       # users, addresses, adminUsers
+│   │   │   ├── products.ts                   # products, productVariants
+│   │   │   ├── reviews.ts
+│   │   │   └── ...                           # stores, orders, categories, coupons, etc.
+│   │   └── migrations/                       # drizzle-kit output (.sql + meta/_journal.json)
 │   │
 │   ├── app/                                  # ONLY routing + page shells. Minimal logic.
 │   │   ├── layout.tsx                        # Root layout - reads tenant, injects CSS theme vars
@@ -147,7 +160,7 @@ ecommerce-website/
 │   ├── features/                             # Feature-based modules (core business logic)
 │   │   │
 │   │   ├── stores/
-│   │   │   ├── model.ts                      # Mongoose schema for Store
+│   │   │   ├── model.ts                      # (legacy) table now in src/db/schema/stores.ts
 │   │   │   ├── repository.ts                 # DB queries (findByDomain, findById, create, update)
 │   │   │   ├── service.ts                    # Business logic (resolveByDomain, createStore, updateTheme)
 │   │   │   ├── schemas.ts                    # Zod validation (createStoreSchema, updateThemeSchema)
@@ -159,7 +172,7 @@ ecommerce-website/
 │   │   │       └── StoreCard.tsx
 │   │   │
 │   │   ├── products/
-│   │   │   ├── model.ts                      # Mongoose schema for Product
+│   │   │   ├── model.ts                      # (legacy) table now in src/db/schema/products.ts
 │   │   │   ├── repository.ts                 # DB queries (findByStore, findBySlug, search)
 │   │   │   ├── service.ts                    # Business logic (createProduct, updateStock)
 │   │   │   ├── schemas.ts                    # Zod validation
@@ -182,7 +195,7 @@ ecommerce-website/
 │   │   │       └── CategoryForm.tsx
 │   │   │
 │   │   ├── auth/
-│   │   │   ├── model.ts                      # User + AdminUser Mongoose schemas (AdminUser: roleId, assignedStores)
+│   │   │   ├── model.ts                      # (legacy) tables now in src/db/schema/auth.ts (users, adminUsers)
 │   │   │   ├── repository.ts                 # findByEmail, createUser, etc.
 │   │   │   ├── service.ts                    # login, register, CRUD admins, populateRole at runtime
 │   │   │   ├── schemas.ts                    # loginSchema, registerSchema, createAdminSchema (roleId required)
@@ -290,6 +303,7 @@ ecommerce-website/
 │   │   │   │   ├── Textarea.tsx
 │   │   │   │   ├── Select.tsx
 │   │   │   │   ├── Field.tsx                 # label + input + hint + error wrapper (auto-wires a11y)
+│   │   │   │   ├── Avatar.tsx                # circular avatar w/ object-position+zoom framing; initials fallback
 │   │   │   │   ├── Card.tsx                  # Card + CardHeader
 │   │   │   │   ├── Alert.tsx                 # info/success/warning/error
 │   │   │   │   ├── Badge.tsx
@@ -323,7 +337,7 @@ ecommerce-website/
 │   │   │   └── index.ts
 │   │   │
 │   │   ├── lib/                              # Core utilities
-│   │   │   ├── db.ts                         # MongoDB connection singleton
+│   │   │   ├── (db client lives at src/db/client.ts — not here)
 │   │   │   ├── tenant.ts                     # getTenant() - reads store from request headers
 │   │   │   ├── auth.ts                       # JWT sign/verify helpers
 │   │   │   ├── permissions.ts                # hasPermission / canAccessStore helpers
@@ -353,10 +367,11 @@ ecommerce-website/
 Never query products, orders, users, categories, carts, or reviews without filtering by `storeId`. This is the data isolation mechanism.
 ```typescript
 // CORRECT - in repository
-const products = await ProductModel.find({ storeId, isActive: true }).lean();
+const rows = await db.select().from(products)
+  .where(and(eq(products.storeId, storeId), eq(products.isActive, true)));
 
 // WRONG - leaks data across stores
-const products = await ProductModel.find({ isActive: true }).lean();
+const rows = await db.select().from(products).where(eq(products.isActive, true));
 ```
 
 ### 2. Feature modules are self-contained
@@ -382,7 +397,7 @@ export async function POST(request: NextRequest) {
 ```
 
 ### 4. Repositories are the ONLY DB access layer
-Only repository files import Mongoose models. Services never call `.find()`, `.save()`, etc. directly.
+Only repository files import `db` (from `@/db/client`) and the Drizzle tables. Services never call `db.select/insert/update/delete` directly — they call repository methods, which return plain `I*` objects.
 
 ### 5. Middleware handles tenant resolution
 `middleware.ts` reads the `Host` header, resolves it to a store, and sets `x-store-id` and `x-store-slug` headers. Server Components read these via `getTenant()` from `src/shared/lib/tenant.ts`.
@@ -407,8 +422,11 @@ Theme colors/fonts are injected as CSS variables on `<html>` by root layout. Tai
 ### 9. File uploads go to RustFS
 All file uploads go to RustFS via S3-compatible API using `@aws-sdk/client-s3`. Use `src/shared/lib/storage.ts` for all upload/delete operations. Never store files locally in production.
 
-### 10. Mongoose documents must be serialized
-Repositories always use `.lean()` and return plain objects. Use `JSON.parse(JSON.stringify(doc))` when passing to Client Components.
+### 10. Repositories return plain mapped objects
+Drizzle rows are already plain objects. Repositories map each row to its `I*` interface via a `toIX(row)` helper (e.g. `toIUser`), translating `id` → `_id` and `null` → sensible defaults. `jsonb`/`Date` values pass straight through; no `.lean()` / `JSON.parse(JSON.stringify())` needed.
+
+### 11. Auth is split: schema vs. logic
+The `auth` Role/AdminUser model in CLAUDE rule #8 still applies, but: admin/customer rows live in `src/db/schema/auth.ts` (`users`, `adminUsers`, `roles` referenced via `roleId`). Permissions are resolved at runtime by joining/loading the role — same behavior, Drizzle joins instead of Mongoose `.populate()`.
 
 ## SEO Best Practices
 
@@ -445,15 +463,18 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 
 ## Environment Variables
 ```
-MONGODB_URI=mongodb://localhost:27017/ecommerce-multitenant
+DATABASE_URL=postgres://user:pass@localhost:5432/ecommerce
 JWT_SECRET=
 JWT_EXPIRY=7d
 
-# RustFS (S3-compatible)
-RUSTFS_ENDPOINT=http://localhost:9000
-RUSTFS_ACCESS_KEY=
-RUSTFS_SECRET_KEY=
-RUSTFS_BUCKET=ecommerce-uploads
+# RustFS / S3-compatible storage (S3_* preferred, RUSTFS_* fallback — see src/shared/lib/storage.ts)
+S3_ENDPOINT=http://localhost:3900
+S3_ACCESS_KEY=
+S3_SECRET_KEY=
+S3_BUCKET=ecommerce-uploads
+S3_REGION=garage
+# S3_PUBLIC_URL=         # set to a CDN base to serve directly; else served via /api/media/<key>
+UPLOAD_MAX_BYTES=5242880
 
 # Stripe (fallback - stores override with own keys)
 STRIPE_SECRET_KEY=
@@ -470,11 +491,21 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## Local Development
 1. Add to `/etc/hosts`: `127.0.0.1 shirts.localhost punjabi.localhost shoes.localhost`
-2. Start MongoDB locally
-3. Start RustFS locally
-4. Run `npx tsx scripts/seed.ts` to create demo stores
+2. Start PostgreSQL locally (set `DATABASE_URL`)
+3. Start RustFS / S3-compatible storage locally
+4. Run `npm run db:migrate` to apply schema, then `npm run db:seed` to create demo stores
 5. Run `npm run dev`
 6. Visit `http://shirts.localhost:3000` and `http://punjabi.localhost:3000` to see different stores
+
+## Database Migrations (Drizzle)
+Scripts (`package.json`): `db:generate`, `db:migrate`, `db:push`, `db:studio`, `db:seed`.
+
+Workflow when changing a table:
+1. Edit the table in `src/db/schema/*.ts`.
+2. `npm run db:generate` — diffs schema vs. last snapshot, writes a new `src/db/migrations/NNNN_*.sql` + snapshot + journal entry.
+3. `npm run db:migrate` — applies pending migrations to the DB pointed at by `DATABASE_URL`.
+
+**Critical gotcha:** `db:migrate` tracks applied migrations in the `__drizzle_migrations` table. If a journal entry exists but its `ALTER`/`CREATE` never actually ran against the DB, migrate considers it applied and silently skips it — you then hit `column X does not exist` at runtime. If that happens, apply the missing DDL directly (idempotent `ALTER TABLE ... ADD COLUMN IF NOT EXISTS ...`) and verify against `information_schema.columns`. Always run `db:migrate` after pulling new migrations, and confirm new columns exist before assuming a feature works.
 
 ## Internationalization (i18n)
 - Configured via `next-intl`. Locales: `en` (default), `bn`. `localeDetection` is disabled — locale is explicit (cookie / `/api/locale`).
@@ -638,5 +669,6 @@ import { Button, Input, Field, Card, Alert, Modal, ConfirmDialog,
 - Use named exports for components, default exports only for page/layout files
 - Use barrel exports (`index.ts`) for shared/ui components
 - Import features via `@/features/...`, shared via `@/shared/...`
-- Repositories return plain objects (never Mongoose documents to services)
+- Repositories return plain mapped `I*` objects (never raw Drizzle row builders / query objects to services)
 - Services throw typed errors, API routes catch and map to HTTP status codes
+- DB access only in repositories via `db` from `@/db/client`; tables from `@/db/schema`

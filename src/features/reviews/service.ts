@@ -34,6 +34,7 @@ export const ReviewService = {
       rating: input.rating,
       title: input.title,
       comment: input.comment,
+      images: input.images,
       reviewerName,
       isApproved: false,
     } as Partial<IReview>);

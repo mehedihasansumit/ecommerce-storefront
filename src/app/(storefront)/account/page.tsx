@@ -10,6 +10,7 @@ import { OrderService } from "@/features/orders/service";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { Card, Badge, Price } from "@/shared/components/ui";
 import LogoutButton from "./LogoutButton";
+import AvatarUploader from "./AvatarUploader";
 import RedeemPointsButton from "./RedeemPointsButton";
 import { PointService } from "@/features/points/service";
 
@@ -26,15 +27,6 @@ const STATUS_BADGE: Record<string, { tone: "warning" | "neutral" | "success" | "
   delivered:  { tone: "success", label: "Delivered" },
   cancelled:  { tone: "danger",  label: "Cancelled" },
 };
-
-function getInitials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 export default async function AccountPage() {
   const t = await getTranslations("account");
@@ -64,7 +56,6 @@ export default async function AccountPage() {
     month: "long",
   });
 
-  const initials = getInitials(user.name);
   const defaultAddr = user.addresses?.find((a) => a.isDefault) ?? user.addresses?.[0];
 
   return (
@@ -74,12 +65,11 @@ export default async function AccountPage() {
       <Card padding="lg">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0 select-none"
-              style={{ backgroundColor: "var(--color-primary)" }}
-            >
-              {initials}
-            </div>
+            <AvatarUploader
+              name={user.name}
+              initialUrl={user.avatarUrl}
+              initialPosition={user.avatarPosition}
+            />
             <div className="min-w-0">
               <h1 className="text-lg sm:text-xl font-semibold leading-tight text-[var(--color-text)] truncate">{user.name}</h1>
               <p className="text-sm text-text-secondary mt-0.5 truncate">

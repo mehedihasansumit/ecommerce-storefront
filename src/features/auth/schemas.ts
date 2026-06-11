@@ -50,3 +50,16 @@ export const addressSchema = z.object({
 export const updateAddressSchema = addressSchema.partial();
 
 export type AddressInput = z.infer<typeof addressSchema>;
+
+export const avatarPositionSchema = z.object({
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  zoom: z.number().min(1).max(3),
+});
+
+export const updateProfileSchema = z.object({
+  avatarUrl: z.string().min(1),
+  avatarPosition: avatarPositionSchema,
+});
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

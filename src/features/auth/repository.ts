@@ -4,9 +4,12 @@ import { users, addresses, adminUsers, type User, type Address, type AdminUser }
 import type {
   IAddress,
   IAdminUser,
+  IAvatarPosition,
   INotificationPreferences,
   IUser,
 } from "./types";
+
+const DEFAULT_AVATAR_POSITION: IAvatarPosition = { x: 50, y: 50, zoom: 1 };
 
 function toIAddress(row: Address): IAddress {
   return {
@@ -29,6 +32,8 @@ function toIUser(row: User, addressList: Address[]): IUser {
     email: row.email,
     passwordHash: row.passwordHash,
     phone: row.phone ?? "",
+    avatarUrl: row.avatarUrl ?? null,
+    avatarPosition: (row.avatarPosition as IAvatarPosition) ?? DEFAULT_AVATAR_POSITION,
     addresses: addressList.map(toIAddress),
     isActive: row.isActive,
     points: row.points,
@@ -127,6 +132,15 @@ export const AuthRepository = {
   async createUser(data: Partial<IUser>): Promise<IUser> {
     const [row] = await db.insert(users).values(userInsert(data)).returning();
     return toIUser(row, []);
+  },
+
+  async updateUser(id: string, data: Partial<IUser>): Promise<IUser | null> {
+    const [row] = await db
+      .update(users)
+      .set({ ...userInsert(data), updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return hydrateUser(row);
   },
 
   async findAdminByEmail(email: string): Promise<IAdminUser | null> {

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v1.1.07";
+const CACHE_VERSION = "v1.1.09";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `store-cache-${CACHE_VERSION}`;
 const ALL_CACHES = [STATIC_CACHE, DYNAMIC_CACHE];
@@ -52,6 +52,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Never touch React Server Component / Next.js navigation payloads.
+  // These Flight streams reference the live client runtime; serving a stale
+  // or cached copy corrupts the RSC reader (e.g. "Cannot read properties of
+  // null (reading 'enqueueModel')"). Always let them hit the network.
+  if (
+    url.searchParams.has("_rsc") ||
+    request.headers.get("RSC") === "1" ||
+    request.headers.get("Next-Router-Prefetch") === "1" ||
+    request.headers.get("Next-Router-State-Tree") !== null
+  ) {
+    return;
+  }
+
   // Immutable Next.js static assets → cache first (they have content hashes)
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(cacheFirst(request, STATIC_CACHE));
@@ -71,8 +84,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Everything else (fonts, scripts) → stale-while-revalidate
-  event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE));
+  // Fonts / styles / scripts → stale-while-revalidate
+  if (
+    request.destination === "font" ||
+    request.destination === "style" ||
+    request.destination === "script"
+  ) {
+    event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE));
+    return;
+  }
+
+  // Unknown destination (fetch/XHR, RSC data, etc.) → don't cache; go to network.
 });
 
 async function cacheFirst(request, cacheName) {

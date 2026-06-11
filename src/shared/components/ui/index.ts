@@ -7,6 +7,9 @@ export { RichTextEditor } from "./RichTextEditor";
 export { Select } from "./Select";
 export { Field } from "./Field";
 
+export { Avatar } from "./Avatar";
+export type { AvatarPosition } from "./Avatar";
+
 export { Card, CardHeader } from "./Card";
 export { Alert } from "./Alert";
 export { Badge } from "./Badge";

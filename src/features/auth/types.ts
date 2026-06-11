@@ -20,6 +20,12 @@ export interface INotificationPreferences {
   inApp: boolean;
 }
 
+export interface IAvatarPosition {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
 export interface IUser {
   _id: string;
   storeId: string;
@@ -27,6 +33,8 @@ export interface IUser {
   email: string;
   passwordHash: string;
   phone: string;
+  avatarUrl: string | null;
+  avatarPosition: IAvatarPosition;
   addresses: IAddress[];
   isActive: boolean;
   points: number;

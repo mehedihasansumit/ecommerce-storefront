@@ -10,5 +10,16 @@ export async function GET() {
   }
   const { userId, email } = payload as JwtCustomerPayload;
   const user = await AuthRepository.findUserById(userId);
-  return NextResponse.json({ user: { userId, email, name: user?.name ?? null } }, { status: 200 });
+  return NextResponse.json(
+    {
+      user: {
+        userId,
+        email,
+        name: user?.name ?? null,
+        avatarUrl: user?.avatarUrl ?? null,
+        avatarPosition: user?.avatarPosition ?? null,
+      },
+    },
+    { status: 200 },
+  );
 }

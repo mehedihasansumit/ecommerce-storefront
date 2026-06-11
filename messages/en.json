@@ -186,7 +186,16 @@
     "defaultAddress": "Default Address",
     "notProvided": "Not provided",
     "totalOrders": "Total Orders",
-    "totalSpent": "Total Spent"
+    "totalSpent": "Total Spent",
+    "cancel": "Cancel",
+    "editPhoto": "Edit photo",
+    "uploadPhoto": "Upload photo",
+    "changePhoto": "Change photo",
+    "dragToReposition": "Drag to reposition",
+    "zoom": "Zoom",
+    "savePhoto": "Save photo",
+    "photoUpdated": "Profile photo updated",
+    "photoUploadFailed": "Failed to upload photo. Please try again."
   },
   "addresses": {
     "title": "My Addresses",

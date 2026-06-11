@@ -11,7 +11,7 @@ import {
   LogIn,
 } from "lucide-react";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
-import { StoreImage } from "@/shared/components/ui";
+import { StoreImage, Avatar, type AvatarPosition } from "@/shared/components/ui";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { useCart } from "@/shared/context/CartContext";
 import { useState, useEffect, useRef } from "react";
@@ -31,6 +31,8 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userAvatarPos, setUserAvatarPos] = useState<AvatarPosition | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +46,8 @@ export function Header() {
       .then((data) => {
         setUserEmail(data.user?.email ?? null);
         setUserName(data.user?.name ?? null);
+        setUserAvatar(data.user?.avatarUrl ?? null);
+        setUserAvatarPos(data.user?.avatarPosition ?? null);
       })
       .catch(() => {});
   }, [pathname]);
@@ -62,6 +66,8 @@ export function Header() {
     await fetch("/api/auth/logout", { method: "POST" });
     setUserEmail(null);
     setUserName(null);
+    setUserAvatar(null);
+    setUserAvatarPos(null);
     setUserMenuOpen(false);
     router.push("/");
     router.refresh();
@@ -236,14 +242,12 @@ export function Header() {
                     aria-label="Account menu"
                     aria-expanded={userMenuOpen}
                   >
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white select-none"
-                      style={{ backgroundColor: "var(--color-primary)" }}
-                    >
-                      {userName
-                        ? userName.charAt(0).toUpperCase()
-                        : userEmail.charAt(0).toUpperCase()}
-                    </span>
+                    <Avatar
+                      src={userAvatar}
+                      position={userAvatarPos}
+                      name={userName || userEmail}
+                      size="sm"
+                    />
                   </button>
                   {userMenuOpen && (
                     <div

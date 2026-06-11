@@ -6,7 +6,10 @@ export interface IReview {
   rating: number;
   title: string;
   comment: string;
+  images: string[];
   reviewerName: string;
+  reviewerAvatarUrl: string | null;
+  reviewerAvatarPosition: { x: number; y: number; zoom: number } | null;
   isApproved: boolean;
   createdAt: Date;
   updatedAt: Date;

@@ -24,6 +24,10 @@ export const users = pgTable(
     passwordHash: text("password_hash").notNull(),
     name: text("name"),
     phone: text("phone"),
+    avatarUrl: text("avatar_url"),
+    avatarPosition: jsonb("avatar_position")
+      .notNull()
+      .default({ x: 50, y: 50, zoom: 1 }),
     points: integer("points").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
     notificationPreferences: jsonb("notification_preferences")

@@ -161,6 +161,7 @@ export function ProductImageGallery({
               alt={current?.alt || productName}
               fill
               priority
+              fullRes
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
               style={{
@@ -327,6 +328,7 @@ export function ProductImageGallery({
                   sizes="85vw"
                   className="object-contain"
                   priority
+                  fullRes
                 />
               </div>
             )}

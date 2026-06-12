@@ -17,6 +17,10 @@ function toIAddress(row: Address): IAddress {
     label: row.label ?? "",
     street: row.street,
     city: row.city,
+    division: row.division ?? "",
+    district: row.district ?? "",
+    upazila: row.upazila ?? "",
+    union: row.unionName ?? "",
     state: row.state ?? "",
     postalCode: row.postalCode ?? "",
     country: row.country,
@@ -270,6 +274,10 @@ export const AuthRepository = {
         label: address.label || null,
         street: address.street,
         city: address.city,
+        division: address.division || null,
+        district: address.district || null,
+        upazila: address.upazila || null,
+        unionName: address.union || null,
         state: address.state || null,
         postalCode: address.postalCode || null,
         country: address.country,
@@ -307,6 +315,10 @@ export const AuthRepository = {
       if (updates.label !== undefined) setObj.label = updates.label || null;
       if (updates.street !== undefined) setObj.street = updates.street;
       if (updates.city !== undefined) setObj.city = updates.city;
+      if (updates.division !== undefined) setObj.division = updates.division || null;
+      if (updates.district !== undefined) setObj.district = updates.district || null;
+      if (updates.upazila !== undefined) setObj.upazila = updates.upazila || null;
+      if (updates.union !== undefined) setObj.unionName = updates.union || null;
       if (updates.state !== undefined) setObj.state = updates.state || null;
       if (updates.postalCode !== undefined) setObj.postalCode = updates.postalCode || null;
       if (updates.country !== undefined) setObj.country = updates.country;

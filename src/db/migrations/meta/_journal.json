@@ -64,6 +64,20 @@
       "when": 1781200353793,
       "tag": "0008_funny_the_call",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781213000985,
+      "tag": "0009_talented_baron_strucker",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781230113559,
+      "tag": "0010_fair_warbound",
+      "breakpoints": true
     }
   ]
 }

@@ -12,6 +12,7 @@ import {
   CreditCard,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Tag,
   Lock,
   Truck,
@@ -23,13 +24,18 @@ import { t as tLocalized } from "@/shared/lib/i18n";
 import { AddressSelector } from "@/features/auth/components/AddressSelector";
 import type { IAddress } from "@/features/auth/types";
 import { useTenant } from "@/shared/hooks/useTenant";
+import { LocationSelect } from "@/shared/components/ui";
+import { calcDeliveryCharge, isInsideDhaka } from "@/shared/lib/delivery";
 
 interface FormData {
   name: string;
   phone: string;
   email: string;
   street: string;
-  city: string;
+  division: string;
+  district: string;
+  upazila: string;
+  union: string;
   postalCode: string;
   country: string;
   notes: string;
@@ -40,7 +46,10 @@ const initialForm: FormData = {
   phone: "",
   email: "",
   street: "",
-  city: "",
+  division: "",
+  district: "",
+  upazila: "",
+  union: "",
   postalCode: "",
   country: "Bangladesh",
   notes: "",
@@ -106,7 +115,10 @@ export default function CheckoutPage() {
           setForm((f) => ({
             ...f,
             street: defaultAddr.street,
-            city: defaultAddr.city,
+            division: defaultAddr.division || "",
+            district: defaultAddr.district || "",
+            upazila: defaultAddr.upazila || "",
+            union: defaultAddr.union || "",
             postalCode: defaultAddr.postalCode || "",
             country: defaultAddr.country || "Bangladesh",
           }));
@@ -132,14 +144,26 @@ export default function CheckoutPage() {
       setForm((f) => ({
         ...f,
         street: address.street,
-        city: address.city,
+        division: address.division || "",
+        district: address.district || "",
+        upazila: address.upazila || "",
+        union: address.union || "",
         postalCode: address.postalCode || "",
         country: address.country || "Bangladesh",
       }));
     } else {
       setSelectedAddressId(null);
       setUsingSavedAddress(false);
-      setForm((f) => ({ ...f, street: "", city: "", postalCode: "", country: "Bangladesh" }));
+      setForm((f) => ({
+        ...f,
+        street: "",
+        division: "",
+        district: "",
+        upazila: "",
+        union: "",
+        postalCode: "",
+        country: "Bangladesh",
+      }));
     }
   }
 
@@ -158,7 +182,10 @@ export default function CheckoutPage() {
     setForm((f) => ({
       ...f,
       street: newAddr.street,
-      city: newAddr.city,
+      division: newAddr.division || "",
+      district: newAddr.district || "",
+      upazila: newAddr.upazila || "",
+      union: newAddr.union || "",
       postalCode: newAddr.postalCode || "",
       country: newAddr.country || "Bangladesh",
     }));
@@ -174,7 +201,9 @@ export default function CheckoutPage() {
       e.phone = t("phoneInvalid");
     }
     if (!form.street.trim()) e.street = t("addressRequired");
-    if (!form.city.trim()) e.city = t("cityRequired");
+    if (!form.division.trim()) e.division = t("divisionRequired");
+    if (!form.district.trim()) e.district = t("districtRequired");
+    if (!form.upazila.trim()) e.upazila = t("upazilaRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -201,10 +230,14 @@ export default function CheckoutPage() {
             name: form.name,
             phone: `+88${form.phone.trim()}`,
             street: form.street,
-            city: form.city,
+            division: form.division,
+            district: form.district,
+            upazila: form.upazila,
+            union: form.union,
+            city: form.district, // backward-compat: city = district
             postalCode: form.postalCode,
             country: form.country,
-            state: "",
+            state: form.division,
           },
           paymentMethod: "cod",
           notes: form.notes,
@@ -227,6 +260,21 @@ export default function CheckoutPage() {
       setSubmitting(false);
     }
   }
+
+  const deliveryEnabled = !!tenant?.deliveryConfig?.enabled;
+  // Charge is district-driven; don't apply a fee until the customer picks one
+  // (an empty district would otherwise resolve to the outside-Dhaka rate).
+  const shippingCost = form.district
+    ? calcDeliveryCharge(tenant?.deliveryConfig, form.district, campaignFreeShipping)
+    : 0;
+  const shippingPending = deliveryEnabled && !campaignFreeShipping && !form.district;
+  const deliveryZoneLabel =
+    deliveryEnabled && form.district && !campaignFreeShipping
+      ? isInsideDhaka(form.district)
+        ? t("insideDhaka")
+        : t("outsideDhaka")
+      : "";
+  const grandTotal = total + shippingCost;
 
   if (!mounted) return null;
 
@@ -307,7 +355,50 @@ export default function CheckoutPage() {
                   />
                 </FieldWrap>
 
-                {/* Street */}
+                {/* Location: Division → District → Upazila → Union */}
+                <LocationSelect
+                  value={{
+                    division: form.division,
+                    district: form.district,
+                    upazila: form.upazila,
+                    union: form.union,
+                  }}
+                  onChange={(v) => setForm((f) => ({ ...f, ...v }))}
+                  locale={locale}
+                  disabled={usingSavedAddress}
+                  required={{ division: true, district: true, upazila: true }}
+                  errors={{
+                    division: errors.division,
+                    district: errors.district,
+                    upazila: errors.upazila,
+                  }}
+                  labels={{
+                    division: t("division"),
+                    district: t("district"),
+                    upazila: t("upazila"),
+                    union: t("union"),
+                  }}
+                  placeholders={{
+                    division: t("selectDivision"),
+                    district: t("selectDistrict"),
+                    upazila: t("selectUpazila"),
+                    union: t("selectUnion"),
+                  }}
+                />
+
+                {/* Postal */}
+                <FieldWrap label={t("postalCode")}>
+                  <input
+                    type="text"
+                    value={form.postalCode}
+                    onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
+                    readOnly={usingSavedAddress}
+                    placeholder={t("postalCode")}
+                    className={usingSavedAddress ? inputReadOnly : inputNormal}
+                  />
+                </FieldWrap>
+
+                {/* Street — exact house/road, after the area is chosen */}
                 <FieldWrap label={t("streetAddress")} required error={errors.street}>
                   <input
                     type="text"
@@ -318,30 +409,6 @@ export default function CheckoutPage() {
                     className={usingSavedAddress ? inputReadOnly : errors.street ? inputError : inputNormal}
                   />
                 </FieldWrap>
-
-                {/* City + Postal */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FieldWrap label={t("city")} required error={errors.city}>
-                    <input
-                      type="text"
-                      value={form.city}
-                      onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-                      readOnly={usingSavedAddress}
-                      placeholder={t("city")}
-                      className={usingSavedAddress ? inputReadOnly : errors.city ? inputError : inputNormal}
-                    />
-                  </FieldWrap>
-                  <FieldWrap label={t("postalCode")}>
-                    <input
-                      type="text"
-                      value={form.postalCode}
-                      onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
-                      readOnly={usingSavedAddress}
-                      placeholder={t("postalCode")}
-                      className={usingSavedAddress ? inputReadOnly : inputNormal}
-                    />
-                  </FieldWrap>
-                </div>
 
                 {/* Country */}
                 <FieldWrap label={t("country")}>
@@ -434,13 +501,17 @@ export default function CheckoutPage() {
               {/* Items */}
               <div className="px-5 py-4 space-y-3 max-h-56 overflow-y-auto">
                 {items.map((item, idx) => (
-                  <div key={`${item.productId}-${idx}`} className="flex items-center gap-3">
+                  <Link
+                    key={`${item.productId}-${idx}`}
+                    href={item.productSlug ? `/products/${item.productSlug}` : "#"}
+                    className="group flex items-center gap-3 -mx-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-surface"
+                  >
                     <div
                       className="w-12 h-12 bg-surface overflow-hidden relative shrink-0"
                       style={{ borderRadius: "var(--border-radius)" }}
                     >
                       {item.thumbnail ? (
-                        <Image src={item.thumbnail} alt={item.productName} fill className="object-cover" />
+                        <Image src={item.thumbnail} alt={item.productName} fill className="object-cover transition-transform group-hover:scale-105" />
                       ) : (
                         <ShoppingBag size={16} className="m-auto mt-3 text-text-tertiary" />
                       )}
@@ -451,7 +522,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate leading-snug">{item.productName}</p>
+                      <p className="text-xs font-medium truncate leading-snug transition-colors group-hover:text-[var(--color-primary)]">{item.productName}</p>
                       {Object.keys(item.variantSelections || {}).length > 0 && (
                         <p className="text-[11px] text-text-tertiary truncate">
                           {Object.entries(item.variantSelections).map(([k, v]) => `${k}: ${v}`).join(" · ")}
@@ -459,10 +530,13 @@ export default function CheckoutPage() {
                       )}
                       <p className="text-[11px] text-text-secondary">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-xs font-semibold shrink-0" style={{ color: "var(--color-price)" }}>
-                      ৳{(item.priceAtAdd * item.quantity).toLocaleString()}
-                    </p>
-                  </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <p className="text-xs font-semibold" style={{ color: "var(--color-price)" }}>
+                        ৳{(item.priceAtAdd * item.quantity).toLocaleString()}
+                      </p>
+                      <ChevronRight size={14} className="text-text-tertiary opacity-0 -ml-0.5 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" />
+                    </div>
+                  </Link>
                 ))}
               </div>
 
@@ -510,11 +584,25 @@ export default function CheckoutPage() {
                 ))}
                 <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span className="flex items-center gap-1.5">
-                    <Truck size={13} />{t("shipping")}
+                    <Truck size={13} />
+                    {t("shipping")}
+                    {deliveryZoneLabel && (
+                      <span className="text-[11px] text-text-tertiary font-normal">
+                        · {deliveryZoneLabel}
+                      </span>
+                    )}
                   </span>
-                  <span className="shrink-0 font-medium text-green-600 dark:text-green-400">
-                    {campaignFreeShipping ? "Free (campaign)" : "Free"}
-                  </span>
+                  {shippingPending ? (
+                    <span className="shrink-0 text-[11px] text-text-tertiary text-right">
+                      {t("shippingSelectArea")}
+                    </span>
+                  ) : shippingCost > 0 ? (
+                    <span className="shrink-0 font-medium">৳{shippingCost.toLocaleString()}</span>
+                  ) : (
+                    <span className="shrink-0 font-medium text-green-600 dark:text-green-400">
+                      {campaignFreeShipping ? t("shippingFreeCampaign") : t("shippingFree")}
+                    </span>
+                  )}
                 </div>
 
                 <div className="pt-3 mt-1 border-t border-border-subtle flex items-center justify-between gap-3">
@@ -523,7 +611,7 @@ export default function CheckoutPage() {
                     className="font-extrabold text-xl shrink-0"
                     style={{ color: "var(--color-price)" }}
                   >
-                    ৳{total.toLocaleString()}
+                    ৳{grandTotal.toLocaleString()}
                   </span>
                 </div>
               </div>

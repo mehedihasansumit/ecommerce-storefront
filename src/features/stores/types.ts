@@ -1,4 +1,7 @@
 import type { LocalizedString } from "@/shared/types/i18n";
+import type { IStoreDeliveryConfig } from "@/shared/lib/delivery";
+
+export type { IStoreDeliveryConfig };
 
 export interface IStoreDarkTheme {
   primaryColor?: string;
@@ -147,6 +150,7 @@ export interface IStore {
   socialOrdering: IStoreSocialOrdering;
   pointsConfig: IStorePointsConfig;
   refundPolicy: IStoreRefundPolicy;
+  deliveryConfig: IStoreDeliveryConfig;
   supportedLanguages: string[];
   defaultLanguage: string;
   createdAt: Date;

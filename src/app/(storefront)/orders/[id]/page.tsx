@@ -754,7 +754,11 @@ export default function OrderDetailPage({
             </div>
             <div className="flex justify-between text-sm text-text-secondary">
               <span>{t("shipping")}</span>
-              <span className="text-green-600 dark:text-green-400 font-medium">{t("shippingFree")}</span>
+              {order.shippingCost > 0 ? (
+                <span>৳{order.shippingCost.toLocaleString()}</span>
+              ) : (
+                <span className="text-green-600 dark:text-green-400 font-medium">{t("shippingFree")}</span>
+              )}
             </div>
             <div
               className="flex justify-between text-base font-bold pt-2 border-t border-border-subtle"
@@ -778,9 +782,16 @@ export default function OrderDetailPage({
               <p className="text-text-secondary">{order.shippingAddress.phone}</p>
               <p className="text-text-secondary mt-1">{order.shippingAddress.street}</p>
               <p className="text-text-secondary">
-                {order.shippingAddress.city}
+                {[
+                  order.shippingAddress.union,
+                  order.shippingAddress.upazila,
+                  order.shippingAddress.district,
+                  order.shippingAddress.division,
+                ]
+                  .filter(Boolean)
+                  .join(", ") || order.shippingAddress.city}
                 {order.shippingAddress.postalCode
-                  ? `, ${order.shippingAddress.postalCode}`
+                  ? ` - ${order.shippingAddress.postalCode}`
                   : ""}
               </p>
               {order.shippingAddress.country && (

@@ -26,6 +26,7 @@ export const stores = pgTable(
     socialOrdering: jsonb("social_ordering").notNull().default({}),
     pointsConfig: jsonb("points_config").notNull().default({}),
     refundPolicy: jsonb("refund_policy").notNull().default({}),
+    deliveryConfig: jsonb("delivery_config").notNull().default({}),
     supportedLanguages: text("supported_languages")
       .array()
       .notNull()

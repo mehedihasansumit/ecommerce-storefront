@@ -23,6 +23,7 @@ import {
   Sparkles,
   RotateCcw,
   Info,
+  Truck,
 } from "lucide-react";
 import type { IStore, HeroLayoutStyle, IStoreTheme } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
@@ -91,7 +92,8 @@ type Tab =
   | "socialOrdering"
   | "seo"
   | "loyalty"
-  | "refundPolicy";
+  | "refundPolicy"
+  | "delivery";
 
 const STORE_TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "general", label: "General", icon: Settings },
@@ -101,6 +103,7 @@ const STORE_TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "socialOrdering", label: "Social Ordering", icon: MessageCircle },
   { id: "seo", label: "SEO", icon: Search },
   { id: "refundPolicy", label: "Refund Policy", icon: RotateCcw },
+  { id: "delivery", label: "Delivery", icon: Truck },
 ];
 
 const LOYALTY_TAB: { id: Tab; label: string; icon: React.ElementType } = {
@@ -336,6 +339,11 @@ export default function StoreEditForm({
       description: store.refundPolicy?.description ?? "",
       autoApprove: store.refundPolicy?.autoApprove ?? false,
     },
+    deliveryConfig: {
+      enabled: store.deliveryConfig?.enabled ?? false,
+      insideDhakaCharge: store.deliveryConfig?.insideDhakaCharge ?? 0,
+      outsideDhakaCharge: store.deliveryConfig?.outsideDhakaCharge ?? 0,
+    },
   });
 
   const [heroBanners, setHeroBanners] = useState<BannerState[]>(
@@ -519,6 +527,7 @@ export default function StoreEditForm({
         payload.supportedLanguages = formData.supportedLanguages;
         payload.defaultLanguage = formData.defaultLanguage;
         payload.refundPolicy = formData.refundPolicy;
+        payload.deliveryConfig = formData.deliveryConfig;
       }
       if (canManagePoints) {
         payload.pointsConfig = formData.pointsConfig;
@@ -2273,6 +2282,128 @@ export default function StoreEditForm({
                           </p>
                         </div>
                       )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "delivery" && (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 space-y-5">
+              <div>
+                <SectionTitle>Delivery Charges</SectionTitle>
+                <p className="text-xs text-admin-text-subtle mt-1">
+                  Charge a flat delivery fee at checkout based on the customer&apos;s
+                  district. Inside Dhaka vs. anywhere else.
+                </p>
+              </div>
+
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-admin-border bg-admin-surface-raised cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={formData.deliveryConfig.enabled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      deliveryConfig: { ...prev.deliveryConfig, enabled: e.target.checked },
+                    }))
+                  }
+                  disabled={loading}
+                  className="w-5 h-5 rounded border-admin-border-md text-admin-text-primary focus:ring-gray-900 mt-0.5"
+                />
+                <div>
+                  <p className="text-sm font-medium text-admin-text-secondary">
+                    Enable delivery charges
+                  </p>
+                  <p className="text-xs text-admin-text-subtle mt-0.5">
+                    When off, delivery is free for all orders.
+                  </p>
+                </div>
+              </label>
+
+              {formData.deliveryConfig.enabled && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field
+                    label="Inside Dhaka (৳)"
+                    hint="Applied when district is Dhaka"
+                  >
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.deliveryConfig.insideDhakaCharge}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          deliveryConfig: {
+                            ...prev.deliveryConfig,
+                            insideDhakaCharge: Math.max(0, parseFloat(e.target.value || "0")),
+                          },
+                        }))
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                    />
+                  </Field>
+
+                  <Field
+                    label="Outside Dhaka (৳)"
+                    hint="Applied for every other district"
+                  >
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.deliveryConfig.outsideDhakaCharge}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          deliveryConfig: {
+                            ...prev.deliveryConfig,
+                            outsideDhakaCharge: Math.max(0, parseFloat(e.target.value || "0")),
+                          },
+                        }))
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+
+            {/* Preview */}
+            <div className="lg:col-span-2">
+              <SectionTitle>Summary</SectionTitle>
+              <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${formData.deliveryConfig.enabled ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-400"}`}>
+                    <Truck size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-admin-text-secondary">
+                      {formData.deliveryConfig.enabled ? "Delivery charges on" : "Free delivery"}
+                    </p>
+                    <p className="text-xs text-admin-text-muted">
+                      {formData.deliveryConfig.enabled
+                        ? "Charged by district at checkout"
+                        : "No delivery fee applied"}
+                    </p>
+                  </div>
+                </div>
+                {formData.deliveryConfig.enabled && (
+                  <>
+                    <div className="border-t border-admin-border" />
+                    <div className="text-xs text-admin-text-secondary space-y-1.5">
+                      <div className="flex justify-between">
+                        <span className="text-admin-text-subtle">Inside Dhaka</span>
+                        <span className="font-medium">৳{formData.deliveryConfig.insideDhakaCharge.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-admin-text-subtle">Outside Dhaka</span>
+                        <span className="font-medium">৳{formData.deliveryConfig.outsideDhakaCharge.toLocaleString()}</span>
+                      </div>
                     </div>
                   </>
                 )}

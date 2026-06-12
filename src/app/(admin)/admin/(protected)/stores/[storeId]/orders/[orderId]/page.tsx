@@ -456,9 +456,15 @@ export default async function OrderDetailPage({
               <address className="not-italic text-sm text-admin-text-secondary space-y-0.5 leading-relaxed">
                 <p className="font-medium">{order.shippingAddress.street}</p>
                 <p>
-                  {order.shippingAddress.city}
-                  {order.shippingAddress.state ? `, ${order.shippingAddress.state}` : ""}
-                  {order.shippingAddress.postalCode ? ` ${order.shippingAddress.postalCode}` : ""}
+                  {[
+                    order.shippingAddress.union,
+                    order.shippingAddress.upazila,
+                    order.shippingAddress.district,
+                    order.shippingAddress.division,
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || order.shippingAddress.city}
+                  {order.shippingAddress.postalCode ? ` - ${order.shippingAddress.postalCode}` : ""}
                 </p>
                 <p className="text-admin-text-muted">{order.shippingAddress.country}</p>
               </address>

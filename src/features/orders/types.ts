@@ -13,6 +13,10 @@ export interface IShippingAddress {
   name: string;
   street: string;
   city: string;
+  division?: string;
+  district?: string;
+  upazila?: string;
+  union?: string;
   state: string;
   postalCode: string;
   country: string;

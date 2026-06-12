@@ -8,6 +8,7 @@ import type { IOrder, IOrderItem, RefundRequestStatus } from "./types";
 import type { CreateOrderInput, CreateRefundRequestInput, ReviewRefundRequestInput } from "./schemas";
 import { tAdmin } from "@/shared/lib/i18n";
 import { normalizePhone } from "@/shared/lib/phone";
+import { calcDeliveryCharge } from "@/shared/lib/delivery";
 import {
   allocateBulkLineTotals,
   getBulkUnitPrice,
@@ -179,7 +180,18 @@ export const OrderService = {
     const campaignDiscount = campaignEval.discountTotal;
     discount = round2(discount + campaignDiscount);
 
-    const total = Math.max(0, subtotal - discount);
+    // Delivery charge: zone derived from district, free when a campaign grants
+    // free shipping. Store config is authoritative — never trust client totals.
+    const store = await StoreService.getById(storeId);
+    const shippingCost = round2(
+      calcDeliveryCharge(
+        store?.deliveryConfig,
+        input.shippingAddress.district,
+        campaignEval.freeShipping,
+      ),
+    );
+
+    const total = Math.max(0, round2(subtotal - discount + shippingCost));
     const orderNumber = generateOrderNumber();
 
     let order: IOrder;
@@ -192,7 +204,7 @@ export const OrderService = {
         guestEmail: input.guestEmail || undefined,
         items: orderItems,
         subtotal,
-        shippingCost: 0,
+        shippingCost,
         tax: 0,
         discount,
         couponCode,

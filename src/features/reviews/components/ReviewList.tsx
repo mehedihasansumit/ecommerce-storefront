@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { ReviewStars } from "./ReviewStars";
 import { Avatar } from "@/shared/components/ui";
+import { imageGuardProps } from "@/shared/lib/imageGuard";
 import type { IReview } from "../types";
 
 interface ReviewListProps {
@@ -103,7 +104,7 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
                         aria-label="View review photo"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt="Review photo" loading="lazy" className="w-full h-full object-cover" />
+                        <img src={url} alt="Review photo" loading="lazy" className="w-full h-full object-cover" {...imageGuardProps} />
                       </button>
                     ))}
                   </div>
@@ -157,6 +158,7 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
             alt="Review photo"
             onClick={(e) => e.stopPropagation()}
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            {...imageGuardProps}
           />
         </div>
       )}

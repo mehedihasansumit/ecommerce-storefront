@@ -14,6 +14,7 @@ import type {
   IHeroBanner,
   HeroLayoutStyle,
 } from "./types";
+import { DEFAULT_DELIVERY_CONFIG, type IStoreDeliveryConfig } from "@/shared/lib/delivery";
 
 function toIStore(row: Store): IStore {
   return {
@@ -38,6 +39,10 @@ function toIStore(row: Store): IStore {
     socialOrdering: row.socialOrdering as IStoreSocialOrdering,
     pointsConfig: row.pointsConfig as IStorePointsConfig,
     refundPolicy: row.refundPolicy as IStoreRefundPolicy,
+    deliveryConfig: {
+      ...DEFAULT_DELIVERY_CONFIG,
+      ...(row.deliveryConfig as Partial<IStoreDeliveryConfig>),
+    },
     supportedLanguages: row.supportedLanguages,
     defaultLanguage: row.defaultLanguage,
     createdAt: row.createdAt,

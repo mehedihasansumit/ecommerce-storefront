@@ -221,6 +221,17 @@ a {
   100% { background-position: 200% 0; }
 }
 
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    #ededed 37%,
+    var(--color-surface) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
 @keyframes heroZoom {
   from { transform: scale(1); }
   to { transform: scale(1.08); }

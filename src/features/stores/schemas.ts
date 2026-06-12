@@ -134,6 +134,13 @@ export const updateStoreSchema = z.object({
       autoApprove: z.boolean().optional(),
     })
     .optional(),
+  deliveryConfig: z
+    .object({
+      enabled: z.boolean().optional(),
+      insideDhakaCharge: z.number().min(0).optional(),
+      outsideDhakaCharge: z.number().min(0).optional(),
+    })
+    .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),
 });

@@ -20,7 +20,11 @@ type Folder = (typeof ALLOWED_FOLDERS)[number];
 
 const VARIANT_WIDTHS = [400, 800, 1200, 2000] as const;
 
-const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 5 * 1024 * 1024;
+// Longest side of the stored "full" image (feeds hover-zoom + lightbox). Capped
+// and re-encoded to WebP so a 4000px camera photo doesn't ship as a 1-2MB blob.
+const FULL_MAX = 2048;
+
+const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 15 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,14 +77,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const originalKey = generateFileKey(storeId, folder, file.name);
-    const originalUrl = await uploadFile(originalKey, buffer, file.type);
+    // Stored "full" image: capped + re-encoded to WebP (replaces the raw original).
+    const originalKey = generateFileKey(storeId, folder, "image.webp");
+    const fullBuffer = await sharp(buffer)
+      .rotate()
+      .resize({ width: FULL_MAX, height: FULL_MAX, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+    const fullMeta = await sharp(fullBuffer).metadata();
+    const fullWidth = fullMeta.width ?? metadata.width;
+    const fullHeight = fullMeta.height ?? metadata.height;
+    const originalUrl = await uploadFile(originalKey, fullBuffer, "image/webp");
 
     const [variantsResult, blurBuffer] = await Promise.all([
       (async () => {
         const variants: Record<string, string> = {};
         for (const w of VARIANT_WIDTHS) {
-          if (w >= metadata.width!) continue;
+          if (w >= fullWidth!) continue;
           const vKey = variantKey(originalKey, `w${w}`);
           const vBuffer = await sharp(buffer)
             .rotate()
@@ -105,8 +118,8 @@ export async function POST(request: NextRequest) {
       {
         url: originalUrl,
         key: originalKey,
-        width: metadata.width,
-        height: metadata.height,
+        width: fullWidth,
+        height: fullHeight,
         variants: variantsResult,
         blurDataURL,
       },

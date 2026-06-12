@@ -5,6 +5,8 @@ export { Input } from "./Input";
 export { Textarea } from "./Textarea";
 export { RichTextEditor } from "./RichTextEditor";
 export { Select } from "./Select";
+export { LocationSelect } from "./LocationSelect";
+export type { LocationValue } from "./LocationSelect";
 export { Field } from "./Field";
 
 export { Avatar } from "./Avatar";

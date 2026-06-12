@@ -97,10 +97,11 @@ export function AddressCard({
       <div className="mt-2 text-sm text-text-secondary space-y-0.5 ml-6">
         <p>{address.street}</p>
         <p>
-          {address.city}
-          {address.postalCode ? `, ${address.postalCode}` : ""}
+          {[address.union, address.upazila, address.district, address.division]
+            .filter(Boolean)
+            .join(", ") || address.city}
+          {address.postalCode ? ` - ${address.postalCode}` : ""}
         </p>
-        {address.state && <p>{address.state}</p>}
         <p>{address.country}</p>
       </div>
     </>

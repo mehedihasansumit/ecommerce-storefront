@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Loader2 } from "lucide-react";
 import type { IAddress } from "../types";
-import { Button, Alert } from "@/shared/components/ui";
+import { Button, Alert, LocationSelect } from "@/shared/components/ui";
 
 interface AddressFormProps {
   initialData?: IAddress;
@@ -20,12 +20,17 @@ export function AddressForm({
   submitLabel,
 }: AddressFormProps) {
   const t = useTranslations("addresses");
+  const locale = useLocale();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     label: initialData?.label ?? "",
     street: initialData?.street ?? "",
     city: initialData?.city ?? "",
+    division: initialData?.division ?? "",
+    district: initialData?.district ?? "",
+    upazila: initialData?.upazila ?? "",
+    union: initialData?.union ?? "",
     state: initialData?.state ?? "",
     postalCode: initialData?.postalCode ?? "",
     country: initialData?.country ?? "Bangladesh",
@@ -36,7 +41,9 @@ export function AddressForm({
   function validate(): boolean {
     const errs: Record<string, string> = {};
     if (!form.street.trim()) errs.street = t("street") + " is required";
-    if (!form.city.trim()) errs.city = t("city") + " is required";
+    if (!form.division.trim()) errs.division = t("division") + " is required";
+    if (!form.district.trim()) errs.district = t("district") + " is required";
+    if (!form.upazila.trim()) errs.upazila = t("upazila") + " is required";
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -47,7 +54,8 @@ export function AddressForm({
     setSaving(true);
     setError("");
     try {
-      await onSubmit(form);
+      // backward-compat: city mirrors district
+      await onSubmit({ ...form, city: form.district });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save address");
     } finally {
@@ -97,50 +105,47 @@ export function AddressForm({
         )}
       </div>
 
-      {/* City + Postal */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-            {t("city")} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={form.city}
-            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-            placeholder={t("city")}
-            className={inputClass("city")}
-          />
-          {fieldErrors.city && (
-            <p className="mt-1 text-xs text-red-500">{fieldErrors.city}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-            {t("postalCode")}
-          </label>
-          <input
-            type="text"
-            value={form.postalCode}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, postalCode: e.target.value }))
-            }
-            placeholder={t("postalCode")}
-            className={inputClass("postalCode")}
-          />
-        </div>
-      </div>
+      {/* Location: Division → District → Upazila → Union */}
+      <LocationSelect
+        value={{
+          division: form.division,
+          district: form.district,
+          upazila: form.upazila,
+          union: form.union,
+        }}
+        onChange={(v) => setForm((f) => ({ ...f, ...v }))}
+        locale={locale}
+        required={{ division: true, district: true, upazila: true }}
+        errors={{
+          division: fieldErrors.division,
+          district: fieldErrors.district,
+          upazila: fieldErrors.upazila,
+        }}
+        labels={{
+          division: t("division"),
+          district: t("district"),
+          upazila: t("upazila"),
+          union: t("union"),
+        }}
+        placeholders={{
+          division: t("selectDivision"),
+          district: t("selectDistrict"),
+          upazila: t("selectUpazila"),
+          union: t("selectUnion"),
+        }}
+      />
 
-      {/* State */}
+      {/* Postal */}
       <div>
         <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-          {t("state")}
+          {t("postalCode")}
         </label>
         <input
           type="text"
-          value={form.state}
-          onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
-          placeholder={t("state")}
-          className={inputClass("state")}
+          value={form.postalCode}
+          onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
+          placeholder={t("postalCode")}
+          className={inputClass("postalCode")}
         />
       </div>
 

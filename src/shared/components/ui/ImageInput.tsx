@@ -171,7 +171,7 @@ export function ImageInput({
                 Drop image or click to upload
               </span>
               <span className="text-[10px] text-gray-400">
-                PNG, JPG, WebP, AVIF · max 5MB
+                PNG, JPG, WebP, AVIF · max 15MB · auto-optimized
               </span>
             </>
           )}

@@ -58,6 +58,7 @@ export function Avatar({ src, position, name, size = "md", className = "" }: Ava
         <img
           src={src}
           alt={name}
+          draggable={false}
           className="w-full h-full object-cover"
           style={{
             objectPosition: `${pos.x}% ${pos.y}%`,

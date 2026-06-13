@@ -59,11 +59,11 @@ export const ProductService = {
     return ProductRepository.findById(id);
   },
 
-  async getFeatured(storeId: string, limit = 8): Promise<IProduct[]> {
+  async getFeatured(storeId: string, limit: number | undefined): Promise<IProduct[]> {
     return ProductRepository.findFeatured(storeId, limit);
   },
 
-  async getNewArrivals(storeId: string, limit = 8): Promise<IProduct[]> {
+  async getNewArrivals(storeId: string, limit: number | undefined): Promise<IProduct[]> {
     return ProductRepository.findNewArrivals(storeId, limit);
   },
 

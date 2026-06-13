@@ -44,8 +44,8 @@ export default async function HomePage() {
   }
 
   const [featuredProducts, newArrivals, categories] = await Promise.all([
-    ProductService.getFeatured(tenant._id, 8),
-    ProductService.getNewArrivals(tenant._id, 8),
+    ProductService.getFeatured(tenant._id, undefined),
+    ProductService.getNewArrivals(tenant._id, undefined),
     CategoryService.getByStore(tenant._id),
   ]);
 

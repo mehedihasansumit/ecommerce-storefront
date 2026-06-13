@@ -46,7 +46,12 @@ export function useProductSelection(product: IProduct): ProductSelection {
     Object.fromEntries(
       options.map((o) => {
         const fromUrl = searchParams.get(o.name);
-        const valid = fromUrl && o.values.includes(fromUrl) ? fromUrl : "";
+        const valid =
+          fromUrl && o.values.includes(fromUrl)
+            ? fromUrl
+            : o.values.length === 1
+            ? o.values[0]
+            : "";
         return [o.name, valid];
       })
     )
@@ -92,7 +97,7 @@ export function useProductSelection(product: IProduct): ProductSelection {
         (v) =>
           v.optionValues?.[optionName] === value &&
           Object.entries(selectedOptions)
-            .filter(([k]) => k !== optionName)
+            .filter(([k, val]) => k !== optionName && val !== "")
             .every(([k, val]) => v.optionValues?.[k] === val) &&
           (v.stock ?? 0) > 0
       );

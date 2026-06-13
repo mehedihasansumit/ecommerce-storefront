@@ -11,6 +11,7 @@
   --color-header-bg: #111827;
   --color-header-text: #FFFFFF;
   --color-surface: #FAFAFA;
+  --color-skeleton-highlight: #ECECEC;
   --color-border-subtle: #F3F4F6;
   --color-text-secondary: #6B7280;
   --color-text-tertiary: #9CA3AF;
@@ -72,6 +73,7 @@ html.dark {
   --color-bg:               #111827;
   --color-text:             #F9FAFB;
   --color-surface:          #1F2937;
+  --color-skeleton-highlight: #273344;
   --color-border-subtle:    #374151;
   --color-text-secondary:   #E5E7EB;
   --color-text-tertiary:    #D1D5DB;
@@ -217,19 +219,28 @@ a {
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% { background-position: 150% 0; }
+  100% { background-position: -150% 0; }
 }
 
 .shimmer {
   background: linear-gradient(
-    90deg,
-    var(--color-surface) 25%,
-    #ededed 37%,
-    var(--color-surface) 63%
+    100deg,
+    var(--color-surface) 20%,
+    color-mix(in srgb, var(--color-skeleton-highlight) 60%, var(--color-surface)) 40%,
+    var(--color-skeleton-highlight) 50%,
+    color-mix(in srgb, var(--color-skeleton-highlight) 60%, var(--color-surface)) 60%,
+    var(--color-surface) 80%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  animation: shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background: var(--color-surface);
+  }
 }
 
 @keyframes heroZoom {

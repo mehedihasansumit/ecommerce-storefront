@@ -227,25 +227,25 @@ export const ProductRepository = {
     return hydrateOne(row);
   },
 
-  async findFeatured(storeId: string, limit = 8): Promise<IProduct[]> {
-    const rows = await db
+  async findFeatured(storeId: string, limit: number | undefined): Promise<IProduct[]> {
+    const builder = db
       .select()
       .from(products)
       .where(
         and(eq(products.storeId, storeId), eq(products.isActive, true), eq(products.isFeatured, true)),
       )
-      .orderBy(desc(products.createdAt))
-      .limit(limit);
+      .orderBy(desc(products.createdAt));
+    const rows = limit !== undefined ? await builder.limit(limit) : await builder;
     return hydrateMany(rows);
   },
 
-  async findNewArrivals(storeId: string, limit = 8): Promise<IProduct[]> {
-    const rows = await db
+  async findNewArrivals(storeId: string, limit: number | undefined): Promise<IProduct[]> {
+    const builder = db
       .select()
       .from(products)
       .where(and(eq(products.storeId, storeId), eq(products.isActive, true)))
-      .orderBy(desc(products.createdAt))
-      .limit(limit);
+      .orderBy(desc(products.createdAt));
+    const rows = limit !== undefined ? await builder.limit(limit) : await builder;
     return hydrateMany(rows);
   },
 

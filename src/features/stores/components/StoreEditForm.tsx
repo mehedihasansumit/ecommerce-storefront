@@ -77,6 +77,10 @@ const LANGUAGE_LABELS: Record<string, string> = {
 
 interface BannerState {
   image: string;
+  variants?: Record<string, string>;
+  blurDataURL?: string;
+  width?: number;
+  height?: number;
   title: LocalizedString;
   subtitle: LocalizedString;
   linkUrl: string;
@@ -349,6 +353,10 @@ export default function StoreEditForm({
   const [heroBanners, setHeroBanners] = useState<BannerState[]>(
     (store.heroBanners || []).map((b) => ({
       image: b.image,
+      variants: b.variants,
+      blurDataURL: b.blurDataURL,
+      width: b.width,
+      height: b.height,
       title: toLocalized(b.title),
       subtitle: toLocalized(b.subtitle),
       linkUrl: b.linkUrl || "",
@@ -464,6 +472,29 @@ export default function StoreEditForm({
   ) => {
     setHeroBanners((prev) =>
       prev.map((b, i) => (i === index ? { ...b, [field]: value } : b))
+    );
+  };
+
+  // Banner image + its upload meta (responsive variants + blur). Clearing the image
+  // (url "") drops the meta too so we never ship stale variants for a removed image.
+  const handleBannerImage = (
+    index: number,
+    url: string,
+    meta?: { variants?: Record<string, string>; blurDataURL?: string; width?: number; height?: number }
+  ) => {
+    setHeroBanners((prev) =>
+      prev.map((b, i) =>
+        i === index
+          ? {
+              ...b,
+              image: url,
+              variants: url ? meta?.variants : undefined,
+              blurDataURL: url ? meta?.blurDataURL : undefined,
+              width: url ? meta?.width : undefined,
+              height: url ? meta?.height : undefined,
+            }
+          : b
+      )
     );
   };
 
@@ -1392,8 +1423,8 @@ export default function StoreEditForm({
                           <ImageInput
                             label="Banner image"
                             value={banner.image}
-                            onChange={(url) =>
-                              handleBannerField(index, "image", url)
+                            onChange={(url, meta) =>
+                              handleBannerImage(index, url, meta)
                             }
                             storeId={store._id}
                             folder="banners"

@@ -60,6 +60,10 @@ export const updateStoreSchema = z.object({
     .array(
       z.object({
         image: z.string().min(1, "Image URL is required"),
+        variants: z.record(z.string(), z.string()).optional(),
+        blurDataURL: z.string().optional(),
+        width: z.number().optional(),
+        height: z.number().optional(),
         title: localizedStringSchema,
         subtitle: localizedStringSchema,
         linkUrl: z.string().optional(),

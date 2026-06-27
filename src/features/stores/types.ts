@@ -66,6 +66,12 @@ export type HeroLayoutStyle =
 
 export interface IHeroBanner {
   image: string;
+  /** Pre-generated responsive variants (w400/w800/w1200/w2000 → URL) for native srcSet. */
+  variants?: Record<string, string>;
+  /** Tiny inline LQIP shown while the full image loads. */
+  blurDataURL?: string;
+  width?: number;
+  height?: number;
   title: LocalizedString;
   subtitle?: LocalizedString;
   linkUrl?: string;

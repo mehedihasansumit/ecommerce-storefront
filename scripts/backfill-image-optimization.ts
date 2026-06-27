@@ -2,7 +2,7 @@ import "dotenv/config";
 import sharp from "sharp";
 import { eq } from "drizzle-orm";
 import { db } from "../src/db/client";
-import { productImages, products } from "../src/db/schema";
+import { productImages, products, stores } from "../src/db/schema";
 import {
   getFile,
   uploadFile,
@@ -164,6 +164,65 @@ async function processThumbnail(url: string) {
   console.log(`  ✓ thumb ${key}  ${kb(before)} → ${kb(out.length)}`);
 }
 
+type BannerLike = {
+  image?: string;
+  variants?: Record<string, string>;
+  blurDataURL?: string;
+  width?: number;
+  height?: number;
+};
+
+/** Re-process a store's hero banners: regenerate variants + blur, persist on the store. */
+async function processStoreBanners(store: { id: string; heroBanners: unknown }) {
+  const banners = Array.isArray(store.heroBanners)
+    ? (store.heroBanners as BannerLike[])
+    : [];
+  if (banners.length === 0) return;
+
+  let changed = false;
+  for (const banner of banners) {
+    const url = typeof banner.image === "string" ? banner.image : "";
+    const key = urlToKey(url);
+    if (!key) {
+      skipped++;
+      continue; // external URL or empty — leave as-is (StoreImage falls back to next/image)
+    }
+    const hasMeta =
+      !!banner.variants &&
+      Object.keys(banner.variants).length > 0 &&
+      !!banner.blurDataURL;
+    if (hasMeta && !FORCE) {
+      skipped++;
+      continue;
+    }
+    const src = await fetchBytes(key);
+    if (!src) {
+      console.warn(`  ! fetch failed: ${key}`);
+      failed++;
+      continue;
+    }
+    const before = src.length;
+    const { out, width, height } = await encodeFull(src);
+    const [variants, blurDataURL] = await Promise.all([
+      buildVariants(src, key, width),
+      makeBlur(src),
+    ]);
+    if (!DRY) await uploadFile(key, out, "image/webp");
+    banner.variants = variants;
+    banner.blurDataURL = blurDataURL;
+    banner.width = width;
+    banner.height = height;
+    changed = true;
+    savedBytes += Math.max(0, before - out.length);
+    processed++;
+    console.log(`  ✓ banner ${key}  ${kb(before)} → ${kb(out.length)}`);
+  }
+
+  if (changed && !DRY) {
+    await db.update(stores).set({ heroBanners: banners }).where(eq(stores.id, store.id));
+  }
+}
+
 async function main() {
   console.log(
     `Backfill image optimization${DRY ? " [DRY RUN]" : ""}${FORCE ? " [FORCE]" : ""}\n`
@@ -181,6 +240,12 @@ async function main() {
     rows.map((r) => r.thumbnail).filter((t): t is string => Boolean(t))
   );
   for (const url of thumbs) await processThumbnail(url);
+
+  console.log("\nStore hero banners…");
+  const storeRows = await db
+    .select({ id: stores.id, heroBanners: stores.heroBanners })
+    .from(stores);
+  for (const s of storeRows) await processStoreBanners(s);
 
   console.log(
     `\nDone. processed=${processed} skipped=${skipped} failed=${failed} saved≈${kb(savedBytes)}`

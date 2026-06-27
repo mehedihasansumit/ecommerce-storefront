@@ -25,15 +25,19 @@ export async function GET(
       new GetObjectCommand({ Bucket: BUCKET, Key: objectKey })
     );
 
-    const body = await result.Body!.transformToByteArray();
+    // Stream the object straight through instead of buffering it in the Node
+    // process — large banners/images no longer pin memory per request.
+    const stream = result.Body!.transformToWebStream();
 
-    return new NextResponse(body.buffer as ArrayBuffer, {
-      headers: {
-        "Content-Type": result.ContentType ?? "application/octet-stream",
-        "Cache-Control": result.CacheControl ?? "public, max-age=31536000, immutable",
-        "Content-Length": String(result.ContentLength ?? body.byteLength),
-      },
-    });
+    const headers: Record<string, string> = {
+      "Content-Type": result.ContentType ?? "application/octet-stream",
+      "Cache-Control": result.CacheControl ?? "public, max-age=31536000, immutable",
+    };
+    if (result.ContentLength != null) {
+      headers["Content-Length"] = String(result.ContentLength);
+    }
+
+    return new NextResponse(stream as ReadableStream, { headers });
   } catch {
     return new NextResponse("Not found", { status: 404 });
   }

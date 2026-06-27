@@ -75,6 +75,13 @@ function RotatingLayout({
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
+  // Only slides that have been shown get their <img> rendered, so off-screen
+  // banners don't download on first paint. Slide 0 is active immediately.
+  const [activated, setActivated] = useState<Set<number>>(() => new Set([0]));
+  useEffect(() => {
+    setActivated((s) => (s.has(current) ? s : new Set(s).add(current)));
+  }, [current]);
+
   const goTo = useCallback(
     (index: number, direction?: "next" | "prev") => {
       if (isTransitioning) return;
@@ -178,6 +185,7 @@ function RotatingLayout({
         shopNow={tr("shopNow")}
         locale={locale}
         sectionStyle={sectionStyle}
+        activated={activated}
       />
     );
   }
@@ -198,6 +206,7 @@ function RotatingLayout({
         shopNow={tr("shopNow")}
         locale={locale}
         sectionStyle={sectionStyle}
+        activated={activated}
       />
     );
   }
@@ -218,6 +227,7 @@ function RotatingLayout({
         shopNow={tr("shopNow")}
         locale={locale}
         sectionStyle={sectionStyle}
+        activated={activated}
       />
     );
   }
@@ -246,9 +256,11 @@ function RotatingLayout({
             zIndex: i === current ? 2 : 1,
           }}
         >
-          {b.image && (
+          {activated.has(i) && b.image && (
             <StoreImage
               src={b.image}
+              variants={b.variants}
+              blurDataURL={b.blurDataURL}
               alt={t(b.title, locale)}
               fill
               priority={i === 0}
@@ -400,6 +412,7 @@ interface LayoutProps {
   shopNow: string;
   locale: string;
   sectionStyle?: React.CSSProperties;
+  activated: Set<number>;
 }
 
 // ── Split layout ──────────────────────────────────────────────────────────────
@@ -418,6 +431,7 @@ function SplitLayout({
   shopNow,
   locale,
   sectionStyle,
+  activated,
 }: LayoutProps) {
   const showOverlay = banner.showOverlay !== false;
   return (
@@ -442,9 +456,11 @@ function SplitLayout({
               zIndex: i === current ? 2 : 1,
             }}
           >
-            {b.image && (
+            {activated.has(i) && b.image && (
               <StoreImage
                 src={b.image}
+                variants={b.variants}
+                blurDataURL={b.blurDataURL}
                 alt={t(b.title, locale)}
                 fill
                 priority={i === 0}
@@ -577,6 +593,7 @@ function CenteredLayout({
   shopNow,
   locale,
   sectionStyle,
+  activated,
 }: LayoutProps) {
   const showOverlay = banner.showOverlay !== false;
   return (
@@ -599,9 +616,11 @@ function CenteredLayout({
             zIndex: i === current ? 2 : 1,
           }}
         >
-          {b.image && (
+          {activated.has(i) && b.image && (
             <StoreImage
               src={b.image}
+              variants={b.variants}
+              blurDataURL={b.blurDataURL}
               alt={t(b.title, locale)}
               fill
               priority={i === 0}
@@ -735,6 +754,7 @@ function MinimalLayout({
   shopNow,
   locale,
   sectionStyle,
+  activated,
 }: LayoutProps) {
   const showOverlay = banner.showOverlay !== false;
   return (
@@ -757,9 +777,11 @@ function MinimalLayout({
             zIndex: i === current ? 2 : 1,
           }}
         >
-          {b.image && (
+          {activated.has(i) && b.image && (
             <StoreImage
               src={b.image}
+              variants={b.variants}
+              blurDataURL={b.blurDataURL}
               alt={t(b.title, locale)}
               fill
               priority={i === 0}
@@ -896,6 +918,8 @@ function GridLayout({
           {main.image && (
             <StoreImage
               src={main.image}
+              variants={main.variants}
+              blurDataURL={main.blurDataURL}
               alt={t(main.title, locale)}
               fill
               priority
@@ -951,6 +975,8 @@ function GridLayout({
                 {b.image && (
                   <StoreImage
                     src={b.image}
+                    variants={b.variants}
+                    blurDataURL={b.blurDataURL}
                     alt={t(b.title, locale)}
                     fill
                     sizes="(max-width: 768px) 50vw, 33vw"
@@ -1020,6 +1046,12 @@ function ImageOnlyLayout({
   const [aspect, setAspect] = useState<number | null>(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+
+  // Only shown slides render their <img> (no first-paint download of off-screen banners).
+  const [activated, setActivated] = useState<Set<number>>(() => new Set([0]));
+  useEffect(() => {
+    setActivated((s) => (s.has(current) ? s : new Set(s).add(current)));
+  }, [current]);
 
   const goTo = useCallback(
     (index: number, direction?: "next" | "prev") => {
@@ -1094,9 +1126,11 @@ function ImageOnlyLayout({
             zIndex: i === current ? 2 : 1,
           }}
         >
-          {b.image && (
+          {activated.has(i) && b.image && (
             <StoreImage
               src={b.image}
+              variants={b.variants}
+              blurDataURL={b.blurDataURL}
               alt={t(b.title, locale)}
               fill
               priority={i === 0}

@@ -287,7 +287,7 @@ export function ProductForm({
         const colorVal = colorOptName ? v.optionValues?.[colorOptName] : undefined;
         return {
           ...v,
-          price: Number(v.price),
+          price: v.price === undefined ? undefined : Number(v.price),
           compareAtPrice: Number(v.compareAtPrice ?? 0),
           stock: Number(v.stock),
           images: colorVal
@@ -731,8 +731,15 @@ export function ProductForm({
                         type="number"
                         min="0"
                         step="0.01"
-                        value={variant.price}
-                        onChange={(e) => updateVariant(idx, "price", Number(e.target.value))}
+                        value={variant.price ?? ""}
+                        placeholder={String(form.price)}
+                        onChange={(e) =>
+                          updateVariant(
+                            idx,
+                            "price",
+                            e.target.value === "" ? undefined : Number(e.target.value)
+                          )
+                        }
                         className="w-24"
                       />
                     </td>

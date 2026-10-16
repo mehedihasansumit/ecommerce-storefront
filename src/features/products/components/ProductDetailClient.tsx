@@ -225,6 +225,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
               selection={selection}
               addToCartLabel={tr("addToCart")}
               outOfStockLabel={tr("outOfStock")}
+              pleaseSelectLabel={(o) => tr("pleaseSelect", { options: o })}
             />
 
             {socialOrdering && productUrl && (
@@ -250,6 +251,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
         addToCartLabel={tr("addToCart")}
         outOfStockLabel={tr("outOfStock")}
         selectOptionsLabel={tr("selectOptions")}
+        pleaseSelectLabel={(o) => tr("pleaseSelect", { options: o })}
       />
     </div>
   );

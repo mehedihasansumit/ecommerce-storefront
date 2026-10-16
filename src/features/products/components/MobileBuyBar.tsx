@@ -20,6 +20,8 @@ interface MobileBuyBarProps {
   addToCartLabel: string;
   outOfStockLabel: string;
   selectOptionsLabel: string;
+  /** e.g. (o) => `Please select ${o}` */
+  pleaseSelectLabel: (options: string) => string;
 }
 
 /**
@@ -35,6 +37,7 @@ export function MobileBuyBar({
   addToCartLabel,
   outOfStockLabel,
   selectOptionsLabel,
+  pleaseSelectLabel,
 }: MobileBuyBarProps) {
   const locale = useLocale();
   const [open, setOpen] = useState(false);
@@ -48,6 +51,7 @@ export function MobileBuyBar({
     activeVariant,
     hasOptions,
     isValueAvailable,
+    missingOptions,
     addToCart,
   } = selection;
 
@@ -59,7 +63,11 @@ export function MobileBuyBar({
 
   function confirmAddToCart() {
     if (outOfStock) return;
-    addToCart();
+    if (!addToCart()) {
+      // Keep the sheet open so the shopper can pick the missing option.
+      if (missingOptions.length > 0) toast.error(pleaseSelectLabel(missingOptions.join(", ")));
+      return;
+    }
     setOpen(false);
     toast.success(`${addToCartLabel} ✓`);
   }

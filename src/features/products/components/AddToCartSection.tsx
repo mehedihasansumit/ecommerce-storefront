@@ -11,6 +11,8 @@ interface AddToCartSectionProps {
   selection: ProductSelection;
   addToCartLabel: string;
   outOfStockLabel: string;
+  /** e.g. (o) => `Please select ${o}` */
+  pleaseSelectLabel: (options: string) => string;
 }
 
 /**
@@ -23,6 +25,7 @@ export function AddToCartSection({
   selection,
   addToCartLabel,
   outOfStockLabel,
+  pleaseSelectLabel,
 }: AddToCartSectionProps) {
   const {
     selectedOptions,
@@ -31,6 +34,7 @@ export function AddToCartSection({
     setQuantity,
     displayStock,
     isValueAvailable,
+    missingOptions,
     addToCart,
   } = selection;
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
@@ -39,7 +43,12 @@ export function AddToCartSection({
 
   function handleAddToCart() {
     if (displayStock <= 0) return;
-    addToCart();
+    if (!addToCart()) {
+      if (missingOptions.length > 0) {
+        setMessage({ type: "error", text: pleaseSelectLabel(missingOptions.join(", ")) });
+      }
+      return;
+    }
     setMessage({ type: "success", text: "Added to cart!" });
     setTimeout(() => setMessage(null), 3000);
   }

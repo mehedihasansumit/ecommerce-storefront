@@ -8,7 +8,8 @@ export interface IProductOption {
 export interface IProductVariant {
   _id?: string;
   optionValues: Record<string, string>;
-  price: number;
+  /** Undefined = inherit the product price (DB `price` is NULL). */
+  price?: number;
   compareAtPrice?: number;
   stock: number;
   sku: string;

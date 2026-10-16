@@ -43,7 +43,7 @@ const pricingTiersSchema = z
 const productVariantSchema = z.object({
   _id: z.string().optional(),
   optionValues: z.record(z.string(), z.string()),
-  price: z.number().positive(),
+  price: z.number().positive().optional(), // omitted = inherit product price
   compareAtPrice: z.number().min(0).optional().default(0),
   stock: z.number().int().min(0).optional().default(0),
   sku: z.string().optional().default(""),

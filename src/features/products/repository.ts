@@ -35,7 +35,7 @@ function toIVariant(row: ProductVariant, variantImages: ProductImage[]): IProduc
   return {
     _id: row.id,
     optionValues: (row.optionValues as Record<string, string>) ?? {},
-    price: Number(row.price ?? 0),
+    price: row.price === null ? undefined : Number(row.price),
     compareAtPrice: row.compareAtPrice === null ? undefined : Number(row.compareAtPrice),
     stock: row.stock,
     sku: row.sku ?? "",

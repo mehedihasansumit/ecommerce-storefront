@@ -20,7 +20,10 @@ export interface ProductSelection {
   displayStock: number;
   hasOptions: boolean;
   isValueAvailable: (optionName: string, value: string) => boolean;
-  addToCart: () => void;
+  /** Names of options the shopper hasn't picked yet (e.g. ["Size"]). */
+  missingOptions: string[];
+  /** Adds the current selection; returns false (and adds nothing) if it isn't buyable. */
+  addToCart: () => boolean;
 }
 
 /**
@@ -105,8 +108,17 @@ export function useProductSelection(product: IProduct): ProductSelection {
     [variants, selectedOptions]
   );
 
+  const missingOptions = useMemo(
+    () => options.filter((o) => !selectedOptions[o.name]).map((o) => o.name),
+    [options, selectedOptions]
+  );
+
   const addToCart = useCallback(() => {
-    if (displayStock <= 0) return;
+    if (displayStock <= 0) return false;
+    // Every option must be chosen, and with real variants the combo must exist —
+    // otherwise checkout rejects the line ("Variant not found").
+    if (missingOptions.length > 0) return false;
+    if (hasOptions && variants.length > 0 && !activeVariant) return false;
     const resolvedThumbnail = activeVariant?.images?.[0]?.url || product.thumbnail;
     const tiers = normalizeTiers(product.pricingTiers);
     // Snapshot the tier-aware unit price using product.price as base (tiers override
@@ -131,10 +143,14 @@ export function useProductSelection(product: IProduct): ProductSelection {
       productName: t(product.name, locale),
       categoryId: product.categoryId ?? undefined,
     });
+    return true;
   }, [
     activeVariant,
     displayPrice,
     displayStock,
+    missingOptions,
+    hasOptions,
+    variants,
     quantity,
     selectedOptions,
     product,
@@ -154,6 +170,7 @@ export function useProductSelection(product: IProduct): ProductSelection {
     displayStock,
     hasOptions,
     isValueAvailable,
+    missingOptions,
     addToCart,
   };
 }

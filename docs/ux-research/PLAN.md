@@ -42,7 +42,7 @@ Branch: `feat/ux-attention`
 5. [x] **Prototype** (`prototype` skill): a throwaway version of each picked idea. Wait for the user's approval.
 6. [x] **Implement** approved ideas following the `CLAUDE.md` design spec (i18n strings, primitives, tokens, a11y).
 7. [x] **Review** (`code-review` skill) against `CLAUDE.md` standards and this plan.
-8. [ ] **PR** (`pr` skill).
+8. [x] **PR** (`pr` skill). Skipped: the user chose a direct commit on `feat/ux-attention` (`f838ceb`) instead of a PR.
 
 ## Skills used
 

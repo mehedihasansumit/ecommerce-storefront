@@ -102,7 +102,14 @@
     "secureCheckout": "Secure Checkout",
     "orderViaWhatsApp": "Order via WhatsApp",
     "orderViaFacebook": "Order via Facebook",
-    "orderDetailsCopied": "Order details copied — paste them in Messenger."
+    "orderDetailsCopied": "Order details copied — paste them in Messenger.",
+    "youSave": "You save {amount}",
+    "imageCounter": "{current, number} / {total, number}",
+    "openImage": "Open image {current, number} of {total, number}",
+    "similarProducts": "Similar products",
+    "addedToCart": "Added to cart",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity"
   },
   "productCard": {
     "noImage": "No Image",
@@ -335,5 +342,14 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous"
+  },
+  "trust": {
+    "label": "Ordering benefits",
+    "codShort": "Cash on delivery",
+    "codLong": "Pay in cash when it arrives. Check the item first.",
+    "deliveryShort": "Dhaka {inside} · Outside {outside}",
+    "deliveryLong": "Delivery {inside} inside Dhaka, {outside} outside Dhaka.",
+    "exchangeShort": "{days, number}-day exchange",
+    "exchangeLong": "Exchange within {days, number} days of delivery."
   }
 }

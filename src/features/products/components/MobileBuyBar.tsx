@@ -1,203 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
-import toast from "react-hot-toast";
-import { useLocale } from "next-intl";
-import { BottomSheet } from "@/shared/components/ui";
+import { useEffect, useState, type RefObject } from "react";
+import { ShoppingCart } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, Price } from "@/shared/components/ui";
 import { t } from "@/shared/lib/i18n";
 import type { IProduct } from "../types";
 import type { ProductSelection } from "../hooks/useProductSelection";
-import type { IStoreSocialOrdering } from "@/features/stores/types";
-import { VariantOptions } from "./VariantOptions";
-import { SocialOrderButtons } from "./SocialOrderButtons";
+import { PRODUCT_OPTIONS_ID } from "./AddToCartSection";
 
 interface MobileBuyBarProps {
   product: IProduct;
   selection: ProductSelection;
-  socialOrdering?: IStoreSocialOrdering;
-  productUrl?: string;
-  addToCartLabel: string;
-  outOfStockLabel: string;
-  selectOptionsLabel: string;
-  /** e.g. (o) => `Please select ${o}` */
-  pleaseSelectLabel: (options: string) => string;
+  /** The inline CTA row. The bar only shows once the shopper has scrolled past it. */
+  anchorRef: RefObject<HTMLDivElement | null>;
 }
 
 /**
- * Mobile-only sticky purchase bar pinned above the bottom nav. Tapping it opens a
- * bottom sheet with the variant options, quantity and a confirm add-to-cart, so the
- * shopper never has to scroll past the image/description to pick a variant or buy.
+ * Mobile-only sticky purchase bar pinned above the bottom nav. Hidden while the inline
+ * buy box is on screen (sizes and CTA are already visible there); slides in after the
+ * shopper scrolls past it. With an option missing it scrolls back to the chips.
  */
-export function MobileBuyBar({
-  product,
-  selection,
-  socialOrdering,
-  productUrl,
-  addToCartLabel,
-  outOfStockLabel,
-  selectOptionsLabel,
-  pleaseSelectLabel,
-}: MobileBuyBarProps) {
+export function MobileBuyBar({ product, selection, anchorRef }: MobileBuyBarProps) {
+  const tr = useTranslations("productDetail");
   const locale = useLocale();
-  const [open, setOpen] = useState(false);
-  const {
-    selectedOptions,
-    setOption,
-    quantity,
-    setQuantity,
-    displayPrice,
-    displayStock,
-    activeVariant,
-    hasOptions,
-    isValueAvailable,
-    missingOptions,
-    addToCart,
-  } = selection;
+  const [visible, setVisible] = useState(false);
+  const { displayPrice, displayStock, activeVariant, missingOptions, tryAddToCart } = selection;
 
-  const options = product.options ?? [];
-  const productName = t(product.name, locale);
-  const displayCompareAt = activeVariant?.compareAtPrice ?? product.compareAtPrice;
-  const hasDiscount = displayCompareAt > 0 && displayCompareAt > displayPrice;
+  useEffect(() => {
+    const el = anchorRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => {
+      // Show only when the CTA has left through the top, not before reaching it.
+      setVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [anchorRef]);
+
   const outOfStock = displayStock <= 0;
+  const compareAt = activeVariant?.compareAtPrice ?? product.compareAtPrice;
 
-  function confirmAddToCart() {
+  function handleAdd() {
     if (outOfStock) return;
-    if (!addToCart()) {
-      // Keep the sheet open so the shopper can pick the missing option.
-      if (missingOptions.length > 0) toast.error(pleaseSelectLabel(missingOptions.join(", ")));
-      return;
+    if (!tryAddToCart() && missingOptions.length > 0) {
+      document.getElementById(PRODUCT_OPTIONS_ID)?.scrollIntoView({ behavior: "smooth" });
     }
-    setOpen(false);
-    toast.success(`${addToCartLabel} ✓`);
-  }
-
-  function handleBarClick() {
-    if (outOfStock) return;
-    // With options the shopper must pick a variant first → open the sheet.
-    // Without options, add straight to cart.
-    if (hasOptions) setOpen(true);
-    else confirmAddToCart();
   }
 
   return (
-    <>
-      {/* Sticky bar */}
-      <div
-        className="fixed inset-x-0 z-40 md:hidden border-t border-border-subtle shadow-[0_-2px_12px_rgba(0,0,0,0.06)]"
-        style={{
-          bottom: "calc(3.5rem + env(safe-area-inset-bottom))",
-          backgroundColor: "var(--color-card-bg)",
-        }}
-      >
-        <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <span
-                className="text-lg font-bold leading-none"
-                style={{ color: "var(--color-price)" }}
-              >
-                ৳{displayPrice.toLocaleString()}
-              </span>
-              {hasDiscount && (
-                <span className="text-xs text-text-tertiary line-through">
-                  ৳{displayCompareAt.toLocaleString()}
-                </span>
-              )}
-            </div>
-            {hasOptions && (
-              <p className="text-[11px] text-text-tertiary mt-0.5 truncate">
-                {Object.values(selectedOptions).filter(Boolean).join(" · ")}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleBarClick}
-            disabled={outOfStock}
-            className="flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold text-sm shrink-0 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              borderRadius: "var(--border-radius)",
-            }}
-          >
-            <ShoppingCart size={18} />
-            {outOfStock ? outOfStockLabel : hasOptions ? selectOptionsLabel : addToCartLabel}
-          </button>
+    <div
+      // Stays mounted and slides (transition, not a replayed mount animation); inert when hidden.
+      inert={!visible}
+      aria-hidden={!visible}
+      className={`fixed inset-x-0 z-40 md:hidden border-t border-border-subtle shadow-[0_-2px_12px_rgba(0,0,0,0.06)] transition-transform duration-300 ease-(--ease-out-expo) ${
+        visible ? "translate-y-0" : "translate-y-[calc(100%+3.5rem)]"
+      }`}
+      style={{
+        bottom: "calc(3.5rem + env(safe-area-inset-bottom))",
+        backgroundColor: "var(--color-card-bg)",
+      }}
+    >
+      <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+        <div className="min-w-0">
+          <p className="text-xs text-text-secondary truncate">{t(product.name, locale)}</p>
+          <Price amount={displayPrice} compareAt={compareAt} size="md" locale={locale} />
         </div>
+        <Button
+          variant="brand"
+          size="lg"
+          className="shrink-0"
+          leftIcon={<ShoppingCart size={18} aria-hidden />}
+          onClick={handleAdd}
+          disabled={outOfStock}
+        >
+          {outOfStock ? tr("outOfStock") : tr("addToCart")}
+        </Button>
       </div>
-
-      {/* Variant sheet */}
-      <BottomSheet open={open} onClose={() => setOpen(false)} title={productName}>
-        <div className="space-y-5 pb-2">
-          <VariantOptions
-            options={options}
-            selectedOptions={selectedOptions}
-            onSelect={setOption}
-            isValueAvailable={isValueAvailable}
-          />
-
-          {/* Quantity */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
-              Qty
-            </span>
-            <div
-              className="flex items-center border border-border-subtle shadow-[var(--shadow-xs)]"
-              style={{ borderRadius: "var(--border-radius)" }}
-            >
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
-                className="px-4 py-2.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors disabled:opacity-40"
-                aria-label="Decrease quantity"
-              >
-                <Minus size={16} />
-              </button>
-              <span className="px-5 py-2.5 font-semibold text-sm min-w-[3rem] text-center border-x border-border-subtle">
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.min(displayStock, q + 1))}
-                disabled={quantity >= displayStock}
-                className="px-4 py-2.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors disabled:opacity-40"
-                aria-label="Increase quantity"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm add to cart */}
-          <button
-            type="button"
-            onClick={confirmAddToCart}
-            disabled={outOfStock}
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-6 text-white font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              borderRadius: "var(--border-radius)",
-            }}
-          >
-            <ShoppingCart size={18} />
-            {outOfStock ? outOfStockLabel : `${addToCartLabel} · ৳${displayPrice.toLocaleString()}`}
-          </button>
-
-          {socialOrdering && productUrl && (
-            <SocialOrderButtons
-              socialOrdering={socialOrdering}
-              productName={productName}
-              productPrice={displayPrice}
-              productUrl={productUrl}
-              quantity={quantity}
-              selectedOptions={selectedOptions}
-            />
-          )}
-        </div>
-      </BottomSheet>
-    </>
+    </div>
   );
 }

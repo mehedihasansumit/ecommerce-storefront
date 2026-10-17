@@ -3,6 +3,9 @@ import { ProductService } from "@/features/products/service";
 import { CategoryService } from "@/features/categories/service";
 import { HeroBanner } from "@/shared/components/storefront/HeroBanner";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
+import { ProductRail } from "@/features/products/components/ProductRail";
+import { getStoreTrustFacts } from "@/features/stores/trust";
+import { StoreTrustInfo } from "@/shared/components/storefront/StoreTrustInfo";
 import { createStoreMetadata, buildOrganizationJsonLd } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -10,10 +13,6 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { t } from "@/shared/lib/i18n";
 import {
   ArrowRight,
-  Truck,
-  Shield,
-  RotateCcw,
-  Headphones,
   Mail,
   Sparkles,
 } from "lucide-react";
@@ -50,6 +49,8 @@ export default async function HomePage() {
   ]);
 
   const orgJsonLd = buildOrganizationJsonLd(tenant);
+  const railIds = new Set(newArrivals.map((p) => p._id));
+  const featuredOnly = featuredProducts.filter((p) => !railIds.has(p._id));
 
   return (
     <div className="pt-4">
@@ -65,180 +66,84 @@ export default async function HomePage() {
         borderRadius={tenant.heroBorderRadius}
       />
 
-      {/* Trust badges */}
-      <section className="border-b border-border-subtle">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              {
-                icon: Truck,
-                title: tr("freeShipping") || "Free Shipping",
-                desc: tr("freeShippingDesc") || "On orders over ৳500",
-              },
-              {
-                icon: Shield,
-                title: tr("securePayment") || "Secure Payment",
-                desc: tr("securePaymentDesc") || "100% secure checkout",
-              },
-              {
-                icon: RotateCcw,
-                title: tr("easyReturns") || "Easy Returns",
-                desc: tr("easyReturnsDesc") || "30-day return policy",
-              },
-              {
-                icon: Headphones,
-                title: tr("support247") || "24/7 Support",
-                desc: tr("support247Desc") || "Dedicated support",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="flex items-center gap-3 text-center md:text-left"
-              >
-                <div
-                  className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{
-                    backgroundColor:
-                      "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                  }}
-                >
-                  <item.icon
-                    size={20}
-                    style={{ color: "var(--color-primary)" }}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate">{item.title}</p>
-                  <p className="text-xs text-text-secondary truncate">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Trust facts from the store's real config (COD, delivery fee, exchange window) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <StoreTrustInfo facts={getStoreTrustFacts(tenant)} layout="chips" />
+      </div>
 
-      {/* Categories */}
+      {/* New arrivals rail: first products land on the first mobile screen */}
+      <ProductRail
+        title={tr("newArrivals")}
+        products={newArrivals}
+        viewAllHref="/products"
+        viewAllLabel={tr("viewAll")}
+      />
+
+      {/* Categories: quick chips, then photo tiles */}
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
-            <div className="max-w-xl">
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 text-[11px] font-semibold uppercase tracking-[0.18em]"
-                style={{
-                  backgroundColor:
-                    "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: "var(--color-primary)" }}
-                />
-                {tr("collections") || "Collections"}
-              </div>
-              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-3">
-                {tr("shopByCategory")}
-              </h2>
-              <p className="text-text-secondary text-base">
-                {tr("shopByCategoryDesc") ||
-                  "Explore our curated collections"}
-              </p>
-            </div>
-            <Link
-              href="/products"
-              className="hidden md:inline-flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-foreground transition-colors group/all"
-            >
-              {tr("viewAll")}
-              <span
-                className="w-8 h-8 rounded-full border border-border-subtle flex items-center justify-center transition-all group-hover/all:border-foreground group-hover/all:bg-foreground group-hover/all:text-background"
-              >
-                <ArrowRight
-                  size={14}
-                  className="transition-transform duration-300 group-hover/all:translate-x-0.5"
-                />
-              </span>
-            </Link>
-          </div>
+        <>
+          <nav
+            aria-label={tr("shopByCategory")}
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3"
+          >
+            <ul className="flex gap-2 overflow-x-auto no-scrollbar">
+              {categories.map((category) => (
+                <li key={category._id} className="shrink-0">
+                  <Link
+                    href={`/categories/${category.slug}`}
+                    className="focus-ring inline-flex items-center gap-2 rounded-full border border-border-subtle pl-1 pr-4 py-1 text-sm font-medium transition-colors hover:bg-surface"
+                  >
+                    <span className="relative w-8 h-8 rounded-full overflow-hidden bg-surface">
+                      {category.image && (
+                        <StoreImage
+                          src={category.image}
+                          alt=""
+                          fill
+                          sizes="32px"
+                          className="object-cover"
+                        />
+                      )}
+                    </span>
+                    {t(category.name, locale)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-          <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-1 stagger-children scrollbar-hide">
-            {categories.map((category) => (
-              <Link
-                key={category._id}
-                href={`/categories/${category.slug}`}
-                className="p-2 group shrink-0 flex flex-col items-center gap-3 w-20 md:w-24"
-              >
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-surface transition-all duration-500 ease-(--ease-out-expo) group-hover:scale-105 ring-2 ring-transparent group-hover:ring-primary ring-offset-2 ring-offset-background">
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+            <h2 className="text-lg md:text-2xl font-semibold tracking-tight mb-3 md:mb-6">
+              {tr("shopByCategory")}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+              {categories.slice(0, 4).map((category) => (
+                <Link
+                  key={category._id}
+                  href={`/categories/${category.slug}`}
+                  className="focus-ring group relative block aspect-[4/5] overflow-hidden bg-surface"
+                  style={{ borderRadius: "var(--border-radius)" }}
+                >
                   {category.image && (
                     <StoreImage
                       src={category.image}
-                      alt={t(category.name, locale)}
+                      alt=""
                       fill
-                      sizes="96px"
-                      className="object-contain p-2 transition-transform duration-700 ease-(--ease-out-expo) group-hover:scale-110"
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 ease-(--ease-out-expo) group-hover:scale-105"
                     />
                   )}
-                </div>
-                <span className="text-xs md:text-sm font-medium text-center leading-tight line-clamp-2 transition-colors group-hover:text-primary">
-                  {t(category.name, locale)}
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center md:hidden">
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 text-sm font-medium"
-              style={{ color: "var(--color-primary)" }}
-            >
-              {tr("viewAll")}
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </section>
+                  <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8 text-sm font-semibold text-white">
+                    {t(category.name, locale)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </>
       )}
 
-      {/* New Arrivals */}
-      {newArrivals.length > 0 && (
-        <section className=" py-4 md:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <h2 className="text-3xl font-semibold tracking-tight mb-2">
-                  {tr("newArrivals")}
-                </h2>
-                <p className="text-text-secondary">
-                  {tr("newArrivalsDesc")}
-                </p>
-              </div>
-              <Link
-                href="/products"
-                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-border-subtle hover:border-text-secondary hover:bg-surface dark:hover:bg-surface transition-all"
-                style={{ borderRadius: "var(--border-radius)" }}
-              >
-                {tr("viewAll")}
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-            <ProductGrid products={newArrivals} />
-            <div className="text-center mt-10 sm:hidden">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-lg"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  borderRadius: "var(--border-radius)",
-                }}
-              >
-                {tr("viewAll")}
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Featured Products */}
+      {/* Featured Products (minus what the rail already shows) */}
+      {featuredOnly.length > 0 && (
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
@@ -260,7 +165,7 @@ export default async function HomePage() {
               <ArrowRight size={16} />
             </Link>
           </div>
-          <ProductGrid products={featuredProducts} />
+          <ProductGrid products={featuredOnly} />
           <div className="text-center mt-10 sm:hidden">
             <Link
               href="/products"
@@ -276,6 +181,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Newsletter / CTA */}
       <section className="py-16 md:py-24">

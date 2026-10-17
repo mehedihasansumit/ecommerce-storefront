@@ -12,7 +12,8 @@ export type ButtonVariant =
   | "danger"
   | "danger-outline";
 
-export type ButtonSize = "sm" | "md" | "lg" | "icon";
+/** xl = the primary storefront buy CTA (Add to cart): 48px+ touch target. */
+export type ButtonSize = "sm" | "md" | "lg" | "xl" | "icon";
 
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
   variant?: ButtonVariant;
@@ -33,6 +34,7 @@ const SIZES: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-xs",
   md: "px-4 py-2 text-sm",
   lg: "px-6 py-2.5 text-sm",
+  xl: "px-6 py-3.5 text-base font-semibold",
   icon: "p-2",
 };
 

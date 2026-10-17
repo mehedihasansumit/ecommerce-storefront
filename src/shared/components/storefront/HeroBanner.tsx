@@ -238,7 +238,7 @@ function RotatingLayout({
 
   return (
     <section
-      className="relative w-full h-[32rem] md:h-[38rem] lg:h-[44rem] overflow-hidden bg-gray-950"
+      className="relative w-full aspect-[16/9] md:aspect-auto md:h-[38rem] lg:h-[44rem] overflow-hidden bg-gray-950"
       style={sectionStyle}
       {...sharedHandlers}
     >
@@ -294,7 +294,7 @@ function RotatingLayout({
         <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="max-w-2xl">
             <div
-              className="h-px w-12 mb-6 transition-all duration-700 ease-out"
+              className="hidden sm:block h-px w-12 mb-6 transition-all duration-700 ease-out"
               style={{
                 backgroundColor: "var(--color-primary)",
                 opacity: textStage >= 1 && textVisible ? 1 : 0,
@@ -303,7 +303,7 @@ function RotatingLayout({
               }}
             />
             <h1
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white mb-5 transition-all duration-700 ease-out"
+              className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white mb-3 sm:mb-5 transition-all duration-700 ease-out"
               style={{
                 opacity: textStage >= 1 && textVisible ? 1 : 0,
                 transform: textStage >= 1 && textVisible ? "translateY(0)" : "translateY(30px)",
@@ -313,7 +313,7 @@ function RotatingLayout({
             </h1>
             {t(banner.subtitle, locale) && (
               <p
-                className="text-base md:text-lg text-white/70 font-light mb-8 max-w-lg leading-relaxed transition-all duration-700 ease-out"
+                className="hidden sm:block text-base md:text-lg text-white/70 font-light mb-8 max-w-lg leading-relaxed transition-all duration-700 ease-out"
                 style={{
                   opacity: textStage >= 2 && textVisible ? 1 : 0,
                   transform: textStage >= 2 && textVisible ? "translateY(0)" : "translateY(24px)",
@@ -335,7 +335,7 @@ function RotatingLayout({
                   className="group inline-flex items-center gap-3 text-white font-medium text-sm tracking-wide uppercase"
                 >
                   <span
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-white/30 group-hover:border-white/60 group-hover:scale-110 transition-all duration-300"
+                    className="inline-flex items-center justify-center w-9 h-9 sm:w-12 sm:h-12 rounded-full border-2 border-white/30 group-hover:border-white/60 group-hover:scale-110 transition-all duration-300"
                     style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 20%, transparent)" }}
                   >
                     <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -365,7 +365,7 @@ function RotatingLayout({
       )}
 
       {banners.length > 1 && (
-        <div className="absolute bottom-8 left-6 sm:left-8 lg:left-12 z-[4] flex items-center gap-1">
+        <div className="absolute bottom-8 left-6 sm:left-8 lg:left-12 z-[4] hidden md:flex items-center gap-1">
           <button onClick={prev} className="p-2.5 text-white/60 hover:text-white transition-colors duration-200" aria-label="Previous banner">
             <ArrowLeft size={20} strokeWidth={1.5} />
           </button>

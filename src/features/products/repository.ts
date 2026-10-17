@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, ne, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   products,
@@ -246,6 +246,30 @@ export const ProductRepository = {
       .where(and(eq(products.storeId, storeId), eq(products.isActive, true)))
       .orderBy(desc(products.createdAt));
     const rows = limit !== undefined ? await builder.limit(limit) : await builder;
+    return hydrateMany(rows);
+  },
+
+  /**
+   * Same-store "similar products" for a PDP rail: same category first, then closest
+   * price, then newest. Excludes the product itself.
+   */
+  async findRelated(
+    storeId: string,
+    product: { id: string; categoryId: string | null | undefined; price: number },
+    limit: number,
+  ): Promise<IProduct[]> {
+    const order: SQL[] = [];
+    // No category → skip that term (a constant ORDER BY key would be read as a column position).
+    if (product.categoryId) {
+      order.push(sql`CASE WHEN ${products.categoryId} = ${product.categoryId} THEN 0 ELSE 1 END`);
+    }
+    order.push(sql`ABS(${products.price} - ${product.price})`, desc(products.createdAt));
+    const rows = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.storeId, storeId), eq(products.isActive, true), ne(products.id, product.id)))
+      .orderBy(...order)
+      .limit(limit);
     return hydrateMany(rows);
   },
 

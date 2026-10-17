@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { X, ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { IProductImage } from "../types";
 import { StoreImage } from "@/shared/components/ui";
 
@@ -39,6 +40,32 @@ export function ProductImageGallery({
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, panX: 0, panY: 0 });
   const lbContainerRef = useRef<HTMLDivElement>(null);
+
+  const tr = useTranslations("productDetail");
+
+  // Mobile swipe track. `liveIndex` follows the finger for the counter; the parent
+  // selection is committed once scrolling settles, so the two never fight the snap.
+  const trackRef = useRef<HTMLDivElement>(null);
+  const settleTimer = useRef<number | undefined>(undefined);
+  const [liveIndex, setLiveIndex] = useState(selectedIndex);
+  const onTrackScroll = () => {
+    const el = trackRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const i = Math.min(images.length - 1, Math.max(0, Math.round(el.scrollLeft / el.clientWidth)));
+    setLiveIndex(i);
+    window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => {
+      if (i !== selectedIndex) setIndex(i);
+    }, 120);
+  };
+  // Selection changed elsewhere (variant chips, lightbox) → bring that slide into view.
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const target = selectedIndex * el.clientWidth;
+    if (Math.abs(el.scrollLeft - target) > 4) el.scrollTo({ left: target, behavior: "smooth" });
+  }, [selectedIndex]);
+  useEffect(() => () => window.clearTimeout(settleTimer.current), []);
 
   const current = images[selectedIndex];
   const currentSrc =
@@ -137,7 +164,54 @@ export function ProductImageGallery({
 
   return (
     <>
-      <div className="space-y-4 animate-fade-in">
+      {/* Mobile: native scroll-snap swipe gallery with a position counter; tap opens the lightbox */}
+      <div className="md:hidden relative -mx-4 sm:-mx-6 animate-fade-in">
+        {images.length > 0 ? (
+          <div
+            ref={trackRef}
+            onScroll={onTrackScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
+          >
+            {images.map((img, i) => (
+              <button
+                key={img.url}
+                type="button"
+                onClick={() => {
+                  setIndex(i);
+                  openLightbox();
+                }}
+                aria-label={tr("openImage", { current: i + 1, total: images.length })}
+                className="focus-ring-inset relative w-full shrink-0 snap-center aspect-square bg-surface"
+              >
+                <StoreImage
+                  src={i === 0 && thumbnail ? thumbnail : img.url}
+                  variants={img.variants}
+                  blurDataURL={img.blurDataURL}
+                  alt={img.alt || productName}
+                  fill
+                  priority={i === 0}
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="aspect-square bg-surface flex items-center justify-center text-gray-300 text-lg">
+            {tr("noImage")}
+          </div>
+        )}
+        {images.length > 1 && (
+          <span
+            aria-live="polite"
+            className="absolute right-3 bottom-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold tabular-nums text-white pointer-events-none"
+          >
+            {tr("imageCounter", { current: liveIndex + 1, total: images.length })}
+          </span>
+        )}
+      </div>
+
+      <div className="hidden md:block space-y-4 animate-fade-in">
         {/* Main image — hover to zoom 2.5x, click for lightbox */}
         <div
           className="relative aspect-square bg-surface overflow-hidden group cursor-zoom-in"

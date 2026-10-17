@@ -102,7 +102,14 @@
     "secureCheckout": "নিরাপদ চেকআউট",
     "orderViaWhatsApp": "হোয়াটসঅ্যাপে অর্ডার করুন",
     "orderViaFacebook": "ফেসবুকে অর্ডার করুন",
-    "orderDetailsCopied": "অর্ডার বিবরণ কপি হয়েছে — মেসেঞ্জারে পেস্ট করুন।"
+    "orderDetailsCopied": "অর্ডার বিবরণ কপি হয়েছে — মেসেঞ্জারে পেস্ট করুন।",
+    "youSave": "সাশ্রয় {amount}",
+    "imageCounter": "{current, number} / {total, number}",
+    "openImage": "ছবি {current, number}/{total, number} বড় করে দেখুন",
+    "similarProducts": "একই ধরনের পণ্য",
+    "addedToCart": "কার্টে যোগ হয়েছে",
+    "decreaseQuantity": "পরিমাণ কমান",
+    "increaseQuantity": "পরিমাণ বাড়ান"
   },
   "productCard": {
     "noImage": "কোন ছবি নেই",
@@ -335,5 +342,14 @@
     "back": "ফিরে যান",
     "next": "পরবর্তী",
     "previous": "আগের"
+  },
+  "trust": {
+    "label": "অর্ডারের সুবিধা",
+    "codShort": "ক্যাশ অন ডেলিভারি",
+    "codLong": "পণ্য হাতে পেয়ে নগদে পরিশোধ করুন। আগে দেখে নিন।",
+    "deliveryShort": "ঢাকা {inside} · ঢাকার বাইরে {outside}",
+    "deliveryLong": "ডেলিভারি চার্জ ঢাকার ভিতরে {inside}, ঢাকার বাইরে {outside}।",
+    "exchangeShort": "{days, number} দিনে এক্সচেঞ্জ",
+    "exchangeLong": "ডেলিভারির {days, number} দিনের মধ্যে এক্সচেঞ্জ করা যাবে।"
   }
 }

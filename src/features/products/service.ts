@@ -67,6 +67,18 @@ export const ProductService = {
     return ProductRepository.findNewArrivals(storeId, limit);
   },
 
+  async getRelated(
+    storeId: string,
+    product: Pick<IProduct, "_id" | "categoryId" | "price">,
+    limit = 8
+  ): Promise<IProduct[]> {
+    return ProductRepository.findRelated(
+      storeId,
+      { id: product._id, categoryId: product.categoryId, price: product.price },
+      limit
+    );
+  },
+
   async create(
     storeId: string,
     data: Omit<IProduct, "_id" | "storeId" | "slug" | "averageRating" | "reviewCount" | "createdAt" | "updatedAt">

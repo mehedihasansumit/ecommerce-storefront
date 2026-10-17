@@ -9,8 +9,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
-import { ChevronRight, Truck, RotateCcw, Shield } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { ProductDetailClient } from "@/features/products/components/ProductDetailClient";
+import { ProductRail } from "@/features/products/components/ProductRail";
+import { getStoreTrustFacts } from "@/features/stores/trust";
 import { ReviewSection } from "@/features/reviews/components/ReviewSection";
 import { t } from "@/shared/lib/i18n";
 import { isHtml, plainTextToHtml } from "@/shared/lib/html";
@@ -50,6 +52,7 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = await ProductService.getBySlug(tenant._id, slug);
   if (!product) notFound();
+  const related = await ProductService.getRelated(tenant._id, product);
 
   const domain = tenant.domains?.[0] || "localhost:3000";
   const storeUrl = `https://${domain}`;
@@ -72,9 +75,9 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 md:pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6 md:py-8">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-xs text-text-tertiary mb-8">
+        <nav className="flex items-center gap-2 text-xs text-text-tertiary mb-4 md:mb-8">
           <Link href="/" className="hover:text-[var(--color-text)] transition-colors">
             {tr("home")}
           </Link>
@@ -93,22 +96,16 @@ export default async function ProductDetailPage({
           product={product}
           socialOrdering={tenant.socialOrdering}
           productUrl={`${storeUrl}/products/${product.slug}`}
+          trustFacts={getStoreTrustFacts(tenant)}
         />
 
-        {/* Trust signals */}
-        <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 md:gap-8 pt-6 border-t border-border-subtle">
-          {[
-            { icon: Truck, label: tr("freeShipping") || "Free Shipping" },
-            { icon: RotateCcw, label: tr("easyReturns") || "Easy Returns" },
-            { icon: Shield, label: tr("secureCheckout") || "Secure Checkout" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <item.icon size={16} style={{ color: "var(--color-primary)", opacity: 0.7 }} />
-              <span className="text-xs text-text-secondary">{item.label}</span>
-            </div>
-          ))}
-        </div>
+      </div>
 
+      <div className="-mt-4 md:mt-0">
+        <ProductRail title={tr("similarProducts")} products={related} />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28 md:pb-8">
         {/* Description & Tags */}
         <div className="mt-20 border-t border-border-subtle pt-14">
           {t(product.description, locale) && (
@@ -143,7 +140,7 @@ export default async function ProductDetailPage({
         </div>
 
         {/* Reviews Section */}
-        <div className="mt-16 border-t border-border-subtle pt-14">
+        <div id="reviews" className="mt-16 border-t border-border-subtle pt-14 scroll-mt-20">
           <ReviewSection
             productId={product._id}
             storeId={tenant._id}

@@ -11,6 +11,9 @@ interface SocialOrderButtonsProps {
   productUrl: string;
   quantity: number;
   selectedOptions: Record<string, string>;
+  /** Options not chosen yet; when non-empty the links don't open and `onBlocked` fires. */
+  missingOptions?: string[];
+  onBlocked?: () => unknown;
 }
 
 const DEFAULT_TEMPLATE =
@@ -23,6 +26,8 @@ export function SocialOrderButtons({
   productUrl,
   quantity,
   selectedOptions,
+  missingOptions,
+  onBlocked,
 }: SocialOrderButtonsProps) {
   const tr = useTranslations("productDetail");
   const [copied, setCopied] = useState(false);
@@ -53,7 +58,16 @@ export function SocialOrderButtons({
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   };
 
-  const handleFacebookClick = async () => {
+  // An order without a size is unusable — same rule as Add to cart.
+  const guardMissingOptions = (e: React.MouseEvent) => {
+    if (!missingOptions?.length) return false;
+    e.preventDefault();
+    onBlocked?.();
+    return true;
+  };
+
+  const handleFacebookClick = async (e: React.MouseEvent) => {
+    if (guardMissingOptions(e)) return;
     const message = buildMessage(whatsapp?.messageTemplate || DEFAULT_TEMPLATE);
     try {
       await navigator.clipboard.writeText(message);
@@ -72,6 +86,7 @@ export function SocialOrderButtons({
             href={buildWhatsAppUrl()}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={guardMissingOptions}
             className="inline-flex items-center justify-center gap-2.5 px-5 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-lg"
             style={{
               backgroundColor: "#25D366",

@@ -3,7 +3,7 @@ interface PriceProps {
   compareAt?: number;
   currency?: string;
   locale?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
@@ -11,9 +11,11 @@ const SIZES = {
   sm: { primary: "text-sm font-semibold", compare: "text-xs" },
   md: { primary: "text-base font-bold", compare: "text-xs" },
   lg: { primary: "text-xl font-bold", compare: "text-sm" },
+  xl: { primary: "text-2xl md:text-3xl font-bold", compare: "text-lg" },
 };
 
-function formatMoney(amount: number, currency: string, locale: string): string {
+/** Plain-text money formatting (same rules as <Price>), for amounts inside sentences. */
+export function formatPrice(amount: number, currency = "BDT", locale = "en"): string {
   if (currency === "BDT") {
     return `৳${amount.toLocaleString(locale === "bn" ? "bn-BD" : "en-US")}`;
   }
@@ -49,11 +51,11 @@ export function Price({
         .join(" ")}
     >
       <span className={s.primary} style={{ color: "var(--color-price)" }}>
-        {formatMoney(amount, currency, locale)}
+        {formatPrice(amount, currency, locale)}
       </span>
       {hasDiscount && (
         <span className={`${s.compare} text-gray-400 line-through`}>
-          {formatMoney(compareAt!, currency, locale)}
+          {formatPrice(compareAt!, currency, locale)}
         </span>
       )}
     </span>

@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Star } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { IProduct, IProductImage } from "../types";
 import type { IStoreSocialOrdering } from "@/features/stores/types";
+import type { StoreTrustFact } from "@/features/stores/trust";
+import { StoreTrustInfo } from "@/shared/components/storefront/StoreTrustInfo";
+import { Price, formatPrice } from "@/shared/components/ui";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { AddToCartSection } from "./AddToCartSection";
 import { MobileBuyBar } from "./MobileBuyBar";
@@ -19,15 +22,23 @@ interface ProductDetailClientProps {
   product: IProduct;
   socialOrdering?: IStoreSocialOrdering;
   productUrl?: string;
+  /** COD / delivery fee / exchange window from the store config, shown next to the CTA. */
+  trustFacts?: StoreTrustFact[];
 }
 
-export function ProductDetailClient({ product, socialOrdering, productUrl }: ProductDetailClientProps) {
+export function ProductDetailClient({
+  product,
+  socialOrdering,
+  productUrl,
+  trustFacts = [],
+}: ProductDetailClientProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
   const selection = useProductSelection(product);
   const { activeVariant, quantity, selectedOptions, displayPrice, displayStock, setOptions } =
     selection;
   const track = useTrackEvent();
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     track({
@@ -100,7 +111,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
     : displayPrice * quantity;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10 lg:gap-16">
       {/* Images */}
       <ProductImageGallery
         images={galleryImages}
@@ -119,7 +130,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
         {/* Discount badge */}
         {hasDiscount && (
           <span
-            className="inline-block px-3 py-1 text-xs font-bold rounded-full mb-4"
+            className="hidden md:inline-block px-3 py-1 text-xs font-bold rounded-full mb-4"
             style={{
               backgroundColor: "var(--color-sale-badge-bg)",
               color: "var(--color-sale-badge-text)",
@@ -129,13 +140,13 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
           </span>
         )}
 
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4 leading-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2 md:mb-4 leading-tight">
           {t(product.name, locale)}
         </h1>
 
         {/* Rating */}
         {product.averageRating > 0 && (
-          <div className="flex items-center gap-3 mb-5">
+          <a href="#reviews" className="focus-ring inline-flex w-fit items-center gap-3 mb-3 md:mb-5">
             <div className="flex items-center gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
@@ -152,26 +163,23 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
             <span className="text-xs text-text-secondary">
               ({product.reviewCount} {tr("reviews")})
             </span>
-          </div>
+          </a>
         )}
 
         {/* Price */}
-        <div className="flex items-baseline gap-3 mb-6">
-          <span
-            className="text-2xl md:text-3xl font-bold"
-            style={{ color: "var(--color-price)" }}
-          >
-            ৳{displayPrice.toLocaleString()}
-          </span>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 md:mb-6">
+          <Price amount={displayPrice} compareAt={displayCompareAt} size="xl" locale={locale} />
           {hasDiscount && (
-            <span className="text-xl text-text-tertiary line-through">
-              ৳{displayCompareAt.toLocaleString()}
+            <span className="text-sm font-semibold" style={{ color: "var(--color-success)" }}>
+              {tr("youSave", {
+                amount: formatPrice(displayCompareAt - displayPrice, "BDT", locale),
+              })}
             </span>
           )}
         </div>
 
         {t(product.shortDescription, locale) && (
-          <p className="text-text-secondary leading-relaxed mb-6">
+          <p className="text-text-secondary leading-relaxed mb-3 md:mb-6">
             {t(product.shortDescription, locale)}
           </p>
         )}
@@ -192,7 +200,7 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
           </div>
         )}
 
-        <div className="border-t border-border-subtle pt-6 space-y-6">
+        <div className="border-t border-border-subtle pt-4 md:pt-6 space-y-4 md:space-y-6">
           {/* Stock */}
           <div>
             {displayStock > 0 ? (
@@ -218,14 +226,13 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
             )}
           </div>
 
-          {/* Desktop: inline selector + social buttons */}
-          <div className="hidden md:block space-y-6">
+          {/* Inline buy box (all breakpoints): sizes → delivery/COD/returns → CTA → social */}
+          <div className="space-y-6">
             <AddToCartSection
               options={product.options ?? []}
               selection={selection}
-              addToCartLabel={tr("addToCart")}
-              outOfStockLabel={tr("outOfStock")}
-              pleaseSelectLabel={(o) => tr("pleaseSelect", { options: o })}
+              ctaRef={ctaRef}
+              beforeCta={<StoreTrustInfo facts={trustFacts} layout="rows" />}
             />
 
             {socialOrdering && productUrl && (
@@ -236,22 +243,19 @@ export function ProductDetailClient({ product, socialOrdering, productUrl }: Pro
                 productUrl={productUrl}
                 quantity={quantity}
                 selectedOptions={selectedOptions}
+                missingOptions={selection.missingOptions}
+                onBlocked={selection.notifyMissingOptions}
               />
             )}
           </div>
         </div>
       </div>
 
-      {/* Mobile: sticky buy bar + variant sheet */}
+      {/* Mobile: sticky buy bar, shown once the inline CTA scrolls away */}
       <MobileBuyBar
         product={product}
         selection={selection}
-        socialOrdering={socialOrdering}
-        productUrl={productUrl}
-        addToCartLabel={tr("addToCart")}
-        outOfStockLabel={tr("outOfStock")}
-        selectOptionsLabel={tr("selectOptions")}
-        pleaseSelectLabel={(o) => tr("pleaseSelect", { options: o })}
+        anchorRef={ctaRef}
       />
     </div>
   );

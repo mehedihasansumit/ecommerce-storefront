@@ -6,7 +6,8 @@ import { useCart } from "@/shared/context/CartContext";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
 import { getBulkUnitPrice, normalizeTiers } from "@/shared/lib/pricing";
 import { t } from "@/shared/lib/i18n";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import toast from "react-hot-toast";
 import type { IProduct, IProductVariant } from "../types";
 
 export interface ProductSelection {
@@ -24,6 +25,10 @@ export interface ProductSelection {
   missingOptions: string[];
   /** Adds the current selection; returns false (and adds nothing) if it isn't buyable. */
   addToCart: () => boolean;
+  /** addToCart + the shopper-facing toast ("Added to cart" / "Please select Size"). */
+  tryAddToCart: () => boolean;
+  /** Toasts "Please select …" for the missing options. Returns true if any were missing. */
+  notifyMissingOptions: () => boolean;
 }
 
 /**
@@ -159,6 +164,23 @@ export function useProductSelection(product: IProduct): ProductSelection {
     track,
   ]);
 
+  const tr = useTranslations("productDetail");
+
+  const notifyMissingOptions = useCallback(() => {
+    if (missingOptions.length === 0) return false;
+    toast.error(tr("pleaseSelect", { options: missingOptions.join(", ") }));
+    return true;
+  }, [missingOptions, tr]);
+
+  const tryAddToCart = useCallback(() => {
+    if (addToCart()) {
+      toast.success(tr("addedToCart"));
+      return true;
+    }
+    notifyMissingOptions();
+    return false;
+  }, [addToCart, notifyMissingOptions, tr]);
+
   return {
     selectedOptions,
     setOption,
@@ -172,5 +194,7 @@ export function useProductSelection(product: IProduct): ProductSelection {
     isValueAvailable,
     missingOptions,
     addToCart,
+    tryAddToCart,
+    notifyMissingOptions,
   };
 }

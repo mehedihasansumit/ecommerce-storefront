@@ -27,6 +27,12 @@
 #
 # Cross-arch (Apple Silicon -> linux/amd64 VPS):
 #   BUILD_PLATFORM=linux/amd64 VPS_USER=... VPS_HOST=... VPS_PATH=... bash scripts/deploy.sh
+#
+# Build network (BUILD_NETWORK, default "host"):
+#   The build's RUN steps use the host's network. Docker's default bridge can
+#   hand out IPv6 addresses it cannot reach, and npm then times out on
+#   registry.npmjs.org (ETIMEDOUT after ~80s). BUILD_NETWORK=default restores
+#   Docker's bridge network.
 
 set -euo pipefail
 
@@ -53,6 +59,7 @@ IMAGE_NAME=${IMAGE_NAME:-ecommerce-website}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 IMAGE_REF="${IMAGE_NAME}:${IMAGE_TAG}"
 BUILD_PLATFORM=${BUILD_PLATFORM:-}
+BUILD_NETWORK=${BUILD_NETWORK:-host}
 
 # Multiplex: one auth, reuse for all ssh/rsync calls below.
 SSH_CTRL_DIR="${TMPDIR:-/tmp}/ecommerce-deploy-ssh-$$"
@@ -70,9 +77,9 @@ cd "$REPO_ROOT"
 echo "==> Build image locally: $IMAGE_REF"
 if [ -n "$BUILD_PLATFORM" ]; then
   # buildx required for cross-platform; --load puts result in local docker image store
-  docker buildx build --platform "$BUILD_PLATFORM" -t "$IMAGE_REF" --load .
+  docker buildx build --platform "$BUILD_PLATFORM" --network "$BUILD_NETWORK" -t "$IMAGE_REF" --load .
 else
-  docker build -t "$IMAGE_REF" .
+  docker build --network "$BUILD_NETWORK" -t "$IMAGE_REF" .
 fi
 
 echo "==> Stream image -> $VPS_USER@$VPS_HOST (docker save | ssh docker load)"

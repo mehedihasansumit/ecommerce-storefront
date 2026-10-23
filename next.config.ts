@@ -18,9 +18,9 @@ const s3Pattern =
   patternFromEnv(process.env.S3_ENDPOINT) ||
   patternFromEnv(process.env.RUSTFS_ENDPOINT);
 
-// When no CDN URL is configured, images are served through /api/media proxy (relative
-// URLs). Next.js image optimization is skipped to avoid the private-IP SSRF check.
-const usingMediaProxy = !process.env.S3_PUBLIC_URL;
+// Images are never run through the Next.js optimizer: uploads already get 400/800px
+// WebP variants (srcSet), served from the bucket's CDN domain (S3_PUBLIC_URL, e.g.
+// Cloudflare R2) in production or the /api/media proxy in dev.
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    unoptimized: usingMediaProxy,
+    unoptimized: true,
     remotePatterns: [
       { protocol: "http", hostname: "localhost" },
       { protocol: "http", hostname: "127.0.0.1" },

@@ -35,6 +35,10 @@ export const s3Client = new S3Client({
     secretAccessKey: SECRET_KEY,
   },
   forcePathStyle: true,
+  // Cloudflare R2 rejects some of the SDK's default flexible checksums; only send
+  // them when an operation requires one (also fine for RustFS/Garage in dev).
+  requestChecksumCalculation: "WHEN_REQUIRED",
+  responseChecksumValidation: "WHEN_REQUIRED",
 });
 
 export function publicUrlFor(key: string): string {

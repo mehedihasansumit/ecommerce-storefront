@@ -9,29 +9,27 @@ KEEP_HOURLY="${BACKUP_KEEP_HOURLY_HOURS:-48}"
 KEEP_DAILY="${BACKUP_KEEP_DAILY_DAYS:-30}"
 KEEP_MONTHLY="${BACKUP_KEEP_MONTHLY_DAYS:-365}"
 
-# One run at a time (a slow dump must not overlap the next hour's run). A lock
-# older than 3 hours is left over from a crashed run and is taken over.
+# One run at a time (a slow dump must not overlap the next hour's run). The
+# kernel lock is held by this process and released when it exits or dies, so a
+# crashed run never blocks later ones and no run can release another's lock.
 mkdir -p "$STATE_DIR"
-LOCK="$STATE_DIR/lock"
-if [ -d "$LOCK" ] && [ -n "$(find "$LOCK" -maxdepth 0 -mmin +180)" ]; then
-  log "removing stale lock"
-  rmdir "$LOCK"
-fi
-if ! mkdir "$LOCK" 2>/dev/null; then
+exec 9>"$STATE_DIR/lock"
+if ! flock -n 9; then
   log "another backup is running; skipping"
   echo "another backup is running"
   exit 0
 fi
 
 WORK=$(mktemp -d)
-trap 'rm -rf "$WORK"; rmdir "$LOCK" 2>/dev/null || true' EXIT
+trap 'rm -rf "$WORK"' EXIT
 
 STAMP=$(date '+%Y%m%d-%H%M%S')
 DAY=$(date '+%Y%m%d')
 MONTH=$(date '+%Y%m')
 NAME="$PGDATABASE-$STAMP.dump"
 
-pg_dump -Fc -f "$WORK/$NAME"
+# Give up instead of queueing forever behind a long table lock (e.g. a migration).
+pg_dump -Fc --lock-wait-timeout=10min -f "$WORK/$NAME"
 pg_restore --list "$WORK/$NAME" >/dev/null
 
 FILE="$NAME"

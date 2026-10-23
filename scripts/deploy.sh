@@ -12,11 +12,12 @@
 #   - Install Docker + compose plugin (https://docs.docker.com/engine/install/)
 #   - mkdir -p $VPS_PATH
 #   - copy .env.production.example -> .env.production, fill secrets
-#   - ufw allow 22, 80, 443; deny 5000, 5432
+#   - ufw allow 22, 80, 443; deny 5000, 5432 (and 3900-3904 while an old Garage
+#     container is still running — docs/deploy/db-backups.md#garage)
 #       (host-mode containers bind these on host — they MUST NOT be public)
 #   - Cloudflare R2: media bucket (docs/deploy/cloudflare-r2.md) and a separate
-#     private backup bucket (docs/deploy/db-backups.md); put both sets of keys
-#     in .env.production (S3_* and BACKUP_S3_*)
+#     private backup bucket (docs/deploy/db-backups.md); media keys (S3_*) go in
+#     .env.production, backup keys (BACKUP_S3_*) in .env.backup (chmod 600)
 #   - Nginx reverse-proxy to 127.0.0.1:5000 with `proxy_set_header Host $host;`
 #     (multi-tenant routing depends on the original Host header)
 #   - First seed: bash scripts/seed-prod.sh
@@ -88,7 +89,7 @@ rsync -avz \
   --exclude='*' \
   ./ "$VPS_USER@$VPS_HOST:$VPS_PATH/"
 
-echo "==> Up on VPS (no rebuild — image already loaded)"
+echo "==> Up on VPS (app image already loaded; the small backup image is built there)"
 ssh $SSH_OPTS "$VPS_USER@$VPS_HOST" bash -se <<EOF
 set -euo pipefail
 cd "$VPS_PATH"
@@ -96,6 +97,10 @@ cd "$VPS_PATH"
 if [ ! -f .env.production ]; then
   echo "ERROR: .env.production missing on VPS at $VPS_PATH"
   echo "Copy .env.production.example -> .env.production and fill secrets, then re-run."
+  exit 1
+fi
+if [ ! -f .env.backup ]; then
+  echo "ERROR: .env.backup missing on VPS at $VPS_PATH (backup bucket keys; see docs/deploy/db-backups.md)"
   exit 1
 fi
 

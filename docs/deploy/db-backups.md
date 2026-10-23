@@ -39,7 +39,15 @@ Put the **public** key on the server (`BACKUP_AGE_RECIPIENT`). Keep
 `lour-haus-backup.key` in a password manager and one more safe place: without
 it the backups cannot be restored.
 
-## 3. Settings in `.env.production`
+## 3. Settings in `.env.backup`
+
+The backup container reads its own file, `.env.backup`, next to
+`docker-compose.prod.yml` on the server. Do not put these in `.env.production`:
+the app must not hold a key that can delete backups.
+
+```bash
+touch .env.backup && chmod 600 .env.backup
+```
 
 ```env
 BACKUP_S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
@@ -91,22 +99,38 @@ A specific backup: pass its folder and file instead of `latest`, e.g.
 
 ## 6. Disaster recovery (the live database is lost or damaged)
 
+Restore into a **new** database, check it, then swap names. Restoring over the
+live database is not a clean rollback: tables created after the backup (for
+example by a later migration) would stay.
+
 1. Stop the app so nothing writes: `docker compose -f docker-compose.prod.yml stop app`.
-2. Restore into the live database (this replaces its contents):
+2. Restore the chosen backup into a new database (`latest`, or an older one from
+   `hourly/` or `daily/` to go back to before a mistake):
    ```bash
    docker compose -f docker-compose.prod.yml exec db-backup \
-     /usr/local/bin/restore.sh latest --target-db ecommerce --force
+     /usr/local/bin/restore.sh latest --target-db ecommerce_restored
    ```
-   To go back to before a mistake, choose an older backup from `hourly/` or
-   `daily/` instead of `latest`.
-3. Start the app: `docker compose -f docker-compose.prod.yml start app`.
+3. Check it (`select count(*) from orders` etc.), then swap:
+   ```bash
+   docker compose -f docker-compose.prod.yml exec postgres psql -U ecommerce -d postgres -c \
+     "alter database ecommerce rename to ecommerce_broken; alter database ecommerce_restored rename to ecommerce;"
+   ```
+4. Start the app: `docker compose -f docker-compose.prod.yml start app`. Drop
+   `ecommerce_broken` once you are sure.
+
+`restore.sh` runs in one transaction: if it fails, the target is left as it
+was. It refuses the live database, and any database that already has tables,
+unless you add `--force`.
 
 ## Garage
 
 Production no longer runs Garage. The compose file does not define it, but
 `docker compose up -d` does not stop a container it no longer knows, and Docker
-keeps its volumes. Copy the media to R2 first (`docs/deploy/cloudflare-r2.md`,
-step 2), then remove it:
+keeps its volumes. Until it is removed it still listens on ports 3900-3904:
+keep those blocked in the firewall. Do not run `docker compose up
+--remove-orphans` or `down --remove-orphans` before the media copy to R2 is
+verified. Copy the media to R2 first (`docs/deploy/cloudflare-r2.md`, step 2),
+then remove it:
 
 ```bash
 docker stop ecommerce-garage && docker rm ecommerce-garage

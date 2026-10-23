@@ -2,7 +2,8 @@
 # Media and backups live in Cloudflare R2 (docs/deploy/cloudflare-r2.md,
 # docs/deploy/db-backups.md); there is no local object storage.
 # All services run in HOST network mode — they reach each other via 127.0.0.1.
-# Operator MUST firewall ports 5000 and 5432 from public.
+# Operator MUST firewall ports 5000 and 5432 from public (and 3900-3904 while an
+# old Garage container from before the R2 move is still running).
 # Only Nginx (manual on host) should expose 80/443.
 
 services:
@@ -69,8 +70,10 @@ services:
     container_name: ecommerce-db-backup
     restart: unless-stopped
     network_mode: host
+    # Its own env file: the backup token never reaches the app, and app secrets
+    # never reach this container (docs/deploy/db-backups.md).
     env_file:
-      - .env.production
+      - .env.backup
     environment:
       PGHOST: 127.0.0.1
       PGPORT: "5432"

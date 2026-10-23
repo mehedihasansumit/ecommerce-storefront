@@ -147,15 +147,19 @@ case_upload_failure() {
 case_lock() {
   reset_bucket
   EXTRA_ENV=()
-  in_image sh -c 'mkdir -p /var/lib/db-backup/lock' >/dev/null
-  local out; out=$(run_backup 2>&1) || fail "locked run should exit 0"
+  # Another run holds the lock (a process keeps it with flock) → this run skips.
+  # shellcheck disable=SC2046
+  docker run -d --rm --name dbb-lock-holder -v "$STATE_VOLUME:/var/lib/db-backup" "$IMAGE" \
+    sh -c 'exec 9>/var/lib/db-backup/lock; flock 9; sleep 60' >/dev/null
+  sleep 2
+  local out; out=$(run_backup 2>&1) || { docker rm -f dbb-lock-holder >/dev/null; fail "locked run should exit 0"; }
+  docker rm -f dbb-lock-holder >/dev/null
   echo "$out" | grep -q "another backup is running" || fail "locked run did not report the lock: $out"
   [ "$(count postgres/hourly)" -eq 0 ] || fail "locked run uploaded a backup"
-  # A lock left by a crashed run (older than 3h) is taken over.
-  in_image sh -c 'touch -d "@$(( $(date +%s) - 4*3600 ))" /var/lib/db-backup/lock' >/dev/null
-  run_backup >/dev/null || fail "run after a stale lock failed"
-  [ "$(count postgres/hourly)" -eq 1 ] || fail "run after a stale lock did not upload"
-  in_image test ! -e /var/lib/db-backup/lock || fail "lock not released"
+  # A lock file left by a crashed run (nobody holds it) does not block the next run.
+  in_image sh -c 'touch /var/lib/db-backup/lock' >/dev/null
+  run_backup >/dev/null || fail "run after a crashed run failed"
+  [ "$(count postgres/hourly)" -eq 1 ] || fail "run after a crashed run did not upload"
   pass "lock"
 }
 
@@ -193,6 +197,14 @@ case_restore_latest() {
     a=$(psql_q ecommerce "select count(*) from $t"); b=$(psql_q "$TARGET_DB" "select count(*) from $t")
     [ "$a" = "$b" ] || fail "row count differs for $t: source $a, restored $b"
   done
+  # A database that already has tables is not overwritten without --force.
+  local out
+  if out=$(in_image /usr/local/bin/restore.sh latest --target-db "$TARGET_DB" 2>&1); then
+    fail "restore into a non-empty database was not refused"
+  fi
+  echo "$out" | grep -qi "already has tables" || fail "non-empty refusal message missing: $out"
+  in_image /usr/local/bin/restore.sh latest --target-db "$TARGET_DB" --force >/dev/null \
+    || fail "forced restore into the same database failed"
   drop_target
   pass "restore latest into a new DB"
 }
@@ -238,7 +250,26 @@ case_restore_encrypted_without_key() {
   pass "encrypted restore needs the key"
 }
 
-ALL_CASES=(backup_uploads_valid_dump tiers retention upload_failure lock encryption restore_latest restore_refuses_live_db restore_encrypted_without_key)
+# The app must not get the backup token, and the backup container must not get
+# app secrets: each reads its own env file.
+case_env_separation() {
+  local t; t=$(mktemp -d)
+  cp "$REPO_ROOT/docker-compose.prod.yml" "$t/"
+  mkdir -p "$t/docker/db-backup"
+  printf 'JWT_SECRET=app-secret\n' >"$t/.env.production"
+  printf 'BACKUP_S3_SECRET_KEY=backup-secret\n' >"$t/.env.backup"
+  local json; json=$(docker compose -f "$t/docker-compose.prod.yml" config --format json 2>/dev/null) || fail "compose config failed"
+  rm -rf "$t"
+  local app bak
+  app=$(echo "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["app"].get("environment",{}))')
+  bak=$(echo "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["db-backup"].get("environment",{}))')
+  echo "$app" | grep -q backup-secret && fail "app gets the backup secret"
+  echo "$bak" | grep -q app-secret && fail "db-backup gets app secrets"
+  echo "$bak" | grep -q backup-secret || fail "db-backup lacks its own secret"
+  pass "env separation"
+}
+
+ALL_CASES=(backup_uploads_valid_dump tiers retention upload_failure lock encryption restore_latest restore_refuses_live_db restore_encrypted_without_key env_separation)
 
 # ---------------------------------------------------------------- main
 

@@ -36,8 +36,9 @@ media and backups, so the Garage service was removed from the production stack.
 - Restores are only trustworthy if tried: the runbook
   (`docs/deploy/db-backups.md`) includes a monthly restore drill into a scratch
   database. `restore.sh` refuses the live database without `--force`.
-- Retention is done by the backup job with the same token that writes, so a
-  leaked backup token can also delete backups. An R2 bucket lock or a second
+- The backup token lives only in `.env.backup`, read by the backup container;
+  the app never holds it. Retention is done by the backup job with the same
+  token that writes, so a leaked backup token can still delete backups. An R2 bucket lock or a second
   copy elsewhere would close that; not done yet.
 - `scripts/test-db-backup.sh` tests backup, tiers, retention, failure, lock,
   encryption and restore end to end against a local S3 (Garage) in place of R2.

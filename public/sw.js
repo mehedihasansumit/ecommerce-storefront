@@ -1,9 +1,24 @@
-const CACHE_VERSION = "v1.1.08";
+// v1.2.0: earlier versions stored personal pages; bumping deletes those caches.
+const CACHE_VERSION = "v1.2.0";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `store-cache-${CACHE_VERSION}`;
 const ALL_CACHES = [STATIC_CACHE, DYNAMIC_CACHE];
 
 const PRECACHE_URLS = ["/", "/offline"];
+
+// Pages and images kept in the dynamic cache; the oldest are dropped beyond this.
+const DYNAMIC_CACHE_LIMIT = 60;
+
+// Pages with one shopper's data (cart, checkout, account, orders, order-tracking
+// links). Never stored: on a shared device they would outlive the session.
+const PERSONAL_PATHS = ["/cart", "/checkout", "/account", "/orders"];
+
+function isPersonal(url) {
+  return (
+    url.searchParams.has("token") ||
+    PERSONAL_PATHS.some((p) => url.pathname === p || url.pathname.startsWith(p + "/"))
+  );
+}
 
 // --- Message ---
 self.addEventListener("message", (event) => {
@@ -77,6 +92,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Personal pages → network only; offline shows the offline page, never a copy.
+  if (request.destination === "document" && isPersonal(url)) {
+    event.respondWith(networkOnly(request));
+    return;
+  }
+
   // HTML pages → network-first so updates are always visible immediately;
   // falls back to cache only when offline
   if (request.destination === "document") {
@@ -113,11 +134,33 @@ async function cacheFirst(request, cacheName) {
   }
 }
 
+/** Drops the oldest entries (insertion order) beyond DYNAMIC_CACHE_LIMIT. */
+async function trimCache(cacheName) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  await Promise.all(
+    keys.slice(0, Math.max(0, keys.length - DYNAMIC_CACHE_LIMIT)).map((k) => cache.delete(k))
+  );
+}
+
+async function putAndTrim(cache, cacheName, request, response) {
+  await cache.put(request, response);
+  await trimCache(cacheName);
+}
+
+async function networkOnly(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    return (await caches.match("/offline")) || new Response("Offline", { status: 503 });
+  }
+}
+
 async function networkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
+    if (response.ok) putAndTrim(cache, cacheName, request, response.clone());
     return response;
   } catch {
     const cached = await cache.match(request);
@@ -132,7 +175,7 @@ async function staleWhileRevalidate(request, cacheName) {
 
   const fetchPromise = fetch(request)
     .then((response) => {
-      if (response.ok) cache.put(request, response.clone());
+      if (response.ok) putAndTrim(cache, cacheName, request, response.clone());
       return response;
     })
     .catch(async () => {

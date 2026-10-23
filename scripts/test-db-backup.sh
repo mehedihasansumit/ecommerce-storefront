@@ -25,9 +25,9 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 pass() { echo "PASS: $*"; }
 
 cleanup() {
-  garage bucket deny --read --write --owner "$BUCKET" --key "$KEY_NAME" >/dev/null 2>&1 || true
-  # Empty the bucket before deleting it.
+  # Empty the bucket (needs the key's access) before revoking access and deleting it.
   [ -n "${ACCESS_KEY:-}" ] && rcl purge "r2:$BUCKET" >/dev/null 2>&1 || true
+  garage bucket deny --read --write --owner "$BUCKET" --key "$KEY_NAME" >/dev/null 2>&1 || true
   garage bucket delete --yes "$BUCKET" >/dev/null 2>&1 || true
   garage key delete --yes "$KEY_NAME" >/dev/null 2>&1 || true
   docker volume rm -f "$STATE_VOLUME" >/dev/null 2>&1 || true

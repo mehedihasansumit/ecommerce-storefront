@@ -17,7 +17,8 @@
  * Marquee (every width, every categoryStyle that supports it):
  *   >= MARQUEE_MIN (7) → one continuously moving row replaces the phone scroll row
  *   and the desktop two-row layout (first 11 + "View all" past 12). Visitors who
- *   prefer reduced motion keep the static layout above for that count.
+ *   prefer reduced motion keep the static layout above for that count, and so does
+ *   every visitor when the Store turns it off (theme.motion.categories = false).
  */
 export type CategoryPhoneLayout = "grid-3" | "grid-2" | "scroll";
 
@@ -44,7 +45,11 @@ const PHONE_OVERFLOW_COUNT = 8;
 /** From this many shown categories the home row auto-scrolls (the marquee). */
 export const MARQUEE_MIN = 7;
 
-export function getCategoryLayout(n: number): CategoryLayout {
+/**
+ * @param autoScroll the Store's `theme.motion.categories` (resolveTheme); false keeps
+ * the static layout for every count.
+ */
+export function getCategoryLayout(n: number, autoScroll = true): CategoryLayout {
   const count = Math.max(0, Math.floor(n));
   if (count > CATEGORY_LAYOUT_MAX) {
     return {
@@ -54,7 +59,7 @@ export function getCategoryLayout(n: number): CategoryLayout {
       desktopCols: 6,
       desktopRowCards: false,
       viewAllTile: true,
-      marquee: true,
+      marquee: autoScroll,
       marqueeCount: CATEGORY_LAYOUT_MAX - 1,
     };
   }
@@ -66,7 +71,7 @@ export function getCategoryLayout(n: number): CategoryLayout {
     desktopCols: count <= 6 ? Math.max(count, 1) : Math.ceil(count / 2),
     desktopRowCards: count <= 4,
     viewAllTile: false,
-    marquee: count >= MARQUEE_MIN,
+    marquee: autoScroll && count >= MARQUEE_MIN,
     marqueeCount: count,
   };
 }

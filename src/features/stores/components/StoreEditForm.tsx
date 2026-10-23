@@ -36,6 +36,7 @@ import {
   resolveTheme,
 } from "@/features/stores/presets";
 import { STYLE_SWITCHES, type StyleSwitchKey } from "@/features/stores/styles";
+import { DEFAULT_MOTION, MOTION_KEYS, type MotionKey } from "@/features/stores/motion";
 import { ImageInput } from "@/shared/components/ui";
 import {
   THEME_TOKENS,
@@ -457,6 +458,14 @@ export default function StoreEditForm({
       const styles = { ...prev.theme.styles, [key]: value || undefined };
       return { ...prev, theme: { ...prev.theme, styles } };
     });
+  };
+
+  /** Home auto-scroll on/off (theme.motion); stored explicitly, presets never change it. */
+  const handleMotionChange = (key: MotionKey, on: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      theme: { ...prev.theme, motion: { ...prev.theme.motion, [key]: on } },
+    }));
   };
 
   const applyPreset = (preset: ThemePreset) => {
@@ -940,6 +949,34 @@ export default function StoreEditForm({
                       </Field>
                     );
                   })}
+                </div>
+
+                {/* Motion: home auto-scroll on/off (theme.motion), brand-neutral */}
+                <div className="mt-5">
+                  <SectionTitle>{tp("motion.title")}</SectionTitle>
+                  <p id="theme-motion-hint" className="text-xs text-admin-text-muted mt-0.5 mb-3">
+                    {tp("motion.hint")}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {MOTION_KEYS.map((key) => (
+                      <label
+                        key={key}
+                        className="flex items-start gap-3 p-4 rounded-xl border border-admin-border bg-admin-surface-raised cursor-pointer select-none"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.theme.motion?.[key] ?? DEFAULT_MOTION[key]}
+                          onChange={(e) => handleMotionChange(key, e.target.checked)}
+                          disabled={loading}
+                          aria-describedby="theme-motion-hint"
+                          className="w-5 h-5 shrink-0 rounded border-admin-border-md accent-admin-text-primary mt-0.5"
+                        />
+                        <span className="text-sm font-medium text-admin-text-secondary">
+                          {tp(`motion.${key}`)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 

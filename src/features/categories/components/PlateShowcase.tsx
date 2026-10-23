@@ -21,6 +21,8 @@ interface PlateShowcaseProps {
   viewAllHref: string;
   viewAllLabel: string;
   locale: string;
+  /** The Store's theme.motion.categories (default on): auto-scroll from MARQUEE_MIN. */
+  autoScroll?: boolean;
 }
 
 const PHONE_LIST = {
@@ -97,12 +99,12 @@ function PlateFrame() {
   );
 }
 
-export function PlateShowcase({ title, description, items, viewAllHref, viewAllLabel, locale }: PlateShowcaseProps) {
+export function PlateShowcase({ title, description, items, viewAllHref, viewAllLabel, locale, autoScroll = true }: PlateShowcaseProps) {
   if (items.length === 0) return null;
   const g = geometry(items.length);
   const rendered = items.slice(0, Math.max(g.phoneVisible, g.wideVisible));
 
-  const marquee = getCategoryLayout(items.length);
+  const marquee = getCategoryLayout(items.length, autoScroll);
 
   const plateLink = (href: string, children: ReactNode, name: ReactNode) => (
     <Link href={href} className={TILE_LINK}>
@@ -227,7 +229,15 @@ export function PlateShowcase({ title, description, items, viewAllHref, viewAllL
 }
 
 /** Loading state with the same count-driven geometry. */
-export function PlateShowcaseSkeleton({ count, longestName = 0 }: { count: number; longestName?: number }) {
+export function PlateShowcaseSkeleton({
+  count,
+  longestName = 0,
+  autoScroll = true,
+}: {
+  count: number;
+  longestName?: number;
+  autoScroll?: boolean;
+}) {
   if (count <= 0) return null;
   const g = geometry(count);
   const tiles = Math.max(g.phoneVisible, g.wideVisible);
@@ -237,7 +247,7 @@ export function PlateShowcaseSkeleton({ count, longestName = 0 }: { count: numbe
       <SkeletonText className={`${TILE_NAME} no-underline sm:pe-6`} width="w-4/5" lines={longestName > 14 ? 2 : 1} lastWidth="w-1/2" lastLineClassName="sm:hidden" />
     </>
   );
-  const marquee = getCategoryLayout(count);
+  const marquee = getCategoryLayout(count, autoScroll);
   const staticList = (
     <ul className={g.listClass} style={g.listStyle}>
       {Array.from({ length: tiles }).map((_, i) => (

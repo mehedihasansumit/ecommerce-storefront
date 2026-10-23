@@ -861,43 +861,48 @@ html.dark .group:focus-visible .plate-photo {
   .cat-tile-name, :lang(bn) .cat-tile-name { font-size: 1.25rem; }
 }
 
-/* ── Home "Shop by Category" marquee (CategoryMarqueeRow, count >= 7) ──────────
-   The viewport is a real overflow-x scroller without a scrollbar: touch swipes
-   scroll it natively while the animation is handed over (data-manual). The track
-   holds the list twice and moves by half its width, so the loop is seamless.
-   Paused until the client measures it and sets data-running. */
-.cat-marquee {
+/* ── Storefront marquee (shared/components/storefront/Marquee.tsx) ─────────────
+   Home "Shop by Category" (count >= 7, right to left) and "New Arrivals" (left to
+   right). The viewport is a real overflow-x scroller without a scrollbar: touch
+   swipes scroll it natively while the animation is handed over (data-manual). The
+   track holds the list twice and moves by half its width, so the loop is seamless;
+   data-direction="ltr" plays the same keyframe in reverse (-50% → 0). Paused until
+   the client measures it and sets data-running. */
+.marquee-viewport {
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
 }
-.cat-marquee-track {
+.marquee-track {
   display: flex;
   width: max-content;
-  animation: cat-marquee var(--marquee-duration, 60s) linear var(--marquee-delay, 0s) infinite;
+  animation: marquee var(--marquee-duration, 60s) linear var(--marquee-delay, 0s) infinite;
   animation-play-state: paused;
 }
-.cat-marquee-track[data-running] {
+.marquee-track[data-direction="ltr"] {
+  animation-direction: reverse;
+}
+.marquee-track[data-running] {
   animation-play-state: running;
   will-change: transform;
 }
-.cat-marquee-track[data-manual] {
+.marquee-track[data-manual] {
   animation: none;
 }
-.cat-marquee-track > ul > li { display: flex; }
-.cat-marquee-track > ul > li > * { flex: 1; min-width: 0; }
-@keyframes cat-marquee {
+.marquee-track > ul > li { display: flex; }
+.marquee-track > ul > li > * { flex: 1; min-width: 0; }
+@keyframes marquee {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cat-marquee-track { animation: none; }
+  .marquee-track { animation: none; }
 }
 /* Pause/Play: the ghost Button in the tenant's ink instead of the admin greys. */
-html[data-tenant] .cat-marquee-toggle {
+html[data-tenant] .marquee-toggle {
   color: var(--color-text);
 }
-html[data-tenant] .cat-marquee-toggle:hover {
+html[data-tenant] .marquee-toggle:hover {
   background-color: color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 

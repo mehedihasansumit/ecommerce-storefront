@@ -23,6 +23,8 @@ interface ScrollRowShowcaseProps {
   viewAllHref: string;
   viewAllLabel: string;
   locale: string;
+  /** The Store's theme.motion.categories (default on): auto-scroll from MARQUEE_MIN. */
+  autoScroll?: boolean;
 }
 
 type Mode = "row" | "grid-2" | "grid-3" | "scroll";
@@ -77,7 +79,7 @@ function ViewAll({ href, label }: { href: string; label: string }) {
   );
 }
 
-export function ScrollRowShowcase({ title, items, viewAllHref, viewAllLabel, locale }: ScrollRowShowcaseProps) {
+export function ScrollRowShowcase({ title, items, viewAllHref, viewAllLabel, locale, autoScroll = true }: ScrollRowShowcaseProps) {
   if (items.length === 0) return null;
   const layout = layoutFor(items.length);
   const isScroll = layout.mode === "scroll";
@@ -149,7 +151,7 @@ export function ScrollRowShowcase({ title, items, viewAllHref, viewAllLabel, loc
     </h2>
   );
 
-  const marquee = getCategoryLayout(items.length);
+  const marquee = getCategoryLayout(items.length, autoScroll);
   if (marquee.marquee) {
     // The snap row (with its prev/next) is the reduced-motion fallback.
     return (
@@ -216,7 +218,15 @@ export function ScrollRowShowcase({ title, items, viewAllHref, viewAllLabel, loc
 }
 
 /** Loading state: same mode, same tile geometry. */
-export function ScrollRowShowcaseSkeleton({ count, longestName = 0 }: { count: number; longestName?: number }) {
+export function ScrollRowShowcaseSkeleton({
+  count,
+  longestName = 0,
+  autoScroll = true,
+}: {
+  count: number;
+  longestName?: number;
+  autoScroll?: boolean;
+}) {
   if (count <= 0) return null;
   const layout = layoutFor(count);
   const isScroll = layout.mode === "scroll";
@@ -253,7 +263,7 @@ export function ScrollRowShowcaseSkeleton({ count, longestName = 0 }: { count: n
       </div>
     </div>
   );
-  const marquee = getCategoryLayout(count);
+  const marquee = getCategoryLayout(count, autoScroll);
   if (marquee.marquee) {
     return (
       <section aria-hidden className={SECTION}>

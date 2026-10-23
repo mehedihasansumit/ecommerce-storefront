@@ -14,6 +14,8 @@ interface CategorySectionProps {
   viewAllHref: string;
   viewAllLabel: string;
   locale: string;
+  /** The Store's theme.motion.categories: auto-scroll from MARQUEE_MIN categories. */
+  autoScroll: boolean;
 }
 
 /** Home "Shop by Category" in the Store's categoryStyle. */
@@ -35,19 +37,21 @@ export function CategorySectionSkeleton({
   categoryStyle,
   count,
   longestName,
+  autoScroll,
 }: {
   categoryStyle: CategoryStyle;
   count: number;
   longestName: number;
+  autoScroll: boolean;
 }) {
   switch (categoryStyle) {
     case "plates":
-      return <PlateShowcaseSkeleton count={count} longestName={longestName} />;
+      return <PlateShowcaseSkeleton count={count} longestName={longestName} autoScroll={autoScroll} />;
     case "scroll-row":
-      return <ScrollRowShowcaseSkeleton count={count} longestName={longestName} />;
+      return <ScrollRowShowcaseSkeleton count={count} longestName={longestName} autoScroll={autoScroll} />;
     case "cards":
-      return <CardShowcaseSkeleton count={count} longestName={longestName} />;
+      return <CardShowcaseSkeleton count={count} longestName={longestName} autoScroll={autoScroll} />;
     default:
-      return <CategoryShowcaseSkeleton count={count} longestName={longestName} />;
+      return <CategoryShowcaseSkeleton count={count} longestName={longestName} autoScroll={autoScroll} />;
   }
 }

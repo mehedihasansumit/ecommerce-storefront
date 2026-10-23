@@ -22,6 +22,8 @@ interface CardShowcaseProps {
   viewAllHref: string;
   viewAllLabel: string;
   locale: string;
+  /** The Store's theme.motion.categories (default on): auto-scroll from MARQUEE_MIN. */
+  autoScroll?: boolean;
 }
 
 const LIST_ID = "home-categories-list";
@@ -119,13 +121,13 @@ function Frame({
   );
 }
 
-export function CardShowcase({ title, items, viewAllHref, viewAllLabel, locale }: CardShowcaseProps) {
+export function CardShowcase({ title, items, viewAllHref, viewAllLabel, locale, autoScroll = true }: CardShowcaseProps) {
   if (items.length === 0) return null;
   const layout = layoutFor(items.length);
   const wideCols = layout.wide === "row" ? layout.shown : 6.5;
   const sizes = `(max-width: 639px) 34vw, (max-width: 1279px) ${Math.ceil(100 / Math.min(wideCols, 4.5))}vw, ${Math.ceil(1216 / wideCols)}px`;
 
-  const marquee = getCategoryLayout(items.length);
+  const marquee = getCategoryLayout(items.length, autoScroll);
   const itemTile = (item: CategoryShowcaseItem, liClass: string, tileSizes: string) => (
     <li key={item.id} className={liClass}>
       <Link href={item.href} className="cat-tile focus-ring group">
@@ -193,11 +195,19 @@ export function CardShowcase({ title, items, viewAllHref, viewAllLabel, locale }
 }
 
 /** Loading state: the same .cat-list geometry and heading row. */
-export function CardShowcaseSkeleton({ count, longestName = 0 }: { count: number; longestName?: number }) {
+export function CardShowcaseSkeleton({
+  count,
+  longestName = 0,
+  autoScroll = true,
+}: {
+  count: number;
+  longestName?: number;
+  autoScroll?: boolean;
+}) {
   if (count <= 0) return null;
   const layout = layoutFor(count);
   const tiles = layout.shown + (layout.viewAllTile ? 1 : 0);
-  const marquee = getCategoryLayout(count);
+  const marquee = getCategoryLayout(count, autoScroll);
   const tile = (nameLines?: { lines: number; lastLineClassName: string }) => (
     <span className="cat-tile">
       <span className="cat-tile-media">

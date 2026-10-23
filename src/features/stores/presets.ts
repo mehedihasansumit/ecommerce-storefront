@@ -4,6 +4,7 @@ import {
   sanitizeStyles,
   type ResolvedStoreStyles,
 } from "./styles";
+import { DEFAULT_MOTION, sanitizeMotion, type ResolvedStoreMotion } from "./motion";
 
 /**
  * Theme Presets: named, reusable starting Themes a Store picks and then overrides.
@@ -19,7 +20,7 @@ export const THEME_PRESET_IDS = ["atelier", "zari-oxblood", "dark-room", "shiraz
 export type ThemePresetId = (typeof THEME_PRESET_IDS)[number];
 
 /** Theme values a preset supplies; everything is optional and the Store may override any of it. */
-export type PresetTheme = Partial<Omit<IStoreTheme, "dark" | "preset" | "styles">> & {
+export type PresetTheme = Partial<Omit<IStoreTheme, "dark" | "preset" | "styles" | "motion">> & {
   dark: Partial<IStoreDarkTheme>;
 };
 
@@ -287,8 +288,8 @@ const BASE_DEFAULTS = {
   backgroundPattern: "grid",
 } as const satisfies Partial<IStoreTheme>;
 
-/** A Theme with every Style Switch decided. */
-export type ResolvedTheme = IStoreTheme & { styles: ResolvedStoreStyles };
+/** A Theme with every Style Switch and motion setting decided. */
+export type ResolvedTheme = IStoreTheme & { styles: ResolvedStoreStyles; motion: ResolvedStoreMotion };
 
 /** Drops unset values (undefined, null, "") so they never mask a preset value. */
 function setValues<T extends object>(obj: T | undefined | null): Partial<T> {
@@ -307,7 +308,7 @@ export function resolveTheme(storeTheme: Partial<IStoreTheme> | undefined | null
   const own = setValues(storeTheme ?? {});
   const preset = getThemePreset(own.preset);
   const { dark: presetDark, ...presetLight } = preset?.theme ?? { dark: {} };
-  const { dark: ownDark, styles: ownStyles, ...ownLight } = own;
+  const { dark: ownDark, styles: ownStyles, motion: ownMotion, ...ownLight } = own;
 
   const dark = { ...setValues(presetDark), ...setValues(ownDark) };
   return {
@@ -320,5 +321,7 @@ export function resolveTheme(storeTheme: Partial<IStoreTheme> | undefined | null
       ...(preset?.styles ?? {}),
       ...sanitizeStyles(ownStyles),
     },
+    // Presets carry no motion: only the Store's own setting, else on.
+    motion: { ...DEFAULT_MOTION, ...sanitizeMotion(ownMotion) },
   } as ResolvedTheme;
 }

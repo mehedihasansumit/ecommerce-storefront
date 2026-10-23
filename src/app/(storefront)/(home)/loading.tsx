@@ -26,7 +26,7 @@ export default async function HomeLoading() {
     ? await getTopLevelCategoriesWithProducts(tenant._id).catch(() => [])
     : [];
   const longestName = Math.max(0, ...showcase.map(({ category }) => tl(category.name, locale).length));
-  const styles = resolveTheme(tenant?.theme).styles;
+  const { styles, motion } = resolveTheme(tenant?.theme);
   const flushHero =
     !!tenant &&
     !tenant.heroContained &&
@@ -69,6 +69,7 @@ export default async function HomeLoading() {
 
       <CategorySectionSkeleton
         categoryStyle={styles.categoryStyle}
+        autoScroll={motion.categories}
         count={showcase.length}
         longestName={longestName}
       />

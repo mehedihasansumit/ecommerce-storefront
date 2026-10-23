@@ -21,6 +21,8 @@ interface CategoryShowcaseProps {
   items: CategoryShowcaseItem[];
   viewAllHref: string;
   viewAllLabel: string;
+  /** The Store's theme.motion.categories (default on): auto-scroll from MARQUEE_MIN. */
+  autoScroll?: boolean;
 }
 
 // Static class maps so Tailwind sees every class. The phone layout comes from
@@ -75,9 +77,9 @@ const MARQUEE_ID = "home-categories-marquee";
 const HEADER_ROW =
   "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 mb-2 md:mb-5";
 
-export function CategoryShowcase({ title, items, viewAllHref, viewAllLabel }: CategoryShowcaseProps) {
+export function CategoryShowcase({ title, items, viewAllHref, viewAllLabel, autoScroll = true }: CategoryShowcaseProps) {
   if (items.length === 0) return null;
-  const layout = getCategoryLayout(items.length);
+  const layout = getCategoryLayout(items.length, autoScroll);
   const rowCards = layout.desktopRowCards;
   const rendered = items.slice(0, Math.max(layout.phoneCount, layout.desktopCount));
   const { listClass, itemClass, listStyle } = showcaseClasses(layout);
@@ -284,13 +286,15 @@ function ViewAllTile({ href, label }: { href: string; label: string }) {
 export function CategoryShowcaseSkeleton({
   count,
   longestName = 0,
+  autoScroll = true,
 }: {
   count: number;
+  autoScroll?: boolean;
   /** Characters in the longest category name: phone tiles (~13 chars a line) wrap past 12. */
   longestName?: number;
 }) {
   if (count <= 0) return null;
-  const layout = getCategoryLayout(count);
+  const layout = getCategoryLayout(count, autoScroll);
   const row = layout.desktopRowCards;
   const tiles = Math.max(layout.phoneCount, layout.desktopCount) + (layout.viewAllTile ? 1 : 0);
   const { listClass, itemClass, listStyle } = showcaseClasses(layout);

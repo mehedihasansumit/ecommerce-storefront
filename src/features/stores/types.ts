@@ -1,9 +1,11 @@
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { IStoreDeliveryConfig } from "@/shared/lib/delivery";
 import type { IStoreStyles } from "./styles";
+import type { IStoreMotion } from "./motion";
 
 export type { IStoreDeliveryConfig };
 export type { IStoreStyles };
+export type { IStoreMotion };
 
 export interface IStoreDarkTheme {
   primaryColor?: string;
@@ -77,6 +79,8 @@ export interface IStoreTheme {
   preset?: string;
   /** Style Switch choices (src/features/stores/styles.ts); unset = the preset's, else the base layout. */
   styles?: IStoreStyles;
+  /** Home auto-scroll on/off (src/features/stores/motion.ts); unset = on. Not set by presets. */
+  motion?: IStoreMotion;
 }
 
 export type HeroLayoutStyle =

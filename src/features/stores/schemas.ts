@@ -61,6 +61,12 @@ export const storeStylesSchema = z.object({
   productCardStyle: z.enum(PRODUCT_CARD_STYLES).optional(),
 });
 
+/** Home auto-scroll on/off; each one optional (unset = on). */
+export const storeMotionSchema = z.object({
+  categories: z.boolean().optional(),
+  newArrivals: z.boolean().optional(),
+});
+
 export const storeThemeSchema = z.object({
   ...themeColorFields,
   fontFamily: z.string().optional(),
@@ -71,6 +77,7 @@ export const storeThemeSchema = z.object({
   dark: z.object(themeColorFields).optional(),
   preset: z.enum(THEME_PRESET_IDS).optional(),
   styles: storeStylesSchema.optional(),
+  motion: storeMotionSchema.optional(),
 });
 
 export const createStoreSchema = z.object({

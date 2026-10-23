@@ -16,6 +16,7 @@ import { HomeNewsletter } from "@/shared/components/storefront/HomeNewsletter";
 import { usesStyledHero } from "@/shared/components/storefront/hero-styles";
 import { CategorySection } from "@/features/categories/components/CategorySection";
 import { resolveTheme } from "@/features/stores/presets";
+import { newArrivalsMarquee } from "@/features/products/layout";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -49,7 +50,7 @@ export default async function HomePage() {
   const orgJsonLd = buildOrganizationJsonLd(tenant);
   const railIds = new Set(newArrivals.map((p) => p._id));
   const featuredOnly = featuredProducts.filter((p) => !railIds.has(p._id));
-  const styles = resolveTheme(tenant.theme).styles;
+  const { styles, motion } = resolveTheme(tenant.theme);
   // The styled full-bleed hero sits flush under the header (no gap strip).
   const flushHero =
     !tenant.heroContained && usesStyledHero(tenant.heroBanners, tenant.heroLayout, styles.heroStyle);
@@ -95,6 +96,7 @@ export default async function HomePage() {
           The categoryStyle Style Switch picks the layout; each adapts to the count. */}
       <CategorySection
         categoryStyle={styles.categoryStyle}
+        autoScroll={motion.categories}
         locale={locale}
         description={tr("shopByCategoryDesc")}
         title={tr("shopByCategory")}
@@ -109,12 +111,18 @@ export default async function HomePage() {
         viewAllLabel={tr("viewAll")}
       />
 
-      {/* New arrivals rail: first products land on the first mobile screen */}
+      {/* New arrivals rail: first products land on the first mobile screen. From
+          NEW_ARRIVALS_MARQUEE_MIN products it moves left to right (theme.motion.newArrivals). */}
       <ProductRail
         title={tr("newArrivals")}
         products={newArrivals}
         viewAllHref="/products"
         viewAllLabel={tr("viewAll")}
+        marquee={
+          newArrivalsMarquee(newArrivals.length, motion.newArrivals)
+            ? { id: "home-new-arrivals-marquee", pauseLabel: tr("newArrivalsPause") }
+            : undefined
+        }
       />
 
       {/* Featured Products (minus what the rail already shows) */}

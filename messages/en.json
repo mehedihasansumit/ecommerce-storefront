@@ -96,7 +96,8 @@
     "or": "or",
     "categoriesPrev": "Previous categories",
     "categoriesNext": "Next categories",
-    "categoriesPause": "Pause category carousel"
+    "categoriesPause": "Pause category carousel",
+    "newArrivalsPause": "Pause new arrivals carousel"
   },
   "products": {
     "allProducts": "All Products",
@@ -491,6 +492,12 @@
     "stylesTitle": "Section styles",
     "stylesDescription": "Layout of individual storefront sections. \"Preset default\" follows the chosen preset.",
     "presetDefault": "Preset default ({option})",
+    "motion": {
+      "title": "Motion",
+      "hint": "Visitors can still pause it; it never moves for visitors who prefer reduced motion.",
+      "categories": "Auto-scroll Shop by Category",
+      "newArrivals": "Auto-scroll New Arrivals"
+    },
     "presets": {
       "atelier": {
         "name": "Atelier",

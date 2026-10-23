@@ -26,7 +26,7 @@ import { AddressSelector } from "@/features/auth/components/AddressSelector";
 import type { IAddress } from "@/features/auth/types";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { Alert, Button, Input, LocationSelect, Select, formatPrice } from "@/shared/components/ui";
-import { calcDeliveryCharge, isInsideDhaka } from "@/shared/lib/delivery";
+import { DELIVERY_CURRENCY, calcDeliveryCharge, isInsideDhaka } from "@/shared/lib/delivery";
 import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 import { formatNumber } from "@/shared/lib/i18n";
@@ -606,7 +606,7 @@ export default function CheckoutPage() {
                       {t("shippingSelectArea")}
                     </span>
                   ) : shippingCost > 0 ? (
-                    <span className="shrink-0 font-medium">{money(shippingCost)}</span>
+                    <span className="shrink-0 font-medium">{formatPrice(shippingCost, DELIVERY_CURRENCY, locale)}</span>
                   ) : (
                     <span className="shrink-0 font-medium text-success">
                       {campaignFreeShipping ? t("shippingFreeCampaign") : t("shippingFree")}

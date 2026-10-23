@@ -5,6 +5,9 @@
  * totals and by the order service as the authoritative source of truth.
  */
 
+/** Delivery charges are set and paid in taka (Bangladesh zones), whatever the store's selling currency. */
+export const DELIVERY_CURRENCY = "BDT";
+
 export interface IStoreDeliveryConfig {
   enabled: boolean;
   insideDhakaCharge: number;

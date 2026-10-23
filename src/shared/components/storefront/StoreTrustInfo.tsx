@@ -4,7 +4,7 @@ import { Banknote, RotateCcw, Truck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { StoreTrustFact } from "@/features/stores/trust";
 import { Card, formatPrice } from "@/shared/components/ui";
-import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { DELIVERY_CURRENCY } from "@/shared/lib/delivery";
 
 interface StoreTrustInfoProps {
   facts: StoreTrustFact[];
@@ -22,7 +22,6 @@ const ICONS = { cod: Banknote, delivery: Truck, exchange: RotateCcw } as const;
 export function StoreTrustInfo({ facts, layout, className }: StoreTrustInfoProps) {
   const tr = useTranslations("trust");
   const locale = useLocale();
-  const currency = useStoreCurrency();
   if (facts.length === 0) return null;
 
   const text = (f: StoreTrustFact, long: boolean) => {
@@ -32,8 +31,8 @@ export function StoreTrustInfo({ facts, layout, className }: StoreTrustInfoProps
         return tr(`cod${suffix}`);
       case "delivery":
         return tr(`delivery${suffix}`, {
-          inside: formatPrice(f.insideDhaka, currency, locale),
-          outside: formatPrice(f.outsideDhaka, currency, locale),
+          inside: formatPrice(f.insideDhaka, DELIVERY_CURRENCY, locale),
+          outside: formatPrice(f.outsideDhaka, DELIVERY_CURRENCY, locale),
         });
       case "exchange":
         return tr(`exchange${suffix}`, { days: f.days });

@@ -12,6 +12,7 @@ import { t as tLocalized } from "@/shared/lib/i18n";
 import { Button, ButtonLink, Input, formatPrice } from "@/shared/components/ui";
 import { getStoreTrustFacts } from "@/features/stores/trust";
 import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { DELIVERY_CURRENCY } from "@/shared/lib/delivery";
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -131,8 +132,8 @@ export default function CartPage() {
             <span>
               {deliveryDue && deliveryFact?.kind === "delivery"
                 ? tt("deliveryLong", {
-                    inside: money(deliveryFact.insideDhaka),
-                    outside: money(deliveryFact.outsideDhaka),
+                    inside: formatPrice(deliveryFact.insideDhaka, DELIVERY_CURRENCY, locale),
+                    outside: formatPrice(deliveryFact.outsideDhaka, DELIVERY_CURRENCY, locale),
                   })
                 : t("freeShippingNote")}
             </span>

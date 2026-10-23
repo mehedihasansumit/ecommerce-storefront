@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Banknote, MapPin, Mail, Phone, RotateCcw, Truck } from "lucide-react";
 import { getStoreTrustFacts, type StoreTrustFact } from "@/features/stores/trust";
 import { formatPrice } from "@/shared/components/ui";
-import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { DELIVERY_CURRENCY } from "@/shared/lib/delivery";
 import { formatNumber } from "@/shared/lib/i18n";
 import { useStoreStyles } from "@/shared/hooks/useStoreStyles";
 import { WordmarkFooter } from "./WordmarkFooter";
@@ -26,7 +26,6 @@ function ColumnsFooter() {
   const t = useTranslations("footer");
   const tr = useTranslations("trust");
   const locale = useLocale();
-  const currency = useStoreCurrency();
 
   const quickLinks = [
     { href: "/products", label: t("allProducts") },
@@ -45,8 +44,8 @@ function ColumnsFooter() {
         return tr("codLong");
       case "delivery":
         return tr("deliveryLong", {
-          inside: formatPrice(f.insideDhaka, currency, locale),
-          outside: formatPrice(f.outsideDhaka, currency, locale),
+          inside: formatPrice(f.insideDhaka, DELIVERY_CURRENCY, locale),
+          outside: formatPrice(f.outsideDhaka, DELIVERY_CURRENCY, locale),
         });
       case "exchange":
         return tr("exchangeLong", { days: f.days });

@@ -12,17 +12,11 @@
 #   - Install Docker + compose plugin (https://docs.docker.com/engine/install/)
 #   - mkdir -p $VPS_PATH
 #   - copy .env.production.example -> .env.production, fill secrets
-#   - ufw allow 22, 80, 443; deny 5000, 27017, 3900, 3901, 3902, 3903
+#   - ufw allow 22, 80, 443; deny 5000, 5432
 #       (host-mode containers bind these on host — they MUST NOT be public)
-#   - Garage cluster init (after first 'docker compose up -d garage'):
-#       docker compose -f docker-compose.prod.yml exec garage /garage status
-#       NODE_ID=<id from status>
-#       docker compose -f docker-compose.prod.yml exec garage /garage layout assign -z dc1 -c 1G $NODE_ID
-#       docker compose -f docker-compose.prod.yml exec garage /garage layout apply --version 1
-#       docker compose -f docker-compose.prod.yml exec garage /garage bucket create ecommerce-uploads
-#       docker compose -f docker-compose.prod.yml exec garage /garage key new --name app-key
-#       docker compose -f docker-compose.prod.yml exec garage /garage bucket allow --read --write --owner ecommerce-uploads --key app-key
-#     -> paste the key id + secret into .env.production (S3_ACCESS_KEY / S3_SECRET_KEY)
+#   - Cloudflare R2: media bucket (docs/deploy/cloudflare-r2.md) and a separate
+#     private backup bucket (docs/deploy/db-backups.md); put both sets of keys
+#     in .env.production (S3_* and BACKUP_S3_*)
 #   - Nginx reverse-proxy to 127.0.0.1:5000 with `proxy_set_header Host $host;`
 #     (multi-tenant routing depends on the original Host header)
 #   - First seed: bash scripts/seed-prod.sh
@@ -105,6 +99,8 @@ if [ ! -f .env.production ]; then
   exit 1
 fi
 
+# The backup image is small and built on the VPS from the rsynced docker/db-backup.
+docker compose -f $COMPOSE_FILE build db-backup
 docker compose -f $COMPOSE_FILE up -d
 docker compose -f $COMPOSE_FILE ps
 EOF

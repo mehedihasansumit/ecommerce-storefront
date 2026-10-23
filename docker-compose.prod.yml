@@ -1,6 +1,8 @@
-# Production stack: Next.js app + Postgres + Garage S3.
+# Production stack: Next.js app + Postgres + hourly database backups.
+# Media and backups live in Cloudflare R2 (docs/deploy/cloudflare-r2.md,
+# docs/deploy/db-backups.md); there is no local object storage.
 # All services run in HOST network mode — they reach each other via 127.0.0.1.
-# Operator MUST firewall ports 5000, 5432, 3900-3903 from public.
+# Operator MUST firewall ports 5000 and 5432 from public.
 # Only Nginx (manual on host) should expose 80/443.
 
 services:
@@ -16,7 +18,6 @@ services:
       - .env.production
     depends_on:
       - postgres
-      - garage
 
   postgres:
     image: postgres:16-alpine
@@ -61,19 +62,28 @@ services:
       timeout: 3s
       retries: 10
 
-  garage:
-    image: dxflrs/garage:v1.0.1
-    container_name: ecommerce-garage
+  db-backup:
+    build:
+      context: docker/db-backup
+    image: ecommerce-db-backup:latest
+    container_name: ecommerce-db-backup
     restart: unless-stopped
     network_mode: host
-    volumes:
-      - ./docker/garage/garage.toml:/etc/garage.toml:ro
-      - garage_meta:/var/lib/garage/meta
-      - garage_data:/var/lib/garage/data
+    env_file:
+      - .env.production
     environment:
-      GARAGE_CONFIG_FILE: /etc/garage.toml
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: ecommerce
+      PGPASSWORD: ecommerce
+      PGDATABASE: ecommerce
+      TZ: Asia/Dhaka
+    volumes:
+      - db_backup_state:/var/lib/db-backup
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
-  garage_meta:
-  garage_data:
+  db_backup_state:

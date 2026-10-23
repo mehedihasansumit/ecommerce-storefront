@@ -1,5 +1,6 @@
 import { getTenant } from "@/shared/lib/tenant";
 import { ProductService } from "@/features/products/service";
+import { getProductBySlug } from "@/features/products/storefront";
 import {
   createStoreMetadata,
   buildProductJsonLd,
@@ -27,7 +28,7 @@ export async function generateMetadata({
   if (!tenant) return { title: "Product" };
 
   const { slug } = await params;
-  const product = await ProductService.getBySlug(tenant._id, slug);
+  const product = await getProductBySlug(tenant._id, slug);
   if (!product) return { title: "Product Not Found" };
 
   const locale = await getLocale();
@@ -50,7 +51,7 @@ export default async function ProductDetailPage({
   if (!tenant) return null;
 
   const { slug } = await params;
-  const product = await ProductService.getBySlug(tenant._id, slug);
+  const product = await getProductBySlug(tenant._id, slug);
   if (!product) notFound();
   const related = await ProductService.getRelated(tenant._id, product);
 

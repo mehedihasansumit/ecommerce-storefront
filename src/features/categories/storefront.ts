@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { CategoryService } from "./service";
 import { cachedForStore, storeTag } from "@/shared/lib/data-cache";
 
@@ -18,4 +19,9 @@ export const getTopLevelCategoriesWithProducts = cachedForStore(
   async (storeId: string) =>
     CategoryService.getTopLevelWithProducts(storeId, await getStoreCategories(storeId)),
   { tags: (storeId) => [storeTag(storeId)] }
+);
+
+/** One lookup per request for generateMetadata and the page. */
+export const getCategoryBySlug = cache((storeId: string, slug: string) =>
+  CategoryService.getBySlug(storeId, slug)
 );

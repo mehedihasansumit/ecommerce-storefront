@@ -1,6 +1,6 @@
 import { getTenant } from "@/shared/lib/tenant";
 import { ProductService } from "@/features/products/service";
-import { CategoryService } from "@/features/categories/service";
+import { getCategoryBySlug } from "@/features/categories/storefront";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { createStoreMetadata } from "@/shared/lib/seo";
 import { notFound } from "next/navigation";
@@ -20,7 +20,7 @@ export async function generateMetadata({
   if (!tenant) return { title: "Category" };
 
   const { slug } = await params;
-  const category = await CategoryService.getBySlug(tenant._id, slug);
+  const category = await getCategoryBySlug(tenant._id, slug);
   if (!category) return { title: "Category Not Found" };
 
   const locale = await getLocale();
@@ -47,7 +47,7 @@ export default async function CategoryPage({
 
   const locale = await getLocale();
   const th = await getTranslations("header");
-  const category = await CategoryService.getBySlug(tenant._id, slug);
+  const category = await getCategoryBySlug(tenant._id, slug);
   if (!category) notFound();
 
   const catName = t(category.name, locale);

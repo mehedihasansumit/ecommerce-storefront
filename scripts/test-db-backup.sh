@@ -177,7 +177,68 @@ case_encryption() {
   pass "encryption"
 }
 
-ALL_CASES=(backup_uploads_valid_dump tiers retention upload_failure lock encryption)
+TARGET_DB=ecommerce_restore_test
+psql_q() { docker exec ecommerce-postgres psql -U ecommerce -d "$1" -At -c "$2"; }
+drop_target() { docker exec ecommerce-postgres psql -U ecommerce -d postgres -c "drop database if exists $TARGET_DB" >/dev/null; }
+db_exists() { [ "$(psql_q postgres "select count(*) from pg_database where datname='$1'")" = "1" ]; }
+
+case_restore_latest() {
+  reset_bucket
+  drop_target
+  EXTRA_ENV=()
+  run_backup >/dev/null || fail "backup failed"
+  in_image /usr/local/bin/restore.sh latest --target-db "$TARGET_DB" >/dev/null || fail "restore exited non-zero"
+  for t in stores products categories orders product_images; do
+    local a b
+    a=$(psql_q ecommerce "select count(*) from $t"); b=$(psql_q "$TARGET_DB" "select count(*) from $t")
+    [ "$a" = "$b" ] || fail "row count differs for $t: source $a, restored $b"
+  done
+  drop_target
+  pass "restore latest into a new DB"
+}
+
+case_restore_refuses_live_db() {
+  EXTRA_ENV=()
+  local out
+  if out=$(in_image /usr/local/bin/restore.sh latest --target-db ecommerce 2>&1); then
+    fail "restore into the live DB was not refused"
+  fi
+  echo "$out" | grep -qi "refusing" || fail "refusal message missing: $out"
+  if out=$(in_image /usr/local/bin/restore.sh latest 2>&1); then
+    fail "restore without --target-db was not refused"
+  fi
+  if out=$(in_image /usr/local/bin/restore.sh latest --target-db "x'; drop database ecommerce; --" 2>&1); then
+    fail "restore accepted an unsafe database name"
+  fi
+  echo "$out" | grep -qi "invalid database name" || fail "unsafe name message missing: $out"
+  pass "restore refuses the live DB"
+}
+
+case_restore_encrypted_without_key() {
+  reset_bucket
+  drop_target
+  local keydir; keydir=$(mktemp -d)
+  docker run --rm -v "$keydir:/k" "$IMAGE" sh -c 'age-keygen -o /k/key.txt 2>/dev/null; chmod 644 /k/key.txt'
+  EXTRA_ENV=(-e "BACKUP_AGE_RECIPIENT=$(grep -o 'age1[0-9a-z]*' "$keydir/key.txt" | head -1)")
+  run_backup >/dev/null || fail "encrypted backup failed"
+  EXTRA_ENV=()
+  local out
+  if out=$(in_image /usr/local/bin/restore.sh latest --target-db "$TARGET_DB" 2>&1); then
+    fail "restoring an encrypted backup without AGE_IDENTITY succeeded"
+  fi
+  echo "$out" | grep -q "AGE_IDENTITY" || fail "message does not mention AGE_IDENTITY: $out"
+  db_exists "$TARGET_DB" && fail "target DB was created before the key check"
+  EXTRA_ENV=(-v "$keydir:/k:ro" -e AGE_IDENTITY=/k/key.txt)
+  in_image /usr/local/bin/restore.sh latest --target-db "$TARGET_DB" >/dev/null || fail "restore with the key failed"
+  [ "$(psql_q "$TARGET_DB" "select count(*) from stores")" = "$(psql_q ecommerce "select count(*) from stores")" ] \
+    || fail "encrypted restore has different store count"
+  EXTRA_ENV=()
+  drop_target
+  rm -rf "$keydir"
+  pass "encrypted restore needs the key"
+}
+
+ALL_CASES=(backup_uploads_valid_dump tiers retention upload_failure lock encryption restore_latest restore_refuses_live_db restore_encrypted_without_key)
 
 # ---------------------------------------------------------------- main
 

@@ -27,7 +27,7 @@ export const BUCKET =
 // Next.js /api/media proxy so no public bucket access or /etc/hosts is needed in dev.
 const CDN_URL = process.env.S3_PUBLIC_URL?.replace(/\/$/, "");
 
-const s3Client = new S3Client({
+export const s3Client = new S3Client({
   endpoint: ENDPOINT,
   region: REGION,
   credentials: {

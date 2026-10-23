@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { IStore } from "@/features/stores/types";
 import type { IProduct } from "@/features/products/types";
 import { t } from "@/shared/lib/i18n";
+import { DEFAULT_CURRENCY } from "@/shared/lib/constants";
 
 interface PageMetaOptions {
   title?: string;
@@ -64,7 +65,7 @@ export function buildProductJsonLd(product: IProduct, storeUrl: string, locale =
     offers: {
       "@type": "Offer",
       price: product.price,
-      priceCurrency: "USD",
+      priceCurrency: DEFAULT_CURRENCY,
       availability:
         product.stock > 0
           ? "https://schema.org/InStock"

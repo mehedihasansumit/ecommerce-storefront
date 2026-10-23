@@ -8,6 +8,7 @@ import {
   PRODUCT_CARD_STYLES,
 } from "./styles";
 import { THEME_PRESET_IDS } from "./presets";
+import { DEFAULT_CURRENCY } from "@/shared/lib/constants";
 
 /** Accepts { en: "...", bn: "..." } or a plain string (wrapped to { en: value }). */
 const localizedStringSchema = z
@@ -95,7 +96,8 @@ export const createStoreSchema = z.object({
   payment: z
     .object({
       provider: z.enum(["stripe", "sslcommerz"]).optional(),
-      currency: z.string().optional(),
+      // Every store sells in taka; no other currency is accepted.
+      currency: z.literal(DEFAULT_CURRENCY).optional(),
     })
     .optional(),
   supportedLanguages: z.array(z.string()).optional(),
@@ -146,7 +148,8 @@ export const updateStoreSchema = z.object({
       stripeSecretKey: z.string().optional(),
       sslcommerzStoreId: z.string().optional(),
       sslcommerzStorePassword: z.string().optional(),
-      currency: z.string().optional(),
+      // Every store sells in taka; no other currency is accepted.
+      currency: z.literal(DEFAULT_CURRENCY).optional(),
     })
     .optional(),
   contact: z

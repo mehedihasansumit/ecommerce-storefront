@@ -20,6 +20,10 @@ _Avoid_: Template, variant, design
 A choice between a small, fixed set of layouts for one storefront section, such as the hero or the footer.
 _Avoid_: Layout option, mode, variant
 
+**Motion**:
+A Store's on/off choice for the auto-scrolling rows (Shop by Category, New Arrivals); kept apart from the Theme Preset, so picking a preset never changes it.
+_Avoid_: Animation setting, marquee (in product talk)
+
 **Variant**:
 One of the four competing storefront redesigns explored on separate branches; a historical source for Theme Presets, not something a Store uses.
 _Avoid_: Theme, preset

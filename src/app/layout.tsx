@@ -105,11 +105,20 @@ export default async function RootLayout({
       ? theme.headingFont
       : undefined;
 
+  // A store that offers Bengali loads Hind Siliguri in both locales and keeps it last
+  // in the English stack: Google serves it per unicode-range, so only the Bengali
+  // subset the page actually shows (the language switch label) is fetched in `en`.
+  // Switching language then reuses the same stylesheet and already-cached glyphs
+  // instead of downloading a new font mid-switch.
+  const offersBengali = themedTenant?.supportedLanguages?.includes("bn") ?? false;
+
   const themeVars: Record<string, string> = {
     ...resolveThemeVars(theme, "light"),
     "--font-family": isBengali
       ? `'${bnFont}', sans-serif`
-      : `'${theme.fontFamily}', sans-serif`,
+      : offersBengali
+        ? `'${theme.fontFamily}', '${bnFont}', sans-serif`
+        : `'${theme.fontFamily}', sans-serif`,
     "--font-heading": headingFont
       ? isBengali
         ? `'${headingFont}', '${bnFont}', serif`
@@ -118,8 +127,14 @@ export default async function RootLayout({
     "--border-radius": theme.borderRadius,
   };
 
+  // Same families in both locales (when the store offers Bengali), so the stylesheet
+  // URL does not change on a language switch.
   const fontHrefs = fontStylesheetUrls(
-    isBengali ? [bnFont, headingFont] : [theme.fontFamily, headingFont]
+    offersBengali
+      ? [theme.fontFamily, bnFont, headingFont]
+      : isBengali
+        ? [bnFont, headingFont]
+        : [theme.fontFamily, headingFont]
   );
   const usesGoogleFonts = fontHrefs.some((h) => h.startsWith("https://fonts.googleapis.com/"));
 

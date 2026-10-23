@@ -44,9 +44,9 @@ export function CategorySectionSkeleton({
     case "plates":
       return <PlateShowcaseSkeleton count={count} longestName={longestName} />;
     case "scroll-row":
-      return <ScrollRowShowcaseSkeleton count={count} />;
+      return <ScrollRowShowcaseSkeleton count={count} longestName={longestName} />;
     case "cards":
-      return <CardShowcaseSkeleton count={count} />;
+      return <CardShowcaseSkeleton count={count} longestName={longestName} />;
     default:
       return <CategoryShowcaseSkeleton count={count} longestName={longestName} />;
   }

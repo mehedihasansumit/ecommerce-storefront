@@ -3,6 +3,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Skeleton, SkeletonText, StoreImage } from "@/shared/components/ui";
 import { getCategoryLayout, type CategoryLayout, type CategoryPhoneLayout } from "../layout";
+import { CategoryMarquee, CategoryMarqueeRow, CategoryMarqueeToggle } from "./CategoryMarquee";
+import { CategoryMarqueeSkeletonRow } from "./CategoryMarqueeSkeleton";
+import { MARQUEE_ITEM, MARQUEE_STATIC, marqueeNameLines } from "./marquee-classes";
 
 export interface CategoryShowcaseItem {
   id: string;
@@ -68,6 +71,10 @@ function showcaseClasses(layout: CategoryLayout) {
   return { listClass, itemClass, listStyle: { "--cols": layout.desktopCols } as CSSProperties };
 }
 
+const MARQUEE_ID = "home-categories-marquee";
+const HEADER_ROW =
+  "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 mb-2 md:mb-5";
+
 export function CategoryShowcase({ title, items, viewAllHref, viewAllLabel }: CategoryShowcaseProps) {
   if (items.length === 0) return null;
   const layout = getCategoryLayout(items.length);
@@ -75,34 +82,73 @@ export function CategoryShowcase({ title, items, viewAllHref, viewAllLabel }: Ca
   const rendered = items.slice(0, Math.max(layout.phoneCount, layout.desktopCount));
   const { listClass, itemClass, listStyle } = showcaseClasses(layout);
 
+  const viewAll = (
+    <Link
+      href={viewAllHref}
+      className="focus-ring shrink-0 inline-flex items-center gap-1 min-h-11 px-1 text-sm font-medium rounded-lg"
+      style={{ color: "var(--color-link)" }}
+    >
+      {viewAllLabel}
+      <ArrowRight size={14} aria-hidden />
+    </Link>
+  );
+  const heading = (
+    <h2 id="shop-by-category" className="text-lg md:text-2xl font-semibold tracking-tight">
+      {title}
+    </h2>
+  );
+  const staticList = (
+    <ul className={listClass} style={listStyle}>
+      {rendered.map((item, i) => (
+        <li key={item.id} className={itemClass(i)}>
+          <CategoryCard item={item} row={rowCards} />
+        </li>
+      ))}
+      {layout.viewAllTile && (
+        <li className={itemClass(0)}>
+          <ViewAllTile href={viewAllHref} label={viewAllLabel} />
+        </li>
+      )}
+    </ul>
+  );
+
+  if (!layout.marquee) {
+    return (
+      <section aria-labelledby="shop-by-category" className="py-4 md:py-8">
+        <div className={HEADER_ROW}>
+          {heading}
+          {viewAll}
+        </div>
+        {staticList}
+      </section>
+    );
+  }
+
+  // >= MARQUEE_MIN: one moving row; the static layout above is the reduced-motion fallback.
   return (
     <section aria-labelledby="shop-by-category" className="py-4 md:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 mb-2 md:mb-5">
-        <h2 id="shop-by-category" className="text-lg md:text-2xl font-semibold tracking-tight">
-          {title}
-        </h2>
-        <Link
-          href={viewAllHref}
-          className="focus-ring shrink-0 inline-flex items-center gap-1 min-h-11 px-1 text-sm font-medium rounded-lg"
-          style={{ color: "var(--color-link)" }}
-        >
-          {viewAllLabel}
-          <ArrowRight size={14} aria-hidden />
-        </Link>
-      </div>
-
-      <ul className={listClass} style={listStyle}>
-        {rendered.map((item, i) => (
-          <li key={item.id} className={itemClass(i)}>
-            <CategoryCard item={item} row={rowCards} />
-          </li>
-        ))}
-        {layout.viewAllTile && (
-          <li className={itemClass(0)}>
-            <ViewAllTile href={viewAllHref} label={viewAllLabel} />
-          </li>
-        )}
-      </ul>
+      <CategoryMarquee>
+        <div className={HEADER_ROW}>
+          {heading}
+          <div className="flex shrink-0 items-center gap-1">
+            <CategoryMarqueeToggle controls={MARQUEE_ID} />
+            {viewAll}
+          </div>
+        </div>
+        <div className={MARQUEE_STATIC}>{staticList}</div>
+        <CategoryMarqueeRow id={MARQUEE_ID} className="max-w-7xl mx-auto">
+          {items.slice(0, layout.marqueeCount).map((item) => (
+            <li key={item.id} className={MARQUEE_ITEM}>
+              <CategoryCard item={item} row={false} />
+            </li>
+          ))}
+          {layout.viewAllTile && (
+            <li className={MARQUEE_ITEM}>
+              <ViewAllTile href={viewAllHref} label={viewAllLabel} />
+            </li>
+          )}
+        </CategoryMarqueeRow>
+      </CategoryMarquee>
     </section>
   );
 }
@@ -249,43 +295,62 @@ export function CategoryShowcaseSkeleton({
   const tiles = Math.max(layout.phoneCount, layout.desktopCount) + (layout.viewAllTile ? 1 : 0);
   const { listClass, itemClass, listStyle } = showcaseClasses(layout);
 
+  const tile = (rowCards: boolean, { lines, lastLineClassName }: { lines: number; lastLineClassName: string }) => (
+    <div
+      className={`flex h-full min-h-11 flex-col gap-2 ${
+        rowCards
+          ? "md:flex-row md:items-center md:gap-4 lg:gap-5 md:p-2 md:pr-4 lg:pr-5 md:border md:border-border-subtle md:bg-[var(--color-card-bg,var(--color-bg))]"
+          : ""
+      }`}
+      style={{ borderRadius: "var(--border-radius)" }}
+    >
+      <Skeleton className={`w-full aspect-square shrink-0 ${rowCards ? "md:w-20 lg:w-28" : ""}`} />
+      <div className="min-w-0 flex-1">
+        <SkeletonText
+          className={`text-[15px] sm:text-base leading-snug ${rowCards ? "md:text-lg lg:text-[22px] md:leading-tight" : "md:text-lg"}`}
+          width="w-4/5"
+          lines={lines}
+          lastWidth="w-1/2"
+          lastLineClassName={lastLineClassName}
+        />
+        <SkeletonText className="mt-0.5 hidden sm:block text-xs" width="w-14" />
+      </div>
+    </div>
+  );
+
+  const staticList = (
+    <ul className={listClass} style={listStyle}>
+      {Array.from({ length: tiles }).map((_, i) => (
+        <li key={i} className={layout.viewAllTile && i === tiles - 1 ? itemClass(0) : itemClass(i)}>
+          {tile(row, { lines: longestName > 12 ? 2 : 1, lastLineClassName: "sm:hidden" })}
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <section aria-hidden className="py-4 md:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 mb-2 md:mb-5">
+      <div className={HEADER_ROW}>
         <SkeletonText className="text-lg md:text-2xl" width="w-36 md:w-48" />
-        <div className="min-h-11 flex items-center">
+        <div className={`min-h-11 flex items-center ${layout.marquee ? "shrink-0 gap-1" : ""}`}>
+          {layout.marquee && <Skeleton radius="lg" className="size-11 motion-reduce:hidden" />}
           <SkeletonText className="text-sm" width="w-16" />
         </div>
       </div>
-      <ul className={listClass} style={listStyle}>
-        {Array.from({ length: tiles }).map((_, i) => (
-          <li
-            key={i}
-            className={layout.viewAllTile && i === tiles - 1 ? itemClass(0) : itemClass(i)}
-          >
-            <div
-              className={`flex h-full min-h-11 flex-col gap-2 ${
-                row
-                  ? "md:flex-row md:items-center md:gap-4 lg:gap-5 md:p-2 md:pr-4 lg:pr-5 md:border md:border-border-subtle md:bg-[var(--color-card-bg,var(--color-bg))]"
-                  : ""
-              }`}
-              style={{ borderRadius: "var(--border-radius)" }}
-            >
-              <Skeleton className={`w-full aspect-square shrink-0 ${row ? "md:w-20 lg:w-28" : ""}`} />
-              <div className="min-w-0 flex-1">
-                <SkeletonText
-                  className={`text-[15px] sm:text-base leading-snug ${row ? "md:text-lg lg:text-[22px] md:leading-tight" : "md:text-lg"}`}
-                  width="w-4/5"
-                  lines={longestName > 12 ? 2 : 1}
-                  lastWidth="w-1/2"
-                  lastLineClassName="sm:hidden"
-                />
-                <SkeletonText className="mt-0.5 hidden sm:block text-xs" width="w-14" />
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {layout.marquee ? (
+        <>
+          <div className={MARQUEE_STATIC}>{staticList}</div>
+          <CategoryMarqueeSkeletonRow className="max-w-7xl mx-auto">
+            {Array.from({ length: layout.marqueeCount + (layout.viewAllTile ? 1 : 0) }).map((_, i) => (
+              <li key={i} className={MARQUEE_ITEM}>
+                {tile(false, marqueeNameLines(longestName, [12, 16, 20]))}
+              </li>
+            ))}
+          </CategoryMarqueeSkeletonRow>
+        </>
+      ) : (
+        staticList
+      )}
     </section>
   );
 }

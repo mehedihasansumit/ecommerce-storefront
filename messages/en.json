@@ -95,7 +95,8 @@
     "newsletterPhoneLabel": "Phone number",
     "or": "or",
     "categoriesPrev": "Previous categories",
-    "categoriesNext": "Next categories"
+    "categoriesNext": "Next categories",
+    "categoriesPause": "Pause category carousel"
   },
   "products": {
     "allProducts": "All Products",

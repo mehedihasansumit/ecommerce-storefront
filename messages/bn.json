@@ -95,7 +95,8 @@
     "newsletterPhoneLabel": "ফোন নম্বর",
     "or": "অথবা",
     "categoriesPrev": "আগের বিভাগগুলো",
-    "categoriesNext": "পরের বিভাগগুলো"
+    "categoriesNext": "পরের বিভাগগুলো",
+    "categoriesPause": "বিভাগের ক্যারোসেল থামান"
   },
   "products": {
     "allProducts": "সমস্ত পণ্য",

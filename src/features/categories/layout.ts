@@ -13,6 +13,11 @@
  *   5–6  → one row of equal tiles
  *   7–12 → two balanced rows (e.g. 4+3, 5+5), the shorter row centred
  *   > 12 → 11 tiles + "View all" in two rows of 6
+ *
+ * Marquee (every width, every categoryStyle that supports it):
+ *   >= MARQUEE_MIN (7) → one continuously moving row replaces the phone scroll row
+ *   and the desktop two-row layout (first 11 + "View all" past 12). Visitors who
+ *   prefer reduced motion keep the static layout above for that count.
  */
 export type CategoryPhoneLayout = "grid-3" | "grid-2" | "scroll";
 
@@ -28,10 +33,16 @@ export interface CategoryLayout {
   desktopRowCards: boolean;
   /** Append a "View all" tile linking to the full catalogue. */
   viewAllTile: boolean;
+  /** One auto-scrolling row at every width (count >= MARQUEE_MIN). */
+  marquee: boolean;
+  /** Tiles in one marquee set (excluding the "View all" tile, which follows viewAllTile). */
+  marqueeCount: number;
 }
 
 export const CATEGORY_LAYOUT_MAX = 12;
 const PHONE_OVERFLOW_COUNT = 8;
+/** From this many shown categories the home row auto-scrolls (the marquee). */
+export const MARQUEE_MIN = 7;
 
 export function getCategoryLayout(n: number): CategoryLayout {
   const count = Math.max(0, Math.floor(n));
@@ -43,6 +54,8 @@ export function getCategoryLayout(n: number): CategoryLayout {
       desktopCols: 6,
       desktopRowCards: false,
       viewAllTile: true,
+      marquee: true,
+      marqueeCount: CATEGORY_LAYOUT_MAX - 1,
     };
   }
   const phone: CategoryPhoneLayout = count === 4 ? "grid-2" : count <= 6 ? "grid-3" : "scroll";
@@ -53,5 +66,7 @@ export function getCategoryLayout(n: number): CategoryLayout {
     desktopCols: count <= 6 ? Math.max(count, 1) : Math.ceil(count / 2),
     desktopRowCards: count <= 4,
     viewAllTile: false,
+    marquee: count >= MARQUEE_MIN,
+    marqueeCount: count,
   };
 }

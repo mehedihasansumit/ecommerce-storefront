@@ -1,24 +1,25 @@
-import { cache } from "react";
 import { headers } from "next/headers";
 import { StoreRepository } from "@/features/stores/repository";
 import type { IStore } from "@/features/stores/types";
 import { APP_SURFACE_HEADER } from "./app-surface";
+import { cachedForStore, STORE_DOMAINS_TAG } from "./data-cache";
 
-const findStoreByHost = cache(async (hostname: string): Promise<IStore | null> => {
-  try {
-    return await StoreRepository.findByDomain(hostname);
-  } catch {
-    return null;
-  }
-});
+const findStoreByHost = cachedForStore(
+  "store-by-domain",
+  (hostname: string): Promise<IStore | null> => StoreRepository.findByDomain(hostname),
+  { tags: () => [STORE_DOMAINS_TAG] }
+);
 
-/** Store for the current request's Host. Memoised per request (layout, loading and page share one lookup). */
+/**
+ * Store for the current request's Host. Cached across requests (expired by every
+ * store write) and memoised per request, so layout, loading and page share one lookup.
+ */
 export async function getTenant(): Promise<IStore | null> {
   const headerList = await headers();
   const host = headerList.get("host") || "";
   const hostname = host.split(":")[0];
   if (!hostname || hostname === "localhost") return null;
-  return findStoreByHost(hostname);
+  return findStoreByHost(hostname).catch(() => null);
 }
 
 export async function getStoreId(): Promise<string | null> {

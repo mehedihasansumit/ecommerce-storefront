@@ -1,5 +1,5 @@
 import { getTenant } from "@/shared/lib/tenant";
-import { ProductService } from "@/features/products/service";
+import { getFeaturedProducts, getNewArrivalProducts } from "@/features/products/storefront";
 import { getTopLevelCategoriesWithProducts } from "@/features/categories/storefront";
 import { HeroBanner } from "@/shared/components/storefront/HeroBanner";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
@@ -42,8 +42,8 @@ export default async function HomePage() {
   }
 
   const [featuredProducts, newArrivals, showcase] = await Promise.all([
-    ProductService.getFeatured(tenant._id, undefined),
-    ProductService.getNewArrivals(tenant._id, undefined),
+    getFeaturedProducts(tenant._id),
+    getNewArrivalProducts(tenant._id),
     getTopLevelCategoriesWithProducts(tenant._id),
   ]);
 

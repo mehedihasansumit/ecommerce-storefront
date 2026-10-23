@@ -1,5 +1,6 @@
 import { OrderRepository } from "./repository";
 import { ProductRepository } from "@/features/products/repository";
+import { restoreStock, takeStock } from "./stock";
 import { CouponService } from "@/features/coupons/service";
 import { CampaignService } from "@/features/campaigns/service";
 import { NotificationService } from "@/features/notifications/service";
@@ -223,13 +224,7 @@ export const OrderService = {
     }
 
     // Decrement stock for each ordered item
-    for (const detail of productDetails) {
-      if (detail.variantId) {
-        await ProductRepository.decreaseVariantStock(detail.productId, detail.variantId, detail.quantity);
-      } else {
-        await ProductRepository.decreaseStock(detail.productId, detail.quantity);
-      }
-    }
+    await takeStock(storeId, productDetails);
 
     // Record coupon usage after order is created
     if (couponId) {
@@ -383,13 +378,14 @@ export const OrderService = {
     if (!order || order.storeId !== storeId) return null;
 
     if (status === "cancelled" && order.status !== "cancelled") {
-      for (const item of order.items) {
-        if (item.variantId) {
-          await ProductRepository.increaseVariantStock(item.productId.toString(), item.variantId, item.quantity);
-        } else {
-          await ProductRepository.increaseStock(item.productId.toString(), item.quantity);
-        }
-      }
+      await restoreStock(
+        storeId,
+        order.items.map((item) => ({
+          productId: item.productId.toString(),
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      );
     }
 
     const updated = await OrderRepository.updateStatus(orderId, status, note);

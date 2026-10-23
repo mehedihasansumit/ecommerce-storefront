@@ -2,6 +2,7 @@ import { ProductRepository } from "./repository";
 import { CategoryRepository } from "@/features/categories/repository";
 import { generateBaseSku, generateVariantSku, dedupeVariantSkus } from "./sku";
 import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
+import { invalidateStore } from "@/shared/lib/data-cache";
 import type { IProduct } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
@@ -94,7 +95,7 @@ export const ProductService = {
         sku: (v.sku && v.sku.trim()) || generateVariantSku(baseSku, v.optionValues),
       })),
     );
-    return ProductRepository.create({
+    const created = await ProductRepository.create({
       ...data,
       sku: baseSku,
       variants,
@@ -103,6 +104,8 @@ export const ProductService = {
       averageRating: 0,
       reviewCount: 0,
     });
+    invalidateStore(storeId);
+    return created;
   },
 
   async update(id: string, data: Partial<IProduct>): Promise<IProduct | null> {
@@ -122,6 +125,7 @@ export const ProductService = {
       );
     }
     const updated = await ProductRepository.update(id, data);
+    if (updated) invalidateStore(updated.storeId);
     if (existing && updated) {
       // Remove blobs dropped by this update (kept images are protected).
       await deleteUnreferencedBlobs(
@@ -135,6 +139,7 @@ export const ProductService = {
   async delete(id: string): Promise<boolean> {
     const existing = await ProductRepository.findById(id);
     const ok = await ProductRepository.delete(id);
+    if (ok && existing) invalidateStore(existing.storeId);
     if (ok && existing) {
       await deleteUnreferencedBlobs(productBlobValues(existing)).catch(() => {});
     }

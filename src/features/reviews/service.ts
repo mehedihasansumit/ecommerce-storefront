@@ -2,12 +2,15 @@ import { ReviewRepository } from "./repository";
 import { ProductRepository } from "@/features/products/repository";
 import { OrderRepository } from "@/features/orders/repository";
 import { PointService } from "@/features/points/service";
+import { invalidateStore } from "@/shared/lib/data-cache";
 import type { IReview } from "./types";
 import type { CreateReviewInput } from "./schemas";
 
 async function syncProductRating(storeId: string, productId: string): Promise<void> {
   const stats = await ReviewRepository.getProductRatingStats(storeId, productId);
   await ProductRepository.updateRatingStats(productId, stats.averageRating, stats.reviewCount);
+  // Product cards show the rating.
+  invalidateStore(storeId);
 }
 
 export const ReviewService = {

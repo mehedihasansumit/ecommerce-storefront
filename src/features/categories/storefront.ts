@@ -1,16 +1,21 @@
-import { cache } from "react";
 import { CategoryService } from "./service";
+import { cachedForStore, storeTag } from "@/shared/lib/data-cache";
 
 /**
- * Per-request memoised category reads for storefront Server Components. A page and
- * its loading.tsx skeleton render in the same request, so routing both through these
- * runs each query once instead of twice.
+ * Storefront category reads, cached per store across requests (expired by every
+ * category, product and store write) and memoised per request, so a page and its
+ * loading.tsx skeleton run each query at most once.
  */
-export const getStoreCategories = cache((storeId: string) =>
-  CategoryService.getByStore(storeId)
+export const getStoreCategories = cachedForStore(
+  "store-categories",
+  (storeId: string) => CategoryService.getByStore(storeId),
+  { tags: (storeId) => [storeTag(storeId)] }
 );
 
 /** Top-level categories with active products (home tiles, /products chip row). */
-export const getTopLevelCategoriesWithProducts = cache(async (storeId: string) =>
-  CategoryService.getTopLevelWithProducts(storeId, await getStoreCategories(storeId))
+export const getTopLevelCategoriesWithProducts = cachedForStore(
+  "top-level-categories-with-products",
+  async (storeId: string) =>
+    CategoryService.getTopLevelWithProducts(storeId, await getStoreCategories(storeId)),
+  { tags: (storeId) => [storeTag(storeId)] }
 );

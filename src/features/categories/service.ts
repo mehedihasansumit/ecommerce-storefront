@@ -1,5 +1,6 @@
 import { CategoryRepository } from "./repository";
 import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
+import { invalidateStore } from "@/shared/lib/data-cache";
 import type { ICategory } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import slugify from "slugify";
@@ -60,7 +61,9 @@ export const CategoryService = {
     data: { name: string | LocalizedString; description?: string | LocalizedString; image?: string; parentId?: string; sortOrder?: number }
   ): Promise<ICategory> {
     const slug = nameToSlug(data.name);
-    return CategoryRepository.create({ ...data, storeId, slug } as Partial<ICategory>);
+    const created = await CategoryRepository.create({ ...data, storeId, slug } as Partial<ICategory>);
+    invalidateStore(storeId);
+    return created;
   },
 
   async update(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
@@ -71,6 +74,7 @@ export const CategoryService = {
     const before =
       data.image !== undefined ? await CategoryRepository.findById(id) : null;
     const updated = await CategoryRepository.update(id, data);
+    if (updated) invalidateStore(updated.storeId);
     if (before && updated) {
       await deleteUnreferencedBlobs([before.image], [updated.image]).catch(() => {});
     }
@@ -80,6 +84,7 @@ export const CategoryService = {
   async delete(id: string): Promise<boolean> {
     const before = await CategoryRepository.findById(id);
     const ok = await CategoryRepository.delete(id);
+    if (ok && before) invalidateStore(before.storeId);
     if (ok && before?.image) {
       await deleteUnreferencedBlobs([before.image]).catch(() => {});
     }

@@ -1,5 +1,6 @@
 import { StoreRepository } from "./repository";
 import { deleteUnreferencedBlobs, deleteBlobsByPrefix } from "@/shared/lib/storage";
+import { invalidateStore } from "@/shared/lib/data-cache";
 import type { IStore } from "./types";
 import slugify from "slugify";
 
@@ -42,15 +43,18 @@ export const StoreService = {
     payment?: Partial<IStore["payment"]>;
   }): Promise<IStore> {
     const slug = slugify(data.name, { lower: true, strict: true });
-    return StoreRepository.create({
+    const created = await StoreRepository.create({
       ...data,
       slug,
     } as Partial<IStore>);
+    invalidateStore(created._id, { domains: true });
+    return created;
   },
 
   async update(id: string, data: Record<string, unknown>): Promise<IStore | null> {
     const before = await StoreRepository.findById(id);
     const updated = await StoreRepository.update(id, data);
+    invalidateStore(id, { domains: true });
     if (before && updated) {
       await deleteUnreferencedBlobs(
         storeBlobValues(before),
@@ -62,6 +66,7 @@ export const StoreService = {
 
   async delete(id: string): Promise<boolean> {
     const ok = await StoreRepository.delete(id);
+    invalidateStore(id, { domains: true });
     if (ok) {
       // Store gone — wipe every blob under its prefix (logos, products, categories, campaigns).
       await deleteBlobsByPrefix(`${id}/`).catch(() => {});

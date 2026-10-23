@@ -1,12 +1,16 @@
 import { headers } from "next/headers";
 import { StoreRepository } from "@/features/stores/repository";
 import type { IStore } from "@/features/stores/types";
+import { toPublicStore } from "@/features/stores/public-store";
 import { APP_SURFACE_HEADER } from "./app-surface";
 import { cachedForStore, STORE_DOMAINS_TAG } from "./data-cache";
 
 const findStoreByHost = cachedForStore(
   "store-by-domain",
-  (hostname: string): Promise<IStore | null> => StoreRepository.findByDomain(hostname),
+  async (hostname: string): Promise<IStore | null> => {
+    const store = await StoreRepository.findByDomain(hostname);
+    return store ? toPublicStore(store) : null;
+  },
   { tags: () => [STORE_DOMAINS_TAG] }
 );
 

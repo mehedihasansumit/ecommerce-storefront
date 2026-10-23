@@ -62,6 +62,24 @@ New uploads then get `https://media.example.com/<key>` links directly. Any
 `/api/media/...` link that is still around keeps working: the proxy reads the
 same keys from R2.
 
+`S3_PUBLIC_URL` here must be exactly the base you passed to the rewrite script
+(same scheme, host, no extra path). The app recognises its own media links by
+that prefix; a mismatch makes the storage cleanup treat live files as unused.
+
+## 5. Catch uploads made during the switch
+
+Until step 4 is live, the running app still saves new uploads to the old storage
+with `/api/media/...` links. Right after the deploy, run both scripts once more
+(they skip what is already done):
+
+```bash
+npx tsx scripts/copy-media-to-r2.ts
+S3_PUBLIC_URL=https://media.example.com npx tsx scripts/rewrite-media-urls.ts --allow-db=<db name>
+```
+
+Simplest: ask admins not to upload or delete images between step 2 and this
+step.
+
 ## Check
 
 ```bash

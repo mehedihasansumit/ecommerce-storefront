@@ -20,3 +20,7 @@ export const NEW_ARRIVALS_MARQUEE_MIN = 6;
 export function newArrivalsMarquee(count: number, autoScroll: boolean): boolean {
   return autoScroll && count >= NEW_ARRIVALS_MARQUEE_MIN;
 }
+
+/** Home page rows load at most this many products (the rail and the featured grid). */
+export const NEW_ARRIVALS_LIMIT = 12;
+export const FEATURED_LIMIT = 24;

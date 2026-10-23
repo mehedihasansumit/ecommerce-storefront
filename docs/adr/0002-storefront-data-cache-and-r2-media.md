@@ -51,6 +51,11 @@ serve media from a Cloudflare R2 bucket on our own domain.
 - Stored media links become absolute (`https://media.<domain>/<key>`) after the
   migration. Old `/api/media/...` links keep working: the proxy reads the same
   keys from R2, and now supports ranges and ETags too.
+- The cached Store is the public projection (`toPublicStore`): payment secrets
+  are removed before it is cached on disk or handed to client components. Code
+  that needs them must read the Store through `StoreService`, uncached.
+- The home rows load at most 12 new arrivals and 24 featured products, which
+  keeps each cache entry well under Next's 2 MB per-entry limit.
 - Images are never run through the Next.js image optimizer; uploads already get
   400/800px WebP variants.
 - The service worker no longer stores cart, checkout, account or order pages,

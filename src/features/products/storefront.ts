@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { ProductService } from "./service";
 import { cachedForStore, storeTag } from "@/shared/lib/data-cache";
+import { FEATURED_LIMIT, NEW_ARRIVALS_LIMIT } from "./layout";
 
 /**
  * Storefront product reads. The home rows are cached per store across requests
@@ -9,13 +10,13 @@ import { cachedForStore, storeTag } from "@/shared/lib/data-cache";
  */
 export const getFeaturedProducts = cachedForStore(
   "featured-products",
-  (storeId: string) => ProductService.getFeatured(storeId, undefined),
+  (storeId: string) => ProductService.getFeatured(storeId, FEATURED_LIMIT),
   { tags: (storeId) => [storeTag(storeId)] }
 );
 
 export const getNewArrivalProducts = cachedForStore(
   "new-arrival-products",
-  (storeId: string) => ProductService.getNewArrivals(storeId, undefined),
+  (storeId: string) => ProductService.getNewArrivals(storeId, NEW_ARRIVALS_LIMIT),
   { tags: (storeId) => [storeTag(storeId)] }
 );
 

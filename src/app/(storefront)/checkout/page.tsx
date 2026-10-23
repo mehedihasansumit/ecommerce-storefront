@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/shared/context/CartContext";
+import { CheckoutSkeleton } from "@/features/cart/components/CheckoutSkeleton";
 import {
   ShoppingBag,
-  Loader2,
   MapPin,
   CreditCard,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  ArrowLeft,
   Tag,
   Lock,
   Truck,
@@ -24,8 +25,11 @@ import { t as tLocalized } from "@/shared/lib/i18n";
 import { AddressSelector } from "@/features/auth/components/AddressSelector";
 import type { IAddress } from "@/features/auth/types";
 import { useTenant } from "@/shared/hooks/useTenant";
-import { LocationSelect } from "@/shared/components/ui";
+import { Alert, Button, Input, LocationSelect, Select, formatPrice } from "@/shared/components/ui";
 import { calcDeliveryCharge, isInsideDhaka } from "@/shared/lib/delivery";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
+import { formatNumber } from "@/shared/lib/i18n";
 
 interface FormData {
   name: string;
@@ -55,29 +59,37 @@ const initialForm: FormData = {
   notes: "",
 };
 
+// Same metrics and focus treatment as the <Input>/<Select> primitives, so the text
+// fields and the location selects line up (they were 44px vs 40px).
 const inputBase =
-  "w-full px-3.5 py-2.5 border rounded-lg text-sm bg-bg text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all placeholder:text-text-tertiary";
-const inputNormal = `${inputBase} border-border-subtle focus:border-[var(--color-primary)] focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`;
-const inputError = `${inputBase} border-red-400 focus:ring-red-200`;
+  "w-full min-h-10 px-3 py-2 border rounded-lg text-sm bg-[var(--color-card-bg)] text-[var(--color-text)] transition-colors placeholder:text-text-tertiary focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--focus-ring,var(--color-primary))]";
+const inputNormal = `${inputBase} border-input-border hover:border-text-secondary`;
+const inputError = `${inputBase} border-error`;
 const inputReadOnly = `${inputBase} border-border-subtle bg-surface text-text-secondary cursor-default`;
+
+const subscribeNoop = () => () => {};
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
+  const tc = useTranslations("common");
   const router = useRouter();
   const {
     items,
     subtotal,
     coupon,
     couponDiscount,
-    campaignDiscount,
     appliedCampaigns,
     campaignFreeItems,
     campaignFreeShipping,
     total,
     clearCart,
+    hydrated: cartHydrated,
   } = useCart();
   const tenant = useTenant();
   const locale = useLocale();
+  const optionLabel = useOptionLabels();
+  const currency = useStoreCurrency();
+  const money = (n: number) => formatPrice(n, currency, locale);
 
   useEffect(() => {
     document.title = `Checkout | ${tenant?.name ?? "Store"}`;
@@ -87,12 +99,12 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [mounted, setMounted] = useState(false);
+  // true on the client, false during SSR — gates the localStorage-backed cart.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [notesOpen, setNotesOpen] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState<IAddress[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [usingSavedAddress, setUsingSavedAddress] = useState(false);
 
   const loadSavedAddresses = useCallback(async () => {
@@ -110,7 +122,6 @@ export default function CheckoutPage() {
           const defaultAddr =
             addrData.addresses.find((a: IAddress) => a.isDefault) ||
             addrData.addresses[0];
-          setSelectedAddressId(defaultAddr._id);
           setUsingSavedAddress(true);
           setForm((f) => ({
             ...f,
@@ -131,15 +142,18 @@ export default function CheckoutPage() {
 
   const [orderPlaced, setOrderPlaced] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { if (mounted) loadSavedAddresses(); }, [mounted, loadSavedAddresses]);
   useEffect(() => {
-    if (mounted && !orderPlaced && items.length === 0) router.replace("/cart");
-  }, [mounted, orderPlaced, items.length, router]);
+    // Deferred a tick: the loader sets state, which must not run synchronously in the effect.
+    const id = setTimeout(() => void loadSavedAddresses(), 0);
+    return () => clearTimeout(id);
+  }, [loadSavedAddresses]);
+  useEffect(() => {
+    // Wait for the cart to load from localStorage, else an empty first render bounces to /cart.
+    if (cartHydrated && !orderPlaced && items.length === 0) router.replace("/cart");
+  }, [cartHydrated, orderPlaced, items.length, router]);
 
   function handleAddressSelect(address: IAddress | null) {
     if (address) {
-      setSelectedAddressId(address._id);
       setUsingSavedAddress(true);
       setForm((f) => ({
         ...f,
@@ -152,7 +166,6 @@ export default function CheckoutPage() {
         country: address.country || "Bangladesh",
       }));
     } else {
-      setSelectedAddressId(null);
       setUsingSavedAddress(false);
       setForm((f) => ({
         ...f,
@@ -177,7 +190,6 @@ export default function CheckoutPage() {
     if (!res.ok) throw new Error(result.error);
     setSavedAddresses(result.addresses);
     const newAddr = result.addresses[result.addresses.length - 1];
-    setSelectedAddressId(newAddr._id);
     setUsingSavedAddress(true);
     setForm((f) => ({
       ...f,
@@ -276,7 +288,7 @@ export default function CheckoutPage() {
       : "";
   const grandTotal = total + shippingCost;
 
-  if (!mounted) return null;
+  if (!mounted || !cartHydrated) return <CheckoutSkeleton />;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -284,9 +296,9 @@ export default function CheckoutPage() {
       <div className="mb-8">
         <Link
           href="/cart"
-          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors mb-4"
+          className="focus-ring inline-flex min-h-10 items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors mb-2"
         >
-          ← {t("backToCart")}
+          <ArrowLeft size={15} aria-hidden /> {t("backToCart")}
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("checkout")}</h1>
       </div>
@@ -320,6 +332,7 @@ export default function CheckoutPage() {
                   <FieldWrap label={t("fullName")} required error={errors.name}>
                     <input
                       type="text"
+                      autoComplete="name"
                       value={form.name}
                       onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                       placeholder={t("fullName")}
@@ -328,19 +341,17 @@ export default function CheckoutPage() {
                   </FieldWrap>
 
                   <FieldWrap label={t("phoneNumber")} required error={errors.phone}>
-                    <div className={`flex items-center border rounded-lg overflow-hidden transition-colors ${errors.phone ? "border-red-400" : "border-border-subtle focus-within:border-[var(--color-primary)]"}`}>
-                      <span className="px-3 py-2.5 text-sm font-medium text-text-secondary bg-surface border-r border-border-subtle shrink-0 select-none">
-                        +88
-                      </span>
-                      <input
-                        type="tel"
-                        value={form.phone}
-                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        placeholder="01XXXXXXXXX"
-                        maxLength={11}
-                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent text-[var(--color-text)]"
-                      />
-                    </div>
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel-national"
+                      prefix="+88"
+                      invalid={Boolean(errors.phone)}
+                      value={form.phone}
+                      onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder={tc("phonePlaceholder")}
+                      maxLength={11}
+                    />
                   </FieldWrap>
                 </div>
 
@@ -348,6 +359,7 @@ export default function CheckoutPage() {
                 <FieldWrap label={t("emailAddress")} optional={t("optional")}>
                   <input
                     type="email"
+                    autoComplete="email"
                     value={form.email}
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                     placeholder="you@example.com"
@@ -390,6 +402,7 @@ export default function CheckoutPage() {
                 <FieldWrap label={t("postalCode")}>
                   <input
                     type="text"
+                    autoComplete="postal-code"
                     value={form.postalCode}
                     onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
                     readOnly={usingSavedAddress}
@@ -402,6 +415,7 @@ export default function CheckoutPage() {
                 <FieldWrap label={t("streetAddress")} required error={errors.street}>
                   <input
                     type="text"
+                    autoComplete="street-address"
                     value={form.street}
                     onChange={(e) => setForm((f) => ({ ...f, street: e.target.value }))}
                     readOnly={usingSavedAddress}
@@ -412,17 +426,16 @@ export default function CheckoutPage() {
 
                 {/* Country */}
                 <FieldWrap label={t("country")}>
-                  <select
+                  <Select
                     value={form.country}
                     onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
                     disabled={usingSavedAddress}
-                    className={usingSavedAddress ? inputReadOnly : inputNormal}
                   >
                     <option>Bangladesh</option>
                     <option>India</option>
                     <option>Pakistan</option>
                     <option>Other</option>
-                  </select>
+                  </Select>
                 </FieldWrap>
 
                 {/* Notes — collapsible */}
@@ -430,7 +443,8 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setNotesOpen((o) => !o)}
-                    className="flex items-center gap-2 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
+                    aria-expanded={notesOpen}
+                    className="focus-ring flex min-h-10 items-center gap-2 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
                   >
                     <ChevronDown
                       size={15}
@@ -479,11 +493,6 @@ export default function CheckoutPage() {
                 </div>
                 <CheckCircle2 size={18} style={{ color: "var(--color-primary)" }} />
               </label>
-
-              <div className="mt-3 flex items-center gap-2 text-xs text-text-tertiary">
-                <Lock size={12} />
-                {t("secureCheckout") || "Your information is encrypted and secure"}
-              </div>
             </Section>
           </div>
 
@@ -511,28 +520,28 @@ export default function CheckoutPage() {
                       style={{ borderRadius: "var(--border-radius)" }}
                     >
                       {item.thumbnail ? (
-                        <Image src={item.thumbnail} alt={item.productName} fill className="object-cover transition-transform group-hover:scale-105" />
+                        <Image src={item.thumbnail} alt={item.productName} fill className="media-dim object-cover transition-transform group-hover:scale-105" />
                       ) : (
                         <ShoppingBag size={16} className="m-auto mt-3 text-text-tertiary" />
                       )}
                       {item.quantity > 1 && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-700 text-white text-[10px] font-bold flex items-center justify-center">
-                          {item.quantity}
+                        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--color-text)] text-[var(--color-bg)] text-[10px] font-bold flex items-center justify-center">
+                          {formatNumber(item.quantity, locale)}
                         </span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate leading-snug transition-colors group-hover:text-[var(--color-primary)]">{item.productName}</p>
+                      <p className="text-xs font-medium truncate leading-snug transition-colors group-hover:text-[var(--color-primary)]">{item.productNames ? tLocalized(item.productNames, locale) || item.productName : item.productName}</p>
                       {Object.keys(item.variantSelections || {}).length > 0 && (
                         <p className="text-[11px] text-text-tertiary truncate">
-                          {Object.entries(item.variantSelections).map(([k, v]) => `${k}: ${v}`).join(" · ")}
+                          {Object.entries(item.variantSelections).map(([k, v]) => `${optionLabel.name(k)}: ${optionLabel.value(v)}`).join(" · ")}
                         </p>
                       )}
-                      <p className="text-[11px] text-text-secondary">Qty: {item.quantity}</p>
+                      <p className="text-[11px] text-text-secondary">{t("qtyShort", { qty: item.quantity })}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <p className="text-xs font-semibold" style={{ color: "var(--color-price)" }}>
-                        ৳{(item.priceAtAdd * item.quantity).toLocaleString()}
+                        {money(item.priceAtAdd * item.quantity)}
                       </p>
                       <ChevronRight size={14} className="text-text-tertiary opacity-0 -ml-0.5 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" />
                     </div>
@@ -544,27 +553,27 @@ export default function CheckoutPage() {
               <div className="px-5 pb-5 pt-3 border-t border-border-subtle space-y-2.5 text-sm">
                 <div className="flex items-center justify-between gap-3 text-text-secondary">
                   <span>{t("subtotal")}</span>
-                  <span className="shrink-0 font-medium">৳{subtotal.toLocaleString()}</span>
+                  <span className="shrink-0 font-medium">{money(subtotal)}</span>
                 </div>
                 {couponDiscount > 0 && (
-                  <div className="flex items-center justify-between gap-3 text-green-600 dark:text-green-400">
+                  <div className="flex items-center justify-between gap-3 text-success">
                     <span className="flex items-center gap-1.5 truncate">
                       <Tag size={12} /> {coupon?.code}
                     </span>
-                    <span className="shrink-0 font-medium">-৳{couponDiscount.toLocaleString()}</span>
+                    <span className="shrink-0 font-medium">-{money(couponDiscount)}</span>
                   </div>
                 )}
                 {appliedCampaigns.map((c) => (
                   <div
                     key={c.campaignId}
-                    className="flex items-center justify-between gap-3 text-green-600 dark:text-green-400"
+                    className="flex items-center justify-between gap-3 text-success"
                   >
                     <span className="flex items-center gap-1.5 truncate">
                       <Sparkles size={12} /> {tLocalized(c.campaignName, locale)}
                     </span>
                     {c.discountAmount > 0 && (
                       <span className="shrink-0 font-medium">
-                        -৳{c.discountAmount.toLocaleString()}
+                        -{money(c.discountAmount)}
                       </span>
                     )}
                   </div>
@@ -575,10 +584,10 @@ export default function CheckoutPage() {
                     className="flex items-center justify-between gap-3 text-text-secondary"
                   >
                     <span className="flex items-center gap-1.5 truncate">
-                      <Gift size={12} style={{ color: "var(--color-primary)" }} /> Free gift × {f.qty}
+                      <Gift size={12} aria-hidden style={{ color: "var(--color-link)" }} /> {t("freeGiftQty", { qty: f.qty })}
                     </span>
-                    <span className="shrink-0 font-medium text-green-600 dark:text-green-400">
-                      FREE
+                    <span className="shrink-0 font-medium text-success">
+                      {t("shippingFree")}
                     </span>
                   </div>
                 ))}
@@ -593,13 +602,13 @@ export default function CheckoutPage() {
                     )}
                   </span>
                   {shippingPending ? (
-                    <span className="shrink-0 text-[11px] text-text-tertiary text-right">
+                    <span className="shrink-0 text-xs text-text-tertiary text-right">
                       {t("shippingSelectArea")}
                     </span>
                   ) : shippingCost > 0 ? (
-                    <span className="shrink-0 font-medium">৳{shippingCost.toLocaleString()}</span>
+                    <span className="shrink-0 font-medium">{money(shippingCost)}</span>
                   ) : (
-                    <span className="shrink-0 font-medium text-green-600 dark:text-green-400">
+                    <span className="shrink-0 font-medium text-success">
                       {campaignFreeShipping ? t("shippingFreeCampaign") : t("shippingFree")}
                     </span>
                   )}
@@ -611,7 +620,7 @@ export default function CheckoutPage() {
                     className="font-extrabold text-xl shrink-0"
                     style={{ color: "var(--color-price)" }}
                   >
-                    ৳{grandTotal.toLocaleString()}
+                    {money(grandTotal)}
                   </span>
                 </div>
               </div>
@@ -619,35 +628,24 @@ export default function CheckoutPage() {
               {/* CTA */}
               <div className="px-5 pb-5">
                 {serverError && (
-                  <div className="mb-3 p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-sm rounded-xl border border-red-200 dark:border-red-800">
+                  <Alert tone="error" className="mb-3">
                     {serverError}
-                  </div>
+                  </Alert>
                 )}
 
-                <button
+                <Button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full flex items-center justify-center gap-2 py-4 text-white font-semibold text-sm transition-all hover:opacity-90 hover:shadow-[var(--shadow-md)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: "var(--color-primary)",
-                    borderRadius: "var(--border-radius)",
-                  }}
+                  variant="brand"
+                  size="xl"
+                  fullWidth
+                  loading={submitting}
+                  leftIcon={<Lock size={15} aria-hidden />}
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 size={17} className="animate-spin" />
-                      {t("placingOrder")}
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={15} />
-                      {t("placeOrder")}
-                    </>
-                  )}
-                </button>
+                  {submitting ? t("placingOrder") : t("placeOrder")}
+                </Button>
 
-                <p className="mt-2.5 text-[11px] text-text-tertiary text-center">
-                  {t("secureCheckout") || "SSL encrypted · Safe & secure checkout"}
+                <p className="mt-2.5 text-xs text-text-tertiary text-center">
+                  {t("secureCheckout")}
                 </p>
               </div>
             </div>
@@ -711,11 +709,11 @@ function FieldWrap({
     <div>
       <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-error ml-0.5">*</span>}
         {optional && <span className="ml-1 text-text-tertiary font-normal">({optional})</span>}
       </label>
       {children}
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-error">{error}</p>}
     </div>
   );
 }

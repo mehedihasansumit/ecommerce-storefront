@@ -33,7 +33,8 @@ export function ReviewStars({ rating, size = "md", showValue = false }: ReviewSt
                 style={{ width: filled ? "100%" : `${fillPercent}%` }}
               >
                 <Star
-                  className={`${starSize} text-yellow-400`}
+                  className={starSize}
+                  style={{ color: "var(--color-rating, var(--color-accent))" }}
                   fill="currentColor"
                 />
               </span>

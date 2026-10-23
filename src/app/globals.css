@@ -2,6 +2,30 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Text on brand-filled elements (inline `background-color: var(--color-primary)`) uses
+   --color-on-primary: white or near-black, whichever reads on the store's brand colour
+   (computed in theme-tokens.ts). Unlayered on purpose so it beats `text-white`.
+   Both attribute spellings: SSR emits no space, client-rendered styles add one. */
+[style*="background-color:var(--color-primary)"],
+[style*="background-color: var(--color-primary)"] {
+  color: var(--color-on-primary, #fff);
+}
+
+/* Tailwind v4 preflight resets buttons & form controls to `cursor: default`.
+   Restore the hand cursor on everything clickable. Base layer, so utilities
+   (cursor-not-allowed, cursor-zoom-in, cursor-grab…) still win. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  select:not(:disabled),
+  summary,
+  input:is([type="checkbox"], [type="radio"], [type="file"], [type="submit"], [type="button"], [type="color"], [type="range"]):not(:disabled),
+  label:has(> input:is([type="checkbox"], [type="radio"]):not(:disabled)) {
+    cursor: pointer;
+  }
+}
+
 :root {
   --color-primary: #3B82F6;
   --color-secondary: #10B981;
@@ -11,11 +35,15 @@
   --color-header-bg: #111827;
   --color-header-text: #FFFFFF;
   --color-surface: #FAFAFA;
-  --color-skeleton-highlight: #ECECEC;
   --color-border-subtle: #F3F4F6;
   --color-text-secondary: #6B7280;
   --color-text-tertiary: #9CA3AF;
+  --color-input-border: #8B919B;
   --font-family: 'Inter', sans-serif;
+  --font-heading: var(--font-family);
+  /* Focus outline colour; dark brand surfaces (header, footer, newsletter) override it
+     with their own text colour — a maroon ring on midnight navy measured 1.6:1. */
+  --focus-ring: var(--color-primary);
   --border-radius: 0.5rem;
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
@@ -37,8 +65,10 @@
   --color-card-bg: #FFFFFF;
 
   /* Semantic status tokens */
-  --color-success: #10B981;
-  --color-error: #EF4444;
+  /* AA on white/ivory (5.5:1); the old #10B981 read at 2.5:1 */
+  --color-success: #047857;
+  /* AA on white/ivory (6:1); #EF4444 measured 3.7:1 */
+  --color-error: #B91C1C;
 
   /* Admin panel semantic tokens */
   --admin-bg:               #F9FAFB;
@@ -73,14 +103,16 @@ html.dark {
   --color-bg:               #111827;
   --color-text:             #F9FAFB;
   --color-surface:          #1F2937;
-  --color-skeleton-highlight: #273344;
   --color-border-subtle:    #374151;
   --color-text-secondary:   #E5E7EB;
   --color-text-tertiary:    #D1D5DB;
+  --color-input-border:     #6B7280;
   --color-newsletter-btn-bg: #1F2937;
   --color-sale-badge-bg:    #DC2626;
   --color-footer-bg:        #0F172A;
   --color-card-bg:          #111827;
+  --color-success:          #34D399;
+  --color-error:            #F87171;
 }
 
 @theme inline {
@@ -95,6 +127,9 @@ html.dark {
   --color-border-subtle: var(--color-border-subtle);
   --color-text-secondary: var(--color-text-secondary);
   --color-text-tertiary: var(--color-text-tertiary);
+  --color-input-border: var(--color-input-border);
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
   --radius-theme: var(--border-radius);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
@@ -119,6 +154,18 @@ html {
   overflow-x: clip;
 }
 
+/* Storefront: focused or anchored content never lands under the sticky header (or the
+   phone bottom nav). Admin has neither bar, so it keeps the browser default. */
+html[data-tenant] {
+  scroll-padding-top: 5.5rem;
+  scroll-padding-bottom: 4.5rem;
+}
+@media (min-width: 768px) {
+  html[data-tenant] {
+    scroll-padding-bottom: 1rem;
+  }
+}
+
 /* html[lang="bn"] {
   font-size: 106.25%;
 } */
@@ -133,6 +180,49 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Storefront scope. The root layout sets `data-tenant` on <html> only when a store is
+   resolved for a storefront request (never on /admin), so these rules reach portaled UI
+   (Modal, ConfirmDialog, toasts) on storefront pages but never the admin, which stays
+   brand-neutral. Shared primitives read the --ui-* variables below and fall back to
+   today's neutral admin greys when they are unset. Declared on <html>, the same element
+   that carries the tenant's light vars (inline) and dark vars (html.dark), so they
+   follow light/dark switching. */
+html[data-tenant] {
+  --ui-field-bg: var(--color-card-bg);
+  --ui-field-bg-dark: var(--color-card-bg);
+  --ui-field-text: var(--color-text);
+  --ui-field-text-dark: var(--color-text);
+  --ui-placeholder: var(--color-text-tertiary);
+  --ui-placeholder-dark: var(--color-text-tertiary);
+  --ui-field-border: var(--color-input-border);
+  --ui-field-border-dark: var(--color-input-border);
+  --ui-field-border-hover: var(--color-text-secondary);
+  --ui-field-border-hover-dark: var(--color-text-secondary);
+  --ui-field-border-invalid: var(--color-error);
+  --ui-field-border-invalid-dark: var(--color-error);
+  --ui-muted: var(--color-text-secondary);
+  --ui-muted-dark: var(--color-text-secondary);
+  --ui-field-disabled-bg: var(--color-surface);
+  --ui-field-disabled-bg-dark: var(--color-surface);
+  --ui-field-disabled-text: var(--color-text-secondary);
+  --ui-field-disabled-text-dark: var(--color-text-secondary);
+  --ui-label: var(--color-text);
+  --ui-label-dark: var(--color-text);
+}
+
+/* Display face for headings (tenant `headingFont`; defaults to the body face). Storefront only. */
+@layer base {
+  html[data-tenant] :is(h1, h2, .font-display) {
+    font-family: var(--font-heading, var(--font-family));
+  }
+  /* Display serifs (Cormorant, Garamond…) have a small x-height: normalise it so
+     a `text-2xl` heading reads as large as it would in the body face. */
+  html[data-heading-font="display"] :is(h1, h2, .font-display) {
+    font-size-adjust: 0.46;
+    letter-spacing: -0.005em;
+  }
+}
+
 /* Storefront grid background */
 .storefront-grid-bg {
   background-color: var(--color-bg);
@@ -140,6 +230,11 @@ body {
     linear-gradient(to right,  rgba(0, 0, 0, 0.045) 0.5px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.045) 0.5px, transparent 1px);
   background-size: 40px 40px;
+}
+
+html[data-bg-pattern="none"] .storefront-grid-bg,
+html[data-bg-pattern="none"].dark .storefront-grid-bg {
+  background-image: none;
 }
 
 html.dark .storefront-grid-bg {
@@ -224,13 +319,17 @@ a {
 }
 
 .shimmer {
+  /* Derived from the tenant's surface + text where the block sits, so skeletons keep
+     the store's hue (ivory stays ivory) and read in dark mode with no extra tokens. */
+  --color-skeleton-base: color-mix(in srgb, var(--color-text) 5%, var(--color-surface));
+  --color-skeleton-highlight: color-mix(in srgb, var(--color-text) 10%, var(--color-surface));
   background: linear-gradient(
     100deg,
-    var(--color-surface) 20%,
-    color-mix(in srgb, var(--color-skeleton-highlight) 60%, var(--color-surface)) 40%,
+    var(--color-skeleton-base) 20%,
+    color-mix(in srgb, var(--color-skeleton-highlight) 60%, var(--color-skeleton-base)) 40%,
     var(--color-skeleton-highlight) 50%,
-    color-mix(in srgb, var(--color-skeleton-highlight) 60%, var(--color-surface)) 60%,
-    var(--color-surface) 80%
+    color-mix(in srgb, var(--color-skeleton-highlight) 60%, var(--color-skeleton-base)) 60%,
+    var(--color-skeleton-base) 80%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
@@ -239,7 +338,7 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .shimmer {
     animation: none;
-    background: var(--color-surface);
+    background: var(--color-skeleton-base);
   }
 }
 
@@ -308,12 +407,12 @@ a {
 /* Focus ring — used by all interactive primitives.
    Keyboard-only (focus-visible) so mouse clicks don't show the ring. */
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--focus-ring, var(--color-primary));
   outline-offset: 2px;
   border-radius: var(--border-radius);
 }
 .focus-ring-inset:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--focus-ring, var(--color-primary));
   outline-offset: -1px;
 }
 
@@ -403,4 +502,388 @@ a {
 }
 .rte-content em {
   font-style: italic;
+}
+
+/* ── Cinematic video hero ─────────────────────────────────────────────────────
+   Scrim is tinted with the tenant header colour so footage, header and hero read
+   as one surface; it is weighted bottom-left where the copy sits, keeping white
+   text ≥ 4.5:1 even over bright footage. */
+.hero-cinematic {
+  --hero-tint: color-mix(in srgb, var(--color-scrim, var(--color-header-bg, #111827)) 32%, #07070a);
+  background-color: var(--hero-tint);
+}
+.hero-cinematic-scrim {
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--hero-tint) 45%, transparent) 0%, transparent 22%),
+    linear-gradient(to top, color-mix(in srgb, var(--hero-tint) 94%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 70%, transparent) 45%, transparent 82%),
+    linear-gradient(to right, color-mix(in srgb, var(--hero-tint) 62%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 22%, transparent) 50%, transparent 72%);
+}
+/* Phones: the copy block covers most of the hero's height, so the scrim must
+   climb higher (measured: 11px eyebrow fell to 2.8:1 over the montage's brightest
+   ivory frames with the desktop scrim). */
+@media (max-width: 767px) {
+  .hero-cinematic-scrim {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, var(--hero-tint) 45%, transparent) 0%, transparent 20%),
+      linear-gradient(to top, color-mix(in srgb, var(--hero-tint) 95%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 86%, transparent) 50%, color-mix(in srgb, var(--hero-tint) 64%, transparent) 72%, transparent 98%);
+  }
+}
+
+.hero-cinematic-title {
+  font-size: clamp(2.125rem, 1.4rem + 3.6vw, 4.75rem);
+  font-size-adjust: none !important;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 24px rgb(0 0 0 / 0.25);
+}
+html[data-tenant][lang="bn"] .hero-cinematic-title {
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+/* ── heroStyle Style Switch (html[data-hero-style], storefront only) ──────────
+   Structure (eyebrow, frame element, CTA size, box height) is switched in
+   HeroBanner; scrims, type and edges live here. "cinematic" is the base above. */
+
+/* film (taste-skill): neutral black scrim, large tight title, no tint. */
+html[data-hero-style="film"] .hero-cinematic {
+  background-color: #000;
+}
+html[data-hero-style="film"] .hero-cinematic-scrim {
+  background: linear-gradient(to top, rgb(0 0 0 / 0.86) 0%, rgb(0 0 0 / 0.66) 45%, rgb(0 0 0 / 0.35) 70%, rgb(0 0 0 / 0) 95%);
+}
+@media (min-width: 1024px) {
+  html[data-hero-style="film"] .hero-cinematic-scrim {
+    background:
+      linear-gradient(to top, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.62) 30%, rgb(0 0 0 / 0.3) 55%, rgb(0 0 0 / 0) 85%),
+      linear-gradient(to right, rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.38) 40%, rgb(0 0 0 / 0) 70%);
+  }
+}
+html[data-hero-style="film"] .hero-cinematic-title {
+  max-width: 13ch;
+  font-size: clamp(2.5rem, 1.6rem + 4.6vw, 6.5rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-shadow: none;
+}
+html[data-hero-style="film"] .hero-cinematic-sub {
+  max-width: 44ch;
+  color: rgb(255 255 255 / 0.9);
+}
+@media (min-width: 640px) {
+  html[data-hero-style="film"] .hero-cinematic-sub { font-size: 1.125rem; }
+}
+@media (min-width: 1024px) {
+  html[data-hero-style="film"] .hero-cinematic-sub { font-size: 1.25rem; }
+}
+
+/* framed (impeccable): the header colour bleeds into the top of the footage, an
+   inset accent hairline "mount" frames it, the ink is the scrim colour near black. */
+html[data-hero-style="framed"] .hero-cinematic {
+  --hero-tint: color-mix(in srgb, var(--color-scrim, var(--color-header-bg)) 28%, #000);
+  --hero-inset: 0.75rem;
+}
+@media (min-width: 640px) {
+  html[data-hero-style="framed"] .hero-cinematic { --hero-inset: 1.25rem; }
+}
+@media (min-width: 1024px) {
+  html[data-hero-style="framed"] .hero-cinematic { --hero-inset: 1.5rem; }
+}
+html[data-hero-style="framed"] .hero-cinematic-scrim {
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-header-bg) 55%, transparent) 0%, transparent 22%),
+    linear-gradient(to top, color-mix(in srgb, var(--hero-tint) 94%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 80%, transparent) 45%, color-mix(in srgb, var(--hero-tint) 45%, transparent) 80%, color-mix(in srgb, var(--hero-tint) 20%, transparent) 100%);
+}
+@media (min-width: 640px) {
+  html[data-hero-style="framed"] .hero-cinematic-scrim {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, var(--color-header-bg) 55%, transparent) 0%, transparent 22%),
+      linear-gradient(to top, color-mix(in srgb, var(--hero-tint) 90%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 60%, transparent) 42%, transparent 76%),
+      linear-gradient(to right, color-mix(in srgb, var(--hero-tint) 60%, transparent) 0%, transparent 62%);
+  }
+}
+.hero-frame {
+  inset: var(--hero-inset, 1rem);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 75%, #fff);
+  opacity: 0.5;
+}
+html[data-hero-style="framed"] .hero-cinematic-title {
+  max-width: 16ch;
+  font-size: clamp(1.75rem, 1rem + 3.4vw, 4.75rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-shadow: 0 1px 18px color-mix(in srgb, var(--hero-tint) 55%, transparent);
+}
+html[data-hero-style="framed"] .hero-cinematic-cta {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-hero-style="framed"] .hero-frame {
+    animation: heroFrame 1.2s var(--ease-out-expo) 0.45s both;
+  }
+}
+@keyframes heroFrame {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 0.5; transform: scale(1); }
+}
+
+/* editorial (frontend-design): the brand ink pushed to night lightness tints the
+   scrim, copy is warm ivory with an italic subtitle, the CTA takes the accent
+   (zari gold) and the film ends on a double gold hairline. */
+html[data-hero-style="editorial"] .hero-cinematic {
+  --color-primary: var(--color-accent);
+  --color-on-primary: var(--color-on-accent);
+  --hero-tint: color-mix(in srgb, var(--color-header-bg) 32%, #000);
+  --hero-tint: oklch(from var(--color-link) min(l, 0.2) min(c, 0.07) h);
+  --hero-ivory: #fbf6ec;
+}
+html.dark[data-hero-style="editorial"] .hero-cinematic {
+  --hero-tint: oklch(from var(--color-header-bg) min(l, 0.2) c h);
+}
+html[data-hero-style="editorial"] .hero-cinematic-scrim {
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--hero-tint) 55%, transparent) 0%, transparent 22%),
+    linear-gradient(to top, color-mix(in srgb, var(--hero-tint) 94%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 74%, transparent) 50%, color-mix(in srgb, var(--hero-tint) 30%, transparent) 72%, transparent 92%),
+    linear-gradient(to right, color-mix(in srgb, var(--hero-tint) 50%, transparent) 0%, transparent 70%);
+}
+@media (min-width: 768px) {
+  html[data-hero-style="editorial"] .hero-cinematic-scrim {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, var(--hero-tint) 55%, transparent) 0%, transparent 22%),
+      radial-gradient(ellipse 72% 88% at 0% 100%, color-mix(in srgb, var(--hero-tint) 84%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 68%, transparent) 50%, transparent 100%),
+      linear-gradient(to top, color-mix(in srgb, var(--hero-tint) 90%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 40%, transparent) 38%, transparent 66%),
+      linear-gradient(to right, color-mix(in srgb, var(--hero-tint) 72%, transparent) 0%, color-mix(in srgb, var(--hero-tint) 28%, transparent) 42%, transparent 64%);
+  }
+}
+html[data-hero-style="editorial"] .hero-cinematic::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 5px;
+  z-index: 6;
+  pointer-events: none;
+  border-block: 1px solid color-mix(in srgb, var(--color-primary) 80%, #fff);
+}
+html[data-hero-style="editorial"] .hero-cinematic-title {
+  max-width: 13ch;
+  font-size: clamp(2.125rem, 1.15rem + 3.9vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--hero-ivory);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 0 32px color-mix(in srgb, var(--hero-tint) 45%, transparent);
+}
+html[data-hero-style="editorial"] .hero-cinematic-sub {
+  max-width: 34ch;
+  font-style: italic;
+  font-size: clamp(1rem, 0.92rem + 0.45vw, 1.3125rem);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--hero-ivory) 88%, transparent);
+}
+html[data-tenant][lang="bn"]:is([data-hero-style="film"], [data-hero-style="framed"], [data-hero-style="editorial"]) .hero-cinematic-title {
+  line-height: 1.22;
+  letter-spacing: 0;
+}
+html[lang="bn"][data-hero-style="editorial"] .hero-cinematic-sub { font-style: normal; }
+
+/* framed / editorial heroes (impeccable, frontend-design): the trust facts under the
+   film read as a quiet line of plain facts, not pills; editorial separates them with
+   hairlines. */
+html:is([data-hero-style="framed"], [data-hero-style="editorial"]) .trust-chips {
+  column-gap: 1.25rem;
+}
+html:is([data-hero-style="framed"], [data-hero-style="editorial"]) .trust-chip {
+  border-color: transparent;
+  background-color: transparent;
+  padding-inline: 0;
+  border-radius: 0;
+}
+html[data-hero-style="editorial"] .trust-chip + .trust-chip {
+  border-inline-start-color: var(--color-border-subtle);
+  padding-inline-start: 1.25rem;
+}
+
+/* ── productCardStyle Style Switch: loading skeleton (html[data-card-style]) ──
+   ProductCardSkeleton is the boxed card; editorial/plate cards are a 4:5 image on
+   the page with the title and price under it. */
+html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel {
+  border-color: transparent;
+  background-color: transparent;
+  border-radius: 0;
+}
+html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-media {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--border-radius);
+}
+html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-body {
+  padding: 0.75rem 0.125rem 0.25rem;
+}
+html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-rating {
+  display: none;
+}
+@media (min-width: 768px) {
+  html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-title {
+    font-size: 15px;
+  }
+}
+
+/* Catalogue photography at night (productCardStyle "plate", categoryStyle "plates"):
+   studio shots on white sweeps settle a step into the dark page and come back to
+   full light on hover / focus. */
+html.dark .plate-photo {
+  filter: brightness(0.82) saturate(0.95);
+}
+html.dark .group:hover .plate-photo,
+html.dark .group:focus-visible .plate-photo {
+  filter: none;
+}
+
+/* ── categoryStyle "cards" (CardShowcase): count-adaptive large image cards ──
+   data-phone (< 640px) and data-wide (>= 640px) come from the count; --cat-n is it. */
+.cat-list {
+  --cat-gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem var(--cat-gap);
+  padding-block: 0.25rem; /* room for the focus ring */
+}
+.cat-list[data-phone="grid-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cat-list[data-phone="scroll"],
+.cat-list[data-wide="scroll"] {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+}
+.cat-list[data-phone="scroll"] { display: flex; }
+/* ~3.5 tiles in view: the half tile at the edge says "this row scrolls". */
+.cat-list[data-phone="scroll"] > .cat-item {
+  flex: 0 0 calc((100% - 3 * var(--cat-gap)) / 3.5);
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .cat-list { --cat-gap: 1rem; scroll-padding-inline: 1.5rem; }
+  .cat-list[data-wide="row"] { display: grid; grid-template-columns: repeat(var(--cat-n), minmax(0, 1fr)); }
+  .cat-list[data-wide="scroll"] { display: flex; }
+  .cat-list[data-wide="scroll"] > .cat-item {
+    flex: 0 0 calc((100% - 4 * var(--cat-gap)) / 4.5);
+    scroll-snap-align: start;
+  }
+}
+@media (min-width: 1024px) {
+  .cat-list { --cat-gap: 1.25rem; scroll-padding-inline: 2rem; }
+  .cat-list[data-wide="scroll"] > .cat-item { flex-basis: calc((100% - 6 * var(--cat-gap)) / 6.5); }
+}
+.cat-item { display: flex; min-width: 0; }
+.cat-tile {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--color-text);
+  transition: transform 150ms var(--ease-out-expo);
+}
+.cat-tile:active { transform: scale(0.98); }
+@media (prefers-reduced-motion: reduce) {
+  .cat-tile { transition: none; }
+  .cat-tile:active { transform: none; }
+}
+.cat-tile-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  background-color: var(--color-surface);
+}
+/* Hairline edge drawn above the photo so it shows on light and dark images alike. */
+.cat-tile-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text) 14%, transparent);
+  transition: box-shadow 200ms var(--ease-out-expo);
+}
+.cat-tile:hover .cat-tile-media::after { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 70%, transparent); }
+/* One to three categories across a wide screen: landscape crop so the row doesn't tower. */
+@media (min-width: 640px) { .cat-list[data-few] .cat-tile-media { aspect-ratio: 4 / 3; } }
+/* No photo yet: a tonal tile with the name's initial inside a fine accent frame. */
+.cat-tile-monogram {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 9%, var(--color-card-bg));
+}
+.cat-tile-monogram::after {
+  content: "";
+  position: absolute;
+  inset: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  border-radius: var(--border-radius);
+}
+@media (min-width: 1024px) { .cat-tile-monogram { font-size: 3rem; } }
+.cat-tile-text { display: flex; min-width: 0; flex-direction: column; gap: 0.125rem; }
+.cat-tile-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 200ms var(--ease-out-expo);
+}
+.cat-tile:hover .cat-tile-name,
+.cat-tile:focus-visible .cat-tile-name { text-decoration-color: var(--color-accent); }
+:lang(bn) .cat-tile-name { font-size: 0.9375rem; line-height: 1.4; letter-spacing: 0; }
+.cat-tile-count { display: none; font-size: 0.8125rem; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+@media (min-width: 640px) {
+  .cat-tile-name { font-size: 1rem; }
+  :lang(bn) .cat-tile-name { font-size: 1rem; }
+  .cat-tile-count { display: block; }
+}
+@media (min-width: 1024px) {
+  .cat-tile { gap: 0.75rem; }
+  .cat-tile-name, :lang(bn) .cat-tile-name { font-size: 1.25rem; }
+}
+
+/* Background video: invisible until frames are playing, so the poster shows first. */
+.hero-video {
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out-expo);
+}
+.hero-video.is-shown {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-video {
+    transition: none;
+  }
+}
+
+/* Bengali has no capitals, and added letter-spacing pulls conjuncts and vowel signs apart.
+   Any uppercase or widely tracked label (written for Latin) is set naturally in `bn`. */
+html[data-tenant][lang="bn"] :is(.uppercase, [class*="tracking-wide"]) {
+  text-transform: none;
+  letter-spacing: normal !important;
+}
+
+/* Dark mode: product/category photos (often shot on white or cream) keep their
+   colour but stop glowing like light panels on the dark page. */
+html.dark .media-dim {
+  filter: brightness(0.86) saturate(0.95);
 }

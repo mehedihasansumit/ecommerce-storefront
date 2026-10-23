@@ -1,6 +1,10 @@
 import { getTenant } from "@/shared/lib/tenant";
 import { ProductService } from "@/features/products/service";
 import { CategoryService } from "@/features/categories/service";
+import {
+  getStoreCategories,
+  getTopLevelCategoriesWithProducts,
+} from "@/features/categories/storefront";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { SortDropdown } from "@/features/products/components/SortDropdown";
 import { ActiveFilters } from "@/features/products/components/ActiveFilters";
@@ -8,10 +12,11 @@ import { createStoreMetadata } from "@/shared/lib/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
-import { getTranslations, getLocale } from "next-intl/server";
+import { getTranslations, getLocale, getFormatter } from "next-intl/server";
 import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { SearchFormWithTracking } from "@/features/products/components/SearchFormWithTracking";
-import { t as tl } from "@/shared/lib/i18n";
+import { formatNumber, t as tl } from "@/shared/lib/i18n";
+import { ScrollCurrentIntoView } from "@/features/categories/components/ScrollCurrentIntoView";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -38,6 +43,7 @@ export default async function ProductsPage({
   const tenant = await getTenant();
   const t = await getTranslations("products");
   const locale = await getLocale();
+  const format = await getFormatter();
   if (!tenant) return null;
 
   const params = await searchParams;
@@ -49,11 +55,13 @@ export default async function ProductsPage({
 
   let categoryId: string | undefined;
   let categoryName: string | undefined;
+  let categoryParentId: string | null = null;
   if (categorySlug) {
     const category = await CategoryService.getBySlug(tenant._id, categorySlug);
     if (category) {
       categoryId = category._id;
       categoryName = tl(category.name, locale);
+      categoryParentId = category.parentId;
     }
   }
 
@@ -66,18 +74,24 @@ export default async function ProductsPage({
       sort,
       order,
     }),
-    CategoryService.getByStore(tenant._id),
+    getStoreCategories(tenant._id),
     // Get the true store-wide total regardless of active filters
     ProductService.getByStore(tenant._id, { page: 1, limit: 1 }).then((r) => r.total),
   ]);
 
-  // Fetch product counts per category for the sidebar
-  const categoryCounts = categories.length > 0
-    ? await ProductService.getCountsByCategoryIds(
-        tenant._id,
-        categories.map((c) => c._id)
-      )
-    : {};
+  // Product counts per category for the sidebar, and the top-level categories
+  // with active products for the phone/tablet chip row (same set as the home tiles).
+  const [categoryCounts, chipCategories] = categories.length > 0
+    ? await Promise.all([
+        ProductService.getCountsByCategoryIds(
+          tenant._id,
+          categories.map((c) => c._id)
+        ),
+        getTopLevelCategoriesWithProducts(tenant._id),
+      ])
+    : [{} as Record<string, number>, []];
+  // A sub-category highlights its top-level parent chip.
+  const activeChipId = categoryParentId ?? categoryId;
 
   const buildUrl = (p: number) => {
     const parts = [`/products?page=${p}`];
@@ -103,29 +117,83 @@ export default async function ProductsPage({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
       {/* Page Header */}
-      <div className="mb-8">
+      <div className="mb-4 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-1">
           {categoryName
             ? categoryName
             : t("allProducts")}
         </h1>
         <p className="text-sm text-text-secondary">
-          {result.total}{" "}
-          {result.total === 1
-            ? (t("productsLabel") || "product")
-            : (t("productsLabel") || "products")}
+          {t("countLabel", { count: result.total })}
           {search && (
-            <> for &ldquo;<span className="text-[var(--color-text)] font-medium">{search}</span>&rdquo;</>
+            <> · {t("searchResults")} &ldquo;<span className="text-[var(--color-text)] font-medium">{search}</span>&rdquo;</>
           )}
         </p>
       </div>
 
+      {/* Phones/tablets: one horizontally scrollable chip row of the top-level
+          categories (same set and order as the home tiles), then a compact search,
+          so the first products still land on the first screen at 390px. Desktop
+          uses the sidebar below. */}
+      {categories.length > 0 && (
+        <div className="lg:hidden mb-5 space-y-3">
+          {chipCategories.length > 0 && (
+            <nav aria-label={t("categories")}>
+              <ul
+                id="products-category-chips"
+                className="-mx-4 px-4 sm:-mx-6 sm:px-6 flex gap-2 overflow-x-auto overscroll-x-contain snap-x scroll-px-4 sm:scroll-px-6 no-scrollbar py-0.5"
+              >
+                {[{ key: "all", href: "/products", label: t("all"), active: !categorySlug },
+                  ...chipCategories.map(({ category: cat }) => ({
+                    key: cat._id,
+                    href: `/products?category=${cat.slug}`,
+                    label: tl(cat.name, locale),
+                    active: activeChipId === cat._id,
+                  })),
+                ].map((chip) => (
+                  <li key={chip.key} className="shrink-0 snap-start">
+                    <Link
+                      href={chip.href}
+                      aria-current={chip.active ? "page" : undefined}
+                      className={`focus-ring inline-flex min-h-10 items-center whitespace-nowrap rounded-full border px-4 text-sm transition-[color,background-color,transform] duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 ${
+                        chip.active
+                          ? "font-semibold"
+                          : "border-border-subtle text-text-secondary hover:bg-surface hover:text-[var(--color-text)]"
+                      }`}
+                      style={
+                        chip.active
+                          ? {
+                              backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                              borderColor: "color-mix(in srgb, var(--color-primary) 35%, transparent)",
+                              color: "var(--color-link)",
+                            }
+                          : undefined
+                      }
+                    >
+                      {chip.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <ScrollCurrentIntoView
+                targetId="products-category-chips"
+                activeKey={activeChipId ?? "all"}
+              />
+            </nav>
+          )}
+          <SearchFormWithTracking
+            defaultValue={search || ""}
+            placeholder={t("searchPlaceholder")}
+          />
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-10">
-        {/* Sidebar - Categories */}
+        {/* Sidebar - Categories (desktop) */}
         {categories.length > 0 && (
-          <aside className="w-full lg:w-60 shrink-0">
+          <aside className="hidden lg:block w-60 shrink-0">
             <div
               className="lg:sticky lg:top-24 p-5 bg-bg shadow-[var(--shadow-xs)] border border-border-subtle"
               style={{ borderRadius: "var(--border-radius)" }}
@@ -140,7 +208,7 @@ export default async function ProductsPage({
               {/* Search input */}
               <SearchFormWithTracking
                 defaultValue={search || ""}
-                placeholder={t("searchPlaceholder") || "Search..."}
+                placeholder={t("searchPlaceholder")}
               />
 
               <ul className="space-y-0.5">
@@ -150,13 +218,13 @@ export default async function ProductsPage({
                     className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
                       !categorySlug
                         ? "font-semibold"
-                        : "text-text-secondary hover:bg-surface dark:hover:bg-gray-700/50 hover:text-[var(--color-text)]"
+                        : "text-text-secondary hover:bg-surface hover:text-[var(--color-text)]"
                     }`}
                     style={
                       !categorySlug
                         ? {
                             backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                            color: "var(--color-primary)",
+                            color: "var(--color-link)",
                             borderRadius: "var(--border-radius)",
                           }
                         : { borderRadius: "var(--border-radius)" }
@@ -177,13 +245,13 @@ export default async function ProductsPage({
                         className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
                           categorySlug === cat.slug
                             ? "font-semibold"
-                            : "text-text-secondary hover:bg-surface dark:hover:bg-gray-700/50 hover:text-[var(--color-text)]"
+                            : "text-text-secondary hover:bg-surface hover:text-[var(--color-text)]"
                         }`}
                         style={
                           categorySlug === cat.slug
                             ? {
                                 backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                                color: "var(--color-primary)",
+                                color: "var(--color-link)",
                                 borderRadius: "var(--border-radius)",
                               }
                             : { borderRadius: "var(--border-radius)" }
@@ -191,7 +259,7 @@ export default async function ProductsPage({
                       >
                         <span>{tl(cat.name, locale)}</span>
                         {count > 0 && (
-                          <span className="text-xs text-text-tertiary tabular-nums">{count}</span>
+                          <span className="text-xs text-text-tertiary tabular-nums">{formatNumber(count, locale)}</span>
                         )}
                       </Link>
                     </li>
@@ -207,12 +275,12 @@ export default async function ProductsPage({
           {/* Results bar */}
           <div className="flex flex-wrap items-center justify-between mb-4 gap-2 sm:gap-4">
             <p className="text-xs text-text-tertiary shrink-0">
-              {t("showing") || "Showing"}{" "}
+              {t("showing")}{" "}
               <span className="font-medium text-[var(--color-text)]">
-                {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, result.total)}
+                {format.number((page - 1) * ITEMS_PER_PAGE + 1)}–{format.number(Math.min(page * ITEMS_PER_PAGE, result.total))}
               </span>{" "}
-              {t("of") || "of"}{" "}
-              <span className="font-medium text-[var(--color-text)]">{result.total}</span>
+              {t("of")}{" "}
+              <span className="font-medium text-[var(--color-text)]">{format.number(result.total)}</span>
             </p>
             <SortDropdown currentSort={sort} currentOrder={order} />
           </div>
@@ -232,7 +300,7 @@ export default async function ProductsPage({
               {page > 1 && (
                 <Link
                   href={buildUrl(page - 1)}
-                  className="flex items-center gap-1 px-3 py-2 text-sm border border-border-subtle rounded-lg hover:bg-surface dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm border border-border-subtle rounded-lg hover:bg-surface transition-colors"
                   aria-label="Previous page"
                 >
                   <ChevronLeft size={16} />
@@ -251,7 +319,7 @@ export default async function ProductsPage({
                     className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all ${
                       p === page
                         ? "text-white shadow-sm"
-                        : "border border-border-subtle hover:bg-surface dark:hover:bg-gray-800 text-text-secondary"
+                        : "border border-border-subtle hover:bg-surface text-text-secondary"
                     }`}
                     style={
                       p === page
@@ -260,7 +328,7 @@ export default async function ProductsPage({
                     }
                     aria-current={p === page ? "page" : undefined}
                   >
-                    {p}
+                    {format.number(p)}
                   </Link>
                 )
               )}
@@ -268,7 +336,7 @@ export default async function ProductsPage({
               {page < result.totalPages && (
                 <Link
                   href={buildUrl(page + 1)}
-                  className="flex items-center gap-1 px-3 py-2 text-sm border border-border-subtle rounded-lg hover:bg-surface dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm border border-border-subtle rounded-lg hover:bg-surface transition-colors"
                   aria-label="Next page"
                 >
                   <ChevronRight size={16} />

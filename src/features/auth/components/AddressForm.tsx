@@ -91,7 +91,7 @@ export function AddressForm({
       {/* Street */}
       <div>
         <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-          {t("street")} <span className="text-red-500">*</span>
+          {t("street")} <span className="text-error">*</span>
         </label>
         <input
           type="text"
@@ -101,7 +101,7 @@ export function AddressForm({
           className={inputClass("street")}
         />
         {fieldErrors.street && (
-          <p className="mt-1 text-xs text-red-500">{fieldErrors.street}</p>
+          <p className="mt-1 text-xs text-error">{fieldErrors.street}</p>
         )}
       </div>
 

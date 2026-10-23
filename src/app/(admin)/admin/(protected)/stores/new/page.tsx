@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { STORE_FONTS } from "@/shared/lib/fonts";
 import {
   ChevronLeft,
   Palette,
@@ -346,11 +347,9 @@ export default function NewStorePage() {
                   }
                   disabled={loading}
                 >
-                  <option>Inter</option>
-                  <option>Poppins</option>
-                  <option>Playfair Display</option>
-                  <option>Roboto</option>
-                  <option>Open Sans</option>
+                  {STORE_FONTS.map((f) => (
+                    <option key={f}>{f}</option>
+                  ))}
                 </Select>
               </Field>
 

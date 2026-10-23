@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Search, Package, ChevronRight } from "lucide-react";
-import { Alert, Button, Card, Field, Input, PageHeader } from "@/shared/components/ui";
+import { Alert, Button, Card, Field, Input, PageHeader, formatPrice } from "@/shared/components/ui";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 
 type TrackResult = {
   orderId: string;
@@ -19,6 +20,9 @@ type TrackResult = {
 export default function TrackOrderPage() {
   const t = useTranslations("orderTrack");
   const tDetail = useTranslations("orderDetail");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  const currency = useStoreCurrency();
   const router = useRouter();
   const [orderNumber, setOrderNumber] = useState("");
   const [phone, setPhone] = useState("");
@@ -92,35 +96,25 @@ export default function TrackOrderPage() {
             />
           </Field>
 
-          <div className="flex items-center gap-3 text-[11px] uppercase tracking-wider text-text-tertiary">
+          <div className="flex items-center gap-3 text-[11px] uppercase tracking-wider text-text-secondary">
             <span className="flex-1 h-px bg-border-subtle" />
             <span>{t("or")}</span>
             <span className="flex-1 h-px bg-border-subtle" />
           </div>
 
           <Field label={t("phoneLabel")} hint={t("phoneHint")}>
-            <div
-              className={`flex items-center border rounded-lg overflow-hidden transition-colors ${
-                error
-                  ? "border-red-400"
-                  : "border-gray-300 focus-within:border-[var(--color-primary)] dark:border-gray-600"
-              }`}
-            >
-              <span className="px-3 py-2 bg-gray-50 dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-300 border-r border-gray-300 dark:border-gray-600 select-none">
-                +88
-              </span>
-              <input
-                type="tel"
-                inputMode="numeric"
-                value={phone}
-                onChange={(e) =>
-                  setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))
-                }
-                placeholder="01XXXXXXXXX"
-                className="flex-1 px-3 py-2 text-sm bg-white dark:bg-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none"
-                autoComplete="tel"
-              />
-            </div>
+            <Input
+              type="tel"
+              inputMode="numeric"
+              prefix="+88"
+              invalid={Boolean(error)}
+              value={phone}
+              onChange={(e) =>
+                setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))
+              }
+              placeholder={tc("phonePlaceholder")}
+              autoComplete="tel-national"
+            />
           </Field>
 
           <Button
@@ -171,8 +165,8 @@ export default function TrackOrderPage() {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
-                  {" · ৳"}
-                  {o.total.toLocaleString()}
+                  {" · "}
+                  {formatPrice(o.total, currency, locale)}
                 </p>
               </div>
               <span

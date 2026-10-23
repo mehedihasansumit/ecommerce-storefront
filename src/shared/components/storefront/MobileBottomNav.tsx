@@ -16,11 +16,13 @@ import {
   ChevronRight,
   Truck,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCart } from "@/shared/context/CartContext";
+import { formatNumber } from "@/shared/lib/i18n";
 
 export function MobileBottomNav() {
   const t = useTranslations("header");
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
   const { itemCount } = useCart();
@@ -47,11 +49,14 @@ export function MobileBottomNav() {
     }
   }, [searchOpen]);
 
-  useEffect(() => {
+  // Close sheets on navigation (render-phase reset instead of an effect cascade).
+  const [sheetPath, setSheetPath] = useState(pathname);
+  if (sheetPath !== pathname) {
+    setSheetPath(pathname);
     setSearchOpen(false);
     setSearchQuery("");
     setAccountSheetOpen(false);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -111,7 +116,7 @@ export function MobileBottomNav() {
     {
       id: "search",
       icon: Search,
-      label: "Search",
+      label: t("search"),
       href: null,
       isActive: searchOpen,
     },
@@ -134,7 +139,7 @@ export function MobileBottomNav() {
       : {
           id: "track",
           icon: Truck,
-          label: t("trackOrder"),
+          label: t("trackShort"),
           href: "/orders/track",
           isActive: pathname.startsWith("/orders/track"),
         },
@@ -143,7 +148,7 @@ export function MobileBottomNav() {
   const accountMenuItems = [
     { href: "/account",           icon: User,    label: t("myAccount") },
     { href: "/orders",            icon: Package, label: t("myOrders")  },
-    { href: "/orders/track",      icon: Search,  label: t("trackOrder") },
+    { href: "/orders/track",      icon: Truck,   label: t("trackOrder") },
     { href: "/account/addresses", icon: MapPin,  label: t("addresses") },
   ];
 
@@ -154,37 +159,39 @@ export function MobileBottomNav() {
         <div
           className="fixed inset-x-0 z-[49] animate-slide-down md:hidden"
           style={{
-            bottom: "56px",
+            bottom: "calc(56px + env(safe-area-inset-bottom))",
             backgroundColor: "var(--color-header-bg)",
             color: "var(--color-header-text)",
-            borderTop: "1px solid rgba(255,255,255,0.12)",
+            borderTop: "1px solid color-mix(in srgb, currentColor 18%, transparent)",
           }}
         >
           <form onSubmit={handleSearch} className="flex items-center gap-2 px-4 py-3">
-            <Search size={16} className="shrink-0 opacity-50" />
+            <Search size={16} aria-hidden className="shrink-0 opacity-70" />
             <input
               ref={searchInputRef}
-              type="text"
+              type="search"
+              enterKeyHint="search"
+              aria-label={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
-              className="flex-1 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-sm text-inherit placeholder:text-white/40 focus:outline-none focus:bg-white/15 focus:border-white/30 transition-all"
+              className="flex-1 min-h-11 bg-current/10 border border-current/40 rounded-xl px-3 py-2 text-base text-inherit placeholder:text-current/70 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-header-text)] focus:bg-current/15 transition-colors"
             />
             {searchQuery ? (
               <button
                 type="submit"
-                className="text-xs font-semibold px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors shrink-0"
+                className="min-h-11 text-sm font-semibold px-4 rounded-xl bg-current/15 hover:bg-current/15 transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-[var(--color-header-text)]"
               >
-                Go
+                {t("searchGo")}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setSearchOpen(false)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors shrink-0"
-                aria-label="Close search"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg hover:bg-current/10 transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-[var(--color-header-text)]"
+                aria-label={t("closeSearch")}
               >
-                <X size={16} />
+                <X size={18} aria-hidden />
               </button>
             )}
           </form>
@@ -225,10 +232,10 @@ export function MobileBottomNav() {
               </div>
               <button
                 onClick={() => setAccountSheetOpen(false)}
-                className="ml-auto p-1.5 rounded-lg hover:bg-surface transition-colors shrink-0"
-                aria-label="Close"
+                className="focus-ring ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-surface transition-colors shrink-0"
+                aria-label={t("close")}
               >
-                <X size={16} className="text-text-tertiary" />
+                <X size={16} aria-hidden className="text-text-tertiary" />
               </button>
             </div>
 
@@ -259,9 +266,9 @@ export function MobileBottomNav() {
                 className="flex items-center gap-3 w-full px-5 py-3.5 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-red-50 dark:bg-red-950/30">
-                  <LogOut size={16} className="text-red-500" />
+                  <LogOut size={16} className="text-error" />
                 </div>
-                <span className="text-sm font-medium text-red-500">{t("logout")}</span>
+                <span className="text-sm font-medium text-error">{t("logout")}</span>
               </button>
             </nav>
           </div>
@@ -270,7 +277,8 @@ export function MobileBottomNav() {
 
       {/* Bottom nav bar */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 md:hidden border-t border-white/15"
+        aria-label={t("mobileNav")}
+        className="fixed inset-x-0 bottom-0 z-50 md:hidden border-t border-current/20"
         style={{
           backgroundColor: "var(--color-header-bg)",
           color: "var(--color-header-text)",
@@ -280,20 +288,29 @@ export function MobileBottomNav() {
         <div className="flex items-stretch h-14">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            // Dim only icon + label on inactive tabs — the cart badge must stay full strength.
+            const dim = tab.isActive ? 1 : 0.72; // ≥4.5:1 for 11px labels on light or dark bars
             const content = (
               <>
                 <div className="relative">
-                  <Icon size={20} />
+                  <Icon size={20} aria-hidden style={{ opacity: dim }} />
                   {tab.id === "cart" && itemCount > 0 && (
                     <span
-                      className="absolute -top-1.5 -right-2 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none"
-                      style={{ backgroundColor: "var(--color-accent)" }}
+                      className="absolute -top-2 -right-2.5 text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center leading-none ring-2"
+                      style={{
+                        backgroundColor: "var(--color-accent)",
+                        color: "var(--color-on-accent, #fff)",
+                        ["--tw-ring-color" as string]: "var(--color-header-bg)",
+                      }}
                     >
-                      {itemCount > 99 ? "99+" : itemCount}
+                      {formatNumber(Math.min(itemCount, 99), locale)}{itemCount > 99 ? "+" : ""}
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] font-medium leading-none mt-1 w-full text-center truncate px-1">
+                <span
+                  className="text-[11px] font-medium leading-none mt-1 w-full text-center truncate px-1"
+                  style={{ opacity: dim }}
+                >
                   {tab.label}
                 </span>
               </>
@@ -303,7 +320,6 @@ export function MobileBottomNav() {
               "flex flex-1 min-w-0 overflow-hidden flex-col items-center justify-center gap-0.5 py-2 transition-all duration-150";
             const style = {
               color: tab.isActive ? "var(--color-accent)" : undefined,
-              opacity: tab.isActive ? 1 : 0.55,
             };
 
             // Search tab
@@ -315,7 +331,8 @@ export function MobileBottomNav() {
                   className={baseClass}
                   style={style}
                   onClick={() => setSearchOpen((v) => !v)}
-                  aria-label="Search"
+                  aria-label={t("search")}
+                  aria-expanded={searchOpen}
                 >
                   {content}
                 </button>
@@ -331,7 +348,8 @@ export function MobileBottomNav() {
                   className={baseClass}
                   style={style}
                   onClick={() => setAccountSheetOpen((v) => !v)}
-                  aria-label="Account"
+                  aria-label={t("account")}
+                  aria-expanded={accountSheetOpen}
                 >
                   {content}
                 </button>
@@ -340,7 +358,13 @@ export function MobileBottomNav() {
 
             // Regular nav link
             return (
-              <Link key={tab.id} href={tab.href!} className={baseClass} style={style}>
+              <Link
+                key={tab.id}
+                href={tab.href!}
+                className={baseClass}
+                style={style}
+                aria-current={tab.isActive ? "page" : undefined}
+              >
                 {content}
               </Link>
             );

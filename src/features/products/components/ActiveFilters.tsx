@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface ActiveFiltersProps {
   search?: string;
@@ -10,6 +11,7 @@ interface ActiveFiltersProps {
 }
 
 export function ActiveFilters({ search, categorySlug, categoryName }: ActiveFiltersProps) {
+  const t = useTranslations("products");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -24,11 +26,13 @@ export function ActiveFilters({ search, categorySlug, categoryName }: ActiveFilt
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-5">
-      <span className="text-xs text-text-tertiary font-medium">Active filters:</span>
+      <span className="text-xs text-text-tertiary font-medium">{t("activeFilters")}</span>
 
       {categorySlug && (
         <button
+          type="button"
           onClick={() => removeFilter("category")}
+          aria-label={t("removeFilter", { name: categoryName || categorySlug })}
           className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border transition-colors hover:bg-red-50 hover:border-red-200 hover:text-red-600"
           style={{
             backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
@@ -37,13 +41,15 @@ export function ActiveFilters({ search, categorySlug, categoryName }: ActiveFilt
           }}
         >
           {categoryName || categorySlug}
-          <X size={11} />
+          <X size={11} aria-hidden />
         </button>
       )}
 
       {search && (
         <button
+          type="button"
           onClick={() => removeFilter("search")}
+          aria-label={t("removeFilter", { name: `“${search}”` })}
           className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border transition-colors hover:bg-red-50 hover:border-red-200 hover:text-red-600"
           style={{
             backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
@@ -52,7 +58,7 @@ export function ActiveFilters({ search, categorySlug, categoryName }: ActiveFilt
           }}
         >
           &ldquo;{search}&rdquo;
-          <X size={11} />
+          <X size={11} aria-hidden />
         </button>
       )}
     </div>

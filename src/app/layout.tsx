@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { getTenant } from "@/shared/lib/tenant";
+import { getTenant, isAdminSurface } from "@/shared/lib/tenant";
 import { TenantProvider, ThemeProvider } from "@/shared/context";
 import { DEFAULT_THEME } from "@/shared/lib/constants";
+import { fontStylesheetUrls } from "@/shared/lib/fonts";
 import { Toaster } from "react-hot-toast";
 import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
@@ -10,6 +11,7 @@ import {
   resolveThemeVars,
   buildDarkCss,
 } from "@/features/stores/theme-tokens";
+import { resolveTheme } from "@/features/stores/presets";
 
 function localizedValue(
   value: Record<string, string> | string | undefined,
@@ -21,10 +23,17 @@ function localizedValue(
   return value[locale] || value["en"] || Object.values(value)[0] || fallback;
 }
 
+/** Store whose theme styles this request: none on /admin, which stays brand-neutral. */
+async function getThemedTenant() {
+  if (await isAdminSurface()) return null;
+  return getTenant();
+}
+
 export async function generateViewport(): Promise<Viewport> {
-  const tenant = await getTenant();
-  const light = tenant?.theme?.primaryColor ?? "#3B82F6";
-  const dark = tenant?.theme?.dark?.primaryColor ?? light;
+  const tenant = await getThemedTenant();
+  const theme = tenant ? resolveTheme(tenant.theme) : null;
+  const light = theme?.primaryColor ?? "#3B82F6";
+  const dark = theme?.dark?.primaryColor ?? light;
   return {
     themeColor: [
       { media: "(prefers-color-scheme: light)", color: light },
@@ -75,57 +84,100 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const tenant = await getTenant();
-  const theme = tenant?.theme || DEFAULT_THEME;
+  // Theme, fonts and `data-tenant` only for storefront requests: on /admin the page
+  // keeps the platform defaults even when served from a store's domain.
+  const themedTenant = (await isAdminSurface()) ? null : tenant;
+  // The Theme the storefront renders: defaults ← Theme Preset ← the store's own values.
+  const resolved = themedTenant ? resolveTheme(themedTenant.theme) : null;
+  const theme = resolved ?? DEFAULT_THEME;
+  const styles = resolved?.styles;
   const locale = await getLocale();
 
   const isBengali = locale === "bn";
   const bnFont = "Hind Siliguri";
+
+  // Display face for headings (optional, per tenant). Latin display serifs carry no
+  // Bengali glyphs, so in `bn` the stack falls through to Hind Siliguri per glyph:
+  // Bengali headings read in Hind, while Latin ones (store name, product names)
+  // keep the brand serif instead of switching typeface with the language.
+  const headingFont =
+    theme.headingFont && theme.headingFont !== theme.fontFamily
+      ? theme.headingFont
+      : undefined;
 
   const themeVars: Record<string, string> = {
     ...resolveThemeVars(theme, "light"),
     "--font-family": isBengali
       ? `'${bnFont}', sans-serif`
       : `'${theme.fontFamily}', sans-serif`,
+    "--font-heading": headingFont
+      ? isBengali
+        ? `'${headingFont}', '${bnFont}', serif`
+        : `'${headingFont}', '${theme.fontFamily}', serif`
+      : "var(--font-family)",
     "--border-radius": theme.borderRadius,
   };
+
+  const fontHrefs = fontStylesheetUrls(
+    isBengali ? [bnFont, headingFont] : [theme.fontFamily, headingFont]
+  );
+  const usesGoogleFonts = fontHrefs.some((h) => h.startsWith("https://fonts.googleapis.com/"));
 
   const darkCss = buildDarkCss(resolveThemeVars(theme, "dark"));
 
   const antiFlashScript = `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');})()`;
 
   return (
-    <html lang={locale} style={themeVars as React.CSSProperties}>
+    <html
+      lang={locale}
+      style={themeVars as React.CSSProperties}
+      // Storefront scope for globals.css (--ui-* primitive colours, heading font,
+      // bn typography). Absent on /admin and when no store is resolved.
+      data-tenant={themedTenant?.slug || undefined}
+      data-bg-pattern={theme.backgroundPattern ?? "grid"}
+      // x-height normalisation is tuned for the Latin serif; Bengali glyphs in the
+      // same stack would shrink with it, so `bn` opts out.
+      data-heading-font={headingFont && !isBengali ? "display" : undefined}
+      // Style Switches (storefront only): CSS-only differences key off these;
+      // structural ones are switched in components from the resolved theme.
+      data-hero-style={styles?.heroStyle}
+      data-category-style={styles?.categoryStyle}
+      data-footer-style={styles?.footerStyle}
+      data-newsletter-style={styles?.newsletterStyle}
+      data-card-style={styles?.productCardStyle}
+      suppressHydrationWarning
+    >
       <head>
         <style dangerouslySetInnerHTML={{ __html: darkCss }} />
         <script dangerouslySetInnerHTML={{ __html: antiFlashScript }} />
-        {isBengali ? (
-          <link
-            href={`https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap`}
-            rel="stylesheet"
-          />
-        ) : (
-          theme.fontFamily && theme.fontFamily !== "Inter" && (
-            <link
-              href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(theme.fontFamily)}:wght@400;500;600;700&display=swap`}
-              rel="stylesheet"
-            />
-          )
+        {usesGoogleFonts && (
+          <>
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          </>
         )}
+        {fontHrefs.map((href) => (
+          <link key={href} href={href} rel="stylesheet" />
+        ))}
       </head>
       <body className="min-h-screen flex flex-col antialiased">
         <NextIntlClientProvider>
-          <TenantProvider tenant={tenant}>
+          {/* Storefront components read the resolved theme (preset applied); the
+              admin surface keeps the raw store record. */}
+          <TenantProvider tenant={themedTenant && resolved ? { ...themedTenant, theme: resolved } : tenant}>
             <ThemeProvider>
               {children}
               <Toaster position="top-right" />
             </ThemeProvider>
           </TenantProvider>
         </NextIntlClientProvider>
+        {/* Reload on controllerchange only when an older worker was replaced: on a first
+            visit clients.claim() also fires it, and reloading then just costs a page load. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){if(!('serviceWorker' in navigator))return;
-var reloading=false;
-navigator.serviceWorker.addEventListener('controllerchange',function(){if(reloading)return;reloading=true;window.location.reload();});
+var reloading=false;var hadController=!!navigator.serviceWorker.controller;
+navigator.serviceWorker.addEventListener('controllerchange',function(){if(reloading||!hadController)return;reloading=true;window.location.reload();});
 window.addEventListener('load',function(){
   navigator.serviceWorker.register('/sw.js',{scope:'/'}).then(function(reg){
     function track(sw){sw.addEventListener('statechange',function(){if(sw.state==='installed'&&navigator.serviceWorker.controller){sw.postMessage('SKIP_WAITING');}});}

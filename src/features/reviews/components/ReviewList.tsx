@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { ReviewStars } from "./ReviewStars";
 import { Avatar } from "@/shared/components/ui";
 import { imageGuardProps } from "@/shared/lib/imageGuard";
@@ -13,23 +14,25 @@ interface ReviewListProps {
   initialTotal: number;
 }
 
-function timeAgo(date: Date | string): string {
-  const now = Date.now();
-  const diff = now - new Date(date).getTime();
+function timeAgo(date: Date | string, locale: string): string {
+  const diff = Date.now() - new Date(date).getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   const months = Math.floor(days / 30);
   const years = Math.floor(months / 12);
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
-  if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
-  if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  return "Just now";
+  if (years > 0) return rtf.format(-years, "year");
+  if (months > 0) return rtf.format(-months, "month");
+  if (days > 0) return rtf.format(-days, "day");
+  if (hours > 0) return rtf.format(-hours, "hour");
+  return rtf.format(0, "minute");
 }
 
 export function ReviewList({ productId, initialReviews, initialTotal }: ReviewListProps) {
+  const tr = useTranslations("reviews");
+  const locale = useLocale();
   const [reviews, setReviews] = useState<IReview[]>(initialReviews);
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(1);
@@ -65,7 +68,7 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
   if (total === 0) {
     return (
       <p className="text-sm text-text-secondary py-4">
-        No reviews yet. Be the first to review this product!
+        {tr("empty")}
       </p>
     );
   }
@@ -101,10 +104,10 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
                         onClick={() => setLightbox(url)}
                         className="w-16 h-16 rounded-lg overflow-hidden border border-border-subtle focus:outline-none focus-visible:ring-2"
                         style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
-                        aria-label="View review photo"
+                        aria-label={tr("viewPhoto")}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt="Review photo" loading="lazy" className="w-full h-full object-cover" {...imageGuardProps} />
+                        <img src={url} alt={tr("photo")} loading="lazy" className="w-full h-full object-cover" {...imageGuardProps} />
                       </button>
                     ))}
                   </div>
@@ -115,12 +118,12 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
               <Avatar
                 src={review.reviewerAvatarUrl}
                 position={review.reviewerAvatarPosition}
-                name={review.reviewerName || "Customer"}
+                name={review.reviewerName || tr("customer")}
                 size="sm"
               />
-              <span className="font-medium text-text-secondary">{review.reviewerName || "Customer"}</span>
+              <span className="font-medium text-text-secondary">{review.reviewerName || tr("customer")}</span>
               <span>·</span>
-              <span>{timeAgo(review.createdAt)}</span>
+              <span>{timeAgo(review.createdAt, locale)}</span>
             </div>
           </div>
         ))}
@@ -130,10 +133,10 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
         <button
           onClick={loadMore}
           disabled={loading}
-          className="text-sm font-medium disabled:opacity-60 transition-opacity"
-          style={{ color: "var(--color-primary)" }}
+          className="focus-ring inline-flex min-h-10 items-center text-sm font-medium disabled:opacity-60 transition-opacity"
+          style={{ color: "var(--color-link)" }}
         >
-          {loading ? "Loading…" : `Load more reviews (${total - reviews.length} remaining)`}
+          {loading ? tr("loading") : tr("loadMore", { count: total - reviews.length })}
         </button>
       )}
 
@@ -147,7 +150,7 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
           <button
             type="button"
             onClick={() => setLightbox(null)}
-            aria-label="Close"
+            aria-label={tr("close")}
             className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
           >
             <X className="w-5 h-5" />
@@ -155,7 +158,7 @@ export function ReviewList({ productId, initialReviews, initialTotal }: ReviewLi
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lightbox}
-            alt="Review photo"
+            alt={tr("photo")}
             onClick={(e) => e.stopPropagation()}
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
             {...imageGuardProps}

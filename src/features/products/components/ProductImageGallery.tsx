@@ -191,7 +191,7 @@ export function ProductImageGallery({
                   fill
                   priority={i === 0}
                   sizes="100vw"
-                  className="object-cover"
+                  className="media-dim object-cover"
                 />
               </button>
             ))}
@@ -237,7 +237,7 @@ export function ProductImageGallery({
               priority
               fullRes
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              className="media-dim object-cover"
               style={{
                 transformOrigin: `${cursorPos.x}% ${cursorPos.y}%`,
                 transform: isHovering ? "scale(2.5)" : "scale(1)",
@@ -254,15 +254,15 @@ export function ProductImageGallery({
           <button
             onClick={(e) => { e.stopPropagation(); openLightbox(); }}
             className="absolute top-3 right-3 bg-black/40 hover:bg-black/70 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm"
-            aria-label="Open fullscreen view"
+            aria-label={tr("openFullscreen")}
           >
             <Maximize2 size={16} />
           </button>
 
           {/* Bottom label — visible when not hovering */}
           <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 group-hover:opacity-0 transition-opacity duration-200 pointer-events-none select-none">
-            <ZoomIn size={12} />
-            Hover to zoom · Click to expand
+            <ZoomIn size={12} aria-hidden />
+            {tr("zoomHint")}
           </div>
         </div>
 
@@ -290,7 +290,7 @@ export function ProductImageGallery({
                   alt={img.alt || productName}
                   fill
                   sizes="120px"
-                  className="object-cover"
+                  className="media-dim object-cover"
                 />
               </button>
             ))}
@@ -322,14 +322,14 @@ export function ProductImageGallery({
             <button
               onClick={() => setLbZoom(p => Math.min(5, p + 0.5))}
               className="bg-white/10 hover:bg-white/25 text-white p-2 rounded-lg transition-colors"
-              aria-label="Zoom in"
+              aria-label={tr("zoomIn")}
             >
               <ZoomIn size={18} />
             </button>
             <button
               onClick={() => setLbZoom(p => Math.max(1, p - 0.5))}
               className="bg-white/10 hover:bg-white/25 text-white p-2 rounded-lg transition-colors"
-              aria-label="Zoom out"
+              aria-label={tr("zoomOut")}
             >
               <ZoomOut size={18} />
             </button>
@@ -342,7 +342,7 @@ export function ProductImageGallery({
             <button
               onClick={closeLightbox}
               className="bg-white/10 hover:bg-white/25 text-white p-2 rounded-lg transition-colors"
-              aria-label="Close"
+              aria-label={tr("close")}
             >
               <X size={18} />
             </button>
@@ -355,7 +355,7 @@ export function ProductImageGallery({
                 onClick={(e) => { e.stopPropagation(); changeImage(Math.max(0, selectedIndex - 1)); }}
                 disabled={selectedIndex === 0}
                 className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white p-3 rounded-full transition-colors disabled:opacity-20 z-10"
-                aria-label="Previous image"
+                aria-label={tr("previousImage")}
               >
                 <ChevronLeft size={24} />
               </button>
@@ -363,7 +363,7 @@ export function ProductImageGallery({
                 onClick={(e) => { e.stopPropagation(); changeImage(Math.min(images.length - 1, selectedIndex + 1)); }}
                 disabled={selectedIndex === images.length - 1}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white p-3 rounded-full transition-colors disabled:opacity-20 z-10"
-                aria-label="Next image"
+                aria-label={tr("nextImage")}
               >
                 <ChevronRight size={24} />
               </button>
@@ -438,11 +438,11 @@ export function ProductImageGallery({
               </div>
             )}
             <p className="text-white/30 text-xs flex gap-4 select-none">
-              <span>Scroll to zoom</span>
-              <span>Double-click toggle</span>
-              <span>Drag to pan</span>
-              {images.length > 1 && <span>← → navigate</span>}
-              <span>Esc close</span>
+              <span>{tr("zoomHelpScroll")}</span>
+              <span>{tr("zoomHelpDoubleClick")}</span>
+              <span>{tr("zoomHelpDrag")}</span>
+              {images.length > 1 && <span>{tr("zoomHelpArrows")}</span>}
+              <span>{tr("zoomHelpEsc")}</span>
             </p>
           </div>
         </div>

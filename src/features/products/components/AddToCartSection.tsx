@@ -7,6 +7,8 @@ import type { IProductOption } from "../types";
 import type { ProductSelection } from "../hooks/useProductSelection";
 import { Button, formatPrice } from "@/shared/components/ui";
 import { VariantOptions } from "./VariantOptions";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { formatNumber } from "@/shared/lib/i18n";
 
 /** Anchor id of the option chips, so the sticky bar can scroll the shopper back to them. */
 export const PRODUCT_OPTIONS_ID = "product-options";
@@ -28,6 +30,7 @@ interface AddToCartSectionProps {
 export function AddToCartSection({ options, selection, beforeCta, ctaRef }: AddToCartSectionProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
+  const currency = useStoreCurrency();
   const {
     selectedOptions,
     setOption,
@@ -72,7 +75,7 @@ export function AddToCartSection({ options, selection, beforeCta, ctaRef }: AddT
             aria-live="polite"
             className="px-5 py-3 font-semibold text-sm min-w-[3rem] text-center border-x border-border-subtle"
           >
-            {quantity}
+            {formatNumber(quantity, locale)}
           </span>
           <button
             type="button"
@@ -96,7 +99,7 @@ export function AddToCartSection({ options, selection, beforeCta, ctaRef }: AddT
         >
           {outOfStock
             ? tr("outOfStock")
-            : `${tr("addToCart")} · ${formatPrice(displayPrice, "BDT", locale)}`}
+            : `${tr("addToCart")} · ${formatPrice(displayPrice, currency, locale)}`}
         </Button>
       </div>
     </div>

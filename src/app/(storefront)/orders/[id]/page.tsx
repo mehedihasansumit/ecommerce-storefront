@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import {
   CheckCircle,
@@ -22,7 +22,10 @@ import {
   Phone,
   RotateCcw,
 } from "lucide-react";
+import { Skeleton, SkeletonRegion, SkeletonText, formatPrice } from "@/shared/components/ui";
 import type { IOrder, IStatusHistoryEntry, RefundRequestStatus } from "@/features/orders/types";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 
 function CopyField({
   label,
@@ -338,6 +341,8 @@ function RefundRequestPanel({
   const [error, setError] = useState("");
 
   const refund = order.refundRequest;
+  const locale = useLocale();
+  const currency = useStoreCurrency();
 
   async function submitRefund() {
     setLoading(true);
@@ -409,7 +414,7 @@ function RefundRequestPanel({
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">
-              Reason for refund <span className="text-red-500">*</span>
+              Reason for refund <span className="text-error">*</span>
             </label>
             <textarea
               value={reason}
@@ -456,7 +461,7 @@ function RefundRequestPanel({
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Refund amount</span>
               <span className="font-semibold" style={{ color: "var(--color-primary)" }}>
-                ৳{refund.refundAmount.toLocaleString()}
+                {formatPrice(refund.refundAmount, currency, locale)}
               </span>
             </div>
           )}
@@ -501,6 +506,9 @@ export default function OrderDetailPage({
   searchParams: Promise<{ confirmed?: string }>;
 }) {
   const t = useTranslations("orderDetail");
+  const optionLabel = useOptionLabels();
+  const locale = useLocale();
+  const currency = useStoreCurrency();
   const [orderId, setOrderId] = useState<string | null>(null);
   const [order, setOrder] = useState<IOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -531,13 +539,7 @@ export default function OrderDetailPage({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, searchParams, t]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64 py-20">
-        <Loader2 size={32} className="animate-spin text-text-tertiary" />
-      </div>
-    );
-  }
+  if (loading) return <OrderDetailSkeleton />;
 
   if (error || !order) {
     return (
@@ -723,7 +725,7 @@ export default function OrderDetailPage({
                       key={k}
                       className="inline-block text-[11px] text-text-secondary bg-surface rounded-md px-2 py-0.5 mr-1 mt-1"
                     >
-                      {k}: {v}
+                      {optionLabel.name(k)}: {optionLabel.value(v)}
                     </span>
                   ))}
                   <p className="text-xs text-text-tertiary mt-1">
@@ -740,7 +742,7 @@ export default function OrderDetailPage({
                   )}
                 </div>
                 <p className="font-bold text-sm text-[var(--color-text)] shrink-0">
-                  ৳{item.totalPrice.toLocaleString()}
+                  {formatPrice(item.totalPrice, currency, locale)}
                 </p>
               </div>
             ))}
@@ -750,14 +752,14 @@ export default function OrderDetailPage({
           <div className="mt-5 pt-4 border-t border-border-subtle space-y-2">
             <div className="flex justify-between text-sm text-text-secondary">
               <span>{t("subtotal")}</span>
-              <span>৳{order.subtotal.toLocaleString()}</span>
+              <span>{formatPrice(order.subtotal, currency, locale)}</span>
             </div>
             <div className="flex justify-between text-sm text-text-secondary">
               <span>{t("shipping")}</span>
               {order.shippingCost > 0 ? (
-                <span>৳{order.shippingCost.toLocaleString()}</span>
+                <span>{formatPrice(order.shippingCost, currency, locale)}</span>
               ) : (
-                <span className="text-green-600 dark:text-green-400 font-medium">{t("shippingFree")}</span>
+                <span className="text-success font-medium">{t("shippingFree")}</span>
               )}
             </div>
             <div
@@ -765,7 +767,7 @@ export default function OrderDetailPage({
               style={{ color: "var(--color-primary)" }}
             >
               <span>{t("total")}</span>
-              <span>৳{order.total.toLocaleString()}</span>
+              <span>{formatPrice(order.total, currency, locale)}</span>
             </div>
           </div>
         </div>
@@ -851,5 +853,55 @@ export default function OrderDetailPage({
 
       </div>
     </div>
+  );
+}
+
+/** Loading state: same header, order-meta, tracking and items cards as the loaded page. */
+function OrderDetailSkeleton() {
+  const tc = useTranslations("common");
+  const card = "bg-bg rounded-2xl border border-border-subtle shadow-sm";
+  return (
+    <SkeletonRegion label={tc("loading")} className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+      <div aria-hidden>
+        <div className="flex items-center gap-3 mb-6">
+          <Skeleton radius="none" className="size-9 rounded-xl shrink-0" />
+          <div>
+            <SkeletonText className="text-xl" width="w-36" />
+            <SkeletonText className="text-xs" width="w-24" />
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className={`${card} p-5 flex items-center justify-between`}>
+            <div>
+              <SkeletonText className="text-[11px] mb-0.5" width="w-20" />
+              <SkeletonText className="text-lg" width="w-32" />
+              <SkeletonText className="text-xs mt-0.5" width="w-36" />
+            </div>
+            <Skeleton radius="full" className="h-7 w-20" />
+          </div>
+          <div className={`${card} p-5 space-y-4`}>
+            <SkeletonText className="text-sm" width="w-32" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton radius="full" className="size-8 shrink-0" />
+                <SkeletonText className="text-sm flex-1" width="w-40" />
+              </div>
+            ))}
+          </div>
+          <div className={`${card} p-5 space-y-4`}>
+            <SkeletonText className="text-sm" width="w-20" />
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <Skeleton radius="none" className="size-12 rounded-xl shrink-0" />
+                <div className="flex-1">
+                  <SkeletonText className="text-sm" width="w-3/4" />
+                  <SkeletonText className="text-xs mt-1" width="w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </SkeletonRegion>
   );
 }

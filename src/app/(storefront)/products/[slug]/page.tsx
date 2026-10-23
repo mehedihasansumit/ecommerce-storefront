@@ -77,16 +77,16 @@ export default async function ProductDetailPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6 md:py-8">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-xs text-text-tertiary mb-4 md:mb-8">
-          <Link href="/" className="hover:text-[var(--color-text)] transition-colors">
+        <nav aria-label={tr("home")} className="flex items-center gap-2 text-sm text-text-secondary mb-2 md:mb-6">
+          <Link href="/" className="focus-ring inline-flex min-h-10 items-center hover:text-[var(--color-text)] transition-colors">
             {tr("home")}
           </Link>
-          <ChevronRight size={14} className="text-text-tertiary" />
-          <Link href="/products" className="hover:text-[var(--color-text)] transition-colors">
+          <ChevronRight size={14} aria-hidden className="text-text-tertiary shrink-0" />
+          <Link href="/products" className="focus-ring inline-flex min-h-10 items-center hover:text-[var(--color-text)] transition-colors">
             {tr("products")}
           </Link>
-          <ChevronRight size={14} className="text-text-tertiary" />
-          <span className="text-[var(--color-text)] font-medium truncate max-w-48">
+          <ChevronRight size={14} aria-hidden className="text-text-tertiary shrink-0" />
+          <span aria-current="page" className="text-[var(--color-text)] font-medium truncate max-w-48 sm:max-w-none">
             {t(product.name, locale)}
           </span>
         </nav>
@@ -129,7 +129,7 @@ export default async function ProductDetailPage({
               {product.tags?.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-text-secondary text-xs font-medium hover:bg-border-subtle dark:hover:bg-gray-700 transition-colors cursor-default"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-text-secondary text-xs font-medium hover:bg-border-subtle transition-colors cursor-default"
                   style={{ borderRadius: "var(--border-radius)" }}
                 >
                   #{tag}

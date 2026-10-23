@@ -6,7 +6,17 @@ import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { t } from "@/shared/lib/i18n";
-import { StoreImage } from "@/shared/components/ui";
+import { Button, ButtonLink, StoreImage } from "@/shared/components/ui";
+import { useTenant } from "@/shared/hooks/useTenant";
+import { useStoreStyles } from "@/shared/hooks/useStoreStyles";
+import type { HeroStyle } from "@/features/stores/styles";
+import { HERO_SHELL } from "./hero-styles";
+import {
+  HeroVideo,
+  HeroVideoToggle,
+  useHeroVideoPlayback,
+  type HeroVideoPlayback,
+} from "./HeroVideo";
 
 const AUTO_ADVANCE_MS = 7000;
 const SWIPE_THRESHOLD = 50;
@@ -74,13 +84,18 @@ function RotatingLayout({
   const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const hasVideo = banners.some((b) => b.video);
+  const playback = useHeroVideoPlayback(hasVideo);
+  const { heroStyle } = useStoreStyles();
 
   // Only slides that have been shown get their <img> rendered, so off-screen
   // banners don't download on first paint. Slide 0 is active immediately.
   const [activated, setActivated] = useState<Set<number>>(() => new Set([0]));
-  useEffect(() => {
-    setActivated((s) => (s.has(current) ? s : new Set(s).add(current)));
-  }, [current]);
+  if (!activated.has(current)) setActivated(new Set(activated).add(current));
+  // Auto-advance bookkeeping lives in refs so the timer can advance without
+  // a setState-in-effect cascade.
+  const progressRef = useRef(0);
+  const nextRef = useRef<() => void>(() => {});
 
   const goTo = useCallback(
     (index: number, direction?: "next" | "prev") => {
@@ -90,6 +105,7 @@ function RotatingLayout({
       setTextStage(0);
       setCurrent(index);
       setProgress(0);
+      progressRef.current = 0;
       setTimeout(() => {
         setIsTransitioning(false);
         setTimeout(() => setTextStage(1), 100);
@@ -115,20 +131,20 @@ function RotatingLayout({
   }, []);
 
   useEffect(() => {
+    nextRef.current = next;
+  }, [next]);
+
+  useEffect(() => {
     if (banners.length <= 1 || isPaused) return;
     const interval = 50;
     const timer = setInterval(() => {
-      setProgress((p) => {
-        const n = p + (interval / AUTO_ADVANCE_MS) * 100;
-        return n >= 100 ? 100 : n;
-      });
+      const n = Math.min(100, progressRef.current + (interval / AUTO_ADVANCE_MS) * 100);
+      progressRef.current = n;
+      setProgress(n);
+      if (n >= 100) nextRef.current();
     }, interval);
     return () => clearInterval(timer);
   }, [isPaused, banners.length, current]);
-
-  useEffect(() => {
-    if (progress >= 100) next();
-  }, [progress, next]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -186,6 +202,7 @@ function RotatingLayout({
         locale={locale}
         sectionStyle={sectionStyle}
         activated={activated}
+        playback={playback}
       />
     );
   }
@@ -207,6 +224,7 @@ function RotatingLayout({
         locale={locale}
         sectionStyle={sectionStyle}
         activated={activated}
+        playback={playback}
       />
     );
   }
@@ -228,6 +246,32 @@ function RotatingLayout({
         locale={locale}
         sectionStyle={sectionStyle}
         activated={activated}
+        playback={playback}
+      />
+    );
+  }
+
+  // Slider with a video banner, or any non-base heroStyle → the styled full-bleed
+  // hero (keep in sync with usesStyledHero in hero-styles.ts).
+  if (hasVideo || heroStyle !== "cinematic") {
+    return (
+      <CinematicLayout
+        heroStyle={heroStyle}
+        banners={banners}
+        current={current}
+        next={next}
+        prev={prev}
+        progress={progress}
+        banner={banner}
+        textStage={textStage}
+        textVisible={textVisible}
+        slideDirection={slideDirection}
+        sharedHandlers={sharedHandlers}
+        shopNow={tr("shopNow")}
+        locale={locale}
+        sectionStyle={sectionStyle}
+        activated={activated}
+        playback={playback}
       />
     );
   }
@@ -366,11 +410,11 @@ function RotatingLayout({
 
       {banners.length > 1 && (
         <div className="absolute bottom-8 left-6 sm:left-8 lg:left-12 z-[4] hidden md:flex items-center gap-1">
-          <button onClick={prev} className="p-2.5 text-white/60 hover:text-white transition-colors duration-200" aria-label="Previous banner">
+          <button onClick={prev} className="p-2.5 text-white/60 hover:text-white transition-colors duration-200" aria-label={tr("previous")}>
             <ArrowLeft size={20} strokeWidth={1.5} />
           </button>
           <div className="w-px h-5 bg-white/20 mx-1" />
-          <button onClick={next} className="p-2.5 text-white/60 hover:text-white transition-colors duration-200" aria-label="Next banner">
+          <button onClick={next} className="p-2.5 text-white/60 hover:text-white transition-colors duration-200" aria-label={tr("next")}>
             <ArrowRight size={20} strokeWidth={1.5} />
           </button>
         </div>
@@ -413,6 +457,7 @@ interface LayoutProps {
   locale: string;
   sectionStyle?: React.CSSProperties;
   activated: Set<number>;
+  playback: HeroVideoPlayback;
 }
 
 // ── Split layout ──────────────────────────────────────────────────────────────
@@ -432,7 +477,9 @@ function SplitLayout({
   locale,
   sectionStyle,
   activated,
+  playback,
 }: LayoutProps) {
+  const tr = useTranslations("heroBanner");
   const showOverlay = banner.showOverlay !== false;
   return (
     <section
@@ -468,8 +515,14 @@ function SplitLayout({
                 className={`object-cover transition-transform duration-[20s] ease-out ${i === current ? "scale-110" : "scale-100"}`}
               />
             )}
+            {activated.has(i) && b.video && (
+              <HeroVideo src={b.video} playing={playback.decided && !playback.paused && i === current} />
+            )}
           </div>
         ))}
+        {banner.video && (
+          <HeroVideoToggle playback={playback} className="absolute top-4 right-4 z-[5]" />
+        )}
         {/* Gradient bleed to text side on md+ */}
         <div className="absolute inset-y-0 right-0 w-16 z-[3] hidden md:block"
           style={{ background: "linear-gradient(to right, transparent, var(--color-bg, #fff))" }} />
@@ -537,7 +590,7 @@ function SplitLayout({
         {/* Navigation dots */}
         {banners.length > 1 && (
           <div className="absolute bottom-6 left-8 md:left-12 lg:left-16 flex items-center gap-4">
-            <button onClick={prev} className="p-1.5 rounded-full border border-current opacity-40 hover:opacity-100 transition-opacity" style={{ color: "var(--color-text)" }} aria-label="Previous">
+            <button onClick={prev} className="p-1.5 rounded-full border border-current opacity-40 hover:opacity-100 transition-opacity" style={{ color: "var(--color-text)" }} aria-label={tr("previous")}>
               <ArrowLeft size={16} />
             </button>
             <div className="flex gap-1.5">
@@ -553,7 +606,7 @@ function SplitLayout({
                 />
               ))}
             </div>
-            <button onClick={next} className="p-1.5 rounded-full border border-current opacity-40 hover:opacity-100 transition-opacity" style={{ color: "var(--color-text)" }} aria-label="Next">
+            <button onClick={next} className="p-1.5 rounded-full border border-current opacity-40 hover:opacity-100 transition-opacity" style={{ color: "var(--color-text)" }} aria-label={tr("next")}>
               <ArrowRight size={16} />
             </button>
           </div>
@@ -594,7 +647,9 @@ function CenteredLayout({
   locale,
   sectionStyle,
   activated,
+  playback,
 }: LayoutProps) {
+  const tr = useTranslations("heroBanner");
   const showOverlay = banner.showOverlay !== false;
   return (
     <section
@@ -627,6 +682,9 @@ function CenteredLayout({
               sizes="100vw"
               className={`object-cover transition-transform duration-[20s] ease-out ${i === current ? "scale-110" : "scale-100"}`}
             />
+          )}
+          {activated.has(i) && b.video && (
+            <HeroVideo src={b.video} playing={playback.decided && !playback.paused && i === current} />
           )}
         </div>
       ))}
@@ -699,10 +757,14 @@ function CenteredLayout({
       </div>
       )}
 
+      {banner.video && (
+        <HeroVideoToggle playback={playback} className="absolute bottom-6 right-6 z-[5]" />
+      )}
+
       {/* Dot navigation */}
       {banners.length > 1 && (
         <div className="absolute bottom-8 left-0 right-0 z-[4] flex items-center justify-center gap-3">
-          <button onClick={prev} className="p-2 text-white/60 hover:text-white transition-colors" aria-label="Previous">
+          <button onClick={prev} className="p-2 text-white/60 hover:text-white transition-colors" aria-label={tr("previous")}>
             <ArrowLeft size={18} strokeWidth={1.5} />
           </button>
           {banners.map((_, i) => (
@@ -715,7 +777,7 @@ function CenteredLayout({
               }}
             />
           ))}
-          <button onClick={next} className="p-2 text-white/60 hover:text-white transition-colors" aria-label="Next">
+          <button onClick={next} className="p-2 text-white/60 hover:text-white transition-colors" aria-label={tr("next")}>
             <ArrowRight size={18} strokeWidth={1.5} />
           </button>
         </div>
@@ -755,7 +817,9 @@ function MinimalLayout({
   locale,
   sectionStyle,
   activated,
+  playback,
 }: LayoutProps) {
+  const tr = useTranslations("heroBanner");
   const showOverlay = banner.showOverlay !== false;
   return (
     <section
@@ -788,6 +852,9 @@ function MinimalLayout({
               sizes="100vw"
               className={`object-cover transition-transform duration-[25s] ease-out ${i === current ? "scale-105" : "scale-100"}`}
             />
+          )}
+          {activated.has(i) && b.video && (
+            <HeroVideo src={b.video} playing={playback.decided && !playback.paused && i === current} />
           )}
         </div>
       ))}
@@ -854,10 +921,14 @@ function MinimalLayout({
       </div>
       )}
 
+      {banner.video && (
+        <HeroVideoToggle playback={playback} className="absolute top-5 right-5 z-[5]" />
+      )}
+
       {/* Arrows + dots at bottom-left */}
       {banners.length > 1 && (
         <div className="absolute bottom-5 left-6 sm:left-10 lg:left-14 z-[5] flex items-center gap-2">
-          <button onClick={prev} className="p-1.5 text-white/50 hover:text-white transition-colors" aria-label="Previous">
+          <button onClick={prev} className="p-1.5 text-white/50 hover:text-white transition-colors" aria-label={tr("previous")}>
             <ArrowLeft size={16} strokeWidth={1.5} />
           </button>
           <div className="flex gap-1">
@@ -872,7 +943,7 @@ function MinimalLayout({
               />
             ))}
           </div>
-          <button onClick={next} className="p-1.5 text-white/50 hover:text-white transition-colors" aria-label="Next">
+          <button onClick={next} className="p-1.5 text-white/50 hover:text-white transition-colors" aria-label={tr("next")}>
             <ArrowRight size={16} strokeWidth={1.5} />
           </button>
         </div>
@@ -909,6 +980,7 @@ function GridLayout({
 
   const main = banners[0];
   const side = banners.slice(1, 3);
+  const playback = useHeroVideoPlayback(Boolean(main.video));
 
   return (
     <section className="w-full overflow-hidden" style={sectionStyle}>
@@ -926,6 +998,9 @@ function GridLayout({
               sizes="(max-width: 768px) 100vw, 66vw"
               className="object-cover transition-transform duration-[8s] ease-out group-hover:scale-105"
             />
+          )}
+          {main.video && (
+            <HeroVideo src={main.video} playing={playback.decided && !playback.paused} />
           )}
           {main.showOverlay !== false && (
             <div
@@ -964,6 +1039,9 @@ function GridLayout({
                 aria-label={t(main.title, locale)}
               />
             )
+          )}
+          {main.video && (
+            <HeroVideoToggle playback={playback} className="absolute top-4 right-4 z-[5]" />
           )}
         </div>
 
@@ -1037,6 +1115,7 @@ function ImageOnlyLayout({
   banners: IHeroBanner[];
   sectionStyle?: React.CSSProperties;
 }) {
+  const tr = useTranslations("heroBanner");
   const locale = useLocale();
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -1044,14 +1123,17 @@ function ImageOnlyLayout({
   const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [aspect, setAspect] = useState<number | null>(null);
+  const playback = useHeroVideoPlayback(banners.some((b) => b.video));
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   // Only shown slides render their <img> (no first-paint download of off-screen banners).
   const [activated, setActivated] = useState<Set<number>>(() => new Set([0]));
-  useEffect(() => {
-    setActivated((s) => (s.has(current) ? s : new Set(s).add(current)));
-  }, [current]);
+  if (!activated.has(current)) setActivated(new Set(activated).add(current));
+  // Auto-advance bookkeeping lives in refs so the timer can advance without
+  // a setState-in-effect cascade.
+  const progressRef = useRef(0);
+  const nextRef = useRef<() => void>(() => {});
 
   const goTo = useCallback(
     (index: number, direction?: "next" | "prev") => {
@@ -1060,6 +1142,7 @@ function ImageOnlyLayout({
       setIsTransitioning(true);
       setCurrent(index);
       setProgress(0);
+      progressRef.current = 0;
       setTimeout(() => setIsTransitioning(false), 600);
     },
     [isTransitioning, current]
@@ -1069,17 +1152,19 @@ function ImageOnlyLayout({
   const prev = useCallback(() => goTo((current - 1 + banners.length) % banners.length, "prev"), [current, banners.length, goTo]);
 
   useEffect(() => {
+    nextRef.current = next;
+  }, [next]);
+
+  useEffect(() => {
     if (banners.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
-      setProgress((p) => {
-        const n = p + (50 / AUTO_ADVANCE_MS) * 100;
-        return n >= 100 ? 100 : n;
-      });
+      const n = Math.min(100, progressRef.current + (50 / AUTO_ADVANCE_MS) * 100);
+      progressRef.current = n;
+      setProgress(n);
+      if (n >= 100) nextRef.current();
     }, 50);
     return () => clearInterval(timer);
   }, [isPaused, banners.length, current]);
-
-  useEffect(() => { if (progress >= 100) next(); }, [progress, next]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -1148,29 +1233,44 @@ function ImageOnlyLayout({
               }
             />
           )}
+          {activated.has(i) && b.video && (
+            <HeroVideo
+              src={b.video}
+              playing={playback.decided && !playback.paused && i === current}
+              className="!object-contain"
+            />
+          )}
           {b.linkUrl && (
             <a href={b.linkUrl} className="absolute inset-0 z-10" aria-label={t(b.title, locale)} />
           )}
         </div>
       ))}
 
+      {banners[current].video && (
+        <HeroVideoToggle playback={playback} className="absolute top-4 right-4 z-[11]" />
+      )}
+
       {/* Navigation — only shown on hover, minimal chrome */}
       {banners.length > 1 && (
         <>
-          <button
+          <Button
+            variant="overlay"
+            size="icon"
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-[3] w-10 h-10 flex items-center justify-center rounded-full bg-black/25 hover:bg-black/45 backdrop-blur-sm text-white transition-all duration-200 hover:scale-105"
-            aria-label="Previous"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-[3] h-10 w-10"
+            aria-label={tr("previous")}
           >
-            <ArrowLeft size={18} strokeWidth={1.5} />
-          </button>
-          <button
+            <ArrowLeft size={18} strokeWidth={1.5} aria-hidden />
+          </Button>
+          <Button
+            variant="overlay"
+            size="icon"
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-[3] w-10 h-10 flex items-center justify-center rounded-full bg-black/25 hover:bg-black/45 backdrop-blur-sm text-white transition-all duration-200 hover:scale-105"
-            aria-label="Next"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-[3] h-10 w-10"
+            aria-label={tr("next")}
           >
-            <ArrowRight size={18} strokeWidth={1.5} />
-          </button>
+            <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
+          </Button>
 
           {/* Dot indicators */}
           <div className="absolute bottom-5 left-0 right-0 z-[3] flex justify-center gap-1.5">
@@ -1203,6 +1303,216 @@ function ImageOnlyLayout({
             />
           </div>
         </>
+      )}
+    </section>
+  );
+}
+
+// ── Styled full-bleed hero (slider + video, or a non-base heroStyle) ──────────
+// Full-bleed footage under a scrim; headline set bottom-left on the same grid as the
+// header logo; one brand CTA; quiet chrome (pause/play, counter) bottom-right. Poster
+// image stays the LCP element. The heroStyle Style Switch picks the treatment:
+//   cinematic  tenant-tinted scrim, eyebrow with the store name, serif title (base)
+//   film       taller film, neutral scrim, large title, no eyebrow (taste-skill)
+//   framed     inset accent hairline frame, header colour bleeding in (impeccable)
+//   editorial  brand-ink scrim, italic subtitle, accent CTA, zari hairlines (frontend-design)
+// Scrims, type and the zari edge are CSS keyed on html[data-hero-style] (globals.css).
+
+function CinematicLayout({
+  banners,
+  current,
+  next,
+  prev,
+  progress,
+  banner,
+  textStage,
+  textVisible,
+  slideDirection,
+  sharedHandlers,
+  shopNow,
+  locale,
+  sectionStyle,
+  activated,
+  playback,
+  heroStyle,
+}: LayoutProps & { heroStyle: HeroStyle }) {
+  const tr = useTranslations("heroBanner");
+  const tenant = useTenant();
+  const showOverlay = banner.showOverlay !== false;
+  const showEyebrow = heroStyle === "cinematic";
+  const title = t(banner.title, locale);
+  const subtitle = t(banner.subtitle, locale);
+  const multi = banners.length > 1;
+
+  const reveal = (stage: number, offset = 16): React.CSSProperties => ({
+    opacity: textStage >= stage && textVisible ? 1 : 0,
+    transform: textStage >= stage && textVisible ? "translateY(0)" : `translateY(${offset}px)`,
+  });
+
+  return (
+    <section
+      className={`hero-cinematic relative isolate w-full overflow-hidden ${HERO_SHELL[heroStyle]}`}
+      style={sectionStyle}
+      aria-roledescription={multi ? tr("carousel") : undefined}
+      {...sharedHandlers}
+    >
+      {banners.map((b, i) => (
+        <div
+          key={i}
+          className="absolute inset-0 transition-[clip-path] duration-[800ms] ease-[cubic-bezier(0.77,0,0.18,1)]"
+          style={{
+            clipPath:
+              i === current
+                ? "inset(0 0 0 0)"
+                : slideDirection === "next"
+                  ? "inset(0 0 0 100%)"
+                  : "inset(0 100% 0 0)",
+            zIndex: i === current ? 2 : 1,
+          }}
+          aria-hidden={i !== current || undefined}
+        >
+          {activated.has(i) && b.image && (
+            <StoreImage
+              src={b.image}
+              variants={b.variants}
+              blurDataURL={b.blurDataURL}
+              alt={t(b.title, locale)}
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              className="object-cover"
+            />
+          )}
+          {activated.has(i) && b.video && (
+            <HeroVideo
+              src={b.video}
+              playing={playback.decided && !playback.paused && i === current}
+            />
+          )}
+        </div>
+      ))}
+
+      {showOverlay ? (
+        <>
+          <div aria-hidden className="hero-cinematic-scrim pointer-events-none absolute inset-0 z-[3]" />
+          {heroStyle === "framed" && (
+            <div aria-hidden className="hero-frame pointer-events-none absolute z-[4]" />
+          )}
+
+          <div className="absolute inset-x-0 bottom-0 z-[4]">
+            <div
+              className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 lg:pb-16 pr-20 sm:pr-24 ${multi ? "md:pr-64" : ""}`}
+            >
+              <div className="max-w-3xl text-white">
+                {showEyebrow && tenant?.name && (
+                  <p
+                    className="flex items-center gap-3 mb-4 sm:mb-6 text-xs font-semibold uppercase tracking-[0.28em] text-white transition-[opacity,transform] duration-700 ease-(--ease-out-expo) motion-reduce:transition-none"
+                    style={reveal(1, 8)}
+                  >
+                    <span
+                      aria-hidden
+                      className="h-px w-8 sm:w-12"
+                      style={{ backgroundColor: "var(--color-primary)" }}
+                    />
+                    {tenant.name}
+                  </p>
+                )}
+                <h1
+                  className="hero-cinematic-title font-medium text-balance transition-[opacity,transform] duration-700 ease-(--ease-out-expo) motion-reduce:transition-none"
+                  style={reveal(1)}
+                >
+                  {title}
+                </h1>
+                {subtitle && (
+                  <p
+                    className="hero-cinematic-sub mt-3 sm:mt-5 max-w-md text-sm sm:text-base md:text-lg leading-relaxed text-white/85 line-clamp-2 sm:line-clamp-none transition-[opacity,transform] duration-700 ease-(--ease-out-expo) motion-reduce:transition-none"
+                    style={reveal(2)}
+                  >
+                    {subtitle}
+                  </p>
+                )}
+                {banner.linkUrl && (
+                  <div
+                    className="mt-6 sm:mt-8 transition-[opacity,transform] duration-700 ease-(--ease-out-expo) motion-reduce:transition-none"
+                    style={reveal(3)}
+                  >
+                    <ButtonLink
+                      href={banner.linkUrl}
+                      variant="brand"
+                      size={heroStyle === "framed" ? "lg" : "xl"}
+                      className="hero-cinematic-cta group focus-visible:outline-white"
+                      rightIcon={
+                        <ArrowRight
+                          size={18}
+                          aria-hidden
+                          className="transition-transform duration-150 group-hover:translate-x-1"
+                        />
+                      }
+                    >
+                      {banner.linkText || shopNow}
+                    </ButtonLink>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        banner.linkUrl && (
+          <Link
+            href={banner.linkUrl}
+            className="absolute inset-0 z-[4]"
+            aria-label={title}
+          />
+        )
+      )}
+
+      {/* Quiet chrome, bottom-right: slide controls + video pause/play */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 sm:bottom-12 lg:bottom-16 z-[5]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end">
+          <div className="pointer-events-auto mb-1 flex items-center gap-2 text-white">
+            {multi && (
+              <>
+                <span className="hidden md:inline text-xs tabular-nums tracking-[0.2em] text-white/80 mr-2">
+                  {String(current + 1).padStart(2, "0")} / {String(banners.length).padStart(2, "0")}
+                </span>
+                <button
+                  type="button"
+                  onClick={prev}
+                  aria-label={tr("previous")}
+                  className="hidden md:inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-white"
+                >
+                  <ArrowLeft size={18} strokeWidth={1.5} aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  onClick={next}
+                  aria-label={tr("next")}
+                  className="hidden md:inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-white"
+                >
+                  <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
+                </button>
+              </>
+            )}
+            {banner.video && <HeroVideoToggle playback={playback} />}
+          </div>
+        </div>
+      </div>
+
+      {multi && (
+        <div className="absolute bottom-0 inset-x-0 z-[5] flex gap-1" aria-hidden>
+          {banners.map((_, i) => (
+            <div key={i} className="flex-1 h-[2px] bg-white/15">
+              <div
+                className="h-full"
+                style={{
+                  width: i === current ? `${progress}%` : i < current ? "100%" : "0%",
+                  backgroundColor: "var(--color-primary)",
+                }}
+              />
+            </div>
+          ))}
+        </div>
       )}
     </section>
   );

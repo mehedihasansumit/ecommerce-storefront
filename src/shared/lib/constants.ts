@@ -17,6 +17,9 @@ export const DEFAULT_THEME: IStoreTheme = {
 
 export const ITEMS_PER_PAGE = 12;
 
+/** Fallback when a store has no payment currency configured. */
+export const DEFAULT_CURRENCY = "BDT";
+
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
   confirmed: "Confirmed",

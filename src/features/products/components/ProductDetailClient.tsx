@@ -13,10 +13,11 @@ import { AddToCartSection } from "./AddToCartSection";
 import { MobileBuyBar } from "./MobileBuyBar";
 import { SocialOrderButtons } from "./SocialOrderButtons";
 import { BulkPricingTable } from "./BulkPricingTable";
-import { t } from "@/shared/lib/i18n";
+import { formatNumber, t } from "@/shared/lib/i18n";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
 import { useProductSelection } from "../hooks/useProductSelection";
 import { getBulkLineTotal, normalizeTiers } from "@/shared/lib/pricing";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 
 interface ProductDetailClientProps {
   product: IProduct;
@@ -34,6 +35,7 @@ export function ProductDetailClient({
 }: ProductDetailClientProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
+  const currency = useStoreCurrency();
   const selection = useProductSelection(product);
   const { activeVariant, quantity, selectedOptions, displayPrice, displayStock, setOptions } =
     selection;
@@ -98,9 +100,6 @@ export function ProductDetailClient({
   const displayCompareAt = activeVariant?.compareAtPrice ?? product.compareAtPrice;
 
   const hasDiscount = displayCompareAt > 0 && displayCompareAt > displayPrice;
-  const discountPercent = hasDiscount
-    ? Math.round(((displayCompareAt - displayPrice) / displayCompareAt) * 100)
-    : 0;
 
   const tiers = normalizeTiers(product.pricingTiers);
   const hasTiers = tiers.length > 0;
@@ -127,20 +126,7 @@ export function ProductDetailClient({
 
       {/* Product Info */}
       <div className="animate-fade-in-up">
-        {/* Discount badge */}
-        {hasDiscount && (
-          <span
-            className="hidden md:inline-block px-3 py-1 text-xs font-bold rounded-full mb-4"
-            style={{
-              backgroundColor: "var(--color-sale-badge-bg)",
-              color: "var(--color-sale-badge-text)",
-            }}
-          >
-            {tr("save") || "Save"} {discountPercent}%
-          </span>
-        )}
-
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight mb-2 md:mb-4 leading-tight">
+        <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-2 md:mb-4 leading-tight text-balance">
           {t(product.name, locale)}
         </h1>
 
@@ -152,16 +138,14 @@ export function ProductDetailClient({
                 <Star
                   key={i}
                   size={16}
-                  className={
-                    i < Math.round(product.averageRating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "fill-border-subtle text-border-subtle dark:fill-text-tertiary dark:text-text-tertiary"
-                  }
+                  aria-hidden
+                  className={i < Math.round(product.averageRating) ? "fill-current" : "fill-none opacity-40"}
+                  style={{ color: "var(--color-rating, var(--color-accent))" }}
                 />
               ))}
             </div>
             <span className="text-xs text-text-secondary">
-              ({product.reviewCount} {tr("reviews")})
+              ({formatNumber(product.reviewCount, locale)} {tr("reviews")})
             </span>
           </a>
         )}
@@ -172,7 +156,7 @@ export function ProductDetailClient({
           {hasDiscount && (
             <span className="text-sm font-semibold" style={{ color: "var(--color-success)" }}>
               {tr("youSave", {
-                amount: formatPrice(displayCompareAt - displayPrice, "BDT", locale),
+                amount: formatPrice(displayCompareAt - displayPrice, currency, locale),
               })}
             </span>
           )}
@@ -192,10 +176,13 @@ export function ProductDetailClient({
               currentQuantity={quantity}
             />
             <p className="mt-3 text-sm text-text-secondary">
-              <span className="font-medium text-[var(--color-text)]">
-                ৳{previewLineTotal.toLocaleString()}
-              </span>{" "}
-              for {quantity} {quantity === 1 ? "piece" : "pieces"}
+              {tr.rich("bulkLineTotal", {
+                count: quantity,
+                total: formatPrice(previewLineTotal, currency, locale),
+                strong: (chunks) => (
+                  <span className="font-medium text-[var(--color-text)]">{chunks}</span>
+                ),
+              })}
             </p>
           </div>
         )}
@@ -206,7 +193,7 @@ export function ProductDetailClient({
             {displayStock > 0 ? (
               <div className="flex items-center gap-2">
                 <span
-                  className="w-2 h-2 rounded-full animate-pulse"
+                  className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: "var(--color-success)" }}
                 />
                 <span className="text-sm font-medium" style={{ color: "var(--color-success)" }}>

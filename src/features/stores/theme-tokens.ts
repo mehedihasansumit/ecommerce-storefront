@@ -22,6 +22,12 @@ export interface ThemeTokenDef {
   lightDefault?: string;
   darkDefault?: string;
   fallbackChain?: string[];
+  /** Dark mode, no explicit dark value: lighten until readable on the dark bg/surface (≥ 4.5:1). */
+  darkMinContrast?: boolean;
+  /** Light mode, value inherited (not set explicitly): darken until ≥ 4.5:1 on bg/surface/card. */
+  lightMinContrast?: boolean;
+  /** No explicit value: pick white or near-black, whichever reads better on this token. */
+  readableOn?: string;
   editableLight: boolean;
   editableDark: boolean;
 }
@@ -53,7 +59,7 @@ export const THEME_TOKEN_GROUPS: Record<
 };
 
 export const THEME_TOKENS: ThemeTokenDef[] = [
-  { key: "primaryColor",      cssVar: "--color-primary",            label: "Primary",         group: "core",       lightDefault: "#3B82F6",                          editableLight: true, editableDark: true },
+  { key: "primaryColor",      cssVar: "--color-primary",            label: "Primary",         group: "core",       lightDefault: "#3B82F6",                          editableLight: true, editableDark: true, darkMinContrast: true },
   { key: "secondaryColor",    cssVar: "--color-secondary",          label: "Secondary",       group: "core",       lightDefault: "#10B981",                          editableLight: true, editableDark: true },
   { key: "accentColor",       cssVar: "--color-accent",             label: "Accent",          group: "core",       lightDefault: "#F59E0B",                          editableLight: true, editableDark: true },
   { key: "backgroundColor",   cssVar: "--color-bg",                 label: "Background",      group: "core",       lightDefault: "#FFFFFF", darkDefault: "#111827",  editableLight: true, editableDark: true },
@@ -68,21 +74,33 @@ export const THEME_TOKENS: ThemeTokenDef[] = [
   { key: "cardBg",            cssVar: "--color-card-bg",            label: "Card BG",         group: "cards",      fallbackChain: ["backgroundColor"],               editableLight: true, editableDark: true },
 
   { key: "newsletterBg",      cssVar: "--color-newsletter-bg",      label: "Newsletter BG",   group: "newsletter", fallbackChain: ["primaryColor"],                  editableLight: true, editableDark: true },
-  { key: "newsletterText",    cssVar: "--color-newsletter-text",    label: "Newsletter Text", group: "newsletter", lightDefault: "#FFFFFF", darkDefault: "#FFFFFF",  editableLight: true, editableDark: true },
+  { key: "newsletterText",    cssVar: "--color-newsletter-text",    label: "Newsletter Text", group: "newsletter", lightDefault: "#FFFFFF", darkDefault: "#FFFFFF",  editableLight: true, editableDark: true, readableOn: "newsletterBg" },
   { key: "newsletterBtnBg",   cssVar: "--color-newsletter-btn-bg",  label: "Btn BG",          group: "newsletter", lightDefault: "#FFFFFF", darkDefault: "#1F2937",  editableLight: true, editableDark: true },
   { key: "newsletterBtnText", cssVar: "--color-newsletter-btn-text",label: "Btn Text",        group: "newsletter", fallbackChain: ["primaryColor"],                  editableLight: true, editableDark: true },
 
-  { key: "priceColor",        cssVar: "--color-price",              label: "Price",           group: "products",   fallbackChain: ["primaryColor"],                  editableLight: true, editableDark: true },
-  { key: "saleBadgeBg",       cssVar: "--color-sale-badge-bg",      label: "Sale Badge BG",   group: "products",   lightDefault: "#EF4444", darkDefault: "#DC2626",  editableLight: true, editableDark: true },
+  { key: "priceColor",        cssVar: "--color-price",              label: "Price",           group: "products",   fallbackChain: ["primaryColor"],                  editableLight: true, editableDark: true, darkMinContrast: true, lightMinContrast: true },
+  { key: "saleBadgeBg",       cssVar: "--color-sale-badge-bg",      label: "Sale Badge BG",   group: "products",   lightDefault: "#DC2626", darkDefault: "#DC2626",  editableLight: true, editableDark: true },
   { key: "saleBadgeText",     cssVar: "--color-sale-badge-text",    label: "Sale Badge Text", group: "products",   lightDefault: "#FFFFFF", darkDefault: "#FFFFFF",  editableLight: true, editableDark: true },
 
   { key: "footerBg",          cssVar: "--color-footer-bg",          label: "Footer BG",       group: "footer",     fallbackChain: ["headerBg"],                      editableLight: true, editableDark: true },
   { key: "footerText",        cssVar: "--color-footer-text",        label: "Footer Text",     group: "footer",     fallbackChain: ["headerText"],                    editableLight: true, editableDark: true },
 
-  { key: "linkColor",         cssVar: "--color-link",               label: "Link",            group: "links",      fallbackChain: ["primaryColor"],                  editableLight: true, editableDark: true },
+  { key: "linkColor",         cssVar: "--color-link",               label: "Link",            group: "links",      fallbackChain: ["primaryColor"],                  editableLight: true, editableDark: true, darkMinContrast: true, lightMinContrast: true },
 ];
 
 const TOKEN_BY_KEY = new Map(THEME_TOKENS.map((t) => [t.key, t]));
+
+/**
+ * Global colours from globals.css (success, error) that a store's theme may set
+ * explicitly (light and/or `dark`); an explicit value wins. Not editable in the admin.
+ * Used to keep pre-redesign values on existing stores (scripts/pin-legacy-theme-defaults.ts).
+ */
+export const PINNABLE_DERIVED_TOKENS = [
+  { key: "successColor", cssVar: "--color-success" },
+  { key: "errorColor", cssVar: "--color-error" },
+] as const;
+
+export type PinnableDerivedKey = (typeof PINNABLE_DERIVED_TOKENS)[number]["key"];
 
 export type ThemeColorMode = "light" | "dark";
 
@@ -101,6 +119,55 @@ function readField(
   return undefined;
 }
 
+// ── Contrast helpers (WCAG 2.x relative luminance) ─────────────────────────────
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const h = m[1].length === 3 ? m[1].replace(/./g, (c) => c + c) : m[1];
+  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)) as [number, number, number];
+}
+
+function luminance(hex: string): number | null {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return null;
+  const [r, g, b] = rgb.map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function contrastRatio(a: string, b: string): number | null {
+  const la = luminance(a);
+  const lb = luminance(b);
+  if (la === null || lb === null) return null;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+const ON_LIGHT = "#111827";
+const ON_DARK = "#FFFFFF";
+
+/** White or near-black, whichever reads better on `bg`. Non-hex values fall back to white. */
+export function readableTextOn(bg: string): string {
+  const white = contrastRatio(ON_DARK, bg);
+  const dark = contrastRatio(ON_LIGHT, bg);
+  if (white === null || dark === null) return ON_DARK;
+  return white >= dark ? ON_DARK : ON_LIGHT;
+}
+
+/** Mix `hex` toward white until it reaches `min` contrast on every bg (or is white). */
+function lightenToContrast(hex: string, bgs: string[], min = 4.5): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  for (let t = 0; t <= 1.0001; t += 0.05) {
+    const mixed =
+      "#" + rgb.map((v) => Math.round(v + (255 - v) * t).toString(16).padStart(2, "0")).join("").toUpperCase();
+    if (bgs.every((bg) => (contrastRatio(mixed, bg) ?? 21) >= min)) return mixed;
+  }
+  return "#FFFFFF";
+}
+
 function resolveValue(
   theme: ThemeLike,
   token: ThemeTokenDef,
@@ -109,19 +176,60 @@ function resolveValue(
   const direct = readField(theme, token.key, mode);
   if (direct) return direct;
 
+  const value = resolveBase(theme, token, mode);
+
+  // Store left this token on auto in dark mode: brand colours picked for a light page are
+  // often too dark on #111827 — lighten until they read (≥ 4.5:1 on bg and surface).
+  if (mode === "dark" && token.darkMinContrast) {
+    const bgs = ["backgroundColor", "surfaceColor"]
+      .map((k) => TOKEN_BY_KEY.get(k))
+      .filter((t): t is ThemeTokenDef => !!t)
+      .map((t) => resolveValue(theme, t, mode));
+    return lightenToContrast(value, bgs);
+  }
+  // Same idea for light mode: a link/price inherited from a mid-tone brand colour
+  // (e.g. emerald #059669 = 3.8:1 on white) is darkened until it reads as text.
+  if (mode === "light" && token.lightMinContrast) {
+    const bgs = ["backgroundColor", "surfaceColor", "cardBg"]
+      .map((k) => TOKEN_BY_KEY.get(k))
+      .filter((t): t is ThemeTokenDef => !!t)
+      .map((t) => resolveValue(theme, t, mode));
+    return darkenToContrast(value, bgs);
+  }
+  return value;
+}
+
+/** Mix `hex` toward black until it reaches `min` contrast on every bg. */
+function darkenToContrast(hex: string, bgs: string[], min = 4.5): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb || bgs.some((bg) => !hexToRgb(bg))) return hex;
+  for (let t = 0; t <= 1.0001; t += 0.05) {
+    const mixed =
+      "#" + rgb.map((v) => Math.round(v * (1 - t)).toString(16).padStart(2, "0")).join("").toUpperCase();
+    if (bgs.every((bg) => (contrastRatio(mixed, bg) ?? 21) >= min)) return t === 0 ? hex : mixed;
+  }
+  return ON_LIGHT;
+}
+
+/** Resolution without the explicit value or contrast adjustments. */
+function resolveBase(
+  theme: ThemeLike,
+  token: ThemeTokenDef,
+  mode: ThemeColorMode
+): string {
+  if (token.readableOn) {
+    const on = TOKEN_BY_KEY.get(token.readableOn);
+    if (on) return readableTextOn(resolveValue(theme, on, mode));
+  }
+
   if (token.fallbackChain) {
     for (const fk of token.fallbackChain) {
       const dep = TOKEN_BY_KEY.get(fk);
       if (!dep) continue;
-      const fromChain = readField(theme, fk, mode);
-      if (fromChain) return fromChain;
-      if (mode === "dark") {
-        const fromLight = readField(theme, fk, "light");
-        if (fromLight) return fromLight;
-      }
-      const depDefault =
-        mode === "dark" ? dep.darkDefault ?? dep.lightDefault : dep.lightDefault;
-      if (depDefault) return depDefault;
+      // Follow what the dependency resolves to in *this* mode. Reading its raw light value
+      // first gave dark mode light colours (e.g. white cards on a #111827 page).
+      const fromDep = resolveValue(theme, dep, mode);
+      if (fromDep) return fromDep;
     }
   }
 
@@ -141,16 +249,132 @@ export function resolveThemeVars(
   for (const token of THEME_TOKENS) {
     out[token.cssVar] = resolveValue(theme, token, mode);
   }
+  // Text/icon colour on brand-filled surfaces (buttons, badges): derived, not editable.
+  out["--color-on-primary"] = readableTextOn(out["--color-primary"]);
+  out["--color-on-accent"] = readableTextOn(out["--color-accent"]);
+
+  // Muted text tiers, derived from the store's own text + page colours so they keep
+  // the palette's warmth AND clear WCAG AA on every page surface. The old static greys
+  // (#6B7280 / #9CA3AF) measured 4.18:1 and 2.37:1 on a warm ivory store.
+  const pageBgs = [out["--color-bg"], out["--color-surface"], out["--color-card-bg"]];
+  // Dark mode: blend toward a mid-tone of the page's own hue (navy page → slate-navy
+  // greys) rather than toward the near-black bg, which only greyed a warm text colour
+  // out into neutral beige-grey that read as "not part of the night palette".
+  const mutedToward =
+    mode === "dark" ? hueMidTone(out["--color-bg"]) ?? out["--color-bg"] : out["--color-bg"];
+  const secondary = mixTowardUntilContrast(out["--color-text"], mutedToward, pageBgs, 5.5);
+  const tertiary = mixTowardUntilContrast(out["--color-text"], mutedToward, pageBgs, 4.6);
+  // Hero scrim base: the darkest brand colour available, so text over video stays
+  // legible whether the store's header is dark or light.
+  const scrimCandidates = [
+    out["--color-header-bg"],
+    out["--color-footer-bg"],
+    out["--color-secondary"],
+    out["--color-text"],
+    out["--color-bg"],
+  ].filter((c) => luminance(c) !== null);
+  if (scrimCandidates.length) {
+    out["--color-scrim"] = scrimCandidates.reduce((a, b) =>
+      (luminance(b) ?? 1) < (luminance(a) ?? 1) ? b : a
+    );
+  }
+
+  // Star ratings: the accent if it reads as a graphic on cards (≥ 3:1), else amber.
+  // Pale accents (e.g. #DBEAFE) made stars invisible on white cards.
+  const ratingFallback = mode === "dark" ? "#FBBF24" : "#B45309";
+  out["--color-rating"] =
+    (contrastRatio(out["--color-accent"], out["--color-card-bg"]) ?? 0) >= 3
+      ? out["--color-accent"]
+      : ratingFallback;
+  // Form-control outline: WCAG 1.4.11 wants ≥ 3:1 against the page/card it sits on.
+  // The hairline border token (~1.3:1) is too faint to identify an input by.
+  const inputBorder = mixTowardUntilContrast(out["--color-text"], mutedToward, pageBgs, 3);
+  if (inputBorder) out["--color-input-border"] = inputBorder;
+  if (secondary) out["--color-text-secondary"] = secondary;
+  if (tertiary) out["--color-text-tertiary"] = tertiary;
+
+  // Explicit per-store success/error colours win (see PINNABLE_DERIVED_TOKENS).
+  for (const { key, cssVar } of PINNABLE_DERIVED_TOKENS) {
+    const pinned = readField(theme, key, mode);
+    if (pinned) out[cssVar] = pinned;
+  }
+  // An explicit hero scrim colour (e.g. from a Theme Preset) wins over the derived one.
+  const heroScrim = readField(theme, "heroScrim", mode);
+  if (heroScrim) out["--color-scrim"] = heroScrim;
   return out;
+}
+
+/**
+ * Blend `fg` toward `toward` as far as possible while staying ≥ `min` contrast on
+ * every bg. Returns null for non-hex inputs (caller keeps the CSS defaults).
+ */
+function mixTowardUntilContrast(
+  fg: string,
+  toward: string,
+  bgs: string[],
+  min: number
+): string | null {
+  const a = hexToRgb(fg);
+  const b = hexToRgb(toward);
+  if (!a || !b || bgs.some((bg) => !hexToRgb(bg))) return null;
+  let best = fg.toUpperCase();
+  for (let t = 0; t <= 0.9001; t += 0.02) {
+    const mixed =
+      "#" +
+      a
+        .map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase();
+    if (bgs.every((bg) => (contrastRatio(mixed, bg) ?? 0) >= min)) best = mixed;
+    else break;
+  }
+  return best;
+}
+
+/**
+ * The colour's hue at a mid lightness with restrained saturation, e.g. #0A1020 (navy)
+ * → a slate-navy. Null for non-hex input or a hueless (grey) colour.
+ */
+function hueMidTone(hex: string): string | null {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return null;
+  const [r, g, b] = rgb.map((v) => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  if (d < 0.02) return null;
+  let h: number;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h *= 60;
+  if (h < 0) h += 360;
+  const l0 = (max + min) / 2;
+  const s0 = d / (1 - Math.abs(2 * l0 - 1));
+  const s = Math.min(s0, 0.2);
+  const l = 0.5;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  const [r1, g1, b1] =
+    h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return (
+    "#" +
+    [r1, g1, b1]
+      .map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0"))
+      .join("")
+      .toUpperCase()
+  );
 }
 
 export function buildDarkCss(darkVars: Record<string, string>): string {
   const lines = Object.entries(darkVars).map(
     ([cssVar, value]) => `  ${cssVar}: ${value} !important;`
   );
-  // Static dark-mode text helpers (not editable, kept here so admin can't break them).
-  lines.push("  --color-text-secondary: #E5E7EB !important;");
-  lines.push("  --color-text-tertiary: #D1D5DB !important;");
+  // Dark-mode muted text: derived per store in resolveThemeVars; static fallback only
+  // if derivation was impossible (non-hex colours).
+  if (!darkVars["--color-text-secondary"]) lines.push("  --color-text-secondary: #E5E7EB !important;");
+  if (!darkVars["--color-text-tertiary"]) lines.push("  --color-text-tertiary: #D1D5DB !important;");
   return `html.dark {\n${lines.join("\n")}\n}`;
 }
 
@@ -220,7 +444,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       newsletterBtnBg: "#FFFFFF",
       newsletterBtnText: "#4F46E5",
       priceColor: "#4F46E5",
-      saleBadgeBg: "#EF4444",
+      saleBadgeBg: "#DC2626",
       saleBadgeText: "#FFFFFF",
       footerBg: "#0F172A",
       footerText: "#CBD5E1",

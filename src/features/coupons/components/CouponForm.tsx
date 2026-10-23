@@ -266,7 +266,7 @@ export function CouponForm({ storeId, coupon }: CouponFormProps) {
             onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
             className="w-4 h-4 rounded border-admin-border-md"
           />
-          <label htmlFor="isActive" className="text-sm font-medium text-admin-text-secondary">
+          <label htmlFor="isActive" className="text-sm font-medium text-admin-text-secondary cursor-pointer">
             Active
           </label>
         </div>

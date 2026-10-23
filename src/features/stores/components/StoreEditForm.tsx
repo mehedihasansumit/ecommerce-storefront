@@ -28,8 +28,17 @@ import {
 import type { IStore, HeroLayoutStyle, IStoreTheme } from "@/features/stores/types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
+import { STORE_FONTS, STORE_HEADING_FONTS } from "@/shared/lib/fonts";
+import { useTranslations } from "next-intl";
+import {
+  THEME_PRESET_IDS,
+  getThemePreset,
+  resolveTheme,
+} from "@/features/stores/presets";
+import { STYLE_SWITCHES, type StyleSwitchKey } from "@/features/stores/styles";
 import { ImageInput } from "@/shared/components/ui";
 import {
+  THEME_TOKENS,
   THEME_TOKEN_GROUPS,
   THEME_PRESETS,
   getTokensByGroup,
@@ -75,6 +84,11 @@ const LANGUAGE_LABELS: Record<string, string> = {
   bn: "বাংলা",
 };
 
+/** Keep a stored value selectable even if it isn't in the curated list. */
+function withCurrent(list: readonly string[], current?: string): readonly string[] {
+  return current && !list.includes(current) ? [current, ...list] : list;
+}
+
 interface BannerState {
   image: string;
   variants?: Record<string, string>;
@@ -86,6 +100,8 @@ interface BannerState {
   linkUrl: string;
   linkText: string;
   showOverlay: boolean;
+  /** Optional background video (mp4 URL); `image` stays the poster. */
+  video?: string;
 }
 
 type Tab =
@@ -271,28 +287,11 @@ export default function StoreEditForm({
     domains: store.domains.join(", "),
     theme: {
       ...store.theme,
-      dark: {
-        primaryColor:      store.theme.dark?.primaryColor,
-        secondaryColor:    store.theme.dark?.secondaryColor,
-        accentColor:       store.theme.dark?.accentColor,
-        backgroundColor:   store.theme.dark?.backgroundColor ?? "#111827",
-        textColor:         store.theme.dark?.textColor ?? "#F9FAFB",
-        surfaceColor:      store.theme.dark?.surfaceColor ?? "#1F2937",
-        borderColor:       store.theme.dark?.borderColor ?? "#374151",
-        headerBg:          store.theme.dark?.headerBg ?? "#0F172A",
-        headerText:        store.theme.dark?.headerText ?? "#F8FAFC",
-        newsletterBg:      store.theme.dark?.newsletterBg,
-        newsletterText:    store.theme.dark?.newsletterText,
-        newsletterBtnBg:   store.theme.dark?.newsletterBtnBg,
-        newsletterBtnText: store.theme.dark?.newsletterBtnText,
-        priceColor:        store.theme.dark?.priceColor,
-        saleBadgeBg:       store.theme.dark?.saleBadgeBg,
-        saleBadgeText:     store.theme.dark?.saleBadgeText,
-        footerBg:          store.theme.dark?.footerBg,
-        footerText:        store.theme.dark?.footerText,
-        linkColor:         store.theme.dark?.linkColor,
-        cardBg:            store.theme.dark?.cardBg,
-      },
+      // Only what the store sets itself: unset dark colours fall back to the preset or
+      // the token defaults when rendered (and in the colour fields below), so they are
+      // never written back as explicit overrides. Keys the form does not edit (pinned
+      // legacy colours, heroScrim) are kept as they are.
+      dark: { ...store.theme.dark },
     },
     isActive: store.isActive,
     logo: store.logo || "",
@@ -350,6 +349,10 @@ export default function StoreEditForm({
     },
   });
 
+  // What the storefront renders for the current form values (defaults ← preset ← overrides).
+  const effectiveTheme = resolveTheme(formData.theme);
+  const tp = useTranslations("themePresets");
+
   const [heroBanners, setHeroBanners] = useState<BannerState[]>(
     (store.heroBanners || []).map((b) => ({
       image: b.image,
@@ -362,6 +365,7 @@ export default function StoreEditForm({
       linkUrl: b.linkUrl || "",
       linkText: b.linkText || "",
       showOverlay: b.showOverlay ?? true,
+      video: b.video || undefined,
     }))
   );
 
@@ -407,6 +411,52 @@ export default function StoreEditForm({
         dark: { ...prev.theme.dark, [key]: value },
       },
     }));
+  };
+
+  /**
+   * Theme Preset: sets `preset` and clears the colour, font, radius, background and
+   * Style Switch overrides, so the preset renders as designed and later preset updates
+   * reach the store. The fields below then show the preset's values; editing one makes
+   * it an override again. Pinned success/error colours are kept.
+   */
+  const applyThemePreset = (presetId: string) => {
+    if (!getThemePreset(presetId)) {
+      // "None": keep today's look, now as the store's own explicit values.
+      setFormData((prev) => {
+        const { preset: _preset, ...own } = resolveTheme(prev.theme);
+        void _preset;
+        return { ...prev, theme: own as typeof prev.theme };
+      });
+      return;
+    }
+    const colourKeys = new Set([...THEME_TOKENS.map((t) => t.key), "heroScrim"]);
+    setFormData((prev) => {
+      const light = Object.fromEntries(
+        Object.entries(prev.theme).filter(
+          ([k]) =>
+            !colourKeys.has(k) &&
+            !["fontFamily", "headingFont", "borderRadius", "backgroundPattern", "styles", "preset"].includes(k)
+        )
+      );
+      const dark = Object.fromEntries(
+        Object.entries(prev.theme.dark ?? {}).filter(([k]) => !colourKeys.has(k))
+      );
+      return {
+        ...prev,
+        theme: {
+          ...light,
+          dark,
+          preset: presetId,
+        } as typeof prev.theme,
+      };
+    });
+  };
+
+  const handleStyleChange = (key: StyleSwitchKey, value: string) => {
+    setFormData((prev) => {
+      const styles = { ...prev.theme.styles, [key]: value || undefined };
+      return { ...prev, theme: { ...prev.theme, styles } };
+    });
   };
 
   const applyPreset = (preset: ThemePreset) => {
@@ -467,11 +517,15 @@ export default function StoreEditForm({
 
   const handleBannerField = (
     index: number,
-    field: "image" | "linkUrl" | "linkText",
+    field: "image" | "linkUrl" | "linkText" | "video",
     value: string
   ) => {
     setHeroBanners((prev) =>
-      prev.map((b, i) => (i === index ? { ...b, [field]: value } : b))
+      prev.map((b, i) =>
+        i === index
+          ? { ...b, [field]: field === "video" ? value.trim() || undefined : value }
+          : b
+      )
     );
   };
 
@@ -836,16 +890,69 @@ export default function StoreEditForm({
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Controls */}
             <div className="lg:col-span-3 space-y-5">
-              {/* Preset palettes */}
+              {/* Theme Preset + Style Switches (brand-neutral: no tenant colours here) */}
               <div className="pt-1">
-                <SectionTitle>Palette Presets</SectionTitle>
+                <SectionTitle>{tp("title")}</SectionTitle>
+                <p className="text-xs text-admin-text-muted mt-0.5 mb-3">{tp("description")}</p>
+                <Field label={tp("presetLabel")}>
+                  <select
+                    value={formData.theme.preset ?? ""}
+                    onChange={(e) => applyThemePreset(e.target.value)}
+                    className={inputCls}
+                    disabled={loading}
+                    aria-describedby="theme-preset-description"
+                  >
+                    <option value="">{tp("none")}</option>
+                    {THEME_PRESET_IDS.map((id) => (
+                      <option key={id} value={id}>
+                        {tp(`presets.${id}.name`)}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <p id="theme-preset-description" className="text-xs text-admin-text-muted mt-1.5 mb-5 min-h-8">
+                  {getThemePreset(formData.theme.preset) ? tp(`presets.${formData.theme.preset}.description`) : ""}
+                </p>
+
+                <SectionTitle>{tp("stylesTitle")}</SectionTitle>
+                <p className="text-xs text-admin-text-muted mt-0.5 mb-3">{tp("stylesDescription")}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(Object.keys(STYLE_SWITCHES) as StyleSwitchKey[]).map((key) => {
+                    const presetStyles = getThemePreset(formData.theme.preset)?.styles;
+                    const fallback = presetStyles?.[key] ?? STYLE_SWITCHES[key][0];
+                    return (
+                      <Field key={key} label={tp(`switches.${key}.label`)}>
+                        <select
+                          value={formData.theme.styles?.[key] ?? ""}
+                          onChange={(e) => handleStyleChange(key, e.target.value)}
+                          className={inputCls}
+                          disabled={loading}
+                        >
+                          <option value="">
+                            {tp("presetDefault", { option: tp(`switches.${key}.options.${fallback}`) })}
+                          </option>
+                          {STYLE_SWITCHES[key].map((option) => (
+                            <option key={option} value={option}>
+                              {tp(`switches.${key}.options.${option}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Colour palettes: fill the colour fields only */}
+              <div className="pt-1">
+                <SectionTitle>Colour Palettes</SectionTitle>
                 <p className="text-xs text-admin-text-muted mt-0.5 mb-3">
                   One-click starting point. Replaces all colour fields. Tweak afterwards.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                   {THEME_PRESETS.map((preset) => {
                     const swatches = getPresetSwatches(preset);
-                    const isActive = formData.theme.primaryColor === preset.light.primaryColor;
+                    const isActive = effectiveTheme.primaryColor === preset.light.primaryColor;
                     return (
                       <button
                         key={preset.id}
@@ -895,11 +1002,11 @@ export default function StoreEditForm({
                   .filter((g) => groups[g].length > 0);
 
                 const resolveLight = (token: ThemeTokenDef): string => {
-                  const direct = (formData.theme as Record<string, unknown>)[token.key];
+                  const direct = (effectiveTheme as unknown as Record<string, unknown>)[token.key];
                   if (typeof direct === "string" && direct) return direct;
                   if (token.fallbackChain) {
                     for (const fk of token.fallbackChain) {
-                      const v = (formData.theme as Record<string, unknown>)[fk];
+                      const v = (effectiveTheme as unknown as Record<string, unknown>)[fk];
                       if (typeof v === "string" && v) return v;
                     }
                   }
@@ -907,19 +1014,19 @@ export default function StoreEditForm({
                 };
 
                 const resolveDark = (token: ThemeTokenDef): string => {
-                  const dark = formData.theme.dark as Record<string, unknown> | undefined;
+                  const dark = effectiveTheme.dark as Record<string, unknown> | undefined;
                   const direct = dark?.[token.key];
                   if (typeof direct === "string" && direct) return direct;
                   if (token.fallbackChain) {
                     for (const fk of token.fallbackChain) {
                       const v = dark?.[fk];
                       if (typeof v === "string" && v) return v;
-                      const lightV = (formData.theme as Record<string, unknown>)[fk];
+                      const lightV = (effectiveTheme as unknown as Record<string, unknown>)[fk];
                       if (typeof lightV === "string" && lightV) return lightV;
                     }
                   }
                   if (token.darkDefault) return token.darkDefault;
-                  const lightDirect = (formData.theme as Record<string, unknown>)[token.key];
+                  const lightDirect = (effectiveTheme as unknown as Record<string, unknown>)[token.key];
                   if (typeof lightDirect === "string" && lightDirect) return lightDirect;
                   return token.lightDefault ?? "";
                 };
@@ -974,27 +1081,36 @@ export default function StoreEditForm({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
                   <Field label="Font Family">
                     <select
-                      value={formData.theme.fontFamily}
+                      value={effectiveTheme.fontFamily}
                       onChange={(e) =>
                         handleColorChange("fontFamily", e.target.value as never)
                       }
                       className={inputCls}
                       disabled={loading}
                     >
-                      {[
-                        "Inter",
-                        "Poppins",
-                        "Playfair Display",
-                        "Roboto",
-                        "Open Sans",
-                      ].map((f) => (
+                      {withCurrent(STORE_FONTS, effectiveTheme.fontFamily).map((f) => (
+                        <option key={f}>{f}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Heading Font">
+                    <select
+                      value={effectiveTheme.headingFont ?? ""}
+                      onChange={(e) =>
+                        handleColorChange("headingFont", (e.target.value || undefined) as never)
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                    >
+                      <option value="">Same as body font</option>
+                      {withCurrent(STORE_HEADING_FONTS, effectiveTheme.headingFont).map((f) => (
                         <option key={f}>{f}</option>
                       ))}
                     </select>
                   </Field>
                   <Field label="Border Radius">
                     <select
-                      value={formData.theme.borderRadius}
+                      value={effectiveTheme.borderRadius}
                       onChange={(e) =>
                         handleColorChange(
                           "borderRadius",
@@ -1006,6 +1122,7 @@ export default function StoreEditForm({
                     >
                       <option value="0rem">None — Sharp corners</option>
                       <option value="0.25rem">Small — 4px</option>
+                      <option value="0.375rem">Small+ — 6px</option>
                       <option value="0.5rem">Medium — 8px</option>
                       <option value="0.75rem">Large — 12px</option>
                       <option value="1rem">Extra Large — 16px</option>
@@ -1013,7 +1130,7 @@ export default function StoreEditForm({
                   </Field>
                   <Field label="Layout Style">
                     <select
-                      value={formData.theme.layoutStyle}
+                      value={effectiveTheme.layoutStyle}
                       onChange={(e) =>
                         handleColorChange(
                           "layoutStyle",
@@ -1028,6 +1145,19 @@ export default function StoreEditForm({
                       <option value="masonry">Masonry</option>
                     </select>
                   </Field>
+                  <Field label="Page Background">
+                    <select
+                      value={effectiveTheme.backgroundPattern ?? "grid"}
+                      onChange={(e) =>
+                        handleColorChange("backgroundPattern", e.target.value as never)
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                    >
+                      <option value="grid">Grid lines</option>
+                      <option value="none">Plain</option>
+                    </select>
+                  </Field>
                 </div>
               </div>
             </div>
@@ -1038,14 +1168,14 @@ export default function StoreEditForm({
               <div className="mt-3 sticky top-6">
                 <div
                   className="rounded-xl overflow-hidden border border-admin-border shadow-sm text-xs"
-                  style={{ fontFamily: formData.theme.fontFamily }}
+                  style={{ fontFamily: effectiveTheme.fontFamily }}
                 >
                   {/* Mock header */}
                   <div
                     className="px-3 py-2.5 flex items-center justify-between"
                     style={{
-                      backgroundColor: formData.theme.headerBg,
-                      color: formData.theme.headerText,
+                      backgroundColor: effectiveTheme.headerBg,
+                      color: effectiveTheme.headerText,
                     }}
                   >
                     <span className="font-bold text-sm">
@@ -1061,7 +1191,7 @@ export default function StoreEditForm({
                   {/* Mock hero */}
                   <div
                     className="px-4 py-7 text-center"
-                    style={{ backgroundColor: formData.theme.primaryColor }}
+                    style={{ backgroundColor: effectiveTheme.primaryColor }}
                   >
                     <p className="font-bold text-sm text-white drop-shadow-sm">
                       Welcome to our store
@@ -1073,8 +1203,8 @@ export default function StoreEditForm({
                       type="button"
                       className="mt-3 px-4 py-1.5 text-[11px] font-semibold text-white shadow-sm"
                       style={{
-                        backgroundColor: formData.theme.accentColor,
-                        borderRadius: formData.theme.borderRadius,
+                        backgroundColor: effectiveTheme.accentColor,
+                        borderRadius: effectiveTheme.borderRadius,
                       }}
                     >
                       Shop Now
@@ -1084,21 +1214,21 @@ export default function StoreEditForm({
                   {/* Mock product cards */}
                   <div
                     className="p-3 grid grid-cols-3 gap-2"
-                    style={{ backgroundColor: formData.theme.backgroundColor }}
+                    style={{ backgroundColor: effectiveTheme.backgroundColor }}
                   >
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
                         className="aspect-square flex flex-col items-center justify-center gap-1 border border-admin-border bg-admin-surface shadow-sm"
                         style={{
-                          borderRadius: formData.theme.borderRadius,
+                          borderRadius: effectiveTheme.borderRadius,
                         }}
                       >
                         <Package size={14} className="text-gray-300" />
                         <div
                           className="h-1.5 w-8 rounded-full opacity-20"
                           style={{
-                            backgroundColor: formData.theme.textColor,
+                            backgroundColor: effectiveTheme.textColor,
                           }}
                         />
                       </div>
@@ -1109,8 +1239,8 @@ export default function StoreEditForm({
                   <div
                     className="px-3 py-2 text-[10px] flex items-center justify-between"
                     style={{
-                      backgroundColor: formData.theme.secondaryColor,
-                      color: formData.theme.headerText,
+                      backgroundColor: effectiveTheme.secondaryColor,
+                      color: effectiveTheme.headerText,
                       opacity: 0.9,
                     }}
                   >
@@ -1124,12 +1254,12 @@ export default function StoreEditForm({
                 {/* Colour palette strip */}
                 <div className="mt-3 flex gap-1.5">
                   {[
-                    formData.theme.primaryColor,
-                    formData.theme.secondaryColor,
-                    formData.theme.accentColor,
-                    formData.theme.headerBg,
-                    formData.theme.backgroundColor,
-                    formData.theme.textColor,
+                    effectiveTheme.primaryColor,
+                    effectiveTheme.secondaryColor,
+                    effectiveTheme.accentColor,
+                    effectiveTheme.headerBg,
+                    effectiveTheme.backgroundColor,
+                    effectiveTheme.textColor,
                   ].map((color, i) => (
                     <div
                       key={i}
@@ -1523,6 +1653,26 @@ export default function StoreEditForm({
                                   className={inputCls}
                                   disabled={loading}
                                 />
+                              </Field>
+                              <Field label="Background Video URL (optional)">
+                                <input
+                                  type="url"
+                                  inputMode="url"
+                                  value={banner.video ?? ""}
+                                  onChange={(e) =>
+                                    handleBannerField(
+                                      index,
+                                      "video",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="/media/hero.mp4"
+                                  className={inputCls}
+                                  disabled={loading}
+                                />
+                                <p className="mt-1 text-xs text-admin-text-subtle">
+                                  Muted looping MP4 (H.264, ≤ 4 MB). The image above is its poster.
+                                </p>
                               </Field>
                             </div>
                           )}

@@ -3,6 +3,7 @@ import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
 import type { ICategory } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import slugify from "slugify";
+import { ProductService } from "@/features/products/service";
 
 function nameToSlug(name: string | LocalizedString): string {
   const raw = typeof name === "string" ? name : (name.en ?? Object.values(name)[0] ?? "category");
@@ -15,6 +16,35 @@ export const CategoryService = {
     status?: "active" | "inactive" | "all"
   ): Promise<ICategory[]> {
     return CategoryRepository.findByStore(storeId, status);
+  },
+
+  /**
+   * Top-level categories that hold at least one active product, for the home
+   * "Shop by Category" tiles and the /products chip row. Ordered by the admin
+   * sort order; when no order was set (all equal) the busiest categories lead.
+   * Pass `categories` when the caller already loaded the store's list.
+   */
+  async getTopLevelWithProducts(
+    storeId: string,
+    categories?: ICategory[],
+  ): Promise<{ category: ICategory; count: number }[]> {
+    const all = categories ?? (await CategoryRepository.findByStore(storeId, "active"));
+    const roots = all.filter((c) => c.isActive && !c.parentId);
+    if (roots.length === 0) return [];
+    const counts = await ProductService.getCountsByCategoryIds(
+      storeId,
+      roots.map((c) => c._id),
+      { activeOnly: true },
+    );
+    const withCounts = roots
+      .map((category) => ({ category, count: counts[category._id] ?? 0 }))
+      .filter((r) => r.count > 0);
+    const hasOrder = new Set(withCounts.map((r) => r.category.sortOrder)).size > 1;
+    return withCounts.sort((a, b) =>
+      hasOrder && a.category.sortOrder !== b.category.sortOrder
+        ? a.category.sortOrder - b.category.sortOrder
+        : b.count - a.count,
+    );
   },
 
   async getBySlug(storeId: string, slug: string): Promise<ICategory | null> {

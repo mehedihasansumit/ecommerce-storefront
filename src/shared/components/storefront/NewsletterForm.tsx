@@ -1,21 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { useId, useState } from "react";
+import { CheckCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Button, Field, Input } from "@/shared/components/ui";
 
 interface NewsletterFormProps {
   storeId: string;
-  emailPlaceholder: string;
-  subscribeLabel: string;
 }
 
 type Status = "idle" | "loading" | "success" | "error";
 
-export function NewsletterForm({
-  storeId,
-  emailPlaceholder,
-  subscribeLabel,
-}: NewsletterFormProps) {
+/**
+ * Newsletter sign-up on the brand panel (`--color-newsletter-*` tokens).
+ * Email or phone, either is enough. Labels stay visible (no placeholder-only fields).
+ */
+export function NewsletterForm({ storeId }: NewsletterFormProps) {
+  const tr = useTranslations("home");
+  const tc = useTranslations("common");
+  const id = useId();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -25,7 +28,7 @@ export function NewsletterForm({
     e.preventDefault();
 
     if (!email && !phone) {
-      setErrorMsg("Please enter your email or phone number.");
+      setErrorMsg(tr("newsletterNeedContact"));
       setStatus("error");
       return;
     }
@@ -51,94 +54,104 @@ export function NewsletterForm({
         return;
       }
 
-      const data = await res.json();
-      if (res.status === 409) {
-        setErrorMsg("You're already subscribed!");
-      } else {
-        setErrorMsg(data?.error || "Something went wrong. Please try again.");
-      }
+      const data = await res.json().catch(() => null);
+      setErrorMsg(
+        res.status === 409
+          ? tr("newsletterAlreadySubscribed")
+          : data?.error || tr("newsletterError")
+      );
       setStatus("error");
     } catch {
-      setErrorMsg("Network error. Please try again.");
+      setErrorMsg(tr("newsletterNetworkError"));
       setStatus("error");
     }
   };
 
+  const muted = { color: "color-mix(in srgb, var(--color-newsletter-text) 80%, transparent)" };
+
   if (status === "success") {
     return (
-      <div className="flex flex-col items-center gap-3 py-2">
-        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-          <CheckCircle size={28} style={{ color: "var(--color-newsletter-text)" }} />
-        </div>
-        <p className="font-semibold text-lg" style={{ color: "var(--color-newsletter-text)" }}>Thanks for subscribing!</p>
-        <p className="text-sm" style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 70%, transparent)" }}>We'll keep you updated with the best offers.</p>
+      <div role="status" className="flex flex-col items-center md:items-start gap-2 py-2 text-center md:text-left">
+        <CheckCircle size={28} aria-hidden style={{ color: "var(--color-newsletter-text)" }} />
+        <p className="font-semibold text-lg" style={{ color: "var(--color-newsletter-text)" }}>
+          {tr("subscribedTitle")}
+        </p>
+        <p className="text-sm" style={muted}>{tr("subscribedDesc")}</p>
       </div>
     );
   }
 
-  const inputClass =
-    "w-full px-5 py-3 rounded-full bg-white/10 border border-white/25 placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all disabled:opacity-60 text-sm";
+  const loading = status === "loading";
 
   return (
-    <div className="max-w-sm mx-auto">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="w-full space-y-3"
+      // Inputs are light fields: ring them in the brand colour, not the panel text colour.
+      // Field labels sit on the newsletter panel, so they take its text colour.
+      style={{
+        ["--focus-ring" as string]: "var(--color-primary)",
+        ["--ui-label" as string]: "var(--color-newsletter-text)",
+        ["--ui-label-dark" as string]: "var(--color-newsletter-text)",
+      }}
+    >
+      <Field label={tr("newsletterEmailLabel")}>
+        <Input
+          id={`${id}-email`}
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder={emailPlaceholder}
-          disabled={status === "loading"}
-          className={inputClass}
-          style={{ color: "var(--color-newsletter-text)" }}
+          placeholder={tr("emailPlaceholder")}
+          disabled={loading}
+          className="min-h-11"
         />
+      </Field>
 
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-white/20" />
-          <span
-            className="text-xs uppercase tracking-widest"
-            style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 40%, transparent)" }}
-          >or</span>
-          <div className="flex-1 h-px bg-white/20" />
-        </div>
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="flex-1 h-px" style={{ backgroundColor: "color-mix(in srgb, var(--color-newsletter-text) 25%, transparent)" }} />
+        <span className="text-xs uppercase tracking-widest" style={muted}>{tr("or")}</span>
+        <span className="flex-1 h-px" style={{ backgroundColor: "color-mix(in srgb, var(--color-newsletter-text) 25%, transparent)" }} />
+      </div>
 
-        <input
+      <Field label={tr("newsletterPhoneLabel")}>
+        <Input
+          id={`${id}-phone`}
           type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+880 1XXX XXXXXX"
-          disabled={status === "loading"}
-          className={inputClass}
-          style={{ color: "var(--color-newsletter-text)" }}
+          placeholder={tc("phonePlaceholder")}
+          disabled={loading}
+          className="min-h-11"
         />
-
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="w-full px-8 py-3.5 font-semibold rounded-full transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2 mt-1"
-          style={{
-            backgroundColor: "var(--color-newsletter-btn-bg)",
-            color: "var(--color-newsletter-btn-text)",
-          }}
-        >
-          {status === "loading" ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Subscribing…
-            </>
-          ) : (
-            subscribeLabel
-          )}
-        </button>
-      </form>
+      </Field>
 
       {status === "error" && errorMsg && (
-        <p
-          className="mt-3 text-sm text-center bg-white/10 rounded-full px-4 py-1.5"
-          style={{ color: "color-mix(in srgb, var(--color-newsletter-text) 80%, transparent)" }}
-        >
+        <p role="alert" className="text-sm font-medium" style={{ color: "var(--color-newsletter-text)" }}>
           {errorMsg}
         </p>
       )}
-    </div>
+
+      <Button
+        type="submit"
+        variant="brand"
+        size="xl"
+        fullWidth
+        loading={loading}
+        className="mt-1"
+        style={{
+          backgroundColor: "var(--color-newsletter-btn-bg)",
+          color: "var(--color-newsletter-btn-text)",
+          ["--focus-ring" as string]: "var(--color-newsletter-text)",
+        }}
+      >
+        {tr("subscribe")}
+      </Button>
+
+      <p className="text-xs" style={muted}>{tr("noSpam")}</p>
+    </form>
   );
 }

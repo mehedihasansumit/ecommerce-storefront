@@ -43,3 +43,18 @@ export function tAdmin(
 ): string {
   return t(field, preferLocale);
 }
+
+/**
+ * Format a number in the locale's own digits (Bengali digits for `bn`), for numbers set
+ * directly in markup: badges, steppers, scores, years. Messages use `{n, number}` instead.
+ */
+export function formatNumber(
+  value: number,
+  locale: string,
+  options?: Intl.NumberFormatOptions
+): string {
+  return new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US", {
+    useGrouping: false,
+    ...options,
+  }).format(value);
+}

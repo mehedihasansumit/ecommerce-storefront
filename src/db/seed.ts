@@ -98,16 +98,11 @@ async function main() {
       slug: "punjabi-palace",
       name: "Punjabi Palace",
       domains: ["punjabi.localhost", "www.punjabi.com"],
+      // The demo look is the "atelier" Theme Preset (palette, fonts, radius and Style
+      // Switches resolved at render time). Other presets: "zari-oxblood", "dark-room",
+      // "shiraz-zari" (src/features/stores/presets.ts); set `styles` to override sections.
       theme: {
-        primaryColor: "#D97706",
-        secondaryColor: "#B45309",
-        accentColor: "#FEF3C7",
-        backgroundColor: "#FFFBEB",
-        textColor: "#1C1917",
-        headerBg: "#7C2D12",
-        headerText: "#FFFFFF",
-        fontFamily: "Playfair Display",
-        borderRadius: "0.75rem",
+        preset: "atelier",
         layoutStyle: "grid",
       },
       heroBanners: [

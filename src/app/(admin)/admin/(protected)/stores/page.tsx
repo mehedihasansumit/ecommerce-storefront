@@ -4,6 +4,7 @@ import { StoreService } from "@/features/stores/service";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
 import type { Metadata } from "next";
+import { resolveTheme } from "@/features/stores/presets";
 import { Store, Plus, Globe, ExternalLink, Settings } from "lucide-react";
 
 export const metadata: Metadata = { title: "Manage Stores" };
@@ -91,7 +92,7 @@ export default async function StoresPage() {
           {/* Mobile card list */}
           <div className="flex flex-col gap-3 sm:hidden">
             {stores.map((store) => {
-              const primary = store.theme?.primaryColor || "#111827";
+              const primary = resolveTheme(store.theme).primaryColor || "#111827";
               const initials = store.name
                 .split(" ")
                 .slice(0, 2)
@@ -205,7 +206,7 @@ export default async function StoresPage() {
               </thead>
               <tbody className="divide-y divide-admin-border">
                 {stores.map((store) => {
-                  const primary = store.theme?.primaryColor || "#111827";
+                  const primary = resolveTheme(store.theme).primaryColor || "#111827";
                   const initials = store.name
                     .split(" ")
                     .slice(0, 2)

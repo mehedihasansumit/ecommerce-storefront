@@ -1,6 +1,7 @@
 "use client";
 
 import { cloneElement, isValidElement, useId } from "react";
+import { useTranslations } from "next-intl";
 import type { ReactElement, ReactNode } from "react";
 
 interface FieldProps {
@@ -28,6 +29,7 @@ export function Field({
   children,
   className,
 }: FieldProps) {
+  const tc = useTranslations("common");
   const reactId = useId();
   const existingId = isValidElement(children) ? children.props.id : undefined;
   const id = htmlFor ?? existingId ?? reactId;
@@ -46,11 +48,11 @@ export function Field({
   return (
     <div className={["space-y-1.5", className].filter(Boolean).join(" ")}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label htmlFor={id} className="block text-sm font-medium text-[var(--ui-label,#374151)] dark:text-[var(--ui-label-dark,#d1d5db)]">
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <span className="text-error ml-0.5">*</span>}
           {optional && (
-            <span className="text-gray-400 font-normal ml-1">(optional)</span>
+            <span className="text-gray-400 font-normal ml-1">{tc("optional")}</span>
           )}
         </label>
       )}

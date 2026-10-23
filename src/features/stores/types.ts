@@ -1,7 +1,9 @@
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { IStoreDeliveryConfig } from "@/shared/lib/delivery";
+import type { IStoreStyles } from "./styles";
 
 export type { IStoreDeliveryConfig };
+export type { IStoreStyles };
 
 export interface IStoreDarkTheme {
   primaryColor?: string;
@@ -24,6 +26,11 @@ export interface IStoreDarkTheme {
   footerText?: string;
   linkColor?: string;
   cardBg?: string;
+  /** Pinned global colours (PINNABLE_DERIVED_TOKENS); normally unset. */
+  successColor?: string;
+  errorColor?: string;
+  /** Base colour of the hero scrim; derived from the darkest brand colour when unset. */
+  heroScrim?: string;
 }
 
 // NOTE: Color tokens here mirror `THEME_TOKENS` in ./theme-tokens.ts.
@@ -40,7 +47,11 @@ export interface IStoreTheme {
   headerBg: string;
   headerText: string;
   fontFamily: string;
+  /** Optional display face for headings (Google Font family). Falls back to `fontFamily`. */
+  headingFont?: string;
   borderRadius: string;
+  /** Storefront page background texture. Default "grid" (graph-paper lines). */
+  backgroundPattern?: "grid" | "none";
   layoutStyle: "grid" | "list" | "masonry";
   newsletterBg?: string;
   newsletterText?: string;
@@ -53,7 +64,19 @@ export interface IStoreTheme {
   footerText?: string;
   linkColor?: string;
   cardBg?: string;
+  /** Pinned global colours (PINNABLE_DERIVED_TOKENS); normally unset. */
+  successColor?: string;
+  errorColor?: string;
+  /** Base colour of the hero scrim; derived from the darkest brand colour when unset. */
+  heroScrim?: string;
   dark?: IStoreDarkTheme;
+  /**
+   * Theme Preset id (src/features/stores/presets.ts). The storefront renders
+   * defaults ← preset ← the values set here (resolveTheme); explicit values win.
+   */
+  preset?: string;
+  /** Style Switch choices (src/features/stores/styles.ts); unset = the preset's, else the base layout. */
+  styles?: IStoreStyles;
 }
 
 export type HeroLayoutStyle =
@@ -72,6 +95,11 @@ export interface IHeroBanner {
   blurDataURL?: string;
   width?: number;
   height?: number;
+  /**
+   * Optional looping background video (mp4 URL). Muted, decorative; `image`
+   * (+ variants/blurDataURL) stays the poster, LCP element and fallback.
+   */
+  video?: string;
   title: LocalizedString;
   subtitle?: LocalizedString;
   linkUrl?: string;

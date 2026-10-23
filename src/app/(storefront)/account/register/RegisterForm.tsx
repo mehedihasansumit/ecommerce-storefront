@@ -9,6 +9,7 @@ import { Alert, Button, Input } from "@/shared/components/ui";
 
 export default function RegisterForm() {
   const t = useTranslations("auth");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -43,7 +44,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
+    <div className="flex justify-center px-4 py-8 md:min-h-[70vh] md:items-center md:py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1
@@ -58,7 +59,7 @@ export default function RegisterForm() {
           className="shadow-sm border px-8 py-10"
           style={{
             borderRadius: "var(--border-radius)",
-            backgroundColor: "var(--color-surface)",
+            backgroundColor: "var(--color-card-bg)",
             borderColor: "var(--color-border-subtle)",
           }}
         >
@@ -67,13 +68,14 @@ export default function RegisterForm() {
 
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                 {t("name")}
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600 pointer-events-none" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
                 <Input
                   type="text"
+                  autoComplete="name"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -86,13 +88,14 @@ export default function RegisterForm() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                 {t("email")}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600 pointer-events-none" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
                 <Input
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -105,47 +108,45 @@ export default function RegisterForm() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                 {t("phone")} <span style={{ color: "var(--color-error)" }}>*</span>
               </label>
-              <div className="flex items-stretch">
-                <span
-                  className="flex items-center gap-1.5 px-3 py-2.5 border border-gray-300 dark:border-gray-600 border-r-0 bg-gray-50 dark:bg-gray-700/50 text-sm font-medium text-gray-600 dark:text-gray-400 select-none shrink-0"
-                  style={{ borderRadius: "var(--border-radius) 0 0 var(--border-radius)" }}
-                >
-                  <Phone className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                  +88
-                </span>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="off"
-                  required
-                  pattern="\d*"
-                  value={nationalNumber}
-                  onChange={(e) => setNationalNumber(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (!/[0-9]/.test(e.key) && e.key !== "Backspace" && e.key !== "Delete") {
-                      e.preventDefault();
-                    }
-                  }}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 border border-gray-300 dark:border-gray-600 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-primary)] transition-all text-sm"
-                  style={{ borderRadius: "0 var(--border-radius) var(--border-radius) 0" }}
-                  placeholder="01712345678"
-                  maxLength={11}
-                />
-              </div>
+              <Input
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                required
+                pattern="\d*"
+                prefix={
+                  <>
+                    <Phone aria-hidden className="w-4 h-4" />
+                    +88
+                  </>
+                }
+                value={nationalNumber}
+                onChange={(e) => setNationalNumber(e.target.value)}
+                onKeyDown={(e) => {
+                  // Block single printable non-digits; named keys (Tab, arrows, Backspace) pass through.
+                  if (e.key.length === 1 && !/[0-9]/.test(e.key) && !e.metaKey && !e.ctrlKey) {
+                    e.preventDefault();
+                  }
+                }}
+                style={{ borderRadius: "var(--border-radius)" }}
+                placeholder={tc("phonePlaceholder")}
+                maxLength={11}
+              />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                 {t("password")}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600 pointer-events-none" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -156,9 +157,9 @@ export default function RegisterForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                  tabIndex={-1}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="focus-ring absolute right-0.5 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary hover:text-[var(--color-text)] transition-colors"
+                  aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+                  aria-pressed={showPassword}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -171,7 +172,7 @@ export default function RegisterForm() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-6 text-center text-sm text-text-secondary">
           {t("haveAccount")}{" "}
           <Link
             href="/account/login"

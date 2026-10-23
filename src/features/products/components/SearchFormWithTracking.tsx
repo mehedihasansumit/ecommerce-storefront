@@ -23,14 +23,16 @@ export function SearchFormWithTracking({
   }
 
   return (
-    <form method="get" action="/products" className="mb-4" onSubmit={handleSubmit}>
+    <form method="get" action="/products" role="search" className="mb-4" onSubmit={handleSubmit}>
       <div className="relative">
         <input
-          type="text"
+          type="search"
           name="search"
           defaultValue={defaultValue}
           placeholder={placeholder}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-bg border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          aria-label={placeholder}
+          enterKeyHint="search"
+          className="focus-ring w-full min-h-11 pl-9 pr-3 py-2 text-sm bg-[var(--color-card-bg)] text-[var(--color-text)] placeholder:text-text-tertiary border border-input-border transition-colors"
           style={{ borderRadius: "var(--border-radius)" }}
         />
         <Search

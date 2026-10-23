@@ -5,9 +5,10 @@ import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { createStoreMetadata } from "@/shared/lib/seo";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { t } from "@/shared/lib/i18n";
 
 export async function generateMetadata({
@@ -45,6 +46,7 @@ export default async function CategoryPage({
   const { page: pageParam } = await searchParams;
 
   const locale = await getLocale();
+  const th = await getTranslations("header");
   const category = await CategoryService.getBySlug(tenant._id, slug);
   if (!category) notFound();
 
@@ -59,18 +61,18 @@ export default async function CategoryPage({
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <nav className="text-sm text-gray-500 mb-6">
-        <Link href="/" className="hover:text-gray-900">
-          Home
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <nav aria-label={th("home")} className="flex items-center gap-2 text-sm text-text-secondary mb-2 md:mb-4">
+        <Link href="/" className="focus-ring inline-flex min-h-10 items-center hover:text-[var(--color-text)] transition-colors">
+          {th("home")}
         </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">{catName}</span>
+        <ChevronRight size={14} aria-hidden className="text-text-tertiary" />
+        <span className="text-[var(--color-text)] font-medium truncate" aria-current="page">{catName}</span>
       </nav>
 
-      <h1 className="text-3xl font-bold mb-2">{catName}</h1>
+      <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-2">{catName}</h1>
       {catDesc && (
-        <p className="text-gray-600 mb-8">{catDesc}</p>
+        <p className="text-text-secondary mb-6 md:mb-8 max-w-2xl">{catDesc}</p>
       )}
 
       <ProductGrid products={result.data} />
@@ -82,10 +84,11 @@ export default async function CategoryPage({
               <Link
                 key={p}
                 href={`/categories/${slug}?page=${p}`}
-                className={`px-4 py-2 text-sm border ${
+                aria-current={p === page ? "page" : undefined}
+                className={`focus-ring inline-flex min-h-10 min-w-10 items-center justify-center px-4 text-sm border transition-colors ${
                   p === page
-                    ? "font-bold border-gray-900"
-                    : "border-gray-300 hover:border-gray-500"
+                    ? "font-semibold border-[var(--color-text)]"
+                    : "border-border-subtle text-text-secondary hover:border-text-secondary"
                 }`}
                 style={{ borderRadius: "var(--border-radius)" }}
               >

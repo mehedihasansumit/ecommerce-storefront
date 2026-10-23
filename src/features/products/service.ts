@@ -143,8 +143,9 @@ export const ProductService = {
 
   async getCountsByCategoryIds(
     storeId: string,
-    categoryIds: string[]
+    categoryIds: string[],
+    { activeOnly = false }: { activeOnly?: boolean } = {}
   ): Promise<Record<string, number>> {
-    return ProductRepository.countByCategoryIds(storeId, categoryIds);
+    return ProductRepository.countByCategoryIds(storeId, categoryIds, activeOnly);
   },
 };

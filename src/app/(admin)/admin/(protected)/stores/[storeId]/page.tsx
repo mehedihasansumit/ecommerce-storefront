@@ -21,6 +21,7 @@ import {
   Gift,
 } from "lucide-react";
 import StoreEditForm from "@/features/stores/components/StoreEditForm";
+import { resolveTheme } from "@/features/stores/presets";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 
@@ -258,20 +259,22 @@ export default async function StoreDetailPage({
     accent: ModuleAccent;
   }[];
 
+  // Summary swatches show what the storefront renders (Theme Preset applied).
+  const theme = resolveTheme(store.theme);
   const lightColors = [
-    store.theme.primaryColor,
-    store.theme.secondaryColor,
-    store.theme.accentColor,
-    store.theme.headerBg,
-    store.theme.backgroundColor,
+    theme.primaryColor,
+    theme.secondaryColor,
+    theme.accentColor,
+    theme.headerBg,
+    theme.backgroundColor,
   ];
 
-  const darkColors = store.theme.dark
+  const darkColors = theme.dark
     ? [
-        store.theme.dark.backgroundColor,
-        store.theme.dark.primaryColor ?? store.theme.primaryColor,
-        store.theme.dark.surfaceColor,
-        store.theme.dark.headerBg,
+        theme.dark.backgroundColor,
+        theme.dark.primaryColor ?? theme.primaryColor,
+        theme.dark.surfaceColor,
+        theme.dark.headerBg,
       ].filter(Boolean)
     : [];
 
@@ -289,19 +292,19 @@ export default async function StoreDetailPage({
         <div
           className="absolute inset-0 opacity-[0.07]"
           style={{
-            background: `linear-gradient(135deg, ${store.theme.primaryColor} 0%, ${store.theme.accentColor} 100%)`,
+            background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.accentColor} 100%)`,
           }}
         />
         <div
           className="absolute top-0 left-0 w-1 h-full"
-          style={{ backgroundColor: store.theme.primaryColor }}
+          style={{ backgroundColor: theme.primaryColor }}
         />
         <div className="relative p-6">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4 min-w-0">
               <div
                 className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-md flex-shrink-0 select-none ring-4 ring-white/30 dark:ring-black/20"
-                style={{ backgroundColor: store.theme.primaryColor }}
+                style={{ backgroundColor: theme.primaryColor }}
               >
                 {store.name.charAt(0).toUpperCase()}
               </div>
@@ -395,13 +398,13 @@ export default async function StoreDetailPage({
 
               <span className="inline-flex items-center gap-1.5">
                 <Type size={12} />
-                {store.theme.fontFamily}
+                {theme.fontFamily}
               </span>
-              <span className="capitalize">{store.theme.layoutStyle} layout</span>
+              <span className="capitalize">{theme.layoutStyle} layout</span>
               <span>
-                {store.theme.borderRadius === "0rem"
+                {theme.borderRadius === "0rem"
                   ? "No radius"
-                  : `${store.theme.borderRadius} radius`}
+                  : `${theme.borderRadius} radius`}
               </span>
             </div>
           )}

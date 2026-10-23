@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, formatPrice } from "@/shared/components/ui";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 
 interface RedeemPointsButtonProps {
   points: number;
@@ -15,6 +18,9 @@ export default function RedeemPointsButton({
   pointsPerBdt,
 }: RedeemPointsButtonProps) {
   const router = useRouter();
+  const tr = useTranslations("redeemPoints");
+  const locale = useLocale();
+  const currency = useStoreCurrency();
   const [loading, setLoading] = useState(false);
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,13 +41,13 @@ export default function RedeemPointsButton({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Redemption failed");
+        setError(data.error ?? tr("redeemFailed"));
         return;
       }
       setCouponCode(data.coupon.code as string);
       router.refresh();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(tr("genericError"));
     } finally {
       setLoading(false);
     }
@@ -57,43 +63,41 @@ export default function RedeemPointsButton({
   if (couponCode) {
     return (
       <div className="space-y-2">
-        <p className="text-xs text-gray-500">Your coupon code:</p>
+        <p className="text-xs text-text-secondary">{tr("yourCode")}</p>
         <div className="flex items-center gap-2">
           <code
             className="text-sm font-mono font-semibold px-3 py-1.5 rounded-lg border border-dashed"
             style={{
-              color: "var(--color-primary)",
-              borderColor: "var(--color-primary)",
-              backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, white)",
+              color: "var(--color-link)",
+              borderColor: "var(--color-link)",
+              backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, var(--color-card-bg))",
             }}
           >
             {couponCode}
           </code>
-          <button
-            onClick={handleCopy}
-            className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
+          <Button variant="secondary" size="sm" onClick={handleCopy} aria-live="polite">
+            {copied ? tr("copied") : tr("copy")}
+          </Button>
         </div>
-        <p className="text-xs text-gray-400">Valid for 30 days · Single use</p>
+        <p className="text-xs text-text-secondary">{tr("validity")}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-2 text-right">
-      {error && <p className="text-xs text-red-600">{error}</p>}
-      <button
+      {error && <p className="text-xs text-error" role="alert">{error}</p>}
+      <Button
+        variant="brand"
         onClick={handleRedeem}
-        disabled={loading || redeemablePoints === 0}
-        className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-opacity"
-        style={{ backgroundColor: "var(--color-primary)" }}
+        loading={loading}
+        disabled={redeemablePoints === 0}
       >
-        {loading
-          ? "Redeeming…"
-          : `Redeem ${redeemablePoints} pts for ৳${discountValue}`}
-      </button>
+        {tr("redeem", {
+          points: redeemablePoints,
+          amount: formatPrice(discountValue, currency, locale),
+        })}
+      </Button>
     </div>
   );
 }

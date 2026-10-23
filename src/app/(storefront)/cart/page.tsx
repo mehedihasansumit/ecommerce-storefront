@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Loader2, X, Tag, ArrowRight, ArrowLeft, Truck, Lock, Gift, Sparkles } from "lucide-react";
+import { ShoppingBag, X, Tag, ArrowRight, ArrowLeft, Truck, Gift, Sparkles } from "lucide-react";
 import { useCart } from "@/shared/context/CartContext";
 import { CartItemRow } from "@/features/cart/components/CartItemRow";
+import { CartSkeleton } from "@/features/cart/components/CartSkeleton";
 import { useTranslations, useLocale } from "next-intl";
 import { useTenant } from "@/shared/hooks/useTenant";
 import { t as tLocalized } from "@/shared/lib/i18n";
+import { Button, ButtonLink, Input, formatPrice } from "@/shared/components/ui";
+import { getStoreTrustFacts } from "@/features/stores/trust";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -16,7 +20,6 @@ export default function CartPage() {
     subtotal,
     coupon,
     couponDiscount,
-    campaignDiscount,
     appliedCampaigns,
     campaignFreeItems,
     campaignFreeShipping,
@@ -26,13 +29,27 @@ export default function CartPage() {
     couponError,
     applyCoupon,
     removeCoupon,
+    hydrated,
   } = useCart();
   const tenant = useTenant();
   const locale = useLocale();
+  const currency = useStoreCurrency();
+  const tt = useTranslations("trust");
+  const money = (n: number) => formatPrice(n, currency, locale);
+  // Real delivery terms from the store config. Without a configured fee the
+  // checkout charges nothing, so "free" is only claimed when it is true.
+  const deliveryFact = tenant
+    ? getStoreTrustFacts(tenant).find((f) => f.kind === "delivery")
+    : undefined;
+  const deliveryDue = Boolean(deliveryFact) && !campaignFreeShipping;
 
   useEffect(() => {
     document.title = `Cart | ${tenant?.name ?? "Store"}`;
   }, [tenant?.name]);
+
+  // Cart lives in localStorage: until it's read, show a skeleton instead of
+  // flashing the empty state at shoppers who do have items.
+  if (!hydrated) return <CartSkeleton />;
 
   if (items.length === 0) {
     return (
@@ -42,23 +59,20 @@ export default function CartPage() {
             className="w-20 h-20 rounded-2xl flex items-center justify-center"
             style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)" }}
           >
-            <ShoppingBag size={36} style={{ color: "var(--color-primary)" }} />
+            <ShoppingBag size={36} aria-hidden style={{ color: "var(--color-link)" }} />
           </div>
           <div>
-            <h1 className="text-xl font-bold mb-1 text-[var(--color-text)]">{t("empty")}</h1>
+            <h1 className="text-2xl font-medium mb-1 text-[var(--color-text)]">{t("empty")}</h1>
             <p className="text-text-secondary text-sm">{t("emptyDesc")}</p>
           </div>
-          <Link
+          <ButtonLink
             href="/products"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              borderRadius: "var(--border-radius)",
-            }}
+            variant="brand"
+            size="lg"
+            rightIcon={<ArrowRight size={16} aria-hidden />}
           >
             {t("continueShopping")}
-            <ArrowRight size={16} />
-          </Link>
+          </ButtonLink>
         </div>
       </div>
     );
@@ -71,12 +85,12 @@ export default function CartPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text)]">
           {t("yourCart")}
           <span className="ml-2 text-base font-normal text-text-tertiary">
-            ({items.length} {items.length === 1 ? "item" : "items"})
+            ({t("items", { count: items.length })})
           </span>
         </h1>
         <Link
           href="/products"
-          className="hidden sm:inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
+          className="focus-ring hidden sm:inline-flex min-h-10 items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
         >
           <ArrowLeft size={15} />
           {t("continueShopping")}
@@ -98,7 +112,7 @@ export default function CartPage() {
                 <CartItemRow
                   key={`${item.productId}-${JSON.stringify(item.variantSelections)}-${idx}`}
                   productId={item.productId}
-                  productName={item.productName}
+                  productName={item.productNames ? tLocalized(item.productNames, locale) || item.productName : item.productName}
                   productSlug={item.productSlug}
                   thumbnail={item.thumbnail}
                   priceAtAdd={item.priceAtAdd}
@@ -109,17 +123,24 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Free shipping nudge */}
-          <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border-subtle text-sm text-text-secondary"
+          {/* Delivery note: the store's real fee, or free shipping when it really is free */}
+          <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg border border-border-subtle text-sm text-text-secondary"
             style={{ backgroundColor: "color-mix(in srgb, var(--color-primary) 6%, transparent)" }}
           >
-            <Truck size={15} className="shrink-0" style={{ color: "var(--color-primary)" }} />
-            <span>{t("freeShippingNote")}</span>
+            <Truck size={15} aria-hidden className="shrink-0" style={{ color: "var(--color-link)" }} />
+            <span>
+              {deliveryDue && deliveryFact?.kind === "delivery"
+                ? tt("deliveryLong", {
+                    inside: money(deliveryFact.insideDhaka),
+                    outside: money(deliveryFact.outsideDhaka),
+                  })
+                : t("freeShippingNote")}
+            </span>
           </div>
 
           <Link
             href="/products"
-            className="inline-flex sm:hidden items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
+            className="focus-ring inline-flex sm:hidden min-h-10 items-center gap-1.5 text-sm text-text-secondary hover:text-[var(--color-text)] transition-colors"
           >
             <ArrowLeft size={15} />
             {t("continueShopping")}
@@ -150,24 +171,24 @@ export default function CartPage() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between gap-3 text-text-secondary">
                 <span>
-                  {t("subtotal")} ({items.length} {items.length === 1 ? "item" : "items"})
+                  {t("subtotal")} ({t("items", { count: items.length })})
                 </span>
-                <span className="font-medium shrink-0 text-[var(--color-text)]">৳{subtotal.toLocaleString()}</span>
+                <span className="font-medium shrink-0 text-[var(--color-text)]">{money(subtotal)}</span>
               </div>
               {couponDiscount > 0 && (
-                <div className="flex items-center justify-between gap-3" style={{ color: "#16a34a" }}>
+                <div className="flex items-center justify-between gap-3" style={{ color: "var(--color-success)" }}>
                   <span className="flex items-center gap-1.5">
                     <Tag size={13} />
-                    Coupon ({coupon?.code})
+                    {t("couponLine", { code: coupon?.code ?? "" })}
                   </span>
-                  <span className="font-medium shrink-0">-৳{couponDiscount.toLocaleString()}</span>
+                  <span className="font-medium shrink-0">-{money(couponDiscount)}</span>
                 </div>
               )}
               {appliedCampaigns.map((c) => (
                 <div
                   key={c.campaignId}
                   className="flex items-start justify-between gap-3"
-                  style={{ color: "#16a34a" }}
+                  style={{ color: "var(--color-success)" }}
                 >
                   <span className="flex items-center gap-1.5">
                     <Sparkles size={13} />
@@ -175,7 +196,7 @@ export default function CartPage() {
                   </span>
                   {c.discountAmount > 0 && (
                     <span className="font-medium shrink-0">
-                      -৳{c.discountAmount.toLocaleString()}
+                      -{money(c.discountAmount)}
                     </span>
                   )}
                 </div>
@@ -189,10 +210,10 @@ export default function CartPage() {
                     >
                       <span className="flex items-center gap-1.5 text-text-secondary">
                         <Gift size={12} style={{ color: "var(--color-primary)" }} />
-                        Free × {f.qty}
+                        {t("freeItemQty", { qty: f.qty })}
                       </span>
-                      <span style={{ color: "#16a34a" }} className="font-medium">
-                        FREE
+                      <span style={{ color: "var(--color-success)" }} className="font-medium">
+                        {t("free")}
                       </span>
                     </div>
                   ))}
@@ -216,9 +237,13 @@ export default function CartPage() {
               )}
               <div className="flex items-center justify-between gap-3 text-text-secondary">
                 <span>{t("shipping")}</span>
-                <span className="shrink-0 font-semibold" style={{ color: "#16a34a" }}>
-                  {campaignFreeShipping ? "Free (campaign)" : "Free"}
-                </span>
+                {deliveryDue ? (
+                  <span className="shrink-0 text-right">{t("shippingAtCheckout")}</span>
+                ) : (
+                  <span className="shrink-0 font-semibold" style={{ color: "var(--color-success)" }}>
+                    {campaignFreeShipping ? t("freeCampaign") : t("free")}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -226,27 +251,21 @@ export default function CartPage() {
             <div className="mt-4 pt-4 border-t border-border-subtle flex items-center justify-between gap-3">
               <span className="font-bold text-base text-[var(--color-text)]">{t("total")}</span>
               <span className="font-extrabold text-xl shrink-0" style={{ color: "var(--color-price)" }}>
-                ৳{total.toLocaleString()}
+                {money(total)}
               </span>
             </div>
 
             {/* Checkout CTA */}
-            <Link
+            <ButtonLink
               href="/checkout"
-              className="mt-5 flex items-center justify-center gap-2 w-full py-3.5 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md active:scale-[0.98]"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                borderRadius: "var(--border-radius)",
-              }}
+              variant="brand"
+              size="xl"
+              fullWidth
+              className="mt-5"
+              rightIcon={<ArrowRight size={16} aria-hidden />}
             >
               {t("checkout")}
-              <ArrowRight size={16} />
-            </Link>
-
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-text-tertiary">
-              <Lock size={10} />
-              <span>{t("secureCheckout")}</span>
-            </div>
+            </ButtonLink>
           </div>
         </div>
       </div>
@@ -268,6 +287,10 @@ function CouponInput({
   onRemove: () => void;
 }) {
   const [code, setCode] = useState("");
+  const tc = useTranslations("cart");
+  const locale = useLocale();
+  const currency = useStoreCurrency();
+  const removeLabel = tc("removeCoupon");
 
   async function handleApply(e: React.FormEvent) {
     e.preventDefault();
@@ -281,21 +304,22 @@ function CouponInput({
       <div
         className="mb-4 flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm border"
         style={{
-          backgroundColor: "color-mix(in srgb, #16a34a 8%, transparent)",
-          borderColor: "color-mix(in srgb, #16a34a 25%, transparent)",
+          backgroundColor: "color-mix(in srgb, var(--color-success) 8%, transparent)",
+          borderColor: "color-mix(in srgb, var(--color-success) 25%, transparent)",
         }}
       >
-        <Tag size={13} style={{ color: "#16a34a" }} className="shrink-0" />
-        <span className="font-medium flex-1 truncate" style={{ color: "#16a34a" }}>
-          {coupon.code} · -৳{coupon.discount.toLocaleString()}
+        <Tag size={13} style={{ color: "var(--color-success)" }} className="shrink-0" />
+        <span className="font-medium flex-1 truncate" style={{ color: "var(--color-success)" }}>
+          {coupon.code} · -{formatPrice(coupon.discount, currency, locale)}
         </span>
         <button
           onClick={onRemove}
-          className="shrink-0 p-0.5 rounded transition-opacity hover:opacity-60"
-          style={{ color: "#16a34a" }}
-          aria-label="Remove coupon"
+          type="button"
+          className="focus-ring shrink-0 -my-2 -mr-2 inline-flex h-10 w-10 items-center justify-center rounded-lg transition-opacity hover:opacity-70"
+          style={{ color: "var(--color-success)" }}
+          aria-label={removeLabel}
         >
-          <X size={14} />
+          <X size={16} aria-hidden />
         </button>
       </div>
     );
@@ -304,31 +328,29 @@ function CouponInput({
   return (
     <div className="mb-5">
       <form onSubmit={handleApply} className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase())}
-          placeholder="Coupon code"
-          className="flex-1 min-w-0 px-3 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder:text-text-tertiary text-[var(--color-text)]"
-          style={{
-            backgroundColor: "var(--color-card-bg)",
-            ["--tw-ring-color" as string]: "color-mix(in srgb, var(--color-primary) 30%, transparent)",
-          }}
+          placeholder={tc("couponPlaceholder")}
+          aria-label={tc("couponPlaceholder")}
+          invalid={Boolean(couponError)}
+          aria-describedby={couponError ? "coupon-error" : undefined}
+          autoCapitalize="characters"
+          className="flex-1 min-w-0"
         />
-        <button
+        <Button
           type="submit"
-          disabled={couponLoading || !code.trim()}
-          className="shrink-0 px-4 py-2 text-sm font-semibold border rounded-lg transition-all hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
-          style={{
-            borderColor: "var(--color-primary)",
-            color: "var(--color-primary)",
-          }}
+          variant="secondary"
+          loading={couponLoading}
+          disabled={!code.trim()}
+          className="shrink-0 min-h-10"
         >
-          {couponLoading ? <Loader2 size={14} className="animate-spin" /> : "Apply"}
-        </button>
+          {tc("applyCoupon")}
+        </Button>
       </form>
       {couponError && (
-        <p className="mt-1.5 text-xs text-red-500">{couponError}</p>
+        <p id="coupon-error" role="alert" className="mt-1.5 text-xs text-error">{couponError}</p>
       )}
     </div>
   );

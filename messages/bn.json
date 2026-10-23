@@ -12,7 +12,15 @@
     "logout": "লগআউট",
     "addresses": "ঠিকানা",
     "callUs": "কল করুন",
-    "trackOrder": "অর্ডার ট্র্যাক করুন"
+    "trackOrder": "অর্ডার ট্র্যাক করুন",
+    "callNumber": "{phone} নম্বরে কল করুন",
+    "close": "বন্ধ করুন",
+    "trackShort": "ট্র্যাক",
+    "toggleTheme": "রঙের থিম পরিবর্তন করুন",
+    "searchGo": "খুঁজুন",
+    "closeSearch": "সার্চ বন্ধ করুন",
+    "search": "খুঁজুন",
+    "mobileNav": "স্টোর নেভিগেশন"
   },
   "footer": {
     "quickLinks": "দ্রুত লিঙ্ক",
@@ -33,14 +41,23 @@
     "privacyPolicy": "গোপনীয়তা নীতি",
     "termsOfService": "সেবার শর্তাবলী",
     "contactUs": "যোগাযোগ করুন",
-    "paymentMethods": "আমরা সকল প্রধান পেমেন্ট পদ্ধতি গ্রহণ করি"
+    "paymentMethods": "আমরা সকল প্রধান পেমেন্ট পদ্ধতি গ্রহণ করি",
+    "shoppingWithUs": "আমাদের থেকে কেনাকাটা",
+    "ordering": "অর্ডার",
+    "storeFallback": "স্টোর"
   },
   "heroBanner": {
-    "shopNow": "এখনই কিনুন"
+    "shopNow": "এখনই কিনুন",
+    "playVideo": "ব্যাকগ্রাউন্ড ভিডিও চালু করুন",
+    "pauseVideo": "ব্যাকগ্রাউন্ড ভিডিও থামান",
+    "carousel": "ক্যারোসেল",
+    "previous": "আগের স্লাইড",
+    "next": "পরের স্লাইড"
   },
   "home": {
     "shopByCategory": "বিভাগ অনুযায়ী কেনাকাটা করুন",
     "shopByCategoryDesc": "আমাদের নির্বাচিত সংগ্রহ অন্বেষণ করুন",
+    "categoryCount": "{count, plural, =0 {দেখুন} other {#টি পণ্য}}",
     "featuredProducts": "বৈশিষ্ট্যযুক্ত পণ্য",
     "featuredProductsDesc": "আপনার জন্য বাছাই করা পণ্য",
     "viewAll": "সব দেখুন",
@@ -67,7 +84,18 @@
     "noSpam": "কোনো স্প্যাম নেই, যেকোনো সময় আনসাবস্ক্রাইব করুন",
     "privacyNote": "সাবস্ক্রাইব করে আপনি আমাদের গোপনীয়তা নীতিতে সম্মত হচ্ছেন।",
     "newArrivals": "নতুন আগমন",
-    "newArrivalsDesc": "আমাদের সর্বশেষ সংযোজন"
+    "newArrivalsDesc": "আমাদের সর্বশেষ সংযোজন",
+    "subscribedTitle": "সাবস্ক্রাইব করার জন্য ধন্যবাদ!",
+    "subscribedDesc": "সেরা অফারগুলোর খবর আমরা আপনাকে জানাব।",
+    "newsletterNeedContact": "আপনার ইমেইল বা ফোন নম্বর দিন।",
+    "newsletterAlreadySubscribed": "আপনি ইতিমধ্যে সাবস্ক্রাইব করেছেন।",
+    "newsletterError": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    "newsletterNetworkError": "নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।",
+    "newsletterEmailLabel": "ইমেইল",
+    "newsletterPhoneLabel": "ফোন নম্বর",
+    "or": "অথবা",
+    "categoriesPrev": "আগের বিভাগগুলো",
+    "categoriesNext": "পরের বিভাগগুলো"
   },
   "products": {
     "allProducts": "সমস্ত পণ্য",
@@ -80,14 +108,21 @@
     "searchPlaceholder": "খুঁজুন...",
     "showing": "দেখানো হচ্ছে",
     "of": "এর মধ্যে",
-    "productsLabel": "পণ্য"
+    "countLabel": "{count, number}টি পণ্য",
+    "activeFilters": "ফিল্টার:",
+    "removeFilter": "{name} ফিল্টার সরান",
+    "sortLabel": "সাজান",
+    "sortNewest": "নতুন আগে",
+    "sortPriceAsc": "দাম: কম থেকে বেশি",
+    "sortPriceDesc": "দাম: বেশি থেকে কম",
+    "sortTopRated": "সেরা রেটিং"
   },
   "productDetail": {
     "home": "হোম",
     "products": "পণ্য",
     "noImage": "কোন ছবি নেই",
     "reviews": "পর্যালোচনা",
-    "inStock": "স্টকে আছে ({available} উপলব্ধ)",
+    "inStock": "স্টকে আছে ({available, number} উপলব্ধ)",
     "outOfStock": "স্টক খালি",
     "addToCart": "কার্টে যোগ করুন",
     "selectOptions": "অপশন নির্বাচন করুন",
@@ -109,12 +144,34 @@
     "similarProducts": "একই ধরনের পণ্য",
     "addedToCart": "কার্টে যোগ হয়েছে",
     "decreaseQuantity": "পরিমাণ কমান",
-    "increaseQuantity": "পরিমাণ বাড়ান"
+    "increaseQuantity": "পরিমাণ বাড়ান",
+    "bulkTitle": "বাল্ক মূল্য",
+    "bulkBase": "মূল দাম {price}",
+    "bulkBuy": "পরিমাণ",
+    "bulkTotal": "মোট",
+    "bulkPerPiece": "প্রতি পিস",
+    "bulkLineTotal": "{count, number}টির জন্য <strong>{total}</strong>",
+    "openFullscreen": "বড় করে দেখুন",
+    "zoomHint": "জুম করতে মাউস রাখুন · বড় করতে ক্লিক করুন",
+    "zoomIn": "জুম ইন",
+    "zoomOut": "জুম আউট",
+    "close": "বন্ধ করুন",
+    "previousImage": "আগের ছবি",
+    "nextImage": "পরের ছবি",
+    "zoomHelpScroll": "জুম করতে স্ক্রল করুন",
+    "zoomHelpDoubleClick": "ডাবল-ক্লিকে জুম চালু/বন্ধ",
+    "zoomHelpDrag": "সরাতে টেনে নিন",
+    "zoomHelpArrows": "← → ছবি বদলান",
+    "zoomHelpEsc": "বন্ধ করতে Esc"
   },
   "productCard": {
     "noImage": "কোন ছবি নেই",
     "outOfStock": "স্টক খালি",
-    "viewDetails": "বিস্তারিত দেখুন"
+    "viewDetails": "বিস্তারিত দেখুন",
+    "new": "নতুন",
+    "onlyLeft": "মাত্র {count, number}টি বাকি",
+    "rating": "৫-এর মধ্যে {rating} রেটিং",
+    "discount": "{percent, number}% ছাড়"
   },
   "cart": {
     "yourCart": "আপনার কার্ট",
@@ -130,7 +187,20 @@
     "orderSummary": "অ্ডার সারসংক্ষেপ",
     "items": "{count, plural, one {# টি পণ্য} other {# টি পণ্য}}",
     "freeShippingNote": "এই অর্ডারে বিনামূল্যে শিপিং",
-    "secureCheckout": "নিরাপদ চেকআউট · SSL এনক্রিপ্টেড"
+    "secureCheckout": "নিরাপদ চেকআউট · SSL এনক্রিপ্টেড",
+    "decreaseQty": "পরিমাণ কমান",
+    "increaseQty": "পরিমাণ বাড়ান",
+    "quantity": "পরিমাণ",
+    "removeCoupon": "কুপন সরান",
+    "couponPlaceholder": "কুপন কোড",
+    "applyCoupon": "প্রয়োগ করুন",
+    "couponLine": "কুপন ({code})",
+    "freeItemQty": "ফ্রি × {qty, number}",
+    "free": "ফ্রি",
+    "freeCampaign": "ফ্রি (ক্যাম্পেইন)",
+    "shippingAtCheckout": "চেকআউটে হিসাব হবে",
+    "unitEach": "প্রতিটি {price}",
+    "bulkTier": "বাল্ক: {qty, number}টি {price}"
   },
   "checkout": {
     "checkout": "চেকআউট",
@@ -180,7 +250,9 @@
     "upazilaRequired": "উপজেলা প্রয়োজন",
     "submitting": "অর্ডার প্রক্রিয়াধীন...",
     "secureCheckout": "SSL এনক্রিপ্টেড · নিরাপদ চেকআউট",
-    "deliveryAddress": "ডেলিভারি ঠিকানা"
+    "deliveryAddress": "ডেলিভারি ঠিকানা",
+    "qtyShort": "পরিমাণ: {qty, number}",
+    "freeGiftQty": "ফ্রি উপহার × {qty, number}"
   },
   "auth": {
     "login": "লগইন",
@@ -195,7 +267,9 @@
     "loggingIn": "লগইন করছি...",
     "registering": "নিবন্ধন করছি...",
     "error": "একটি ত্রুটি ঘটেছে",
-    "required": "প্রয়োজনীয়"
+    "required": "প্রয়োজনীয়",
+    "showPassword": "পাসওয়ার্ড দেখান",
+    "hidePassword": "পাসওয়ার্ড লুকান"
   },
   "account": {
     "myAccount": "আমার অ্যাকাউন্ট",
@@ -263,7 +337,7 @@
     "total": "মোট",
     "status": "অবস্থা",
     "noOrders": "আপনি এখনো কোনো অর্ডার দেননি।",
-    "items": "{count} টি পণ্য",
+    "items": "{count, number} টি পণ্য",
     "viewOrder": "অর্ডার দেখুন"
   },
   "orderDetail": {
@@ -277,7 +351,7 @@
     "trackOrder": "অর্ডার ট্র্যাক করুন",
     "orderTracking": "অর্ডার ট্র্যাকিং",
     "items": "পণ্যসমূহ",
-    "qty": "পরিমাণ: {count}",
+    "qty": "পরিমাণ: {count, number}",
     "subtotal": "সাব টোটাল",
     "shipping": "শিপিং",
     "shippingFree": "বিনামূল্যে",
@@ -327,7 +401,7 @@
     "notFound": "এই তথ্যের সাথে মিলে এমন কোনো অর্ডার খুঁজে পাওয়া যায়নি। অনুগ্রহ করে আবার যাচাই করুন।",
     "invalidInput": "অর্ডার নম্বর অথবা ফোন নম্বর দিন।",
     "networkError": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
-    "resultsCount": "{count} টি অর্ডার পাওয়া গেছে"
+    "resultsCount": "{count, number} টি অর্ডার পাওয়া গেছে"
   },
   "common": {
     "loading": "লোড হচ্ছে...",
@@ -341,7 +415,9 @@
     "view": "দেখুন",
     "back": "ফিরে যান",
     "next": "পরবর্তী",
-    "previous": "আগের"
+    "previous": "আগের",
+    "phonePlaceholder": "যেমন: 01712345678",
+    "optional": "(ঐচ্ছিক)"
   },
   "trust": {
     "label": "অর্ডারের সুবিধা",
@@ -351,5 +427,128 @@
     "deliveryLong": "ডেলিভারি চার্জ ঢাকার ভিতরে {inside}, ঢাকার বাইরে {outside}।",
     "exchangeShort": "{days, number} দিনে এক্সচেঞ্জ",
     "exchangeLong": "ডেলিভারির {days, number} দিনের মধ্যে এক্সচেঞ্জ করা যাবে।"
+  },
+  "redeemPoints": {
+    "yourCode": "আপনার কুপন কোড:",
+    "copy": "কপি",
+    "copied": "কপি হয়েছে!",
+    "validity": "৩০ দিন বৈধ · একবার ব্যবহারযোগ্য",
+    "redeem": "{points, number} পয়েন্টে {amount} ছাড় নিন",
+    "redeemFailed": "রিডিম করা যায়নি",
+    "genericError": "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।"
+  },
+  "reviews": {
+    "title": "ক্রেতাদের রিভিউ",
+    "outOf5": "৫-এর মধ্যে {rating}",
+    "logIn": "লগ ইন করুন",
+    "loginToReview": "রিভিউ লিখতে। শুধু যাচাইকৃত ক্রেতারা রিভিউ দিতে পারেন।",
+    "alreadyReviewed": "আপনি এই পণ্যের রিভিউ দিয়েছেন। ধন্যবাদ!",
+    "purchasersOnly": "শুধু যাঁরা এই পণ্যটি কিনেছেন তাঁরাই রিভিউ লিখতে পারেন।",
+    "empty": "এখনো কোনো রিভিউ নেই। প্রথম রিভিউটি আপনিই দিন!",
+    "loading": "লোড হচ্ছে…",
+    "loadMore": "আরও রিভিউ দেখুন (বাকি {count, number}টি)",
+    "viewPhoto": "রিভিউয়ের ছবি দেখুন",
+    "photo": "রিভিউয়ের ছবি",
+    "customer": "ক্রেতা",
+    "close": "বন্ধ করুন"
+  },
+  "optionNames": {
+    "Size": "সাইজ",
+    "Color": "রং",
+    "Colour": "রং",
+    "Fabric": "কাপড়",
+    "Fit": "ফিট"
+  },
+  "reviewForm": {
+    "title": "রিভিউ লিখুন",
+    "yourRating": "আপনার রেটিং",
+    "rateN": "৫-এর মধ্যে {n, number} দিন",
+    "titleLabel": "শিরোনাম",
+    "titlePlaceholder": "আপনার রিভিউ সংক্ষেপে লিখুন",
+    "commentLabel": "রিভিউ",
+    "commentPlaceholder": "এই পণ্য নিয়ে আপনার অভিজ্ঞতা লিখুন…",
+    "photosLabel": "ছবি",
+    "photosHint": "ঐচ্ছিক, সর্বোচ্চ {max, number}টি ছবি",
+    "photoAlt": "রিভিউয়ের ছবি",
+    "removePhoto": "ছবি সরান",
+    "addPhotos": "ছবি যোগ করুন",
+    "maxPhotos": "সর্বোচ্চ {max, number}টি ছবি যোগ করা যাবে",
+    "uploadFailed": "ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।",
+    "ratingRequired": "অনুগ্রহ করে একটি রেটিং দিন",
+    "titleRequired": "অনুগ্রহ করে রিভিউয়ের একটি শিরোনাম লিখুন",
+    "submitFailed": "রিভিউ জমা দেওয়া যায়নি",
+    "genericError": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    "success": "ধন্যবাদ! আপনার রিভিউ জমা হয়েছে এবং অনুমোদনের অপেক্ষায় আছে।",
+    "submit": "রিভিউ জমা দিন",
+    "uploading": "ছবি আপলোড হচ্ছে…"
+  },
+  "themePresets": {
+    "title": "থিম প্রিসেট",
+    "description": "একটি সম্পূর্ণ লুক: রং, ফন্ট, কোণ ও সেকশনের ধরন। একটি বেছে নিলে নিচের রং ও ফন্টের নিজস্ব মান মুছে যায়, যাতে প্রিসেটটি যেমন ডিজাইন করা তেমন দেখায়; পরে যেকোনো ঘর বদলালে সেটি প্রিসেটের উপরে বসবে।",
+    "none": "কোনোটি নয় (নিজস্ব থিম)",
+    "presetLabel": "প্রিসেট",
+    "stylesTitle": "সেকশনের ধরন",
+    "stylesDescription": "স্টোরফ্রন্টের আলাদা আলাদা সেকশনের বিন্যাস। \"প্রিসেটের ডিফল্ট\" বেছে নেওয়া প্রিসেট অনুসরণ করে।",
+    "presetDefault": "প্রিসেটের ডিফল্ট ({option})",
+    "presets": {
+      "atelier": {
+        "name": "আতেলিয়ে",
+        "description": "দিনে আইভরি ও অক্সব্লাড, সেরিফ শিরোনাম; রাতে মিডনাইট নেভি ও সোনালি। সিনেম্যাটিক হিরো, ক্যাটাগরি টাইল, বক্সড প্রোডাক্ট কার্ড।"
+      },
+      "zari-oxblood": {
+        "name": "জরি অক্সব্লাড",
+        "description": "উষ্ণ আইভরি, অক্সব্লাড ও জরি সোনালি, বাংলা-প্রথম টাইপফেস। সোনালি ফ্রেমের হিরো ও ক্যাটাগরি প্লেট, শান্ত নিউজলেটার ব্যান্ড।"
+      },
+      "dark-room": {
+        "name": "ডার্ক রুম",
+        "description": "গ্যালারি সাদা, একটি স্যান্স ফন্ট ও চৌকো কোণ; রাতে অন্ধকার ঘর। উঁচু ফিল্ম হিরো ও ট্রাস্ট ব্যান্ড, স্ক্রল করা ক্যাটাগরি সারি, বড় নামের ফুটার।"
+      },
+      "shiraz-zari": {
+        "name": "শিরাজ জরি",
+        "description": "শিরাজ ওয়াইন ও জরি সোনালি, বোডোনি শিরোনাম; রাতে প্লাম-কালো। সোনালি পাইপিংসহ এডিটোরিয়াল হিরো, বড় ক্যাটাগরি কার্ড, এডিটোরিয়াল প্রোডাক্ট কার্ড।"
+      }
+    },
+    "switches": {
+      "heroStyle": {
+        "label": "হিরো",
+        "options": {
+          "cinematic": "সিনেম্যাটিক",
+          "film": "ফিল্ম ও ট্রাস্ট ব্যান্ড",
+          "framed": "ফ্রেমযুক্ত",
+          "editorial": "এডিটোরিয়াল"
+        }
+      },
+      "categoryStyle": {
+        "label": "ক্যাটাগরি অনুযায়ী কিনুন",
+        "options": {
+          "tiles": "টাইল",
+          "scroll-row": "স্ক্রল করা সারি",
+          "plates": "ফ্রেমযুক্ত প্লেট",
+          "cards": "বড় কার্ড"
+        }
+      },
+      "productCardStyle": {
+        "label": "প্রোডাক্ট কার্ড",
+        "options": {
+          "boxed": "বক্সড",
+          "editorial": "এডিটোরিয়াল",
+          "plate": "প্লেট"
+        }
+      },
+      "newsletterStyle": {
+        "label": "নিউজলেটার",
+        "options": {
+          "panel": "প্যানেল",
+          "band": "পূর্ণ-প্রস্থ ব্যান্ড"
+        }
+      },
+      "footerStyle": {
+        "label": "ফুটার",
+        "options": {
+          "columns": "কলাম",
+          "wordmark": "কলাম ও বড় নাম"
+        }
+      }
+    }
   }
 }

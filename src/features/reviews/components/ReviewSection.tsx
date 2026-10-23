@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
+import { formatNumber } from "@/shared/lib/i18n";
 import { getCustomerToken } from "@/shared/lib/auth";
 import { ReviewService } from "../service";
 import { ReviewList } from "./ReviewList";
@@ -19,7 +21,9 @@ export async function ReviewSection({
   averageRating = 0,
   reviewCount = 0,
 }: ReviewSectionProps) {
-  const [payload, { reviews, total }] = await Promise.all([
+  const [tr, locale, payload, { reviews, total }] = await Promise.all([
+    getTranslations("reviews"),
+    getLocale(),
     getCustomerToken(),
     ReviewService.getApprovedForProduct(storeId, productId, 1, 10),
   ]);
@@ -41,12 +45,19 @@ export async function ReviewSection({
     <section>
       {/* Section header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-[var(--color-text)]">Customer Reviews</h2>
-        {reviewCount > 0 && (
+        <h2 className="text-xl font-semibold text-[var(--color-text)]">{tr("title")}</h2>
+        {/* Only summarise ratings that are actually listed below; a stored average with
+            no approved reviews read as "4.9 out of 5 … No reviews yet". */}
+        {reviewCount > 0 && total > 0 && (
           <div className="flex items-center gap-2">
             <ReviewStars rating={averageRating} size="md" />
             <span className="text-sm text-text-secondary">
-              {averageRating.toFixed(1)} out of 5
+              {tr("outOf5", {
+                rating: formatNumber(averageRating, locale, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                }),
+              })}
             </span>
           </div>
         )}
@@ -57,12 +68,12 @@ export async function ReviewSection({
         <div className="bg-surface rounded-lg p-5 mb-8 text-sm text-text-secondary">
           <Link
             href="/account/login"
-            className="font-medium"
-            style={{ color: "var(--color-primary)" }}
+            className="focus-ring font-medium underline-offset-2 hover:underline"
+            style={{ color: "var(--color-link)" }}
           >
-            Log in
+            {tr("logIn")}
           </Link>{" "}
-          to write a review. Only verified purchasers can review.
+          {tr("loginToReview")}
         </div>
       )}
 
@@ -70,12 +81,12 @@ export async function ReviewSection({
         <div className="mb-8">
           {eligibility.alreadyReviewed && (
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-800 dark:bg-blue-950/30 dark:border-blue-900 dark:text-blue-300">
-              You have already reviewed this product. Thank you!
+              {tr("alreadyReviewed")}
             </div>
           )}
           {!eligibility.hasPurchased && !eligibility.alreadyReviewed && (
             <div className="bg-surface border border-border-subtle rounded-lg p-4 text-sm text-text-secondary">
-              Only customers who have purchased this product can write a review.
+              {tr("purchasersOnly")}
             </div>
           )}
           {eligibility.canReview && (

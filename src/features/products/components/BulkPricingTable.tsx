@@ -1,7 +1,11 @@
 "use client";
 
 import type { IPricingTier } from "../types";
+import { useLocale, useTranslations } from "next-intl";
 import { normalizeTiers } from "@/shared/lib/pricing";
+import { formatPrice } from "@/shared/components/ui";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { formatNumber } from "@/shared/lib/i18n";
 
 interface BulkPricingTableProps {
   tiers: IPricingTier[];
@@ -17,11 +21,14 @@ export function BulkPricingTable({
   tiers,
   basePrice,
   currentQuantity,
-  title = "Bulk Pricing",
-  perUnitLabel = "per piece",
-  bundleLabel = "Total",
-  quantityLabel = "Buy",
+  title,
+  perUnitLabel,
+  bundleLabel,
+  quantityLabel,
 }: BulkPricingTableProps) {
+  const tr = useTranslations("productDetail");
+  const locale = useLocale();
+  const currency = useStoreCurrency();
   const sorted = normalizeTiers(tiers);
   if (sorted.length === 0) return null;
 
@@ -40,16 +47,16 @@ export function BulkPricingTable({
     >
       <div className="flex items-baseline justify-between">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-text-secondary">
-          {title}
+          {title ?? tr("bulkTitle")}
         </h3>
         <span className="text-xs text-text-tertiary">
-          base ৳{basePrice.toLocaleString()}
+          {tr("bulkBase", { price: formatPrice(basePrice, currency, locale) })}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-2 text-xs font-medium text-text-tertiary uppercase tracking-wide">
-        <span>{quantityLabel}</span>
-        <span className="text-right">{bundleLabel}</span>
-        <span className="text-right">{perUnitLabel}</span>
+        <span>{quantityLabel ?? tr("bulkBuy")}</span>
+        <span className="text-right">{bundleLabel ?? tr("bulkTotal")}</span>
+        <span className="text-right">{perUnitLabel ?? tr("bulkPerPiece")}</span>
       </div>
       <ul className="space-y-1.5">
         {sorted.map((tier) => {
@@ -65,10 +72,10 @@ export function BulkPricingTable({
               }`}
               style={{ borderRadius: "calc(var(--border-radius) - 2px)" }}
             >
-              <span>{tier.quantity}</span>
-              <span className="text-right">৳{tier.totalPrice.toLocaleString()}</span>
+              <span>{formatNumber(tier.quantity, locale)}</span>
+              <span className="text-right">{formatPrice(tier.totalPrice, currency, locale)}</span>
               <span className="text-right text-text-secondary">
-                ৳{perUnit.toFixed(2)}
+                {formatPrice(Math.round(perUnit * 100) / 100, currency, locale)}
               </span>
             </li>
           );

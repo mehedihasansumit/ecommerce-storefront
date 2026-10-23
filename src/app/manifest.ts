@@ -1,13 +1,15 @@
 import type { MetadataRoute } from "next";
 import { getTenant } from "@/shared/lib/tenant";
+import { resolveTheme } from "@/features/stores/presets";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const tenant = await getTenant();
 
   const name = tenant?.name ?? "Shop";
   const shortName = name.split(/\s+/)[0].slice(0, 12);
-  const themeColor = tenant?.theme?.primaryColor ?? "#3B82F6";
-  const bgColor = tenant?.theme?.backgroundColor ?? "#FFFFFF";
+  const theme = tenant ? resolveTheme(tenant.theme) : null;
+  const themeColor = theme?.primaryColor ?? "#3B82F6";
+  const bgColor = theme?.backgroundColor ?? "#FFFFFF";
 
   const largeIcon = tenant?.logo || tenant?.favicon || "/icons/icon-512.png";
   const smallIcon = tenant?.favicon || tenant?.logo || "/icons/icon-192.png";

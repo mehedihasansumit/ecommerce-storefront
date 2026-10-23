@@ -91,7 +91,7 @@ export function NotificationBell() {
       {/* Bell button */}
       <button
         onClick={handleOpen}
-        className="p-2.5 rounded-lg hover:bg-white/10 transition-colors relative"
+        className="p-2.5 rounded-lg hover:bg-current/10 transition-colors relative"
         aria-label="Notifications"
         aria-expanded={open}
         aria-haspopup="true"
@@ -99,9 +99,10 @@ export function NotificationBell() {
         <Bell size={18} />
         {unreadCount > 0 && (
           <span
-            className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center leading-none ring-2"
+            className="absolute -top-0.5 -right-0.5 text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center leading-none ring-2"
             style={{
               backgroundColor: "var(--color-accent)",
+              color: "var(--color-on-accent, #fff)",
               ["--tw-ring-color" as string]: "var(--color-header-bg)",
             }}
           >

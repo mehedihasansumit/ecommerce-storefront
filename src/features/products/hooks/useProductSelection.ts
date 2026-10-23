@@ -8,6 +8,7 @@ import { getBulkUnitPrice, normalizeTiers } from "@/shared/lib/pricing";
 import { t } from "@/shared/lib/i18n";
 import { useLocale, useTranslations } from "next-intl";
 import toast from "react-hot-toast";
+import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 import type { IProduct, IProductVariant } from "../types";
 
 export interface ProductSelection {
@@ -124,7 +125,10 @@ export function useProductSelection(product: IProduct): ProductSelection {
     // otherwise checkout rejects the line ("Variant not found").
     if (missingOptions.length > 0) return false;
     if (hasOptions && variants.length > 0 && !activeVariant) return false;
-    const resolvedThumbnail = activeVariant?.images?.[0]?.url || product.thumbnail;
+    // Fall back to the gallery's first image: many products have no explicit
+    // thumbnail, and an empty string leaves a blank plate in the cart.
+    const resolvedThumbnail =
+      activeVariant?.images?.[0]?.url || product.thumbnail || product.images?.[0]?.url || "";
     const tiers = normalizeTiers(product.pricingTiers);
     // Snapshot the tier-aware unit price using product.price as base (tiers override
     // variant price overrides for consistency). Cart context re-derives across all
@@ -134,6 +138,7 @@ export function useProductSelection(product: IProduct): ProductSelection {
     addItem({
       productId: product._id,
       productName: t(product.name, locale),
+      productNames: typeof product.name === "string" ? undefined : product.name,
       productSlug: product.slug,
       thumbnail: resolvedThumbnail,
       variantSelections: selectedOptions,
@@ -165,12 +170,13 @@ export function useProductSelection(product: IProduct): ProductSelection {
   ]);
 
   const tr = useTranslations("productDetail");
+  const optionLabel = useOptionLabels();
 
   const notifyMissingOptions = useCallback(() => {
     if (missingOptions.length === 0) return false;
-    toast.error(tr("pleaseSelect", { options: missingOptions.join(", ") }));
+    toast.error(tr("pleaseSelect", { options: missingOptions.map(optionLabel.name).join(", ") }));
     return true;
-  }, [missingOptions, tr]);
+  }, [missingOptions, tr, optionLabel]);
 
   const tryAddToCart = useCallback(() => {
     if (addToCart()) {

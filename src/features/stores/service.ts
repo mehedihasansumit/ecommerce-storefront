@@ -3,7 +3,7 @@ import { deleteUnreferencedBlobs, deleteBlobsByPrefix } from "@/shared/lib/stora
 import type { IStore } from "./types";
 import slugify from "slugify";
 
-/** All image URLs/keys a store references directly (logos, favicons, banners, OG image). */
+/** All blob URLs/keys a store references directly (logos, favicons, banner images and videos, OG image). */
 function storeBlobValues(s: IStore): string[] {
   const out: string[] = [];
   for (const v of [s.logo, s.logoDark, s.favicon, s.faviconDark, s.seo?.ogImage]) {
@@ -11,6 +11,7 @@ function storeBlobValues(s: IStore): string[] {
   }
   for (const b of s.heroBanners ?? []) {
     if (b.image) out.push(b.image);
+    if (b.video) out.push(b.video);
   }
   return out;
 }

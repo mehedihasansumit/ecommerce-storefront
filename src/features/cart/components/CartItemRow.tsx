@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatPrice } from "@/shared/components/ui";
 import { useCart } from "@/shared/context/CartContext";
+import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
+import { formatNumber } from "@/shared/lib/i18n";
+import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 
 interface CartItemRowProps {
   productId: string;
@@ -24,6 +29,10 @@ export function CartItemRow({
   quantity,
   variantSelections,
 }: CartItemRowProps) {
+  const tr = useTranslations("cart");
+  const locale = useLocale();
+  const currency = useStoreCurrency();
+  const money = (n: number) => formatPrice(n, currency, locale);
   const { updateQuantity, removeItem, getLineByItem } = useCart();
   const qty = quantity;
   const line = getLineByItem({
@@ -48,6 +57,7 @@ export function CartItemRow({
     }
   }
 
+  const optionLabel = useOptionLabels();
   const variantEntries = Object.entries(variantSelections);
 
   return (
@@ -63,7 +73,7 @@ export function CartItemRow({
               src={thumbnail}
               alt={productName}
               fill
-              className="object-cover hover:scale-105 transition-transform duration-300"
+              className="media-dim object-cover hover:scale-105 transition-transform duration-300"
             />
           ) : (
             <div className="w-full h-full bg-surface" />
@@ -82,10 +92,11 @@ export function CartItemRow({
           </Link>
           <button
             onClick={() => handleUpdate(0)}
-            className="shrink-0 p-1.5 rounded-lg text-text-tertiary hover:text-red-500 hover:bg-red-50/80 transition-colors"
-            aria-label="Remove item"
+            type="button"
+            className="focus-ring shrink-0 -mr-2 -mt-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary hover:text-error hover:bg-surface transition-colors"
+            aria-label={`${tr("removeItem")}: ${productName}`}
           >
-            <Trash2 size={15} />
+            <Trash2 size={16} aria-hidden />
           </button>
         </div>
 
@@ -97,7 +108,7 @@ export function CartItemRow({
                 className="px-2 py-0.5 text-[11px] rounded-full border border-border-subtle text-text-secondary"
                 style={{ backgroundColor: "var(--color-card-bg)" }}
               >
-                {key}: <span className="font-semibold">{val}</span>
+                {optionLabel.name(key)}: <span className="font-semibold">{optionLabel.value(val)}</span>
               </span>
             ))}
           </div>
@@ -114,31 +125,37 @@ export function CartItemRow({
           >
             <button
               onClick={() => handleUpdate(qty - 1)}
-              className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
-              aria-label="Decrease quantity"
+              type="button"
+              className="focus-ring-inset inline-flex h-10 w-10 shrink-0 items-center justify-center text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
+              aria-label={tr("decreaseQty")}
             >
-              <Minus size={13} />
+              <Minus size={14} aria-hidden />
             </button>
-            <span className="px-3 py-1.5 text-sm font-semibold min-w-[2rem] text-center border-x border-border-subtle text-[var(--color-text)]">
-              {qty}
+            <span
+              aria-live="polite"
+              aria-label={`${tr("quantity")}: ${formatNumber(qty, locale)}`}
+              className="inline-flex h-10 min-w-10 items-center justify-center px-2 text-sm font-semibold border-x border-border-subtle text-[var(--color-text)]"
+            >
+              {formatNumber(qty, locale)}
             </span>
             <button
               onClick={() => handleUpdate(qty + 1)}
-              className="px-2.5 py-1.5 text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
-              aria-label="Increase quantity"
+              type="button"
+              className="focus-ring-inset inline-flex h-10 w-10 shrink-0 items-center justify-center text-text-secondary hover:text-[var(--color-text)] hover:bg-surface transition-colors"
+              aria-label={tr("increaseQty")}
             >
-              <Plus size={13} />
+              <Plus size={14} aria-hidden />
             </button>
           </div>
 
           {/* Line total */}
           <div className="text-right">
             <p className="text-sm font-bold" style={{ color: "var(--color-price)" }}>
-              ৳{lineTotal.toLocaleString()}
+              {money(lineTotal)}
             </p>
             {qty > 1 && (
               <p className="text-[11px] text-text-tertiary">
-                ৳{unitPrice.toFixed(2)} each
+                {tr("unitEach", { price: money(unitPrice) })}
               </p>
             )}
             {hasTier && (
@@ -150,8 +167,10 @@ export function CartItemRow({
                   color: "var(--color-primary)",
                 }}
               >
-                Bulk: {line.appliedTierQty} for ৳
-                {line.appliedTierTotal?.toLocaleString()}
+                {tr("bulkTier", {
+                  qty: line.appliedTierQty ?? 0,
+                  price: money(line.appliedTierTotal ?? 0),
+                })}
               </p>
             )}
           </div>

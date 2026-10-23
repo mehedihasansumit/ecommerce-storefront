@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { Star, ImagePlus, X, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Alert, Button, Field, Input, Textarea } from "@/shared/components/ui";
 
 interface ReviewFormProps {
   productId: string;
@@ -11,6 +13,7 @@ interface ReviewFormProps {
 const MAX_IMAGES = 5;
 
 export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
+  const tr = useTranslations("reviewForm");
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [title, setTitle] = useState("");
@@ -29,7 +32,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
     const room = MAX_IMAGES - images.length;
     if (room <= 0) {
-      setError(`You can attach at most ${MAX_IMAGES} photos`);
+      setError(tr("maxPhotos", { max: MAX_IMAGES }));
       return;
     }
     const selected = files.slice(0, room);
@@ -43,12 +46,12 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
         const res = await fetch("/api/reviews/upload", { method: "POST", body });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error ?? "Failed to upload image");
+          setError(data.error ?? tr("uploadFailed"));
           continue;
         }
         setImages((prev) => [...prev, data.url as string]);
       } catch {
-        setError("Failed to upload image. Please try again.");
+        setError(tr("uploadFailed"));
       } finally {
         setUploading((n) => n - 1);
       }
@@ -62,11 +65,11 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (rating === 0) {
-      setError("Please select a rating");
+      setError(tr("ratingRequired"));
       return;
     }
     if (!title.trim()) {
-      setError("Please enter a title for your review");
+      setError(tr("titleRequired"));
       return;
     }
 
@@ -82,14 +85,14 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Failed to submit review");
+        setError(data.error ?? tr("submitFailed"));
         return;
       }
 
       setSuccess(true);
       onSuccess?.();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(tr("genericError"));
     } finally {
       setSubmitting(false);
     }
@@ -97,9 +100,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
   if (success) {
     return (
-      <div className="rounded-lg bg-green-50 border border-green-100 p-4 text-sm text-green-800 dark:bg-green-950/30 dark:border-green-900 dark:text-green-300">
-        Thank you! Your review has been submitted and is pending approval.
-      </div>
+      <Alert tone="success">{tr("success")}</Alert>
     );
   }
 
@@ -107,12 +108,14 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="font-semibold text-[var(--color-text)]">Write a Review</h3>
+      <h3 className="font-semibold text-[var(--color-text)]">{tr("title")}</h3>
 
       {/* Star rating input */}
       <div>
-        <label className="block text-sm text-text-secondary mb-1.5">Your Rating <span className="text-red-500">*</span></label>
-        <div className="flex gap-1">
+        <p id="review-rating-label" className="block text-sm font-medium text-[var(--ui-label,#374151)] mb-1.5">
+          {tr("yourRating")} <span className="text-error">*</span>
+        </p>
+        <div className="flex gap-1" role="group" aria-labelledby="review-rating-label">
           {[1, 2, 3, 4, 5].map((i) => (
             <button
               key={i}
@@ -120,8 +123,9 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
               onClick={() => setRating(i)}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(0)}
-              className="focus:outline-none"
-              aria-label={`Rate ${i} out of 5`}
+              className="focus-ring rounded-lg p-1.5"
+              aria-label={tr("rateN", { n: i })}
+              aria-pressed={rating === i}
             >
               <Star
                 className="w-7 h-7 transition-colors"
@@ -136,58 +140,47 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
       </div>
 
       {/* Title */}
-      <div>
-        <label className="block text-sm text-text-secondary mb-1.5" htmlFor="review-title">
-          Title <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="review-title"
+      <Field label={tr("titleLabel")} required>
+        <Input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={100}
-          placeholder="Summarize your review"
+          placeholder={tr("titlePlaceholder")}
           required
-          className="w-full bg-bg border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
-          style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
         />
-      </div>
+      </Field>
 
       {/* Comment */}
-      <div>
-        <label className="block text-sm text-text-secondary mb-1.5" htmlFor="review-comment">
-          Review <span className="text-text-tertiary">(optional)</span>
-        </label>
-        <textarea
-          id="review-comment"
+      <Field label={tr("commentLabel")} optional>
+        <Textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           maxLength={2000}
           rows={4}
-          placeholder="Share your experience with this product..."
-          className="w-full bg-bg border border-border-subtle rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:border-transparent"
-          style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
+          placeholder={tr("commentPlaceholder")}
         />
-      </div>
+      </Field>
 
       {/* Photos */}
       <div>
-        <label className="block text-sm text-text-secondary mb-1.5">
-          Photos <span className="text-text-tertiary">(optional, up to {MAX_IMAGES})</span>
-        </label>
+        <p className="block text-sm font-medium text-[var(--ui-label,#374151)] mb-1.5">
+          {tr("photosLabel")}{" "}
+          <span className="text-text-tertiary font-normal">({tr("photosHint", { max: MAX_IMAGES })})</span>
+        </p>
         <div className="flex flex-wrap gap-2">
           {images.map((url) => (
             <div key={url} className="relative w-16 h-16">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={url}
-                alt="Review photo"
+                alt={tr("photoAlt")}
                 className="w-16 h-16 object-cover rounded-lg border border-border-subtle"
               />
               <button
                 type="button"
                 onClick={() => removeImage(url)}
-                aria-label="Remove photo"
+                aria-label={tr("removePhoto")}
                 className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-black/70 text-white hover:bg-black"
               >
                 <X className="w-3 h-3" />
@@ -205,7 +198,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              aria-label="Add photos"
+              aria-label={tr("addPhotos")}
               className="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border-subtle text-text-tertiary hover:text-text-secondary transition-colors"
             >
               <ImagePlus className="w-5 h-5" />
@@ -222,18 +215,11 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
         />
       </div>
 
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <Alert tone="error">{error}</Alert>}
 
-      <button
-        type="submit"
-        disabled={submitting || uploading > 0}
-        className="px-5 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-opacity"
-        style={{ backgroundColor: "var(--color-primary)" }}
-      >
-        {submitting ? "Submitting…" : uploading > 0 ? "Uploading photos…" : "Submit Review"}
-      </button>
+      <Button type="submit" variant="brand" loading={submitting} disabled={uploading > 0}>
+        {uploading > 0 ? tr("uploading") : tr("submit")}
+      </Button>
     </form>
   );
 }

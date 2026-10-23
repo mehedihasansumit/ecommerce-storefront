@@ -18,24 +18,33 @@ export function LanguageSwitcher() {
     return null;
   }
 
-  const handleLanguageChange = (newLocale: string) => {
+  // Locale cookie is set by /api/locale (single place that owns it).
+  const handleLanguageChange = async (newLocale: string) => {
     if (newLocale === locale) return;
-    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+    await fetch("/api/locale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale: newLocale }),
+    }).catch(() => {});
     router.refresh();
   };
 
   return (
-    <div className="flex items-center gap-0.5 rounded-lg overflow-hidden border border-white/15 text-xs font-semibold">
+    <div className="flex shrink-0 items-center gap-0.5 rounded-lg overflow-hidden border border-current/20 text-xs font-semibold">
       {tenant.supportedLanguages.map((lang) => {
         const isActive = locale === lang;
         return (
           <button
             key={lang}
+            type="button"
             onClick={() => handleLanguageChange(lang)}
-            className={`px-2.5 py-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            aria-pressed={isActive}
+            lang={lang}
+            className={`focus-ring-inset inline-flex min-h-10 min-w-10 items-center justify-center px-2.5 transition-colors whitespace-nowrap cursor-pointer ${
               isActive
-                ? "bg-white/20 opacity-100"
-                : "opacity-50 hover:opacity-80 hover:bg-white/10"
+                ? // ≤359px: show only the language you can switch TO (one 40px button)
+                  "bg-current/15 opacity-100 max-[359px]:hidden"
+                : "opacity-75 hover:opacity-100 hover:bg-current/10"
             }`}
           >
             {languageNames[lang] || lang.toUpperCase()}

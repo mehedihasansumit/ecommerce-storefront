@@ -41,7 +41,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
+    <div className="flex justify-center px-4 py-8 md:min-h-[70vh] md:items-center md:py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1
@@ -56,7 +56,7 @@ export default function LoginForm() {
           className="shadow-sm border px-8 py-10"
           style={{
             borderRadius: "var(--border-radius)",
-            backgroundColor: "var(--color-surface)",
+            backgroundColor: "var(--color-card-bg)",
             borderColor: "var(--color-border-subtle)",
           }}
         >
@@ -64,11 +64,11 @@ export default function LoginForm() {
             {error && <Alert tone="error">{error}</Alert>}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                 {t("email")}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600 pointer-events-none" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
                 <Input
                   type="email"
                   required
@@ -82,11 +82,11 @@ export default function LoginForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
                 {t("password")}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600 pointer-events-none" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   required
@@ -99,9 +99,9 @@ export default function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                  tabIndex={-1}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="focus-ring absolute right-0.5 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary hover:text-[var(--color-text)] transition-colors"
+                  aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+                  aria-pressed={showPassword}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -114,7 +114,7 @@ export default function LoginForm() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-6 text-center text-sm text-text-secondary">
           {t("noAccount")}{" "}
           <Link
             href="/account/register"

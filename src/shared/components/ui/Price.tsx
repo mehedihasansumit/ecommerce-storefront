@@ -38,7 +38,7 @@ export function Price({
   size = "md",
   className,
 }: PriceProps) {
-  const hasDiscount = compareAt && compareAt > amount;
+  const hasDiscount = !!compareAt && compareAt > amount;
   const s = SIZES[size];
 
   return (
@@ -54,7 +54,7 @@ export function Price({
         {formatPrice(amount, currency, locale)}
       </span>
       {hasDiscount && (
-        <span className={`${s.compare} text-gray-400 line-through`}>
+        <span className={`${s.compare} text-text-secondary line-through`}>
           {formatPrice(compareAt!, currency, locale)}
         </span>
       )}

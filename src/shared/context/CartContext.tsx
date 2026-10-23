@@ -28,6 +28,8 @@ import type {
 export interface LocalCartItem {
   productId: string;
   productName: string;
+  /** Every locale's name, so the cart and checkout follow a language switch after adding. */
+  productNames?: Record<string, string>;
   productSlug: string;
   thumbnail: string;
   variantSelections: Record<string, string>;
@@ -57,6 +59,8 @@ interface CouponDetails {
 
 interface CartContextValue {
   items: LocalCartItem[];
+  /** True once the cart has been read from localStorage (items are trustworthy). */
+  hydrated: boolean;
   itemCount: number;
   subtotal: number;
   coupon: CouponDetails | null;
@@ -151,6 +155,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const updated = [...prev];
         updated[idx] = {
           ...updated[idx],
+          productNames: newItem.productNames ?? updated[idx].productNames,
           quantity: updated[idx].quantity + newItem.quantity,
         };
         return updated;
@@ -416,6 +421,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         items,
+        hydrated,
         itemCount,
         subtotal,
         coupon,

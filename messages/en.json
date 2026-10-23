@@ -12,7 +12,15 @@
     "logout": "Logout",
     "addresses": "Addresses",
     "callUs": "Call us",
-    "trackOrder": "Track Order"
+    "trackOrder": "Track Order",
+    "callNumber": "Call {phone}",
+    "close": "Close",
+    "trackShort": "Track",
+    "toggleTheme": "Switch colour theme",
+    "searchGo": "Search",
+    "closeSearch": "Close search",
+    "search": "Search",
+    "mobileNav": "Store navigation"
   },
   "footer": {
     "quickLinks": "Quick Links",
@@ -33,14 +41,23 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contactUs": "Contact Us",
-    "paymentMethods": "We accept all major payment methods"
+    "paymentMethods": "We accept all major payment methods",
+    "shoppingWithUs": "Shopping with us",
+    "ordering": "Ordering",
+    "storeFallback": "Store"
   },
   "heroBanner": {
-    "shopNow": "Shop Now"
+    "shopNow": "Shop Now",
+    "playVideo": "Play background video",
+    "pauseVideo": "Pause background video",
+    "carousel": "carousel",
+    "previous": "Previous slide",
+    "next": "Next slide"
   },
   "home": {
     "shopByCategory": "Shop by Category",
     "shopByCategoryDesc": "Explore our curated collections",
+    "categoryCount": "{count, plural, =0 {Explore} one {# piece} other {# pieces}}",
     "featuredProducts": "Featured Products",
     "featuredProductsDesc": "Hand-picked products just for you",
     "viewAll": "View All",
@@ -67,7 +84,18 @@
     "noSpam": "No spam, unsubscribe anytime",
     "privacyNote": "By subscribing you agree to our Privacy Policy.",
     "newArrivals": "New Arrivals",
-    "newArrivalsDesc": "Our latest additions"
+    "newArrivalsDesc": "Our latest additions",
+    "subscribedTitle": "Thanks for subscribing!",
+    "subscribedDesc": "We'll keep you updated with the best offers.",
+    "newsletterNeedContact": "Enter your email or phone number.",
+    "newsletterAlreadySubscribed": "You're already subscribed.",
+    "newsletterError": "Something went wrong. Please try again.",
+    "newsletterNetworkError": "Network error. Please try again.",
+    "newsletterEmailLabel": "Email",
+    "newsletterPhoneLabel": "Phone number",
+    "or": "or",
+    "categoriesPrev": "Previous categories",
+    "categoriesNext": "Next categories"
   },
   "products": {
     "allProducts": "All Products",
@@ -80,14 +108,21 @@
     "searchPlaceholder": "Search...",
     "showing": "Showing",
     "of": "of",
-    "productsLabel": "products"
+    "countLabel": "{count, plural, one {# product} other {# products}}",
+    "activeFilters": "Filters:",
+    "removeFilter": "Remove filter {name}",
+    "sortLabel": "Sort by",
+    "sortNewest": "Newest",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "sortTopRated": "Top rated"
   },
   "productDetail": {
     "home": "Home",
     "products": "Products",
     "noImage": "No Image",
     "reviews": "reviews",
-    "inStock": "In Stock ({available} available)",
+    "inStock": "In Stock ({available, number} available)",
     "outOfStock": "Out of Stock",
     "addToCart": "Add to Cart",
     "selectOptions": "Select Options",
@@ -109,12 +144,34 @@
     "similarProducts": "Similar products",
     "addedToCart": "Added to cart",
     "decreaseQuantity": "Decrease quantity",
-    "increaseQuantity": "Increase quantity"
+    "increaseQuantity": "Increase quantity",
+    "bulkTitle": "Bulk pricing",
+    "bulkBase": "Base {price}",
+    "bulkBuy": "Buy",
+    "bulkTotal": "Total",
+    "bulkPerPiece": "Per piece",
+    "bulkLineTotal": "<strong>{total}</strong> for {count, plural, one {# piece} other {# pieces}}",
+    "openFullscreen": "Open fullscreen view",
+    "zoomHint": "Hover to zoom · Click to expand",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "close": "Close",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "zoomHelpScroll": "Scroll to zoom",
+    "zoomHelpDoubleClick": "Double-click to toggle",
+    "zoomHelpDrag": "Drag to pan",
+    "zoomHelpArrows": "← → navigate",
+    "zoomHelpEsc": "Esc to close"
   },
   "productCard": {
     "noImage": "No Image",
     "outOfStock": "Out of Stock",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "new": "New",
+    "onlyLeft": "Only {count, number} left",
+    "rating": "Rated {rating} out of 5",
+    "discount": "{percent, number}% off"
   },
   "cart": {
     "yourCart": "Your Cart",
@@ -130,7 +187,20 @@
     "orderSummary": "Order Summary",
     "items": "{count, plural, one {# item} other {# items}}",
     "freeShippingNote": "Free shipping on this order",
-    "secureCheckout": "Secure checkout · SSL encrypted"
+    "secureCheckout": "Secure checkout · SSL encrypted",
+    "decreaseQty": "Decrease quantity",
+    "increaseQty": "Increase quantity",
+    "quantity": "Quantity",
+    "removeCoupon": "Remove coupon",
+    "couponPlaceholder": "Coupon code",
+    "applyCoupon": "Apply",
+    "couponLine": "Coupon ({code})",
+    "freeItemQty": "Free × {qty, number}",
+    "free": "Free",
+    "freeCampaign": "Free (campaign)",
+    "shippingAtCheckout": "Calculated at checkout",
+    "unitEach": "{price} each",
+    "bulkTier": "Bulk: {qty, number} for {price}"
   },
   "checkout": {
     "checkout": "Checkout",
@@ -180,7 +250,9 @@
     "upazilaRequired": "Upazila is required",
     "submitting": "Placing order...",
     "secureCheckout": "SSL encrypted · Safe & secure checkout",
-    "deliveryAddress": "Delivery Address"
+    "deliveryAddress": "Delivery Address",
+    "qtyShort": "Qty: {qty, number}",
+    "freeGiftQty": "Free gift × {qty, number}"
   },
   "auth": {
     "login": "Login",
@@ -195,7 +267,9 @@
     "loggingIn": "Logging in...",
     "registering": "Registering...",
     "error": "An error occurred",
-    "required": "Required"
+    "required": "Required",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "account": {
     "myAccount": "My Account",
@@ -263,7 +337,7 @@
     "total": "Total",
     "status": "Status",
     "noOrders": "You haven't placed any orders yet.",
-    "items": "{count} items",
+    "items": "{count, number} items",
     "viewOrder": "View Order"
   },
   "orderDetail": {
@@ -277,7 +351,7 @@
     "trackOrder": "Track Order",
     "orderTracking": "Order Tracking",
     "items": "Items",
-    "qty": "Qty: {count}",
+    "qty": "Qty: {count, number}",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "shippingFree": "Free",
@@ -327,7 +401,7 @@
     "notFound": "We couldn't find any order matching that. Please double-check and try again.",
     "invalidInput": "Please enter an order number or phone number.",
     "networkError": "Something went wrong. Please try again.",
-    "resultsCount": "{count} orders found"
+    "resultsCount": "{count, number} orders found"
   },
   "common": {
     "loading": "Loading...",
@@ -341,7 +415,9 @@
     "view": "View",
     "back": "Back",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "phonePlaceholder": "e.g. 01712345678",
+    "optional": "(optional)"
   },
   "trust": {
     "label": "Ordering benefits",
@@ -351,5 +427,128 @@
     "deliveryLong": "Delivery {inside} inside Dhaka, {outside} outside Dhaka.",
     "exchangeShort": "{days, number}-day exchange",
     "exchangeLong": "Exchange within {days, number} days of delivery."
+  },
+  "redeemPoints": {
+    "yourCode": "Your coupon code:",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "validity": "Valid for 30 days · Single use",
+    "redeem": "Redeem {points, number} pts for {amount}",
+    "redeemFailed": "Redemption failed",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "reviews": {
+    "title": "Customer Reviews",
+    "outOf5": "{rating} out of 5",
+    "logIn": "Log in",
+    "loginToReview": "to write a review. Only verified purchasers can review.",
+    "alreadyReviewed": "You have already reviewed this product. Thank you!",
+    "purchasersOnly": "Only customers who have purchased this product can write a review.",
+    "empty": "No reviews yet. Be the first to review this product!",
+    "loading": "Loading…",
+    "loadMore": "Load more reviews ({count, number} remaining)",
+    "viewPhoto": "View review photo",
+    "photo": "Review photo",
+    "customer": "Customer",
+    "close": "Close"
+  },
+  "optionNames": {
+    "Size": "Size",
+    "Color": "Color",
+    "Colour": "Colour",
+    "Fabric": "Fabric",
+    "Fit": "Fit"
+  },
+  "reviewForm": {
+    "title": "Write a review",
+    "yourRating": "Your rating",
+    "rateN": "Rate {n, number} out of 5",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Summarize your review",
+    "commentLabel": "Review",
+    "commentPlaceholder": "Share your experience with this product…",
+    "photosLabel": "Photos",
+    "photosHint": "Optional, up to {max, number} photos",
+    "photoAlt": "Review photo",
+    "removePhoto": "Remove photo",
+    "addPhotos": "Add photos",
+    "maxPhotos": "You can attach at most {max, number} photos",
+    "uploadFailed": "Failed to upload image. Please try again.",
+    "ratingRequired": "Please select a rating",
+    "titleRequired": "Please enter a title for your review",
+    "submitFailed": "Failed to submit review",
+    "genericError": "Something went wrong. Please try again.",
+    "success": "Thank you! Your review has been submitted and is pending approval.",
+    "submit": "Submit review",
+    "uploading": "Uploading photos…"
+  },
+  "themePresets": {
+    "title": "Theme preset",
+    "description": "A complete look: colours, fonts, corners and section styles. Picking one clears the colour and font overrides below so the preset shows as designed; change any field afterwards to override it.",
+    "none": "None (custom theme)",
+    "presetLabel": "Preset",
+    "stylesTitle": "Section styles",
+    "stylesDescription": "Layout of individual storefront sections. \"Preset default\" follows the chosen preset.",
+    "presetDefault": "Preset default ({option})",
+    "presets": {
+      "atelier": {
+        "name": "Atelier",
+        "description": "Ivory and oxblood with a serif display face by day, midnight navy and gold by night. Cinematic hero, adaptive category tiles, boxed product cards."
+      },
+      "zari-oxblood": {
+        "name": "Zari Oxblood",
+        "description": "Warm ivory, oxblood and zari gold set in Bengali-first type. Gold-framed hero and category plates, calm newsletter band."
+      },
+      "dark-room": {
+        "name": "Dark Room",
+        "description": "Gallery white with one sans and square corners; a dark room at night. Tall film hero with a trust band, scrolling category row, giant wordmark footer."
+      },
+      "shiraz-zari": {
+        "name": "Shiraz Zari",
+        "description": "Shiraz wine and zari gold with Bodoni headings, plum-black at night. Editorial hero with gold piping, large category cards, editorial product cards."
+      }
+    },
+    "switches": {
+      "heroStyle": {
+        "label": "Hero",
+        "options": {
+          "cinematic": "Cinematic",
+          "film": "Film with trust band",
+          "framed": "Framed",
+          "editorial": "Editorial"
+        }
+      },
+      "categoryStyle": {
+        "label": "Shop by category",
+        "options": {
+          "tiles": "Tiles",
+          "scroll-row": "Scrolling row",
+          "plates": "Framed plates",
+          "cards": "Large cards"
+        }
+      },
+      "productCardStyle": {
+        "label": "Product card",
+        "options": {
+          "boxed": "Boxed",
+          "editorial": "Editorial",
+          "plate": "Plate"
+        }
+      },
+      "newsletterStyle": {
+        "label": "Newsletter",
+        "options": {
+          "panel": "Panel",
+          "band": "Full-width band"
+        }
+      },
+      "footerStyle": {
+        "label": "Footer",
+        "options": {
+          "columns": "Columns",
+          "wordmark": "Columns with wordmark"
+        }
+      }
+    }
   }
 }

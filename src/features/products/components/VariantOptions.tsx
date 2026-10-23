@@ -1,6 +1,7 @@
 "use client";
 
 import type { IProductOption } from "../types";
+import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 
 interface VariantOptionsProps {
   options: IProductOption[];
@@ -19,6 +20,7 @@ export function VariantOptions({
   onSelect,
   isValueAvailable,
 }: VariantOptionsProps) {
+  const label = useOptionLabels();
   if (options.length === 0) return null;
 
   return (
@@ -26,14 +28,14 @@ export function VariantOptions({
       {options.map((option) => (
         <div key={option.name}>
           <label className="block text-xs font-semibold uppercase tracking-wide mb-2.5 text-text-secondary">
-            {option.name}
+            {label.name(option.name)}
             {selectedOptions[option.name] && (
               <span className="font-normal text-text-secondary ml-1">
-                — {selectedOptions[option.name]}
+                — {label.value(selectedOptions[option.name])}
               </span>
             )}
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={label.name(option.name)}>
             {option.values.map((value) => {
               const available = isValueAvailable(option.name, value);
               const selected = selectedOptions[option.name] === value;
@@ -43,7 +45,8 @@ export function VariantOptions({
                   type="button"
                   onClick={() => onSelect(option.name, value)}
                   disabled={!available}
-                  className={`px-4 py-2.5 border text-sm font-medium transition-all duration-200 ${
+                  aria-pressed={selected}
+                  className={`focus-ring px-4 py-2.5 border text-sm font-medium transition-all duration-200 ${
                     selected
                       ? "border-[var(--color-primary)] text-[var(--color-primary)]"
                       : available
@@ -60,7 +63,7 @@ export function VariantOptions({
                       : undefined),
                   }}
                 >
-                  {value}
+                  {label.value(value)}
                 </button>
               );
             })}

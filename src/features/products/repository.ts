@@ -465,12 +465,19 @@ export const ProductRepository = {
   async countByCategoryIds(
     storeId: string,
     categoryIds: string[],
+    activeOnly = false,
   ): Promise<Record<string, number>> {
     if (categoryIds.length === 0) return {};
     const rows = await db
       .select({ categoryId: products.categoryId, count: count() })
       .from(products)
-      .where(and(eq(products.storeId, storeId), inArray(products.categoryId, categoryIds)))
+      .where(
+        and(
+          eq(products.storeId, storeId),
+          inArray(products.categoryId, categoryIds),
+          activeOnly ? eq(products.isActive, true) : undefined,
+        ),
+      )
       .groupBy(products.categoryId);
     return Object.fromEntries(rows.map((r) => [r.categoryId ?? "", Number(r.count)]));
   },

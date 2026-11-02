@@ -762,13 +762,18 @@ html:is([data-card-style="editorial"], [data-card-style="plate"], [data-card-sty
   content: ""; position: absolute; inset: 5px; border-radius: 50%;
   border: 1px dashed color-mix(in srgb, var(--color-sale-badge-text) 60%, transparent);
 }
-.pc-seal b { display: block; font: 600 18px/1 var(--font-heading, var(--font-family)); font-variant-numeric: tabular-nums; }
+/* The body face, not the display serif: Cormorant's old-style figures made "14" read
+   as "I4". In `bn` the body face is Noto Sans Bengali, whose ১ is clear. */
+.pc-seal b { display: block; font: 700 14px/1 var(--font-family); font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.02em; }
+/* Bengali digits run wider: keep "১৬%" inside the dashed ring. */
+html[lang="bn"] .pc-seal b { font-size: 13.5px; }
 .pc-seal small { display: block; margin-top: 1px; font: 600 8px/1 var(--font-family); letter-spacing: 0.12em; text-transform: uppercase; }
 .group:hover .pc-seal, .group:focus-visible .pc-seal { transform: rotate(-12deg) scale(1.05); }
 @container (max-width: 200px) {
   .pc-seal { width: 44px; height: 44px; top: 8px; right: 8px; }
   .pc-seal::before { inset: 4px; }
-  .pc-seal b { font-size: 14px; }
+  .pc-seal b { font-size: 11px; }
+  html[lang="bn"] .pc-seal b { font-size: 10.5px; }
   .pc-seal small { font-size: 7px; }
 }
 @media (prefers-reduced-motion: reduce) {

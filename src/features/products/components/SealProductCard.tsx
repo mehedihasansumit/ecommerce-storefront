@@ -55,7 +55,7 @@ export function SealProductCard({ product }: { product: IProduct }) {
         ) : card.hasDiscount ? (
           <span className="pc-seal" aria-hidden>
             <span>
-              <b>−{formatNumber(card.discountPercent, locale)}%</b>
+              <b>{formatNumber(card.discountPercent, locale)}%</b>
               <small>{tr("sealOff")}</small>
             </span>
           </span>

@@ -554,7 +554,7 @@ import { Button, Input, Field, Card, Alert, Modal, ConfirmDialog,
 | Primary action | `<Button variant="brand">` — uses tenant `--color-primary` | `<Button variant="primary">` — gray-900, brand-neutral |
 | Background | `var(--color-bg)` | `bg-gray-50` |
 | Density | Airy — `py-8`/`py-10` sections | Dense — `p-4 md:p-8` page frame |
-| Fonts | `--font-family` (tenant) or Hind Siliguri for `bn` | Same |
+| Fonts | `--font-family` (tenant) or Noto Sans Bengali for `bn` | Same |
 | Hero / decorative animations | Yes — `stagger-children`, `animate-hero-zoom` | No — admin is a tool, not a showcase |
 
 **Admin must not read tenant theme colors** — it's cross-store. Admin uses neutral grays and the `primary` button variant.
@@ -644,7 +644,7 @@ import { Button, Input, Field, Card, Alert, Modal, ConfirmDialog,
 - **No hardcoded UI strings.** Every user-visible string goes through `useTranslations()` / `getTranslations()` from `next-intl`.
 - Localized content fields (product name, category name, etc.) use `LocalizedString` and the `t()` helper from `@/shared/lib/i18n`.
 - Currency: use `<Price amount={...} currency={...} locale={...} />` — never hardcode `৳` or `$`.
-- Bengali (`bn`) gets `Hind Siliguri` font (handled in root layout). Header nav switches from uppercase-tracked to natural `text-[15px]` for `bn`.
+- Bengali (`bn`) gets `Noto Sans Bengali` font (handled in root layout). Not Hind Siliguri: its ১ is small and curled and reads like ৯. Header nav switches from uppercase-tracked to natural `text-[15px]` for `bn`.
 - RTL: not currently supported; avoid left/right-specific classes where `start`/`end` equivalents exist if you can.
 
 ### When building a new page

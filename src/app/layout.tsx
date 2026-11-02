@@ -94,18 +94,20 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   const isBengali = locale === "bn";
-  const bnFont = "Hind Siliguri";
+  // Noto Sans Bengali, not Hind Siliguri: Hind draws ১ (one) small and curled, so
+  // prices like ৳১,১৫০ were easy to misread as ৳৯,৯৫০.
+  const bnFont = "Noto Sans Bengali";
 
   // Display face for headings (optional, per tenant). Latin display serifs carry no
-  // Bengali glyphs, so in `bn` the stack falls through to Hind Siliguri per glyph:
-  // Bengali headings read in Hind, while Latin ones (store name, product names)
+  // Bengali glyphs, so in `bn` the stack falls through to the Bengali face per glyph:
+  // Bengali headings read in it, while Latin ones (store name, product names)
   // keep the brand serif instead of switching typeface with the language.
   const headingFont =
     theme.headingFont && theme.headingFont !== theme.fontFamily
       ? theme.headingFont
       : undefined;
 
-  // A store that offers Bengali loads Hind Siliguri in both locales and keeps it last
+  // A store that offers Bengali loads the Bengali face in both locales and keeps it last
   // in the English stack: Google serves it per unicode-range, so only the Bengali
   // subset the page actually shows (the language switch label) is fetched in `en`.
   // Switching language then reuses the same stylesheet and already-cached glyphs

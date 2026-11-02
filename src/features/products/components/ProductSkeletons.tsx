@@ -5,9 +5,9 @@ import { Skeleton, SkeletonText } from "@/shared/components/ui";
 // skeleton to content does not move anything.
 
 /**
- * Mirrors ProductCard: square image, a two-line title box and the rating row (the
- * real card always reserves both), price row. For the "editorial" and "plate"
- * productCardStyle the box, ratio and rating row change in CSS
+ * Mirrors ProductCard: 4:5 image, the category line, a two-line title box and the
+ * colour/rating row (the real card always reserves all three), price row. For the
+ * "editorial" and "plate" productCardStyle the box and padding change in CSS
  * (html[data-card-style] .pc-skel*, globals.css), so loading.tsx files need no props.
  */
 export function ProductCardSkeleton() {
@@ -16,9 +16,12 @@ export function ProductCardSkeleton() {
       aria-hidden
       className="pc-skel flex flex-col overflow-hidden border border-border-subtle bg-[var(--color-card-bg)] rounded-[var(--border-radius)]"
     >
-      <Skeleton radius="none" className="pc-skel-media aspect-square" />
+      <Skeleton radius="none" className="pc-skel-media aspect-[4/5]" />
       <div className="pc-skel-body flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
-        <SkeletonText className="pc-skel-title text-sm leading-snug" width="w-full" lines={2} lastWidth="w-2/3" />
+        <div>
+          <Skeleton radius="lg" className="h-4 w-16" />
+          <SkeletonText className="pc-skel-title mt-0.5 text-sm leading-snug" width="w-full" lines={2} lastWidth="w-2/3" />
+        </div>
         <Skeleton radius="lg" className="pc-skel-rating h-4 w-24" />
         <div className="mt-auto pt-1">
           <SkeletonText className="text-base" width="w-20" />

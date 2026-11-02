@@ -33,20 +33,20 @@ export default async function ProductDetailLoading() {
           <Skeleton radius="lg" className="h-[0.7em] w-32" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10 lg:gap-16">
-          {/* Gallery */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-5 md:gap-8 lg:gap-14">
+          {/* Gallery: portrait swipe below lg, thumbnail rail + portrait image on desktop */}
           <div aria-hidden>
             <Skeleton
               radius="none"
-              className="md:hidden -mx-4 sm:-mx-6 aspect-square"
+              className="lg:hidden -mx-4 sm:-mx-6 md:mx-0 aspect-[4/5]"
             />
-            <div className="hidden md:block space-y-4">
-              <Skeleton className="aspect-square" />
-              <div className="grid grid-cols-5 gap-2.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-square" />
+            <div className="hidden lg:grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4">
+              <div className="flex flex-col gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[4/5]" />
                 ))}
               </div>
+              <Skeleton className="aspect-[4/5] w-full max-w-[calc((100svh-8rem)*0.8)]" />
             </div>
           </div>
 
@@ -93,19 +93,17 @@ export default async function ProductDetailLoading() {
                     />
                   )}
                   {/* Quantity + add to cart */}
-                  <div aria-hidden className="flex flex-col sm:flex-row gap-3">
+                  <div aria-hidden className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3">
                     <Skeleton className="self-start h-[46px] w-[8.5rem] shrink-0" />
                     <Skeleton className="h-[52px] sm:flex-1" />
                   </div>
                 </div>
-                {/* WhatsApp / Messenger order buttons */}
+                {/* "Prefer to order by chat?" link row */}
                 {socialCount > 0 && (
-                  <div
-                    aria-hidden
-                    className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3"
-                  >
+                  <div aria-hidden className="mt-6 flex items-center gap-5">
+                    <SkeletonText className="text-sm" width="w-40" />
                     {Array.from({ length: socialCount }).map((_, i) => (
-                      <Skeleton key={i} className="h-[46px]" />
+                      <SkeletonText key={i} className="text-sm" width="w-20" />
                     ))}
                   </div>
                 )}
@@ -119,7 +117,7 @@ export default async function ProductDetailLoading() {
         <ProductRailSkeleton />
       </div>
 
-      {/* Description (keeps the footer below the fold until the page arrives) */}
+      {/* Reviews heading (keeps the footer below the fold until the page arrives) */}
       <div aria-hidden className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28 md:pb-8">
         <div className="mt-20 border-t border-border-subtle pt-14">
           <div className="max-w-3xl">

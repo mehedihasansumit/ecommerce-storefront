@@ -7,6 +7,8 @@ import type { IProductOption } from "../types";
 import type { ProductSelection } from "../hooks/useProductSelection";
 import { Button, formatPrice } from "@/shared/components/ui";
 import { VariantOptions } from "./VariantOptions";
+import { SizeGuideLink, SizeMeasurements, isSizeOption } from "./SizeGuide";
+import type { ISizeGuide } from "@/features/categories/types";
 import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 import { formatNumber } from "@/shared/lib/i18n";
 
@@ -20,6 +22,11 @@ interface AddToCartSectionProps {
   beforeCta?: ReactNode;
   /** Attached to the CTA row; the mobile sticky bar shows once it scrolls out of view. */
   ctaRef?: Ref<HTMLDivElement>;
+  /**
+   * The category's size chart: a "Size guide" link beside the Size label (opens the
+   * accordion section) and the chosen size's measurements under the chips.
+   */
+  sizeGuide?: ISizeGuide | null;
 }
 
 /**
@@ -27,7 +34,13 @@ interface AddToCartSectionProps {
  * shared useProductSelection hook (state lives in ProductDetailClient), so the mobile sticky
  * bar and this section never desync.
  */
-export function AddToCartSection({ options, selection, beforeCta, ctaRef }: AddToCartSectionProps) {
+export function AddToCartSection({
+  options,
+  selection,
+  beforeCta,
+  ctaRef,
+  sizeGuide,
+}: AddToCartSectionProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
   const currency = useStoreCurrency();
@@ -42,6 +55,7 @@ export function AddToCartSection({ options, selection, beforeCta, ctaRef }: AddT
     tryAddToCart,
   } = selection;
   const outOfStock = displayStock <= 0;
+  const sizeOptionName = options.find((o) => isSizeOption(o.name))?.name;
 
   return (
     <div className="space-y-6">
@@ -51,13 +65,20 @@ export function AddToCartSection({ options, selection, beforeCta, ctaRef }: AddT
           selectedOptions={selectedOptions}
           onSelect={setOption}
           isValueAvailable={isValueAvailable}
+          labelAction={(name) => (sizeGuide && name === sizeOptionName ? <SizeGuideLink /> : null)}
+          afterValues={(name) =>
+            sizeGuide && name === sizeOptionName ? (
+              <SizeMeasurements guide={sizeGuide} size={selectedOptions[name]} />
+            ) : null
+          }
         />
+        {sizeGuide && !sizeOptionName && <SizeGuideLink />}
       </div>
 
       {beforeCta}
 
       {/* Quantity + Add to Cart */}
-      <div ref={ctaRef} className="flex flex-col sm:flex-row gap-3">
+      <div ref={ctaRef} className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3">
         <div
           className="flex items-center self-start border border-border-subtle shadow-[var(--shadow-xs)] shrink-0"
           style={{ borderRadius: "var(--border-radius)" }}

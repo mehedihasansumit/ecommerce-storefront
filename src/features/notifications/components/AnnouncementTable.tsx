@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, Pencil, Megaphone, X } from "lucide-react";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/shared/components/ui";
 import { BroadcastButton } from "./BroadcastButton";
 import type { IAnnouncement } from "../types";
 
@@ -48,16 +50,22 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
   const router = useRouter();
   const [announcements, setAnnouncements] = useState(initial);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<IAnnouncement | null>(null);
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeleting(id);
     try {
       const res = await fetch(`/api/announcements/${id}?storeId=${storeId}`, { method: "DELETE" });
       if (res.ok) {
         setAnnouncements((prev) => prev.filter((a) => a._id !== id));
+        toast.success(`"${title}" deleted`);
         router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? "Failed to delete announcement");
       }
+    } catch {
+      toast.error("Failed to delete announcement");
     } finally {
       setDeleting(null);
     }
@@ -237,9 +245,11 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
                         <Pencil className="w-4 h-4" />
                       </Link>
                       <button
-                        onClick={() => handleDelete(a._id, a.title)}
+                        type="button"
+                        onClick={() => setPendingDelete(a)}
                         disabled={deleting === a._id}
-                        className="p-1.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
+                        className="p-2.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                        aria-label={`Delete ${a.title}`}
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -252,6 +262,18 @@ export function AnnouncementTable({ announcements: initial, storeId, filterStatu
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => {
+          if (pendingDelete) await handleDelete(pendingDelete._id, pendingDelete.title);
+        }}
+        tone="danger"
+        title="Delete announcement?"
+        description={`"${pendingDelete?.title ?? ""}" will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+      />
     </div>
   );
 }

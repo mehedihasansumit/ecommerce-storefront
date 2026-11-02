@@ -14,6 +14,7 @@ import { OrderRepository } from "@/features/orders/repository";
 import { StoreService } from "@/features/stores/service";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
+import { FilterChip } from "@/shared/components/admin/FilterChip";
 import type { OrderStatus } from "@/features/orders/types";
 
 export const metadata: Metadata = { title: "All Orders" };
@@ -101,52 +102,26 @@ export default async function AllOrdersPage({
 
       {/* Status filter */}
       <div className="flex gap-1.5 flex-wrap mb-3">
-        <Link
-          href={href({ status: undefined })}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!status
-              ? "bg-gray-900 text-white border-gray-900"
-              : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-            }`}
-        >
+        <FilterChip href={href({ status: undefined })} selected={!status}>
           All Status
-        </Link>
+        </FilterChip>
         {ALL_STATUSES.map((s) => (
-          <Link
-            key={s}
-            href={href({ status: s })}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${status === s
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
-          >
+          <FilterChip key={s} href={href({ status: s })} selected={status === s} className="capitalize">
             {s}
-          </Link>
+          </FilterChip>
         ))}
       </div>
 
       {/* Store filter */}
       {stores.length > 1 && (
         <div className="flex gap-1.5 flex-wrap mb-6">
-          <Link
-            href={href({ storeId: undefined })}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!filterStore
-                ? "bg-gray-700 text-white border-gray-700"
-                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
-          >
+          <FilterChip href={href({ storeId: undefined })} selected={!filterStore}>
             All Stores
-          </Link>
+          </FilterChip>
           {stores.map((s) => (
-            <Link
-              key={s._id}
-              href={href({ storeId: s._id })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${filterStore === s._id
-                  ? "bg-gray-700 text-white border-gray-700"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-                }`}
-            >
+            <FilterChip key={s._id} href={href({ storeId: s._id })} selected={filterStore === s._id}>
               {s.name}
-            </Link>
+            </FilterChip>
           ))}
         </div>
       )}

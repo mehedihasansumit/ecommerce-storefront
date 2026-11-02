@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/shared/components/ui";
 
 interface Props {
   categoryId: string;
@@ -11,32 +13,48 @@ interface Props {
 
 export function DeleteCategoryButton({ categoryId, categoryName }: Props) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Delete "${categoryName}"? This cannot be undone.`)) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/categories/${categoryId}`, { method: "DELETE" });
       if (res.ok) {
+        toast.success(`"${categoryName}" deleted.`);
         router.refresh();
       } else {
         const data = await res.json().catch(() => ({}));
-        alert(data.error ?? "Failed to delete category.");
+        toast.error(data.error ?? "Failed to delete category.");
       }
+    } catch {
+      toast.error("Failed to delete category.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <button
-      onClick={handleDelete}
-      disabled={loading}
-      className="p-1.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
-      title="Delete category"
-    >
-      <Trash2 className="w-4 h-4" />
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        disabled={loading}
+        className="p-2.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+        aria-label={`Delete ${categoryName}`}
+        title="Delete category"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+      <ConfirmDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onConfirm={handleDelete}
+        tone="danger"
+        title="Delete category?"
+        description={`"${categoryName}" will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+      />
+    </>
   );
 }

@@ -2,15 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Store,
-  LayoutDashboard,
-  ShoppingBag,
-  Users,
-  UserCog,
-  Shield,
-  HardDrive,
-} from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
+import { getAdminNavItems, isAdminNavActive } from "./admin-nav";
 import { AdminLogoutButton } from "./AdminLogoutButton";
 import { ThemeToggle } from "@/shared/components/ui";
 
@@ -34,22 +27,15 @@ export function AdminSidebar({
   const pathname = usePathname();
 
   function isActive(href: string) {
-    if (href === "/admin") return pathname === "/admin";
-    return pathname.startsWith(href);
+    return isAdminNavActive(pathname, href);
   }
 
-  const coreItems = [
-    { href: "/admin", icon: LayoutDashboard, label: "Dashboard", show: true },
-    { href: "/admin/stores", icon: Store, label: "Stores", show: canViewStores },
-    { href: "/admin/orders", icon: ShoppingBag, label: "All Orders", show: canViewOrders },
-    { href: "/admin/customers", icon: Users, label: "Customers", show: canViewCustomers },
-  ].filter((i) => i.show);
-
-  const superItems = [
-    { href: "/admin/roles", icon: Shield, label: "Roles", show: isSuperAdmin },
-    { href: "/admin/admins", icon: UserCog, label: "Admins", show: isSuperAdmin },
-    { href: "/admin/maintenance", icon: HardDrive, label: "Storage Cleanup", show: isSuperAdmin },
-  ].filter((i) => i.show);
+  const { coreItems, superItems } = getAdminNavItems({
+    isSuperAdmin,
+    canViewStores,
+    canViewOrders,
+    canViewCustomers,
+  });
 
   const initials = adminName
     ? adminName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()

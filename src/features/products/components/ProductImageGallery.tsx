@@ -165,7 +165,7 @@ export function ProductImageGallery({
   return (
     <>
       {/* Mobile: native scroll-snap swipe gallery with a position counter; tap opens the lightbox */}
-      <div className="md:hidden relative -mx-4 sm:-mx-6 animate-fade-in">
+      <div className="lg:hidden relative -mx-4 sm:-mx-6 md:mx-0 md:overflow-hidden animate-fade-in md:rounded-[var(--border-radius)]">
         {images.length > 0 ? (
           <div
             ref={trackRef}
@@ -181,7 +181,7 @@ export function ProductImageGallery({
                   openLightbox();
                 }}
                 aria-label={tr("openImage", { current: i + 1, total: images.length })}
-                className="focus-ring-inset relative w-full shrink-0 snap-center aspect-square bg-surface"
+                className="focus-ring-inset relative w-full shrink-0 snap-center aspect-[4/5] bg-surface"
               >
                 <StoreImage
                   src={i === 0 && thumbnail ? thumbnail : img.url}
@@ -190,14 +190,14 @@ export function ProductImageGallery({
                   alt={img.alt || productName}
                   fill
                   priority={i === 0}
-                  sizes="100vw"
+                  sizes="(max-width: 767px) 100vw, 50vw"
                   className="media-dim object-cover"
                 />
               </button>
             ))}
           </div>
         ) : (
-          <div className="aspect-square bg-surface flex items-center justify-center text-gray-300 text-lg">
+          <div className="aspect-[4/5] bg-surface flex items-center justify-center text-text-tertiary text-lg">
             {tr("noImage")}
           </div>
         )}
@@ -211,10 +211,52 @@ export function ProductImageGallery({
         )}
       </div>
 
-      <div className="hidden md:block space-y-4 animate-fade-in">
+      {/* Desktop: thumbnail rail + one large portrait image. The column sticks while the
+          longer buy box scrolls past, and is capped to the viewport height so it never crops. */}
+      <div
+        className={`hidden lg:grid lg:sticky lg:top-24 lg:self-start gap-4 animate-fade-in ${
+          images.length > 1 ? "grid-cols-[4.5rem_minmax(0,1fr)]" : "grid-cols-1"
+        }`}
+      >
+        {images.length > 1 && (
+          <div className="relative">
+            <div className="absolute inset-0 flex flex-col gap-3 overflow-y-auto no-scrollbar">
+              {images.map((img, i) => (
+                <button
+                  key={img.url}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-label={tr("imageCounter", { current: i + 1, total: images.length })}
+                  aria-pressed={i === selectedIndex}
+                  className={`focus-ring relative aspect-[4/5] w-full shrink-0 overflow-hidden bg-surface transition-opacity duration-200 ${
+                    i === selectedIndex ? "opacity-100" : "opacity-55 hover:opacity-100"
+                  }`}
+                  style={{ borderRadius: "var(--border-radius)" }}
+                >
+                  <StoreImage
+                    src={img.url}
+                    variants={img.variants}
+                    blurDataURL={img.blurDataURL}
+                    alt=""
+                    fill
+                    sizes="72px"
+                    className="media-dim object-cover"
+                  />
+                  {i === selectedIndex && (
+                    <span
+                      aria-hidden
+                      className="absolute inset-x-0 bottom-0 h-0.5 bg-[var(--color-text)]"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Main image — hover to zoom 2.5x, click for lightbox */}
         <div
-          className="relative aspect-square bg-surface overflow-hidden group cursor-zoom-in"
+          className="relative aspect-[4/5] w-full max-w-[calc((100svh-8rem)*0.8)] bg-surface overflow-hidden group cursor-zoom-in"
           style={{ borderRadius: "var(--border-radius)" }}
           onMouseMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
@@ -236,7 +278,7 @@ export function ProductImageGallery({
               fill
               priority
               fullRes
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              sizes="(max-width: 1280px) 55vw, 700px"
               className="media-dim object-cover"
               style={{
                 transformOrigin: `${cursorPos.x}% ${cursorPos.y}%`,
@@ -245,57 +287,21 @@ export function ProductImageGallery({
               }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg">
-              No Image
+            <div className="w-full h-full flex items-center justify-center text-text-tertiary text-lg">
+              {tr("noImage")}
             </div>
           )}
 
-          {/* Expand icon — top-right on hover */}
+          {/* Expand — appears on hover or keyboard focus; no permanent hint over the photo */}
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); openLightbox(); }}
-            className="absolute top-3 right-3 bg-black/40 hover:bg-black/70 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm"
+            className="focus-ring absolute top-3 right-3 bg-black/60 hover:bg-black/75 text-white p-2.5 rounded-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200"
             aria-label={tr("openFullscreen")}
           >
             <Maximize2 size={16} />
           </button>
-
-          {/* Bottom label — visible when not hovering */}
-          <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 group-hover:opacity-0 transition-opacity duration-200 pointer-events-none select-none">
-            <ZoomIn size={12} aria-hidden />
-            {tr("zoomHint")}
-          </div>
         </div>
-
-        {/* Thumbnails */}
-        {images.length > 1 && (
-          <div className="grid grid-cols-5 gap-2.5">
-            {images.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setIndex(i)}
-                className={`relative aspect-square overflow-hidden transition-all duration-200 ${
-                  i === selectedIndex
-                    ? "ring-2 ring-offset-2 opacity-100"
-                    : "opacity-50 hover:opacity-100"
-                }`}
-                style={{
-                  borderRadius: "var(--border-radius)",
-                  ["--tw-ring-color" as string]: "var(--color-primary)",
-                }}
-              >
-                <StoreImage
-                  src={img.url}
-                  variants={img.variants}
-                  blurDataURL={img.blurDataURL}
-                  alt={img.alt || productName}
-                  fill
-                  sizes="120px"
-                  className="media-dim object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Lightbox */}
@@ -390,7 +396,7 @@ export function ProductImageGallery({
                   height: "min(85vw, 85vh)",
                   flexShrink: 0,
                   transform: `translate(${panPos.x}px, ${panPos.y}px) scale(${lbZoom})`,
-                  transition: isDragging ? "none" : "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  transition: isDragging ? "none" : "transform 0.2s var(--ease-out-expo)",
                 }}
               >
                 <StoreImage

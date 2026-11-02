@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Send, Loader2, CheckCircle } from "lucide-react";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/shared/components/ui";
 
 interface BroadcastButtonProps {
   announcementId: string;
@@ -21,9 +23,9 @@ export function BroadcastButton({
   );
   const [sentCount, setSentCount] = useState(initialCount);
   const [errorMsg, setErrorMsg] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function handleBroadcast() {
-    if (!confirm("Send this announcement to all email subscribers?")) return;
     setStatus("loading");
     setErrorMsg("");
 
@@ -37,17 +39,34 @@ export function BroadcastButton({
       const data = await res.json();
 
       if (res.ok) {
-        setSentCount(data.sent ?? 0);
+        const sent: number = data.sent ?? 0;
+        setSentCount(sent);
         setStatus("done");
+        toast.success(`Sent to ${sent} subscriber${sent !== 1 ? "s" : ""}`);
       } else {
-        setErrorMsg(data?.error || "Failed to send");
+        const msg = data?.error || "Failed to send";
+        setErrorMsg(msg);
         setStatus("error");
+        toast.error(msg);
       }
     } catch {
       setErrorMsg("Network error");
       setStatus("error");
+      toast.error("Network error");
     }
   }
+
+  const dialog = (
+    <ConfirmDialog
+      open={confirmOpen}
+      onClose={() => setConfirmOpen(false)}
+      onConfirm={handleBroadcast}
+      tone="primary"
+      title="Send announcement?"
+      description="This announcement will be emailed to all subscribers of this store."
+      confirmLabel="Send"
+    />
+  );
 
   if (status === "done") {
     return (
@@ -63,31 +82,41 @@ export function BroadcastButton({
 
   if (status === "error") {
     return (
-      <button
-        onClick={handleBroadcast}
-        className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
-        title={errorMsg || "Send failed — click to retry"}
-      >
-        <Send size={14} />
-      </button>
+      <>
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          className="p-2.5 text-red-400 hover:text-red-600 rounded-lg transition-colors"
+          aria-label="Retry sending announcement to email subscribers"
+          title={errorMsg || "Send failed — click to retry"}
+        >
+          <Send size={14} />
+        </button>
+        {dialog}
+      </>
     );
   }
 
   if (status === "loading") {
     return (
-      <span className="p-1.5 text-admin-text-subtle">
+      <span className="inline-flex p-2.5 text-admin-text-subtle" role="status" aria-label="Sending announcement">
         <Loader2 size={14} className="animate-spin" />
       </span>
     );
   }
 
   return (
-    <button
-      onClick={handleBroadcast}
-      className="p-1.5 text-admin-text-subtle hover:text-blue-600 transition-colors"
-      title="Send to email subscribers"
-    >
-      <Send size={14} />
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setConfirmOpen(true)}
+        className="p-2.5 text-admin-text-subtle hover:text-blue-600 rounded-lg transition-colors"
+        aria-label="Send announcement to email subscribers"
+        title="Send to email subscribers"
+      >
+        <Send size={14} />
+      </button>
+      {dialog}
+    </>
   );
 }

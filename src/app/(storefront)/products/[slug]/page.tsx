@@ -1,5 +1,6 @@
 import { getTenant } from "@/shared/lib/tenant";
 import { ProductService } from "@/features/products/service";
+import { CategoryService } from "@/features/categories/service";
 import { getProductBySlug } from "@/features/products/storefront";
 import {
   createStoreMetadata,
@@ -53,7 +54,18 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = await getProductBySlug(tenant._id, slug);
   if (!product) notFound();
-  const related = await ProductService.getRelated(tenant._id, product);
+  const [related, category] = await Promise.all([
+    ProductService.getRelated(tenant._id, product),
+    product.categoryId ? CategoryService.getById(product.categoryId) : null,
+  ]);
+  // Only this store's category may supply the size chart (tenant isolation).
+  const sizeGuide =
+    category && category.storeId === tenant._id ? category.sizeGuide : null;
+
+  const rawDescription = t(product.description, locale);
+  const descriptionHtml = rawDescription
+    ? sanitizeDescription(isHtml(rawDescription) ? rawDescription : plainTextToHtml(rawDescription))
+    : undefined;
 
   const domain = tenant.domains?.[0] || "localhost:3000";
   const storeUrl = `https://${domain}`;
@@ -98,6 +110,9 @@ export default async function ProductDetailPage({
           socialOrdering={tenant.socialOrdering}
           productUrl={`${storeUrl}/products/${product.slug}`}
           trustFacts={getStoreTrustFacts(tenant)}
+          sizeGuide={sizeGuide}
+          descriptionHtml={descriptionHtml}
+          lowStockThreshold={tenant.lowStockThreshold}
         />
 
       </div>
@@ -107,26 +122,10 @@ export default async function ProductDetailPage({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28 md:pb-8">
-        {/* Description & Tags */}
-        <div className="mt-20 border-t border-border-subtle pt-14">
-          {t(product.description, locale) && (
-            <div className="max-w-3xl">
-              <h2 className="text-xl font-semibold mb-6">{tr("description")}</h2>
-              <div
-                className="rte-content text-text-secondary leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: sanitizeDescription(
-                    isHtml(t(product.description, locale))
-                      ? t(product.description, locale)
-                      : plainTextToHtml(t(product.description, locale))
-                  ),
-                }}
-              />
-            </div>
-          )}
-
-          {(product.tags?.length ?? 0) > 0 && (
-            <div className="mt-8 flex flex-wrap gap-2">
+        {/* Tags (the description now lives in the buy box accordion) */}
+        {(product.tags?.length ?? 0) > 0 && (
+          <div className="mt-16">
+            <div className="flex flex-wrap gap-2">
               {product.tags?.map((tag) => (
                 <span
                   key={tag}
@@ -137,8 +136,8 @@ export default async function ProductDetailPage({
                 </span>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Reviews Section */}
         <div id="reviews" className="mt-16 border-t border-border-subtle pt-14 scroll-mt-20">

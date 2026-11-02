@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps } from "./_shared";
 
 export const stores = pgTable(
@@ -27,6 +27,8 @@ export const stores = pgTable(
     pointsConfig: jsonb("points_config").notNull().default({}),
     refundPolicy: jsonb("refund_policy").notNull().default({}),
     deliveryConfig: jsonb("delivery_config").notNull().default({}),
+    /** Product page says "Only N left" at or below this stock; 0 turns it off. */
+    lowStockThreshold: integer("low_stock_threshold").notNull().default(5),
     supportedLanguages: text("supported_languages")
       .array()
       .notNull()

@@ -1,7 +1,7 @@
 import { CategoryRepository } from "./repository";
 import { deleteUnreferencedBlobs } from "@/shared/lib/storage";
 import { invalidateStore } from "@/shared/lib/data-cache";
-import type { ICategory } from "./types";
+import type { ICategory, ISizeGuide } from "./types";
 import type { LocalizedString } from "@/shared/types/i18n";
 import slugify from "slugify";
 import { ProductService } from "@/features/products/service";
@@ -58,7 +58,7 @@ export const CategoryService = {
 
   async create(
     storeId: string,
-    data: { name: string | LocalizedString; description?: string | LocalizedString; image?: string; parentId?: string; sortOrder?: number }
+    data: { name: string | LocalizedString; description?: string | LocalizedString; image?: string; sizeGuide?: ISizeGuide | null; parentId?: string; sortOrder?: number }
   ): Promise<ICategory> {
     const slug = nameToSlug(data.name);
     const created = await CategoryRepository.create({ ...data, storeId, slug } as Partial<ICategory>);

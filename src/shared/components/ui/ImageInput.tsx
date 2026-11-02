@@ -130,9 +130,10 @@ export function ImageInput({
               type="button"
               onClick={clear}
               aria-label="Remove image"
-              className="absolute top-1 right-1 w-6 h-6 bg-white/90 hover:bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              // Visible on hover AND keyboard focus (and always on touch screens, which have no hover).
+              className="absolute top-1 right-1 w-10 h-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 transition-opacity"
             >
-              <X size={12} />
+              <X size={16} />
             </button>
           )}
         </div>
@@ -191,6 +192,7 @@ export function ImageInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://… or /api/media/…"
           disabled={disabled}
+          aria-label={label ? `${label} URL` : "Image URL"}
         />
       )}
 

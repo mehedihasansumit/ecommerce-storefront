@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { X, Plus, Trash2, Sparkles } from "lucide-react";
-import type { IPricingTier, IProduct, IProductOption, IProductVariant, IProductImage } from "../types";
+import type { IPricingTier, IProduct, IProductDetail, IProductOption, IProductVariant, IProductImage } from "../types";
 import type { ICategory } from "@/features/categories/types";
 import { PricingTiersInput } from "./PricingTiersInput";
+import { ProductDetailsInput } from "./ProductDetailsInput";
 import { generateBaseSku, generateVariantSku, dedupeVariantSkus } from "../sku";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
@@ -145,6 +146,7 @@ export function ProductForm({
   const [options, setOptions] = useState<IProductOption[]>(product?.options ?? []);
   const [variants, setVariants] = useState<IProductVariant[]>(product?.variants ?? []);
   const [pricingTiers, setPricingTiers] = useState<IPricingTier[]>(product?.pricingTiers ?? []);
+  const [details, setDetails] = useState<IProductDetail[]>(product?.details ?? []);
 
   const [colorImages, setColorImages] = useState<Record<string, IProductImage[]>>(() => {
     const initial: Record<string, IProductImage[]> = {};
@@ -279,6 +281,12 @@ export function ProductForm({
       categoryId: form.categoryId || undefined,
       images: productImages,
       options,
+      // Drop rows with nothing in them; keep a row if any language has text.
+      details: details.filter(
+        (d) =>
+          Object.values(d.label).some((s) => s.trim()) &&
+          Object.values(d.value).some((s) => s.trim())
+      ),
       pricingTiers: pricingTiers
         .map((t) => ({ quantity: Number(t.quantity), totalPrice: Number(t.totalPrice) }))
         .filter((t) => t.quantity > 0 && t.totalPrice > 0),
@@ -377,6 +385,24 @@ export function ProductForm({
         </div>
       </Card>
 
+      {/* Details */}
+      <Card>
+        <CardHeader
+          title={
+            supportedLanguages.length > 1 ? (
+              <>
+                Product Details
+                <span className="ml-2 text-xs font-normal text-gray-400">— {langLabel}</span>
+              </>
+            ) : (
+              "Product Details"
+            )
+          }
+          description="Shown under the buy button as a Details list. Fill each language tab."
+        />
+        <ProductDetailsInput value={details} onChange={setDetails} lang={activeLang} />
+      </Card>
+
       {/* Pricing */}
       <Card>
         <CardHeader title="Pricing" />
@@ -425,9 +451,11 @@ export function ProductForm({
       <Card>
         <CardHeader title="Inventory" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="SKU" hint="Leave empty to auto-generate on save.">
+          <Field label="SKU" hint="Leave empty to auto-generate on save." htmlFor="product-sku">
             <div className="flex gap-2">
               <Input
+                id="product-sku"
+                aria-describedby="product-sku-hint"
                 type="text"
                 value={form.sku}
                 onChange={(e) => set("sku", e.target.value)}
@@ -597,9 +625,9 @@ export function ProductForm({
                       type="button"
                       onClick={() => removeValueFromOption(optIdx, valIdx)}
                       aria-label={`Remove ${val}`}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      className="-my-1 -me-1.5 inline-flex min-h-7 min-w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 focus-visible:outline-2 focus-visible:outline-gray-900 dark:hover:text-gray-200"
                     >
-                      <X size={12} />
+                      <X size={14} />
                     </button>
                   </span>
                 ))}
@@ -618,12 +646,13 @@ export function ProductForm({
                     }
                   }}
                   placeholder={`Add ${opt.name} value...`}
+                  aria-label={`New ${opt.name} value`}
                 />
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => addValueToOption(optIdx)}
-                  aria-label="Add value"
+                  aria-label={`Add ${opt.name} value`}
                 >
                   <Plus size={14} />
                 </Button>
@@ -642,9 +671,11 @@ export function ProductForm({
                 }
               }}
               placeholder="Option name (e.g., Color, Size, Material)..."
+              aria-label="New option name"
             />
-            <Button variant="primary" size="sm" onClick={addOption}>
-              + Add Option
+            {/* Secondary: the form's one primary action is Save. */}
+            <Button variant="secondary" size="sm" onClick={addOption} leftIcon={<Plus size={14} />}>
+              Add Option
             </Button>
           </div>
         </div>
@@ -716,7 +747,11 @@ export function ProductForm({
                 </tr>
               </thead>
               <tbody>
-                {variants.map((variant, idx) => (
+                {variants.map((variant, idx) => {
+                  const variantLabel =
+                    options.map((o) => variant.optionValues[o.name]).filter(Boolean).join(" / ") ||
+                    `Variant ${idx + 1}`;
+                  return (
                   <tr
                     key={idx}
                     className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
@@ -733,6 +768,7 @@ export function ProductForm({
                         step="0.01"
                         value={variant.price ?? ""}
                         placeholder={String(form.price)}
+                        aria-label={`${variantLabel} price`}
                         onChange={(e) =>
                           updateVariant(
                             idx,
@@ -748,6 +784,7 @@ export function ProductForm({
                         type="number"
                         min="0"
                         value={variant.stock}
+                        aria-label={`${variantLabel} stock`}
                         onChange={(e) => updateVariant(idx, "stock", Number(e.target.value))}
                         className="w-20"
                       />
@@ -758,11 +795,13 @@ export function ProductForm({
                         value={variant.sku}
                         onChange={(e) => updateVariant(idx, "sku", e.target.value)}
                         placeholder="SKU"
+                        aria-label={`${variantLabel} SKU`}
                         className="w-32"
                       />
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -770,26 +809,27 @@ export function ProductForm({
       )}
 
       {/* Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Spec: primary + secondary on the left, destructive on the right. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-wrap gap-3">
+          <Button type="submit" variant="primary" loading={loading}>
+            {isEdit ? "Save Changes" : "Create Product"}
+          </Button>
           <Button type="button" variant="secondary" onClick={() => router.back()}>
             Cancel
           </Button>
-          {isEdit && (
-            <Button
-              type="button"
-              variant="danger-outline"
-              onClick={() => setDeleteOpen(true)}
-              disabled={loading}
-            >
-              Delete Product
-            </Button>
-          )}
         </div>
 
-        <Button type="submit" variant="primary" loading={loading}>
-          {isEdit ? "Save Changes" : "Create Product"}
-        </Button>
+        {isEdit && (
+          <Button
+            type="button"
+            variant="danger-outline"
+            onClick={() => setDeleteOpen(true)}
+            disabled={loading}
+          >
+            Delete Product
+          </Button>
+        )}
       </div>
 
       {isEdit && (

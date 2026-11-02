@@ -45,6 +45,7 @@ function toIStore(row: Store): IStore {
     },
     supportedLanguages: row.supportedLanguages,
     defaultLanguage: row.defaultLanguage,
+    lowStockThreshold: row.lowStockThreshold ?? 5,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

@@ -3,7 +3,7 @@
 import { Banknote, RotateCcw, Truck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { StoreTrustFact } from "@/features/stores/trust";
-import { Card, formatPrice } from "@/shared/components/ui";
+import { formatPrice } from "@/shared/components/ui";
 import { DELIVERY_CURRENCY } from "@/shared/lib/delivery";
 
 interface StoreTrustInfoProps {
@@ -81,23 +81,17 @@ export function StoreTrustInfo({ facts, layout, className }: StoreTrustInfoProps
   }
 
   return (
-    <Card padding="none" className={className}>
-      <ul aria-label={tr("label")} className="divide-y divide-border-subtle">
-        {facts.map((f) => {
-          const Icon = ICONS[f.kind];
-          return (
-            <li key={f.kind} className="flex items-start gap-3 px-3 py-2.5 text-sm">
-              <Icon
-                size={18}
-                className="mt-0.5 shrink-0"
-                style={{ color: "var(--color-primary)" }}
-                aria-hidden
-              />
-              <span>{text(f, true)}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </Card>
+    // Plain rows, no card: next to the buy button these read as quiet assurances, not a form.
+    <ul aria-label={tr("label")} className={`space-y-2.5 ${className ?? ""}`}>
+      {facts.map((f) => {
+        const Icon = ICONS[f.kind];
+        return (
+          <li key={f.kind} className="flex items-start gap-3 text-sm text-[var(--color-text)]">
+            <Icon size={18} className="mt-0.5 shrink-0 text-text-secondary" aria-hidden />
+            <span>{text(f, true)}</span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

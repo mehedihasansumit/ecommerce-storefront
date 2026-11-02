@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { IProductOption } from "../types";
 import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 
@@ -8,6 +9,10 @@ interface VariantOptionsProps {
   selectedOptions: Record<string, string>;
   onSelect: (name: string, value: string) => void;
   isValueAvailable: (optionName: string, value: string) => boolean;
+  /** Rendered at the end of an option's label row (e.g. "Size guide" beside Size). */
+  labelAction?: (optionName: string) => ReactNode;
+  /** Rendered under an option's chips (e.g. the chosen size's measurements). */
+  afterValues?: (optionName: string) => ReactNode;
 }
 
 /**
@@ -19,6 +24,8 @@ export function VariantOptions({
   selectedOptions,
   onSelect,
   isValueAvailable,
+  labelAction,
+  afterValues,
 }: VariantOptionsProps) {
   const label = useOptionLabels();
   if (options.length === 0) return null;
@@ -27,14 +34,17 @@ export function VariantOptions({
     <div className="space-y-4">
       {options.map((option) => (
         <div key={option.name}>
-          <label className="block text-xs font-semibold uppercase tracking-wide mb-2.5 text-text-secondary">
-            {label.name(option.name)}
-            {selectedOptions[option.name] && (
-              <span className="font-normal text-text-secondary ml-1">
-                — {label.value(selectedOptions[option.name])}
-              </span>
-            )}
-          </label>
+          <div className="flex items-center justify-between gap-4 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+              {label.name(option.name)}
+              {selectedOptions[option.name] && (
+                <span className="font-normal text-text-secondary ml-1">
+                  — {label.value(selectedOptions[option.name])}
+                </span>
+              )}
+            </label>
+            {labelAction?.(option.name)}
+          </div>
           <div className="flex flex-wrap gap-2" role="group" aria-label={label.name(option.name)}>
             {option.values.map((value) => {
               const available = isValueAvailable(option.name, value);
@@ -68,6 +78,7 @@ export function VariantOptions({
               );
             })}
           </div>
+          {afterValues?.(option.name)}
         </div>
       ))}
     </div>

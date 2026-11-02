@@ -31,6 +31,12 @@ export interface IProductSeo {
   description: LocalizedString;
 }
 
+/** One "Details" row on the product page, e.g. Fabric → 100% cotton. */
+export interface IProductDetail {
+  label: LocalizedString;
+  value: LocalizedString;
+}
+
 export interface IPricingTier {
   quantity: number;
   totalPrice: number;
@@ -56,6 +62,7 @@ export interface IProduct {
   tags: string[];
   options: IProductOption[];
   variants: IProductVariant[];
+  details: IProductDetail[];
   pricingTiers: IPricingTier[];
   isActive: boolean;
   isFeatured: boolean;

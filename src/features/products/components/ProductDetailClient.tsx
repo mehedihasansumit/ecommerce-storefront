@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Star } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { IProduct, IProductImage } from "../types";
 import type { IStoreSocialOrdering } from "@/features/stores/types";
@@ -13,6 +13,9 @@ import { AddToCartSection } from "./AddToCartSection";
 import { MobileBuyBar } from "./MobileBuyBar";
 import { SocialOrderButtons } from "./SocialOrderButtons";
 import { BulkPricingTable } from "./BulkPricingTable";
+import { isSizeOption } from "./SizeGuide";
+import { ProductInfoAccordion } from "./ProductInfoAccordion";
+import type { ISizeGuide } from "@/features/categories/types";
 import { formatNumber, t } from "@/shared/lib/i18n";
 import { useTrackEvent } from "@/features/analytics/hooks/useTrackEvent";
 import { useProductSelection } from "../hooks/useProductSelection";
@@ -25,6 +28,12 @@ interface ProductDetailClientProps {
   productUrl?: string;
   /** COD / delivery fee / exchange window from the store config, shown next to the CTA. */
   trustFacts?: StoreTrustFact[];
+  /** The product's category size chart, if the category has one. */
+  sizeGuide?: ISizeGuide | null;
+  /** Long description, sanitized on the server. */
+  descriptionHtml?: string;
+  /** Store setting: "Only N left" at or below this stock, "In stock" above; 0 = never. */
+  lowStockThreshold?: number;
 }
 
 export function ProductDetailClient({
@@ -32,6 +41,9 @@ export function ProductDetailClient({
   socialOrdering,
   productUrl,
   trustFacts = [],
+  sizeGuide,
+  descriptionHtml,
+  lowStockThreshold = 5,
 }: ProductDetailClientProps) {
   const tr = useTranslations("productDetail");
   const locale = useLocale();
@@ -97,6 +109,8 @@ export function ProductDetailClient({
     }
   }
 
+  const sizeOptionName = (product.options ?? []).find((o) => isSizeOption(o.name))?.name;
+
   const displayCompareAt = activeVariant?.compareAtPrice ?? product.compareAtPrice;
 
   const hasDiscount = displayCompareAt > 0 && displayCompareAt > displayPrice;
@@ -110,7 +124,7 @@ export function ProductDetailClient({
     : displayPrice * quantity;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10 lg:gap-16">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-5 md:gap-8 lg:gap-14">
       {/* Images */}
       <ProductImageGallery
         images={galleryImages}
@@ -151,10 +165,18 @@ export function ProductDetailClient({
         )}
 
         {/* Price */}
+        {/* Quiet price: body ink, medium weight. The saving is stated once, plainly —
+            a coloured "You save" shout makes a considered buy read as a clearance. */}
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 md:mb-6">
-          <Price amount={displayPrice} compareAt={displayCompareAt} size="xl" locale={locale} />
+          <Price
+            amount={displayPrice}
+            compareAt={displayCompareAt}
+            size="xl"
+            tone="quiet"
+            locale={locale}
+          />
           {hasDiscount && (
-            <span className="text-sm font-semibold" style={{ color: "var(--color-success)" }}>
+            <span className="text-sm text-text-secondary">
               {tr("youSave", {
                 amount: formatPrice(displayCompareAt - displayPrice, currency, locale),
               })}
@@ -190,15 +212,21 @@ export function ProductDetailClient({
         <div className="border-t border-border-subtle pt-4 md:pt-6 space-y-4 md:space-y-6">
           {/* Stock */}
           <div>
-            {displayStock > 0 ? (
-              <div className="flex items-center gap-2">
+            {/* A warehouse count ("50 available") reads as mass stock; only scarcity is
+                worth saying, and only when it is true. */}
+            {displayStock > lowStockThreshold ? (
+              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                <Check size={16} aria-hidden style={{ color: "var(--color-success)" }} />
+                <span>{tr("inStock")}</span>
+              </div>
+            ) : displayStock > 0 ? (
+              <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]">
                 <span
+                  aria-hidden
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: "var(--color-success)" }}
+                  style={{ backgroundColor: "var(--color-accent)" }}
                 />
-                <span className="text-sm font-medium" style={{ color: "var(--color-success)" }}>
-                  {tr("inStock", { available: displayStock })}
-                </span>
+                <span>{tr("lowStock", { count: displayStock })}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -220,6 +248,7 @@ export function ProductDetailClient({
               selection={selection}
               ctaRef={ctaRef}
               beforeCta={<StoreTrustInfo facts={trustFacts} layout="rows" />}
+              sizeGuide={sizeGuide}
             />
 
             {socialOrdering && productUrl && (
@@ -234,6 +263,13 @@ export function ProductDetailClient({
                 onBlocked={selection.notifyMissingOptions}
               />
             )}
+
+            <ProductInfoAccordion
+              details={product.details ?? []}
+              descriptionHtml={descriptionHtml}
+              sizeGuide={sizeGuide}
+              selectedSize={sizeOptionName ? selectedOptions[sizeOptionName] : undefined}
+            />
           </div>
         </div>
       </div>

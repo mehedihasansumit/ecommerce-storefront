@@ -1,20 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-  Store,
-  LayoutDashboard,
-  ShoppingBag,
-  Users,
-  UserCog,
-  Shield,
-  LogOut,
-  Menu,
-  X,
-} from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/shared/components/ui";
+import { getAdminNavItems, isAdminNavActive } from "./admin-nav";
 
 interface MobileAdminNavProps {
   isSuperAdmin: boolean;
@@ -36,20 +27,56 @@ export function MobileAdminNav({
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const drawerId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const wasOpen = useRef(false);
 
   // Close on route change
-  useEffect(() => {
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
     setIsOpen(false);
-  }, [pathname]);
+  }
 
-  // Close on escape
+  // Focus moves into the drawer on open and back to the trigger on close
   useEffect(() => {
+    if (isOpen) {
+      closeRef.current?.focus();
+    } else if (wasOpen.current) {
+      triggerRef.current?.focus();
+    }
+    wasOpen.current = isOpen;
+  }, [isOpen]);
+
+  // Escape closes; Tab is trapped inside the modal drawer
+  useEffect(() => {
+    if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        return;
+      }
+      if (e.key !== "Tab" || !drawerRef.current) return;
+      const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !drawerRef.current.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !drawerRef.current.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [isOpen]);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -58,8 +85,7 @@ export function MobileAdminNav({
   }, [isOpen]);
 
   function isActive(href: string) {
-    if (href === "/admin") return pathname === "/admin";
-    return pathname.startsWith(href);
+    return isAdminNavActive(pathname, href);
   }
 
   async function handleLogout() {
@@ -68,17 +94,12 @@ export function MobileAdminNav({
     router.refresh();
   }
 
-  const coreItems = [
-    { href: "/admin", icon: LayoutDashboard, label: "Dashboard", show: true },
-    { href: "/admin/stores", icon: Store, label: "Stores", show: canViewStores },
-    { href: "/admin/orders", icon: ShoppingBag, label: "All Orders", show: canViewOrders },
-    { href: "/admin/customers", icon: Users, label: "Customers", show: canViewCustomers },
-  ].filter((i) => i.show);
-
-  const superItems = [
-    { href: "/admin/roles", icon: Shield, label: "Roles", show: isSuperAdmin },
-    { href: "/admin/admins", icon: UserCog, label: "Admins", show: isSuperAdmin },
-  ].filter((i) => i.show);
+  const { coreItems, superItems } = getAdminNavItems({
+    isSuperAdmin,
+    canViewStores,
+    canViewOrders,
+    canViewCustomers,
+  });
 
   const initials = adminName
     ? adminName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
@@ -95,9 +116,13 @@ export function MobileAdminNav({
           <span className="text-[13px] font-semibold tracking-tight">Admin Panel</span>
         </Link>
         <button
+          ref={triggerRef}
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="p-2 rounded-lg hover:bg-admin-surface/[0.07] transition-colors"
+          className="p-2.5 rounded-lg hover:bg-admin-surface/[0.07] transition-colors focus-ring"
           aria-label="Open menu"
+          aria-expanded={isOpen}
+          aria-controls={drawerId}
         >
           <Menu size={20} />
         </button>
@@ -114,8 +139,9 @@ export function MobileAdminNav({
 
           {/* Slide-in panel */}
           <nav
-            className="absolute left-0 top-0 h-full w-72 bg-gray-950 text-white flex flex-col animate-slide-in-right shadow-2xl shadow-black/60"
-            style={{ animationDirection: "normal" }}
+            ref={drawerRef}
+            id={drawerId}
+            className="absolute left-0 top-0 h-full w-72 bg-gray-950 text-white flex flex-col animate-slide-in-left shadow-2xl shadow-black/60"
             role="dialog"
             aria-modal="true"
             aria-label="Admin navigation"
@@ -142,8 +168,10 @@ export function MobileAdminNav({
                 </div>
               </div>
               <button
+                ref={closeRef}
+                type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-admin-surface/[0.07] transition-colors text-admin-text-subtle hover:text-white"
+                className="p-2.5 rounded-lg focus-ring hover:bg-admin-surface/[0.07] transition-colors text-admin-text-subtle hover:text-white"
                 aria-label="Close menu"
               >
                 <X size={18} />

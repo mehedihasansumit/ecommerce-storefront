@@ -16,7 +16,13 @@ import { DEFAULT_MOTION, sanitizeMotion, type ResolvedStoreMotion } from "./moti
  * (messages: themePresets.<id>.name / .description).
  */
 
-export const THEME_PRESET_IDS = ["atelier", "zari-oxblood", "dark-room", "shiraz-zari"] as const;
+export const THEME_PRESET_IDS = [
+  "atelier",
+  "zari-oxblood",
+  "dark-room",
+  "shiraz-zari",
+  "tailored",
+] as const;
 export type ThemePresetId = (typeof THEME_PRESET_IDS)[number];
 
 /** Theme values a preset supplies; everything is optional and the Store may override any of it. */
@@ -262,6 +268,71 @@ export const STORE_THEME_PRESETS: Record<ThemePresetId, StoreThemePreset> = {
       categoryStyle: "cards",
       footerStyle: "columns",
       newsletterStyle: "panel",
+      productCardStyle: "editorial",
+    },
+  },
+
+  /**
+   * Menswear and shirting. Colours come from the cloth itself: bone shirting by day with
+   * navy-ink type, oxford blue as the second colour and brass (the button) as the accent;
+   * deep navy cloth at night. No red anywhere: a sale badge is navy, not an alarm.
+   */
+  tailored: {
+    id: "tailored",
+    theme: {
+      primaryColor: "#1F3047",
+      secondaryColor: "#4F6F96",
+      // Darkened brass: the accent also colours text (active bottom-nav tab) → ≥4.5:1 on bone.
+      accentColor: "#86652F",
+      backgroundColor: "#F5F4F0",
+      textColor: "#14202E",
+      surfaceColor: "#ECEAE4",
+      borderColor: "#DCD9D1",
+      headerBg: "#F5F4F0",
+      headerText: "#14202E",
+      cardBg: "#FFFFFF",
+      newsletterBg: "#1F3047",
+      newsletterText: "#F5F4F0",
+      newsletterBtnBg: "#C9A66B",
+      newsletterBtnText: "#14202E",
+      priceColor: "#14202E",
+      saleBadgeBg: "#1F3047",
+      saleBadgeText: "#FFFFFF",
+      footerBg: "#14202E",
+      footerText: "#E6E4DE",
+      linkColor: "#1F3047",
+      fontFamily: "General Sans",
+      headingFont: "Erode",
+      borderRadius: "0.125rem",
+      backgroundPattern: "none",
+      dark: {
+        primaryColor: "#C9A66B",
+        secondaryColor: "#9DB4D3",
+        accentColor: "#C9A66B",
+        backgroundColor: "#0D141D",
+        textColor: "#EDEBE6",
+        surfaceColor: "#16202C",
+        borderColor: "#27323F",
+        headerBg: "#0D141D",
+        headerText: "#EDEBE6",
+        cardBg: "#131C27",
+        newsletterBg: "#16202C",
+        newsletterText: "#EDEBE6",
+        newsletterBtnBg: "#C9A66B",
+        newsletterBtnText: "#0D141D",
+        priceColor: "#EDEBE6",
+        saleBadgeBg: "#C9A66B",
+        saleBadgeText: "#0D141D",
+        footerBg: "#080D13",
+        footerText: "#C9CDD3",
+        linkColor: "#D7B985",
+      },
+    },
+    styles: {
+      heroStyle: "film",
+      categoryStyle: "cards",
+      footerStyle: "wordmark",
+      newsletterStyle: "band",
       productCardStyle: "editorial",
     },
   },

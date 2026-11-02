@@ -10,6 +10,7 @@ import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permiss
 import { ProductsSearch } from "./ProductsSearch";
 import { CategoryFilter } from "./CategoryFilter";
 import { DeleteProductButton } from "./DeleteProductButton";
+import { FilterChip } from "@/shared/components/admin/FilterChip";
 
 const PAGE_SIZE = 20;
 type Status = "all" | "active" | "inactive";
@@ -118,16 +119,14 @@ export default async function StoreProductsPage({
         {/* Status tabs */}
         <div className="flex items-center gap-1 ml-auto">
           {(["all", "active", "inactive"] as Status[]).map((s) => (
-            <Link
+            <FilterChip
               key={s}
               href={buildHref(storeId, { q, category, status: s })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-                }`}
+              selected={status === s}
+              className="capitalize"
             >
               {s}
-            </Link>
+            </FilterChip>
           ))}
         </div>
       </div>
@@ -236,7 +235,7 @@ export default async function StoreProductsPage({
                         </td>
 
                         {/* SKU */}
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-4 whitespace-nowrap">
                           <span className="font-mono text-xs text-admin-text-muted">
                             {product.sku || "—"}
                           </span>
@@ -248,7 +247,7 @@ export default async function StoreProductsPage({
                         </td>
 
                         {/* Price */}
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-4 whitespace-nowrap">
                           <div className="flex items-baseline gap-1.5">
                             <span className="text-sm font-semibold text-admin-text-primary">
                               ৳{product.price.toLocaleString()}
@@ -311,7 +310,7 @@ export default async function StoreProductsPage({
                         </td>
 
                         {/* Actions */}
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-4 whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1">
                             <Link
                               href={`/admin/stores/${storeId}/products/${product._id}`}

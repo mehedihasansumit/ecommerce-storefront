@@ -14,6 +14,7 @@ import { db } from "@/db/client";
 import { products } from "@/db/schema/products";
 import { orders } from "@/db/schema/orders";
 import { getAdminDbUser } from "@/shared/lib/auth";
+import { EmptyState } from "@/shared/components/ui";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
 import type { OrderStatus } from "@/features/orders/types";
 
@@ -335,7 +336,11 @@ export default async function AdminDashboardPage() {
 
           {recentOrders.length === 0 ? (
             <div className="bg-admin-surface border border-admin-border rounded-xl shadow-sm">
-              <p className="text-sm text-admin-text-subtle text-center py-10">No orders yet</p>
+              <EmptyState
+                icon={ShoppingBag}
+                title="No orders yet"
+                description="New orders from your stores will show up here."
+              />
             </div>
           ) : (
             <>

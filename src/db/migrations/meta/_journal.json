@@ -78,6 +78,20 @@
       "when": 1781230113559,
       "tag": "0010_fair_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793559028444,
+      "tag": "0011_product_details_size_guide",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793563044707,
+      "tag": "0012_store_low_stock_threshold",
+      "breakpoints": true
     }
   ]
 }

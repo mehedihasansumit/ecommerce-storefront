@@ -327,6 +327,7 @@ export default function StoreEditForm({
     heroBorderRadius: store.heroBorderRadius ?? "",
     supportedLanguages: supportedLangs,
     defaultLanguage: store.defaultLanguage || "en",
+    lowStockThreshold: String(store.lowStockThreshold ?? 5),
     pointsConfig: {
       enabled: store.pointsConfig?.enabled ?? DEFAULT_POINTS_CONFIG.enabled,
       pointsPerReview:
@@ -620,6 +621,7 @@ export default function StoreEditForm({
         };
         payload.supportedLanguages = formData.supportedLanguages;
         payload.defaultLanguage = formData.defaultLanguage;
+        payload.lowStockThreshold = Math.max(0, Math.round(Number(formData.lowStockThreshold) || 0));
         payload.refundPolicy = formData.refundPolicy;
         payload.deliveryConfig = formData.deliveryConfig;
       }
@@ -655,7 +657,11 @@ export default function StoreEditForm({
       className="bg-admin-surface rounded-2xl border border-admin-border shadow-sm overflow-hidden"
     >
       {/* Tab Bar */}
-      <div className="flex border-b border-admin-border bg-admin-surface-raised overflow-x-auto">
+      <div
+        role="tablist"
+        aria-label="Store settings"
+        className="flex border-b border-admin-border bg-admin-surface-raised overflow-x-auto"
+      >
         {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -663,6 +669,8 @@ export default function StoreEditForm({
             <button
               key={tab.id}
               type="button"
+              role="tab"
+              aria-selected={isActive}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-px ${
                 isActive
@@ -670,7 +678,7 @@ export default function StoreEditForm({
                   : "border-transparent text-admin-text-muted hover:text-admin-text-secondary hover:bg-admin-chip"
               }`}
             >
-              <Icon size={15} />
+              <Icon size={15} aria-hidden />
               {tab.label}
             </button>
           );
@@ -801,7 +809,7 @@ export default function StoreEditForm({
                     return (
                       <label
                         key={code}
-                        className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer transition-all select-none ${
+                        className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer transition-all select-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gray-900 ${
                           checked
                             ? "border-gray-900 bg-gray-900 text-white"
                             : "border-admin-border bg-admin-surface text-admin-text-secondary hover:border-admin-border-md"
@@ -821,7 +829,7 @@ export default function StoreEditForm({
                           className="sr-only"
                           disabled={loading}
                         />
-                        <Globe size={14} />
+                        {checked ? <Check size={14} aria-hidden /> : <Globe size={14} aria-hidden />}
                         <span className="text-sm font-medium">{label}</span>
                       </label>
                     );
@@ -846,6 +854,39 @@ export default function StoreEditForm({
                   </select>
                 </Field>
               </div>
+
+              <SectionTitle>Product Page</SectionTitle>
+              <Field
+                label="Low-stock threshold"
+                htmlFor="low-stock-threshold"
+                hint={`Shows “Only N left” when a product or size has this many or fewer in stock; above it, just “In stock”. Set 0 to never show it.`}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Wrapper sets the width: inputCls carries w-full. */}
+                  <div className="w-28 shrink-0">
+                    <input
+                      id="low-stock-threshold"
+                      aria-describedby="low-stock-threshold-hint low-stock-preview"
+                      type="number"
+                      min={0}
+                      max={1000}
+                      step={1}
+                      inputMode="numeric"
+                      value={formData.lowStockThreshold}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, lowStockThreshold: e.target.value }))
+                      }
+                      className={inputCls}
+                      disabled={loading}
+                    />
+                  </div>
+                  <span id="low-stock-preview" className="text-sm text-admin-text-muted">
+                    {Number(formData.lowStockThreshold) > 0
+                      ? `Shoppers see “Only ${Math.round(Number(formData.lowStockThreshold))} left”`
+                      : "Off — never shown"}
+                  </span>
+                </div>
+              </Field>
             </div>
 
             {/* Right — store summary card */}
@@ -854,8 +895,7 @@ export default function StoreEditForm({
               <div className="mt-3 rounded-xl border border-admin-border bg-admin-surface-raised p-5 space-y-4">
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0"
-                    style={{ backgroundColor: store.theme.primaryColor }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-900 text-white font-bold text-base shrink-0"
                   >
                     {(formData.name || store.name).charAt(0).toUpperCase()}
                   </div>
@@ -1890,6 +1930,7 @@ export default function StoreEditForm({
 
                   <Field
                     label="Message Template"
+                    htmlFor="wa-message-template"
                     hint="Use the placeholders below. Each list item on its own line will render as a bullet on WhatsApp."
                   >
                     <div className="space-y-2">
@@ -1941,6 +1982,8 @@ export default function StoreEditForm({
                       </div>
 
                       <textarea
+                        id="wa-message-template"
+                        aria-describedby="wa-message-template-hint"
                         value={formData.socialOrdering.whatsapp.messageTemplate}
                         onChange={(e) =>
                           setFormData((prev) => ({
@@ -2673,26 +2716,52 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Label + control + hint. By default the whole field is a <label>, so the label names
+ * its first control without ids. Pass `htmlFor` (and put that id on the control) when
+ * the first control inside is not the one being labelled, e.g. helper buttons first.
+ */
 function Field({
   label,
   hint,
   required,
+  htmlFor,
   children,
 }: {
   label: string;
   hint?: string;
   required?: boolean;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
+  const caption = (
+    <span className="block text-sm font-medium text-admin-text-secondary mb-1.5">
+      {label}
+      {required && <span className="text-red-500 ml-0.5">*</span>}
+    </span>
+  );
+  const help = hint && (
+    <span id={htmlFor ? `${htmlFor}-hint` : undefined} className="block text-xs text-admin-text-subtle mt-1">
+      {hint}
+    </span>
+  );
+  if (htmlFor) {
+    return (
+      <div>
+        <label htmlFor={htmlFor} className="block">
+          {caption}
+        </label>
+        {children}
+        {help}
+      </div>
+    );
+  }
   return (
-    <div>
-      <label className="block text-sm font-medium text-admin-text-secondary mb-1.5">
-        {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
+    <label className="block">
+      {caption}
       {children}
-      {hint && <p className="text-xs text-admin-text-subtle mt-1">{hint}</p>}
-    </div>
+      {help}
+    </label>
   );
 }
 

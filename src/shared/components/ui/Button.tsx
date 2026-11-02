@@ -38,7 +38,8 @@ const SIZES: Record<ButtonSize, string> = {
   md: "px-4 py-2 text-sm",
   lg: "px-6 py-2.5 text-sm",
   xl: "px-6 py-3.5 text-base font-semibold",
-  icon: "p-2",
+  // 40×40 minimum touch target (spec) with a 16–18px glyph.
+  icon: "p-2.5 min-w-10 min-h-10",
 };
 
 const VARIANTS: Record<ButtonVariant, string> = {

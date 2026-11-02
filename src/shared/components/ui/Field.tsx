@@ -37,7 +37,12 @@ export function Field({
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
-  const clonedChild = isValidElement(children)
+  // With `htmlFor` the control sits inside a wrapper (e.g. input + button): the caller
+  // puts `id={htmlFor}` and `aria-describedby={`${htmlFor}-hint`}` on the input itself,
+  // so the wrapper is left untouched (cloning would give it a duplicate id).
+  const clonedChild = htmlFor
+    ? children
+    : isValidElement(children)
     ? cloneElement(children, {
         id,
         "aria-describedby": describedBy,

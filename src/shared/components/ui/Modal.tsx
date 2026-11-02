@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
 
@@ -56,7 +57,9 @@ export function Modal({
 
   if (!open) return null;
 
-  return (
+  // Portal to <body>: a transformed ancestor (e.g. an entrance animation) would otherwise
+  // become the containing block for `fixed`, trapping the backdrop inside that ancestor.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -102,6 +105,7 @@ export function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

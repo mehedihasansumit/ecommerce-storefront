@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, Pencil, Ticket } from "lucide-react";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/shared/components/ui";
 import type { ICoupon } from "../types";
 
 type CouponStatus = "active" | "scheduled" | "expired" | "exhausted" | "inactive";
@@ -43,9 +45,9 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
   const router = useRouter();
   const [coupons, setCoupons] = useState(initialCoupons);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<ICoupon | null>(null);
 
   async function handleDelete(couponId: string, code: string) {
-    if (!confirm(`Delete coupon "${code}"? This cannot be undone.`)) return;
     setDeleting(couponId);
     try {
       const res = await fetch(`/api/coupons/${couponId}?storeId=${storeId}`, {
@@ -53,8 +55,14 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
       });
       if (res.ok) {
         setCoupons((prev) => prev.filter((c) => c._id !== couponId));
+        toast.success(`Coupon "${code}" deleted`);
         router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? "Failed to delete coupon");
       }
+    } catch {
+      toast.error("Failed to delete coupon");
     } finally {
       setDeleting(null);
     }
@@ -210,9 +218,11 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
                         <Pencil className="w-4 h-4" />
                       </Link>
                       <button
-                        onClick={() => handleDelete(coupon._id, coupon.code)}
+                        type="button"
+                        onClick={() => setPendingDelete(coupon)}
                         disabled={deleting === coupon._id}
-                        className="p-1.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
+                        className="p-2.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                        aria-label={`Delete coupon ${coupon.code}`}
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -225,6 +235,18 @@ export function CouponTable({ coupons: initialCoupons, storeId, filterStatus }: 
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => {
+          if (pendingDelete) await handleDelete(pendingDelete._id, pendingDelete.code);
+        }}
+        tone="danger"
+        title="Delete coupon?"
+        description={`Coupon "${pendingDelete?.code ?? ""}" will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+      />
     </div>
   );
 }

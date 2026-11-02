@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { DEMO_DETAILS, DEMO_SIZE_GUIDES } from "./seed-details";
 import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import { db } from "./client";
@@ -57,18 +58,8 @@ async function main() {
       slug: "shirts-hub",
       name: "Shirts Hub",
       domains: ["shirts.localhost", "www.lourhaus.com"],
-      theme: {
-        primaryColor: "#2563EB",
-        secondaryColor: "#3B82F6",
-        accentColor: "#DBEAFE",
-        backgroundColor: "#FFFFFF",
-        textColor: "#1E293B",
-        headerBg: "#1E3A5F",
-        headerText: "#FFFFFF",
-        fontFamily: "Inter",
-        borderRadius: "0.5rem",
-        layoutStyle: "grid",
-      },
+      // Colours, fonts and section styles all come from the preset.
+      theme: { preset: "tailored", layoutStyle: "grid" },
       heroBanners: [
         {
           image: "",
@@ -194,7 +185,7 @@ async function main() {
   ];
   const insertedCats = await db
     .insert(categories)
-    .values(categorySeeds)
+    .values(categorySeeds.map((c) => ({ ...c, sizeGuide: DEMO_SIZE_GUIDES[c.slug] ?? null })))
     .returning({ id: categories.id, storeId: categories.storeId, slug: categories.slug });
   const catId = (storeId: string, slug: string) =>
     insertedCats.find((c) => c.storeId === storeId && c.slug === slug)!.id;
@@ -392,7 +383,10 @@ async function main() {
 
   for (const plan of productPlans) {
     const { variantSizes, ...productRow } = plan;
-    const [inserted] = await db.insert(products).values(productRow).returning({ id: products.id, price: products.price });
+    const [inserted] = await db
+      .insert(products)
+      .values({ ...productRow, details: DEMO_DETAILS[productRow.slug] ?? [] })
+      .returning({ id: products.id, price: products.price });
     if (variantSizes?.length) {
       const variantRows: VariantSeed[] = variantSizes.map((v) => ({
         productId: inserted.id,

@@ -40,6 +40,11 @@ export const products = pgTable(
     tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
     thumbnail: text("thumbnail"),
     options: jsonb("options").notNull().default([]),
+    /** Label/value rows shown as "Details" on the product page (fabric, fit, care…). */
+    details: jsonb("details")
+      .$type<Array<{ label: LocalizedString; value: LocalizedString }>>()
+      .notNull()
+      .default([]),
     pricingTiers: jsonb("pricing_tiers")
       .$type<Array<{ quantity: number; totalPrice: number }>>()
       .notNull()

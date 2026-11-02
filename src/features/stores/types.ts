@@ -191,6 +191,8 @@ export interface IStore {
   deliveryConfig: IStoreDeliveryConfig;
   supportedLanguages: string[];
   defaultLanguage: string;
+  /** Product page says "Only N left" at or below this stock; 0 turns it off. */
+  lowStockThreshold: number;
   createdAt: Date;
   updatedAt: Date;
 }

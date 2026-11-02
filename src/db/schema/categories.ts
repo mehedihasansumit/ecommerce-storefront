@@ -18,6 +18,12 @@ export const categories = pgTable(
     name: jsonb("name").$type<LocalizedString>().notNull(),
     description: jsonb("description").$type<LocalizedString>(),
     image: text("image"),
+    /** Size chart shown from every product in this category; null = no chart. */
+    sizeGuide: jsonb("size_guide").$type<{
+      columns: LocalizedString[];
+      rows: string[][];
+      note: LocalizedString;
+    }>(),
     sortOrder: integer("sort_order").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
     ...timestamps,

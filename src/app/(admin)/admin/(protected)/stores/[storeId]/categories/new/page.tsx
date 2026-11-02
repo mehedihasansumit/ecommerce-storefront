@@ -16,7 +16,7 @@ export default async function NewCategoryPage({
   if (!store) notFound();
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl">
       <PageHeader
         breadcrumbs={
           <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted flex-wrap">

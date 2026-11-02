@@ -139,7 +139,7 @@ export default function NewStorePage() {
   const initial = formData.name.trim().charAt(0).toUpperCase() || "S";
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl">
       <PageHeader
         breadcrumbs={
           <Link
@@ -431,6 +431,7 @@ function ColorInput({ label, hint, value, onChange, disabled }: ColorInputProps)
           className="flex-1 bg-transparent px-3 py-2 text-sm font-mono uppercase outline-none"
           disabled={disabled}
           spellCheck={false}
+          aria-label={`${label} hex value`}
         />
       </div>
     </Field>

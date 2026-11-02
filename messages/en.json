@@ -67,19 +67,14 @@
     "storeNotFound": "Store Not Found",
     "noStoreConfigured": "This domain is not configured for any store.",
     "freeShipping": "Free Shipping",
-    "freeShippingDesc": "On orders over ৳500",
     "securePayment": "Secure Payment",
-    "securePaymentDesc": "100% secure checkout",
     "easyReturns": "Easy Returns",
-    "easyReturnsDesc": "30-day return policy",
     "support247": "24/7 Support",
-    "support247Desc": "Dedicated support",
     "newsletterTitle": "Stay in the Loop",
     "newsletterDesc": "Subscribe to get special offers, free giveaways, and new arrivals.",
     "emailPlaceholder": "Enter your email",
     "subscribe": "Subscribe",
     "exclusiveOffers": "Exclusive Offers",
-    "subscriberCount": "Join 2,000+ subscribers",
     "getNotified": "Get Notified First",
     "noSpam": "No spam, unsubscribe anytime",
     "privacyNote": "By subscribing you agree to our Privacy Policy.",
@@ -124,19 +119,22 @@
     "products": "Products",
     "noImage": "No Image",
     "reviews": "reviews",
-    "inStock": "In Stock ({available, number} available)",
+    "inStock": "In stock",
+    "lowStock": "Only {count, number} left",
     "outOfStock": "Out of Stock",
     "addToCart": "Add to Cart",
     "selectOptions": "Select Options",
     "pleaseSelect": "Please select {options}",
+    "details": "Details",
+    "sizeGuide": "Size guide",
     "description": "Description",
     "price": "Price",
-    "compareAt": "Compare At",
-    "availability": "Availability",
-    "save": "Save",
     "freeShipping": "Free Shipping",
     "easyReturns": "Easy Returns",
     "secureCheckout": "Secure Checkout",
+    "orderByChat": "Prefer to order by chat?",
+    "whatsApp": "WhatsApp",
+    "facebook": "Facebook",
     "orderViaWhatsApp": "Order via WhatsApp",
     "orderViaFacebook": "Order via Facebook",
     "orderDetailsCopied": "Order details copied — paste them in Messenger.",
@@ -147,7 +145,7 @@
     "addedToCart": "Added to cart",
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity",
-    "bulkTitle": "Bulk pricing",
+    "bulkTitle": "Buy more, save more",
     "bulkBase": "Base {price}",
     "bulkBuy": "Buy",
     "bulkTotal": "Total",
@@ -162,7 +160,7 @@
     "nextImage": "Next image",
     "zoomHelpScroll": "Scroll to zoom",
     "zoomHelpDoubleClick": "Double-click to toggle",
-    "zoomHelpDrag": "Drag to pan",
+    "zoomHelpDrag": "Drag to move the image",
     "zoomHelpArrows": "← → navigate",
     "zoomHelpEsc": "Esc to close"
   },
@@ -173,7 +171,8 @@
     "new": "New",
     "onlyLeft": "Only {count, number} left",
     "rating": "Rated {rating} out of 5",
-    "discount": "{percent, number}% off"
+    "discount": "{percent, number}% off",
+    "colours": "{count, plural, one {# colour} other {# colours}}"
   },
   "cart": {
     "yourCart": "Your Cart",
@@ -189,7 +188,7 @@
     "orderSummary": "Order Summary",
     "items": "{count, plural, one {# item} other {# items}}",
     "freeShippingNote": "Free shipping on this order",
-    "secureCheckout": "Secure checkout · SSL encrypted",
+    "secureCheckout": "Secure checkout · Your payment is safe",
     "decreaseQty": "Decrease quantity",
     "increaseQty": "Increase quantity",
     "quantity": "Quantity",
@@ -202,11 +201,10 @@
     "freeCampaign": "Free (campaign)",
     "shippingAtCheckout": "Calculated at checkout",
     "unitEach": "{price} each",
-    "bulkTier": "Bulk: {qty, number} for {price}"
+    "bulkTier": "Buy {qty, number} for {price}"
   },
   "checkout": {
     "checkout": "Checkout",
-    "notImplemented": "Checkout flow will be implemented here.",
     "deliveryInfo": "Delivery Information",
     "fullName": "Full Name",
     "required": "Required",
@@ -251,7 +249,7 @@
     "districtRequired": "District is required",
     "upazilaRequired": "Upazila is required",
     "submitting": "Placing order...",
-    "secureCheckout": "SSL encrypted · Safe & secure checkout",
+    "secureCheckout": "Safe & secure checkout",
     "deliveryAddress": "Delivery Address",
     "qtyShort": "Qty: {qty, number}",
     "freeGiftQty": "Free gift × {qty, number}"
@@ -268,14 +266,13 @@
     "noAccount": "Don't have an account?",
     "loggingIn": "Logging in...",
     "registering": "Registering...",
-    "error": "An error occurred",
+    "error": "Something went wrong. Please try again.",
     "required": "Required",
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },
   "account": {
     "myAccount": "My Account",
-    "notImplemented": "Account management will be shown here.",
     "logout": "Logout",
     "welcome": "Welcome, {name}",
     "email": "Email",
@@ -339,7 +336,7 @@
     "total": "Total",
     "status": "Status",
     "noOrders": "You haven't placed any orders yet.",
-    "items": "{count, number} items",
+    "items": "{count, plural, one {# item} other {# items}}",
     "viewOrder": "View Order"
   },
   "orderDetail": {
@@ -383,9 +380,8 @@
     "paymentPaid": "Paid",
     "paymentFailed": "Failed",
     "paymentRefunded": "Refunded",
-    "trackLaterHint": "Save your order number and phone — track anytime at /orders/track",
     "trackCredsTitle": "Save these to track your order",
-    "trackCredsDesc": "Use this order number and phone at /orders/track to check your order anytime.",
+    "trackCredsDesc": "Keep this order number and phone. Tap \"Track Order\" below to check your order anytime.",
     "phoneLabelShort": "Phone",
     "copy": "Copy",
     "copied": "Copied!"
@@ -403,7 +399,7 @@
     "notFound": "We couldn't find any order matching that. Please double-check and try again.",
     "invalidInput": "Please enter an order number or phone number.",
     "networkError": "Something went wrong. Please try again.",
-    "resultsCount": "{count, number} orders found"
+    "resultsCount": "{count, plural, one {# order found} other {# orders found}}"
   },
   "common": {
     "loading": "Loading...",
@@ -501,27 +497,31 @@
     "presets": {
       "atelier": {
         "name": "Atelier",
-        "description": "Ivory and oxblood with a serif display face by day, midnight navy and gold by night. Cinematic hero, adaptive category tiles, boxed product cards."
+        "description": "Ivory and oxblood with serif headings by day, midnight navy and gold by night. Cinematic banner, adaptive category tiles, boxed product cards."
       },
       "zari-oxblood": {
         "name": "Zari Oxblood",
-        "description": "Warm ivory, oxblood and zari gold set in Bengali-first type. Gold-framed hero and category plates, calm newsletter band."
+        "description": "Warm ivory, oxblood and zari gold with Bengali-first fonts. Gold-framed banner and category plates, calm newsletter strip."
       },
       "dark-room": {
         "name": "Dark Room",
-        "description": "Gallery white with one sans and square corners; a dark room at night. Tall film hero with a trust band, scrolling category row, giant wordmark footer."
+        "description": "Gallery white with one plain font and square corners; a dark room at night. Tall banner with a trust strip, scrolling category row, big store name in the footer."
       },
       "shiraz-zari": {
         "name": "Shiraz Zari",
-        "description": "Shiraz wine and zari gold with Bodoni headings, plum-black at night. Editorial hero with gold piping, large category cards, editorial product cards."
+        "description": "Shiraz wine and zari gold with Bodoni headings, plum-black at night. Magazine-style banner with gold lines, large category cards, magazine-style product cards."
+      },
+      "tailored": {
+        "name": "Tailored",
+        "description": "Bone white, navy and brass, Erode serif headings; deep navy at night. Tall banner, large category cards, tall product cards, big store name in the footer."
       }
     },
     "switches": {
       "heroStyle": {
-        "label": "Hero",
+        "label": "Top banner",
         "options": {
           "cinematic": "Cinematic",
-          "film": "Film with trust band",
+          "film": "Tall banner with trust strip",
           "framed": "Framed",
           "editorial": "Editorial"
         }
@@ -554,7 +554,7 @@
         "label": "Footer",
         "options": {
           "columns": "Columns",
-          "wordmark": "Columns with wordmark"
+          "wordmark": "Columns with big store name"
         }
       }
     }

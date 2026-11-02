@@ -38,7 +38,10 @@ export function SocialOrderButtons({
   const whatsapp = socialOrdering?.whatsapp;
   const facebook = socialOrdering?.facebook;
 
-  if (!whatsapp?.enabled && !facebook?.enabled) return null;
+  // The "order by chat?" label needs at least one usable link after it.
+  if (!(whatsapp?.enabled && whatsapp.phoneNumber) && !(facebook?.enabled && facebook.pageUrl)) {
+    return null;
+  }
 
   const variantText =
     Object.entries(selectedOptions)
@@ -83,22 +86,24 @@ export function SocialOrderButtons({
   };
 
   return (
-    <div className="flex flex-col gap-2 mt-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    // A quiet secondary route under the one primary button: chat ordering stays one tap
+    // away without competing with Add to Cart as two more full-width buttons.
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+        <span className="text-text-secondary">{tr("orderByChat")}</span>
         {whatsapp?.enabled && whatsapp.phoneNumber && (
           <a
             href={buildWhatsAppUrl()}
             target="_blank"
             rel="noopener noreferrer"
             onClick={guardMissingOptions}
-            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2.5 border border-border-subtle bg-[var(--color-card-bg)] px-5 py-3 text-sm font-semibold text-[var(--color-text)] transition-colors duration-150 hover:bg-surface"
-            style={{ borderRadius: "var(--border-radius)" }}
+            className="focus-ring inline-flex min-h-10 items-center gap-2 font-medium text-[var(--color-text)] underline underline-offset-4 decoration-[color-mix(in_srgb,var(--color-text)_30%,transparent)] transition-colors duration-150 hover:decoration-[var(--color-text)]"
           >
-            <svg viewBox="0 0 24 24" aria-hidden className="w-5 h-5 flex-shrink-0" style={{ fill: "#25D366" }}>
+            <svg viewBox="0 0 24 24" aria-hidden className="w-[18px] h-[18px] flex-shrink-0" style={{ fill: "#25D366" }}>
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.12 1.523 5.855L.058 23.675l5.97-1.525A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82a9.796 9.796 0 01-5.244-1.517l-.376-.224-3.898.997 1.04-3.8-.246-.39A9.773 9.773 0 012.18 12c0-5.414 4.406-9.82 9.82-9.82 5.414 0 9.82 4.406 9.82 9.82 0 5.414-4.406 9.82-9.82 9.82z" />
             </svg>
-            {tr("orderViaWhatsApp")}
+            {tr("whatsApp")}
           </a>
         )}
 
@@ -108,13 +113,12 @@ export function SocialOrderButtons({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleFacebookClick}
-            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2.5 border border-border-subtle bg-[var(--color-card-bg)] px-5 py-3 text-sm font-semibold text-[var(--color-text)] transition-colors duration-150 hover:bg-surface"
-            style={{ borderRadius: "var(--border-radius)" }}
+            className="focus-ring inline-flex min-h-10 items-center gap-2 font-medium text-[var(--color-text)] underline underline-offset-4 decoration-[color-mix(in_srgb,var(--color-text)_30%,transparent)] transition-colors duration-150 hover:decoration-[var(--color-text)]"
           >
-            <svg viewBox="0 0 24 24" aria-hidden className="w-5 h-5 flex-shrink-0" style={{ fill: "#1877F2" }}>
+            <svg viewBox="0 0 24 24" aria-hidden className="w-[18px] h-[18px] flex-shrink-0" style={{ fill: "#1877F2" }}>
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
-            {tr("orderViaFacebook")}
+            {tr("facebook")}
           </a>
         )}
       </div>

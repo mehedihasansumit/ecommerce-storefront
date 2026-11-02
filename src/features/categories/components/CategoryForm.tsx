@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ICategory } from "../types";
+import type { ICategory, ISizeGuide } from "../types";
+import { SizeGuideInput } from "./SizeGuideInput";
 import type { LocalizedString } from "@/shared/types/i18n";
 import { toLocalized } from "@/shared/lib/i18n";
 import {
@@ -49,6 +50,8 @@ export function CategoryForm({
     () => toLocalized(category?.description)
   );
 
+  const [sizeGuide, setSizeGuide] = useState<ISizeGuide | null>(category?.sizeGuide ?? null);
+
   const [form, setForm] = useState({
     image: category?.image ?? "",
     sortOrder: category?.sortOrder ?? 0,
@@ -72,6 +75,10 @@ export function CategoryForm({
       ...form,
       name: localizedName,
       description: localizedDesc,
+      // Blank rows (no size in the first cell) are dropped.
+      sizeGuide: sizeGuide
+        ? { ...sizeGuide, rows: sizeGuide.rows.filter((row) => row[0]?.trim()) }
+        : null,
       sortOrder: Number(form.sortOrder),
     };
 
@@ -164,27 +171,45 @@ export function CategoryForm({
         </div>
       </Card>
 
+      <Card>
+        <CardHeader
+          title={
+            supportedLanguages.length > 1 ? (
+              <>
+                Size Chart
+                <span className="ml-2 text-xs font-normal text-gray-400">— {langLabel}</span>
+              </>
+            ) : (
+              "Size Chart"
+            )
+          }
+          description="Every product in this category shows this chart in a “Size guide” section, and the chosen size’s measurements under the size buttons. The first column must match the product’s size values (S, M, 40…)."
+        />
+        <SizeGuideInput value={sizeGuide} onChange={setSizeGuide} lang={activeLang} />
+      </Card>
+
       {/* Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Spec: primary + secondary on the left, destructive on the right. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-wrap gap-3">
+          <Button type="submit" variant="primary" loading={loading}>
+            {isEdit ? "Save Changes" : "Create Category"}
+          </Button>
           <Button type="button" variant="secondary" onClick={() => router.back()}>
             Cancel
           </Button>
-          {isEdit && (
-            <Button
-              type="button"
-              variant="danger-outline"
-              onClick={() => setDeleteOpen(true)}
-              disabled={loading}
-            >
-              Delete Category
-            </Button>
-          )}
         </div>
 
-        <Button type="submit" variant="primary" loading={loading}>
-          {isEdit ? "Save Changes" : "Create Category"}
-        </Button>
+        {isEdit && (
+          <Button
+            type="button"
+            variant="danger-outline"
+            onClick={() => setDeleteOpen(true)}
+            disabled={loading}
+          >
+            Delete Category
+          </Button>
+        )}
       </div>
 
       {isEdit && (

@@ -69,6 +69,11 @@ const requiredLocalizedStringSchema = z.union([
   z.string().min(1, "Product name is required").transform((s) => ({ en: s })),
 ]);
 
+const productDetailSchema = z.object({
+  label: z.record(z.string(), z.string().max(60)),
+  value: z.record(z.string(), z.string().max(300)),
+});
+
 export const createProductSchema = z.object({
   name: requiredLocalizedStringSchema,
   description: localizedStringSchema,
@@ -86,6 +91,7 @@ export const createProductSchema = z.object({
   tags: z.array(z.string()).optional(),
   options: z.array(productOptionSchema).optional().default([]),
   variants: z.array(productVariantSchema).optional().default([]),
+  details: z.array(productDetailSchema).max(20).optional(),
   pricingTiers: pricingTiersSchema,
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),

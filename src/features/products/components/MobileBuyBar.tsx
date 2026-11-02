@@ -64,7 +64,7 @@ export function MobileBuyBar({ product, selection, anchorRef }: MobileBuyBarProp
       <div className="flex items-center justify-between gap-3 px-4 py-2.5">
         <div className="min-w-0">
           <p className="text-xs text-text-secondary truncate">{t(product.name, locale)}</p>
-          <Price amount={displayPrice} compareAt={compareAt} size="md" locale={locale} />
+          <Price amount={displayPrice} compareAt={compareAt} size="md" tone="quiet" locale={locale} />
         </div>
         <Button
           variant="brand"

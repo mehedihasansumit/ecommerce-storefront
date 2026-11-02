@@ -102,6 +102,7 @@ export const createStoreSchema = z.object({
     .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),
+  lowStockThreshold: z.number().int().min(0).max(1000).optional(),
 });
 
 export const updateStoreSchema = z.object({
@@ -209,4 +210,5 @@ export const updateStoreSchema = z.object({
     .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),
+  lowStockThreshold: z.number().int().min(0).max(1000).optional(),
 });

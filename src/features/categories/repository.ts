@@ -2,7 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { categories, type Category } from "@/db/schema/categories";
 import type { LocalizedString } from "@/shared/types/i18n";
-import type { ICategory } from "./types";
+import type { ICategory, ISizeGuide } from "./types";
 
 function toICategory(row: Category): ICategory {
   return {
@@ -12,6 +12,7 @@ function toICategory(row: Category): ICategory {
     slug: row.slug,
     description: (row.description as LocalizedString) ?? {},
     image: row.image ?? "",
+    sizeGuide: (row.sizeGuide as ISizeGuide | null) ?? null,
     parentId: row.parentId,
     sortOrder: row.sortOrder,
     isActive: row.isActive,

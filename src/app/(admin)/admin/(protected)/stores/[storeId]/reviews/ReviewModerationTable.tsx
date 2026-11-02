@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Star, Check, X } from "lucide-react";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/shared/components/ui";
 import type { IReview } from "@/features/reviews/types";
 
 interface ReviewModerationTableProps {
@@ -33,6 +35,7 @@ export function ReviewModerationTable({
   const [reviews, setReviews] = useState(initialReviews);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<IReview | null>(null);
 
   async function handleModerate(reviewId: string, isApproved: boolean) {
     setLoading(reviewId);
@@ -61,7 +64,6 @@ export function ReviewModerationTable({
   }
 
   async function handleDelete(reviewId: string) {
-    if (!confirm("Delete this review? This cannot be undone.")) return;
     setLoading(reviewId);
     setError(null);
     try {
@@ -69,13 +71,14 @@ export function ReviewModerationTable({
         method: "DELETE",
       });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error ?? "Failed to delete review");
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? "Failed to delete review");
         return;
       }
       setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+      toast.success("Review deleted");
     } catch {
-      setError("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setLoading(null);
     }
@@ -183,7 +186,8 @@ export function ReviewModerationTable({
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(review._id)}
+                        type="button"
+                        onClick={() => setPendingDelete(review)}
                         disabled={isLoading}
                         className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-60 transition-colors"
                       >
@@ -197,6 +201,18 @@ export function ReviewModerationTable({
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => {
+          if (pendingDelete) await handleDelete(pendingDelete._id);
+        }}
+        tone="danger"
+        title="Delete review?"
+        description={`The review by ${pendingDelete?.reviewerName || "this customer"} will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
 import type {
   IPricingTier,
   IProduct,
+  IProductDetail,
   IProductImage,
   IProductOption,
   IProductSeo,
@@ -73,6 +74,7 @@ function toIProduct(
     tags: row.tags,
     options: (row.options as IProductOption[]) ?? [],
     variants: variantList.map((v) => toIVariant(v, variantImagesByVariantId.get(v.id) ?? [])),
+    details: (row.details as IProductDetail[]) ?? [],
     pricingTiers: (row.pricingTiers as IPricingTier[]) ?? [],
     isActive: row.isActive,
     isFeatured: row.isFeatured,

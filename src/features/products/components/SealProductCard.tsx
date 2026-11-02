@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Banknote } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { IProduct } from "../types";

@@ -14,9 +14,11 @@ const DYNAMIC_CACHE_LIMIT = 60;
 const PERSONAL_PATHS = ["/cart", "/checkout", "/account", "/orders"];
 
 function isPersonal(url) {
+  // Bangla pages live under /bn (ADR 0004): /bn/cart is as personal as /cart.
+  const path = url.pathname.replace(/^\/bn(?=\/|$)/, "") || "/";
   return (
     url.searchParams.has("token") ||
-    PERSONAL_PATHS.some((p) => url.pathname === p || url.pathname.startsWith(p + "/"))
+    PERSONAL_PATHS.some((p) => path === p || path.startsWith(p + "/"))
   );
 }
 

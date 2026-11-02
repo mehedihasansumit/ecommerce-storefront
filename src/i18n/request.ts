@@ -1,17 +1,18 @@
 import { getRequestConfig } from "next-intl/server";
+import { hasLocale } from "next-intl";
 import { routing } from "./routing";
 import { cookies } from "next/headers";
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Try to get locale from cookie first
-  const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
-
-  const resolvedLocale = await requestLocale;
-  let locale = cookieLocale || resolvedLocale || routing.defaultLocale;
-
-  // Validate that the locale exists in our routing config
-  if (!routing.locales.includes(locale as any)) {
+  // Storefront: the proxy resolved the locale from the URL (/bn/… or none).
+  // Admin and API routes skip i18n routing, so they fall back to the old
+  // NEXT_LOCALE cookie, then English.
+  let locale = await requestLocale;
+  if (!locale) {
+    const cookieStore = await cookies();
+    locale = cookieStore.get("NEXT_LOCALE")?.value;
+  }
+  if (!hasLocale(routing.locales, locale)) {
     locale = routing.defaultLocale;
   }
 

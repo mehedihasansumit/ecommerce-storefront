@@ -96,6 +96,8 @@
   },
   "products": {
     "allProducts": "সমস্ত পণ্য",
+    "metaDescription": "{store}-এর সমস্ত পণ্য দেখুন",
+    "categoryMetaDescription": "{store}-এ {category} দেখুন",
     "categories": "ক্যাটাগরি",
     "all": "সব",
     "noProducts": "কোন পণ্য পাওয়া যায়নি",

@@ -508,7 +508,9 @@ Workflow when changing a table:
 **Critical gotcha:** `db:migrate` tracks applied migrations in the `__drizzle_migrations` table. If a journal entry exists but its `ALTER`/`CREATE` never actually ran against the DB, migrate considers it applied and silently skips it — you then hit `column X does not exist` at runtime. If that happens, apply the missing DDL directly (idempotent `ALTER TABLE ... ADD COLUMN IF NOT EXISTS ...`) and verify against `information_schema.columns`. Always run `db:migrate` after pulling new migrations, and confirm new columns exist before assuming a feature works.
 
 ## Internationalization (i18n)
-- Configured via `next-intl`. Locales: `en` (default), `bn`. `localeDetection` is disabled — locale is explicit (cookie / `/api/locale`).
+- Configured via `next-intl`. Locales: `en` (default), `bn`. `localeDetection` is disabled.
+- **Storefront language is in the URL** (ADR 0004): English unprefixed, Bangla under `/bn`. Storefront routes live in `src/app/[locale]/(storefront)/`. In storefront code use `Link`, `useRouter`, `usePathname`, `redirect`, `getPathname` from `@/i18n/navigation` — never `next/link` / `next/navigation` for these, or links drop the `/bn` prefix. Admin is outside `[locale]` and keeps `next/link` (its locale falls back to the `NEXT_LOCALE` cookie).
+- hreflang/canonical come from `createStoreMetadata` (`src/shared/lib/seo.ts`); pass `hasBanglaContent` for pages whose own content may lack Bangla.
 - Translation bundles live in `messages/{locale}.json`.
 - Server-side locale resolution: `src/i18n/request.ts`. Routing config: `src/i18n/routing.ts`.
 - One-off migration script: `npx tsx scripts/migrate-i18n.ts`.

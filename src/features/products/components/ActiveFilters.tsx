@@ -1,7 +1,8 @@
 "use client";
 
+import { useRouter } from "@/i18n/navigation";
 import { X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface ActiveFiltersProps {

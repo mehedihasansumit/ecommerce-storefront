@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Link } from "@/i18n/navigation";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { X, ArrowRight, Tag, Sparkles, Gift, Bell } from "lucide-react";
-import Link from "next/link";
 import type { IAnnouncement } from "../types";
 
 const DISMISSED_KEY = "dismissed-announcements";
@@ -14,6 +14,11 @@ function getDismissed(): string[] {
   } catch {
     return [];
   }
+}
+
+/** useSyncExternalStore subscriber for a value that never changes after mount. */
+function subscribeNever() {
+  return () => {};
 }
 
 function addDismissed(id: string) {
@@ -90,26 +95,30 @@ function pickIcon(title: string, message: string) {
 
 export function AnnouncementBanner() {
   const [announcements, setAnnouncements] = useState<IAnnouncement[]>([]);
+  // Dismissed this session; ones dismissed earlier are read from localStorage.
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [visible, setVisible] = useState<Set<string>>(new Set());
   const [exiting, setExiting] = useState<Set<string>>(new Set());
-  const [mounted, setMounted] = useState(false);
-
-  const fetchAnnouncements = useCallback(async () => {
-    try {
-      const res = await fetch("/api/announcements/active");
-      if (res.ok) {
-        const data = await res.json();
-        setAnnouncements(data.announcements ?? []);
-      }
-    } catch {}
-  }, []);
+  // False on the server and during hydration, true on the client after: the
+  // banner depends on localStorage, so it renders client-side only.
+  const mounted = useSyncExternalStore(subscribeNever, () => true, () => false);
 
   useEffect(() => {
-    setMounted(true);
-    setDismissed(getDismissed());
-    fetchAnnouncements();
-  }, [fetchAnnouncements]);
+    let cancelled = false;
+    async function fetchAnnouncements() {
+      try {
+        const res = await fetch("/api/announcements/active");
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setAnnouncements(data.announcements ?? []);
+        }
+      } catch {}
+    }
+    void fetchAnnouncements();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -121,7 +130,7 @@ export function AnnouncementBanner() {
         setVisible((prev) => new Set([...prev, a._id]));
       }, 1000 + i * 300);
     });
-  }, [announcements, mounted]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announcements, mounted]);
 
   function handleDismiss(id: string) {
     setExiting((prev) => new Set([...prev, id]));
@@ -135,7 +144,8 @@ export function AnnouncementBanner() {
 
   if (!mounted) return null;
 
-  const all = announcements.filter((a) => !dismissed.includes(a._id));
+  const stored = getDismissed();
+  const all = announcements.filter((a) => !dismissed.includes(a._id) && !stored.includes(a._id));
   const bars = all.filter((a) => a.displayType === "bar");
   const banners = all.filter((a) => a.displayType === "banner");
   const modals = all.filter((a) => a.displayType === "modal");

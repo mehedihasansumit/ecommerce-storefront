@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, MetadataRoute } from "next";
 import type { IStore } from "@/features/stores/types";
 import type { IProduct } from "@/features/products/types";
+import type { LocalizedString } from "@/shared/types/i18n";
 import { t } from "@/shared/lib/i18n";
 import { DEFAULT_CURRENCY } from "@/shared/lib/constants";
 import { DELIVERY_CURRENCY } from "@/shared/lib/delivery";
@@ -11,6 +12,89 @@ interface PageMetaOptions {
   image?: string;
   path?: string;
   noIndex?: boolean;
+  /**
+   * False when the page's own content has no Bangla (e.g. a product with only
+   * an English name). Its /bn URL is then kept out of the index and out of
+   * hreflang: translated buttons around English text is what Google calls a
+   * poor experience. Defaults to true.
+   */
+  hasBanglaContent?: boolean;
+}
+
+/** URL of `path` in a language: English unprefixed, Bangla under /bn (ADR 0004). */
+export function localizedUrl(baseUrl: string, path: string, locale: string): string {
+  const clean = path === "/" ? "" : path;
+  return locale === "bn" ? `${baseUrl}/bn${clean}` : `${baseUrl}${clean}`;
+}
+
+/** Whether the store offers Bangla at all. */
+export function storeOffersBangla(store: Pick<IStore, "supportedLanguages">): boolean {
+  return store.supportedLanguages?.includes("bn") ?? false;
+}
+
+/** The field has a non-empty Bangla value. */
+export function hasBanglaText(field: LocalizedString | string | null | undefined): boolean {
+  return typeof field === "object" && field !== null && Boolean(field.bn?.trim());
+}
+
+/** A product has real Bangla content: a Bangla name and a Bangla description. */
+export function hasBanglaContent(item: {
+  name?: LocalizedString | string | null;
+  description?: LocalizedString | string | null;
+}): boolean {
+  return hasBanglaText(item.name) && hasBanglaText(item.description);
+}
+
+/**
+ * hreflang map for a page, or undefined when it has only one language.
+ * Shared by page metadata and the sitemap so the two never disagree.
+ */
+export function languageAlternates(
+  store: Pick<IStore, "supportedLanguages" | "domains">,
+  path: string,
+  hasBangla = true,
+): Record<string, string> | undefined {
+  if (!storeOffersBangla(store) || !hasBangla) return undefined;
+  const baseUrl = storeBaseUrl(store);
+  const en = localizedUrl(baseUrl, path, "en");
+  return { en, bn: localizedUrl(baseUrl, path, "bn"), "x-default": en };
+}
+
+export interface SitemapPage {
+  path: string;
+  lastModified: Date;
+  changeFrequency: "daily" | "weekly";
+  priority: number;
+  /** See PageMetaOptions.hasBanglaContent. Defaults to true. */
+  hasBanglaContent?: boolean;
+  /** Image URLs (absolute or upload paths) shown on the page. */
+  images?: string[];
+}
+
+/**
+ * Sitemap rows for a store's pages: the English URL always, plus the /bn URL
+ * when the page has Bangla, each carrying the same hreflang set as the page.
+ */
+export function buildSitemapEntries(
+  store: Pick<IStore, "supportedLanguages" | "domains">,
+  pages: SitemapPage[],
+): MetadataRoute.Sitemap {
+  const baseUrl = storeBaseUrl(store);
+  return pages.flatMap((page) => {
+    const languages = languageAlternates(store, page.path, page.hasBanglaContent !== false);
+    const images = page.images?.length
+      ? page.images.map((url) => absoluteUrl(baseUrl, url))
+      : undefined;
+    const locales = languages ? ["en", "bn"] : ["en"];
+    return locales.map((locale) => ({
+      url: localizedUrl(baseUrl, page.path, locale),
+      lastModified: page.lastModified,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+      ...(languages && { alternates: { languages } }),
+      ...(images && { images }),
+    }));
+  });
 }
 
 export function createStoreMetadata(
@@ -18,8 +102,7 @@ export function createStoreMetadata(
   options: PageMetaOptions = {},
   locale = "en"
 ): Metadata {
-  const domain = store.domains?.[0] || "localhost:3000";
-  const baseUrl = `https://${domain}`;
+  const baseUrl = storeBaseUrl(store);
   const storeTitle = t(store.seo.title, locale) || store.name;
   const title = options.title
     ? `${options.title} | ${store.name}`
@@ -29,7 +112,11 @@ export function createStoreMetadata(
     t(store.seo.description, locale) ||
     `Shop at ${store.name}`;
   const image = options.image || store.seo.ogImage || store.logo;
-  const url = options.path ? `${baseUrl}${options.path}` : baseUrl;
+  const path = options.path ?? "/";
+  const url = localizedUrl(baseUrl, path, locale);
+  const hasBangla = options.hasBanglaContent !== false;
+  const languages = languageAlternates(store, path, hasBangla);
+  const thinBangla = locale === "bn" && !hasBangla;
 
   return {
     title,
@@ -41,6 +128,7 @@ export function createStoreMetadata(
       siteName: store.name,
       images: image ? [{ url: image }] : [],
       type: "website",
+      locale: locale === "bn" ? "bn_BD" : "en_US",
     },
     twitter: {
       card: "summary_large_image",
@@ -48,10 +136,12 @@ export function createStoreMetadata(
       description,
       images: image ? [image] : [],
     },
-    alternates: {
-      canonical: url,
-    },
-    robots: options.noIndex ? { index: false, follow: false } : undefined,
+    alternates: languages ? { canonical: url, languages } : { canonical: url },
+    robots: options.noIndex
+      ? { index: false, follow: false }
+      : thinBangla
+        ? { index: false, follow: true }
+        : undefined,
   };
 }
 
@@ -65,7 +155,7 @@ export function storeBaseUrl(store: Pick<IStore, "domains">): string {
 }
 
 /** Google needs absolute image URLs; uploads are often served as `/api/media/…`. */
-function absoluteUrl(baseUrl: string, url: string): string {
+export function absoluteUrl(baseUrl: string, url: string): string {
   if (/^https?:\/\//.test(url)) return url;
   return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
 }
@@ -135,7 +225,7 @@ function buildOffer(
  */
 export function buildProductJsonLd(product: IProduct, store: IStore, locale = "en") {
   const baseUrl = storeBaseUrl(store);
-  const productUrl = `${baseUrl}/products/${product.slug}`;
+  const productUrl = localizedUrl(baseUrl, `/products/${product.slug}`, locale);
   const name = t(product.name, locale);
   const shippingDetails = buildShippingDetails(store);
   const images = (product.images ?? []).map((img) => absoluteUrl(baseUrl, img.url));

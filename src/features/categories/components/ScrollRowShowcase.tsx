@@ -1,5 +1,5 @@
+import { Link } from "@/i18n/navigation";
 import type { CSSProperties } from "react";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Skeleton, SkeletonText, StoreImage } from "@/shared/components/ui";
 import type { CategoryShowcaseItem } from "./CategoryShowcase";

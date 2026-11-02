@@ -1,7 +1,7 @@
 "use client";
 
+import { usePathname } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Phone, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTenant } from "@/shared/hooks/useTenant";

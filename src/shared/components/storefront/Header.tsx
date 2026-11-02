@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link, useRouter, usePathname, getPathname } from "@/i18n/navigation";
 import {
   ShoppingCart,
   User,
@@ -18,7 +18,6 @@ import { useCart } from "@/shared/context/CartContext";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ThemeToggle } from "@/shared/components/ui";
 import { formatNumber } from "@/shared/lib/i18n";
@@ -106,7 +105,10 @@ export function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(searchQuery.trim())}`;
+      window.location.href = getPathname({
+        href: { pathname: "/products", query: { search: searchQuery.trim() } },
+        locale,
+      });
       setSearchOpen(false);
       setSearchQuery("");
     }

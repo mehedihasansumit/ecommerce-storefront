@@ -1,5 +1,5 @@
+import { Link } from "@/i18n/navigation";
 import type { CSSProperties, ReactNode } from "react";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Skeleton, SkeletonText, StoreImage } from "@/shared/components/ui";
 import { getCategoryLayout, type CategoryLayout, type CategoryPhoneLayout } from "../layout";

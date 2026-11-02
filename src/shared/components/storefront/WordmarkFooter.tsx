@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";

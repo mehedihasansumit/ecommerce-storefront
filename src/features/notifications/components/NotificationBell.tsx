@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Link } from "@/i18n/navigation";
+import { useState, useEffect, useRef } from "react";
 import { Bell, Package, Megaphone, User, Check, ChevronRight } from "lucide-react";
-import Link from "next/link";
 import type { INotification, NotificationType } from "../types";
 
 const TYPE_ICON: Record<NotificationType, React.ReactNode> = {
@@ -28,21 +28,25 @@ export function NotificationBell() {
   const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const fetchUnreadCount = useCallback(async () => {
-    try {
-      const res = await fetch("/api/notifications/unread-count");
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.count ?? 0);
-      }
-    } catch {}
-  }, []);
-
+  // Poll the unread count; state is only set once the response arrives.
   useEffect(() => {
-    fetchUnreadCount();
+    let cancelled = false;
+    async function fetchUnreadCount() {
+      try {
+        const res = await fetch("/api/notifications/unread-count");
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          if (!cancelled) setUnreadCount(data.count ?? 0);
+        }
+      } catch {}
+    }
+    void fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Close on outside click
   useEffect(() => {

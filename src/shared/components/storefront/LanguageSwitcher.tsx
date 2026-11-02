@@ -1,24 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useTenant } from "@/shared/hooks/useTenant";
+import { getPathname, usePathname } from "@/i18n/navigation";
 
 const languageNames: Record<string, string> = {
   en: "EN",
   bn: "বাং",
 };
 
-/** Same cookie /api/locale sets, written here so a switch costs one request. */
-function saveLocaleAndReload(locale: string) {
-  document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; samesite=lax`;
-  window.location.reload();
-}
-
+/**
+ * Each language has its own URL (ADR 0004): switching goes from
+ * /products/x to /bn/products/x and back. No cookie, no auto-redirect.
+ */
 export function LanguageSwitcher() {
   const tenant = useTenant();
   const locale = useLocale();
-  // The pressed button flips on click; the page follows when the reload lands.
+  // Path without the /bn prefix; search params (filters, ?Size=M) carry over.
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  // The pressed button flips on click; the page follows when the new one lands.
   const [pendingLocale, setPendingLocale] = useState<string | null>(null);
   const shownLocale = pendingLocale ?? locale;
 
@@ -26,15 +29,16 @@ export function LanguageSwitcher() {
     return null;
   }
 
-  // A full reload rather than router.refresh(): in production builds Next 16's
-  // refresh can fetch the new payload and never commit it on streamed pages
-  // (vercel/next.js#99028), leaving the old language on screen until the next
-  // pointer move. The browser keeps the current page painted until the new one
-  // is ready, so the reload does not flash.
+  // A full page load rather than a client navigation: the root layout (html
+  // lang, fonts, translation messages) sits above [locale] and only renders
+  // fresh on a document request. The browser keeps the current page painted
+  // until the new one is ready, so it does not flash.
   const handleLanguageChange = (newLocale: string) => {
     if (newLocale === shownLocale) return;
     setPendingLocale(newLocale);
-    saveLocaleAndReload(newLocale);
+    const query = searchParams.toString();
+    const target = getPathname({ href: pathname, locale: newLocale });
+    window.location.assign(query ? `${target}?${query}` : target);
   };
 
   return (

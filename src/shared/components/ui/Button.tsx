@@ -1,8 +1,8 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { forwardRef } from "react";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 export type ButtonVariant =

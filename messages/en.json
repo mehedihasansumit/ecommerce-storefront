@@ -96,6 +96,8 @@
   },
   "products": {
     "allProducts": "All Products",
+    "metaDescription": "Browse all products at {store}",
+    "categoryMetaDescription": "Browse {category} at {store}",
     "categories": "Categories",
     "all": "All",
     "noProducts": "No products found",

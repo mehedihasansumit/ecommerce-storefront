@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { IStore } from "@/features/stores/types";
 import type { IProduct } from "@/features/products/types";
-import { buildOrganizationJsonLd, buildProductJsonLd } from "./seo";
+import { buildOrganizationJsonLd, buildProductJsonLd, buildSitemapEntries, createStoreMetadata, hasBanglaContent } from "./seo";
 
 /** What the page actually ships: JSON, with undefined keys dropped. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,6 +114,14 @@ describe("buildProductJsonLd", () => {
   });
 });
 
+describe("buildProductJsonLd on the Bangla page", () => {
+  it("points the offer at the /bn product URL", () => {
+    const ld = asJson(buildProductJsonLd(makeProduct(), makeStore(), "bn"));
+    expect(ld.name).toBe("সাদা সুতি পাঞ্জাবি");
+    expect(ld.offers.url).toBe("https://punjabi.example/bn/products/white-cotton-punjabi");
+  });
+});
+
 describe("buildOrganizationJsonLd", () => {
   it("is an OnlineStore in Bangladesh with the store's return window", () => {
     const ld = asJson(buildOrganizationJsonLd(makeStore()));
@@ -137,5 +145,78 @@ describe("buildOrganizationJsonLd", () => {
       refundPolicy: { enabled: false, windowDays: 0, description: "", autoApprove: false },
     });
     expect(asJson(buildOrganizationJsonLd(store)).hasMerchantReturnPolicy).toBeUndefined();
+  });
+});
+
+describe("createStoreMetadata hreflang", () => {
+  it("links the English and Bangla URLs of a page and canonicalises each to itself", () => {
+    const en = createStoreMetadata(makeStore(), { path: "/products/x" }, "en");
+    const bn = createStoreMetadata(makeStore(), { path: "/products/x" }, "bn");
+    const languages = {
+      en: "https://punjabi.example/products/x",
+      bn: "https://punjabi.example/bn/products/x",
+      "x-default": "https://punjabi.example/products/x",
+    };
+    expect(en.alternates).toEqual({ canonical: languages.en, languages });
+    expect(bn.alternates).toEqual({ canonical: languages.bn, languages });
+    expect(bn.openGraph).toMatchObject({ url: languages.bn, locale: "bn_BD" });
+    expect(en.openGraph).toMatchObject({ locale: "en_US" });
+    expect(bn.robots).toBeUndefined();
+  });
+
+  it("puts the Bangla home page at /bn, not /bn/", () => {
+    const bn = createStoreMetadata(makeStore(), { path: "/" }, "bn");
+    expect(bn.alternates?.canonical).toBe("https://punjabi.example/bn");
+  });
+
+  it("lists no Bangla alternate for a store that only offers English", () => {
+    const store = makeStore({ supportedLanguages: ["en"] });
+    const en = createStoreMetadata(store, { path: "/products/x" }, "en");
+    expect(en.alternates).toEqual({ canonical: "https://punjabi.example/products/x" });
+  });
+
+  it("keeps a Bangla page without Bangla content out of the index", () => {
+    const opts = { path: "/products/x", hasBanglaContent: false };
+    const en = createStoreMetadata(makeStore(), opts, "en");
+    const bn = createStoreMetadata(makeStore(), opts, "bn");
+    expect(en.alternates).toEqual({ canonical: "https://punjabi.example/products/x" });
+    expect(bn.robots).toEqual({ index: false, follow: true });
+  });
+});
+
+describe("hasBanglaContent", () => {
+  it("needs a Bangla name and a Bangla description", () => {
+    expect(hasBanglaContent({ name: { en: "A", bn: "ক" }, description: { bn: "খ" } })).toBe(true);
+    expect(hasBanglaContent({ name: { en: "A", bn: "ক" }, description: { en: "B" } })).toBe(false);
+    expect(hasBanglaContent({ name: { en: "A" }, description: { bn: "খ" } })).toBe(false);
+    expect(hasBanglaContent({ name: { en: "A", bn: "  " }, description: { bn: "খ" } })).toBe(false);
+  });
+});
+
+describe("buildSitemapEntries", () => {
+  const when = new Date("2026-11-01");
+
+  it("lists the Bangla URL next to the English one with the same hreflang set", () => {
+    const rows = buildSitemapEntries(makeStore(), [
+      { path: "/products/x", lastModified: when, changeFrequency: "weekly", priority: 0.8, images: ["/api/media/a.webp"] },
+    ]);
+    expect(rows.map((r) => r.url)).toEqual([
+      "https://punjabi.example/products/x",
+      "https://punjabi.example/bn/products/x",
+    ]);
+    expect(rows[1].alternates?.languages).toEqual({
+      en: "https://punjabi.example/products/x",
+      bn: "https://punjabi.example/bn/products/x",
+      "x-default": "https://punjabi.example/products/x",
+    });
+    expect(rows[0].images).toEqual(["https://punjabi.example/api/media/a.webp"]);
+  });
+
+  it("lists only English for pages without Bangla content or stores without Bangla", () => {
+    const page = { path: "/products/x", lastModified: when, changeFrequency: "weekly" as const, priority: 0.8 };
+    expect(buildSitemapEntries(makeStore(), [{ ...page, hasBanglaContent: false }])).toHaveLength(1);
+    const rows = buildSitemapEntries(makeStore({ supportedLanguages: ["en"] }), [page]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).not.toHaveProperty("alternates");
   });
 });

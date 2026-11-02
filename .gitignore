@@ -43,3 +43,9 @@ next-env.d.ts
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# Local tool output (browser test captures, design-skill workspaces) and scratch scripts
+.playwright-mcp/
+.taste-skill/
+.impeccable/
+.q.mjs

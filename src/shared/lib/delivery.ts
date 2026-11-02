@@ -12,6 +12,10 @@ export interface IStoreDeliveryConfig {
   enabled: boolean;
   insideDhakaCharge: number;
   outsideDhakaCharge: number;
+  /** Days from order to doorstep, fastest case. Unset = not stated. */
+  minDeliveryDays?: number;
+  /** Days from order to doorstep, slowest case (e.g. outside Dhaka). */
+  maxDeliveryDays?: number;
 }
 
 export const DEFAULT_DELIVERY_CONFIG: IStoreDeliveryConfig = {

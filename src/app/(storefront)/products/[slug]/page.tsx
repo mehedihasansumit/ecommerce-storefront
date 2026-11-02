@@ -6,6 +6,7 @@ import {
   createStoreMetadata,
   buildProductJsonLd,
   buildBreadcrumbJsonLd,
+  storeBaseUrl,
 } from "@/shared/lib/seo";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -69,13 +70,16 @@ export default async function ProductDetailPage({
     ? sanitizeDescription(isHtml(rawDescription) ? rawDescription : plainTextToHtml(rawDescription))
     : undefined;
 
-  const domain = tenant.domains?.[0] || "localhost:3000";
-  const storeUrl = `https://${domain}`;
+  const storeUrl = storeBaseUrl(tenant);
+  const ownCategory = category && category.storeId === tenant._id ? category : null;
 
-  const productJsonLd = buildProductJsonLd(product, storeUrl, locale);
+  const productJsonLd = buildProductJsonLd(product, tenant, locale);
+  // Home > Category > Product when the product has a category; else via /products.
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: tr("home"), url: storeUrl },
-    { name: tr("products"), url: `${storeUrl}/products` },
+    ownCategory
+      ? { name: t(ownCategory.name, locale), url: `${storeUrl}/categories/${ownCategory.slug}` }
+      : { name: tr("products"), url: `${storeUrl}/products` },
     { name: t(product.name, locale), url: `${storeUrl}/products/${product.slug}` },
   ]);
 

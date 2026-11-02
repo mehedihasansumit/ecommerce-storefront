@@ -348,6 +348,8 @@ export default function StoreEditForm({
       enabled: store.deliveryConfig?.enabled ?? false,
       insideDhakaCharge: store.deliveryConfig?.insideDhakaCharge ?? 0,
       outsideDhakaCharge: store.deliveryConfig?.outsideDhakaCharge ?? 0,
+      minDeliveryDays: store.deliveryConfig?.minDeliveryDays as number | undefined,
+      maxDeliveryDays: store.deliveryConfig?.maxDeliveryDays as number | undefined,
     },
   });
 
@@ -2632,6 +2634,44 @@ export default function StoreEditForm({
                   </Field>
                 </div>
               )}
+
+              <div>
+                <p className="text-sm font-medium text-admin-text-secondary">Delivery time</p>
+                <p className="text-xs text-admin-text-subtle mt-0.5">
+                  Days from order to the customer&apos;s door. Google shows shipping
+                  info in search only when both are filled in.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(
+                  [
+                    ["minDeliveryDays", "Fastest (days)", "e.g. 1 inside Dhaka"],
+                    ["maxDeliveryDays", "Slowest (days)", "e.g. 5 outside Dhaka"],
+                  ] as const
+                ).map(([key, label, hint]) => (
+                  <Field key={key} label={label} hint={hint}>
+                    <input
+                      type="number"
+                      min={0}
+                      max={60}
+                      step={1}
+                      value={formData.deliveryConfig[key] ?? ""}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          deliveryConfig: {
+                            ...prev.deliveryConfig,
+                            [key]: raw === "" ? undefined : Math.min(60, Math.max(0, Math.round(Number(raw)))),
+                          },
+                        }));
+                      }}
+                      className={inputCls}
+                      disabled={loading}
+                    />
+                  </Field>
+                ))}
+              </div>
             </div>
 
             {/* Preview */}

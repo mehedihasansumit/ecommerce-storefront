@@ -206,7 +206,16 @@ export const updateStoreSchema = z.object({
       enabled: z.boolean().optional(),
       insideDhakaCharge: z.number().min(0).optional(),
       outsideDhakaCharge: z.number().min(0).optional(),
+      minDeliveryDays: z.number().int().min(0).max(60).optional(),
+      maxDeliveryDays: z.number().int().min(0).max(60).optional(),
     })
+    .refine(
+      (d) =>
+        d.minDeliveryDays === undefined ||
+        d.maxDeliveryDays === undefined ||
+        d.minDeliveryDays <= d.maxDeliveryDays,
+      { message: "Fastest delivery can't be slower than the slowest", path: ["maxDeliveryDays"] },
+    )
     .optional(),
   supportedLanguages: z.array(z.string()).optional(),
   defaultLanguage: z.string().optional(),

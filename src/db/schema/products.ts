@@ -45,6 +45,12 @@ export const products = pgTable(
       .$type<Array<{ label: LocalizedString; value: LocalizedString }>>()
       .notNull()
       .default([]),
+    /** This product's own size chart; null = use its category's chart. */
+    sizeGuide: jsonb("size_guide").$type<{
+      columns: LocalizedString[];
+      rows: string[][];
+      note: LocalizedString;
+    }>(),
     pricingTiers: jsonb("pricing_tiers")
       .$type<Array<{ quantity: number; totalPrice: number }>>()
       .notNull()

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { X, Plus, Trash2, Sparkles } from "lucide-react";
 import type { IPricingTier, IProduct, IProductDetail, IProductOption, IProductVariant, IProductImage } from "../types";
-import type { ICategory } from "@/features/categories/types";
+import type { ICategory, ISizeGuide } from "@/features/categories/types";
+import { SizeGuideInput } from "@/features/categories/components/SizeGuideInput";
 import { PricingTiersInput } from "./PricingTiersInput";
 import { ProductDetailsInput } from "./ProductDetailsInput";
 import { generateBaseSku, generateVariantSku, dedupeVariantSkus } from "../sku";
@@ -147,6 +148,7 @@ export function ProductForm({
   const [variants, setVariants] = useState<IProductVariant[]>(product?.variants ?? []);
   const [pricingTiers, setPricingTiers] = useState<IPricingTier[]>(product?.pricingTiers ?? []);
   const [details, setDetails] = useState<IProductDetail[]>(product?.details ?? []);
+  const [sizeGuide, setSizeGuide] = useState<ISizeGuide | null>(product?.sizeGuide ?? null);
 
   const [colorImages, setColorImages] = useState<Record<string, IProductImage[]>>(() => {
     const initial: Record<string, IProductImage[]> = {};
@@ -287,6 +289,10 @@ export function ProductForm({
           Object.values(d.label).some((s) => s.trim()) &&
           Object.values(d.value).some((s) => s.trim())
       ),
+      // null clears the product's own chart, so the category's chart shows again.
+      sizeGuide: sizeGuide
+        ? { ...sizeGuide, rows: sizeGuide.rows.filter((row) => row[0]?.trim()) }
+        : null,
       pricingTiers: pricingTiers
         .map((t) => ({ quantity: Number(t.quantity), totalPrice: Number(t.totalPrice) }))
         .filter((t) => t.quantity > 0 && t.totalPrice > 0),
@@ -401,6 +407,24 @@ export function ProductForm({
           description="Shown under the buy button as a Details list. Fill each language tab."
         />
         <ProductDetailsInput value={details} onChange={setDetails} lang={activeLang} />
+      </Card>
+
+      {/* Own size chart (optional; falls back to the category's) */}
+      <Card>
+        <CardHeader
+          title={
+            supportedLanguages.length > 1 ? (
+              <>
+                Size Chart
+                <span className="ml-2 text-xs font-normal text-gray-400">— {langLabel}</span>
+              </>
+            ) : (
+              "Size Chart"
+            )
+          }
+          description="Optional. Leave empty to use the category’s size chart. Add one only when this product fits differently (e.g. oversized). The first column must match this product’s size values (S, M, 40…)."
+        />
+        <SizeGuideInput value={sizeGuide} onChange={setSizeGuide} lang={activeLang} />
       </Card>
 
       {/* Pricing */}

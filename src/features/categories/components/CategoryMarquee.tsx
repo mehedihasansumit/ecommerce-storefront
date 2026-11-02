@@ -29,7 +29,7 @@ interface CategoryMarqueeRowProps {
   children: ReactNode;
 }
 
-/** The moving row (right to left): one real list, one aria-hidden + inert copy. */
+/** The moving row (right to left): one real list, one aria-hidden copy. */
 export function CategoryMarqueeRow(props: CategoryMarqueeRowProps) {
   return <MarqueeRow direction="rtl" {...props} />;
 }

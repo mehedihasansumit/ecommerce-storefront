@@ -172,7 +172,9 @@
     "onlyLeft": "মাত্র {count, number}টি বাকি",
     "rating": "৫-এর মধ্যে {rating} রেটিং",
     "discount": "{percent, number}% ছাড়",
-    "colours": "{count, number}টি রং"
+    "colours": "{count, number}টি রং",
+    "sealOff": "ছাড়",
+    "sizesInStock": "স্টকে থাকা সাইজ"
   },
   "cart": {
     "yourCart": "আপনার কার্ট",
@@ -540,7 +542,8 @@
         "options": {
           "boxed": "বক্সড",
           "editorial": "এডিটোরিয়াল",
-          "plate": "প্লেট"
+          "plate": "প্লেট",
+          "seal": "সিল + সাইজ"
         }
       },
       "newsletterStyle": {

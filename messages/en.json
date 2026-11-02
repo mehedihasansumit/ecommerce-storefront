@@ -172,7 +172,9 @@
     "onlyLeft": "Only {count, number} left",
     "rating": "Rated {rating} out of 5",
     "discount": "{percent, number}% off",
-    "colours": "{count, plural, one {# colour} other {# colours}}"
+    "colours": "{count, plural, one {# colour} other {# colours}}",
+    "sealOff": "off",
+    "sizesInStock": "Sizes in stock"
   },
   "cart": {
     "yourCart": "Your Cart",
@@ -540,7 +542,8 @@
         "options": {
           "boxed": "Boxed",
           "editorial": "Editorial",
-          "plate": "Plate"
+          "plate": "Plate",
+          "seal": "Seal + sizes"
         }
       },
       "newsletterStyle": {

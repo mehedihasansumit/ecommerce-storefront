@@ -38,9 +38,10 @@ export const NEWSLETTER_STYLES = ["panel", "band"] as const;
 /**
  * Product card: bordered square card (base), portrait image on the page with quiet
  * type under it (editorial), or editorial with photography settled into the page at
- * night and the sold-out state as a label (plate).
+ * night and the sold-out state as a label (plate), or a gallery card with the discount
+ * as a wax seal plus the sizes in stock and "Cash on delivery" (seal).
  */
-export const PRODUCT_CARD_STYLES = ["boxed", "editorial", "plate"] as const;
+export const PRODUCT_CARD_STYLES = ["boxed", "editorial", "plate", "seal"] as const;
 
 export type HeroStyle = (typeof HERO_STYLES)[number];
 export type CategoryStyle = (typeof CATEGORY_STYLES)[number];

@@ -58,9 +58,11 @@ export default async function ProductDetailPage({
     ProductService.getRelated(tenant._id, product),
     product.categoryId ? CategoryService.getById(product.categoryId) : null,
   ]);
-  // Only this store's category may supply the size chart (tenant isolation).
+  // The product's own chart wins; otherwise its category's. Only this store's
+  // category may supply one (tenant isolation).
   const sizeGuide =
-    category && category.storeId === tenant._id ? category.sizeGuide : null;
+    product.sizeGuide ??
+    (category && category.storeId === tenant._id ? category.sizeGuide : null);
 
   const rawDescription = t(product.description, locale);
   const descriptionHtml = rawDescription

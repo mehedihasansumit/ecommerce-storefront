@@ -727,22 +727,56 @@ html[data-hero-style="editorial"] .trust-chip + .trust-chip {
 /* ── productCardStyle Style Switch: loading skeleton (html[data-card-style]) ──
    ProductCardSkeleton is the boxed card; editorial/plate cards are a 4:5 image on
    the page with the title and price under it. */
-html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel {
+html:is([data-card-style="editorial"], [data-card-style="plate"], [data-card-style="seal"]) .pc-skel {
   border-color: transparent;
   background-color: transparent;
   border-radius: 0;
 }
-html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-media {
+html:is([data-card-style="editorial"], [data-card-style="plate"], [data-card-style="seal"]) .pc-skel-media {
   border-radius: var(--border-radius);
 }
-html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-body {
+html:is([data-card-style="editorial"], [data-card-style="plate"], [data-card-style="seal"]) .pc-skel-body {
   padding: 0.75rem 0.125rem 0.25rem;
 }
 @media (min-width: 768px) {
-  html:is([data-card-style="editorial"], [data-card-style="plate"]) .pc-skel-title {
+  html:is([data-card-style="editorial"], [data-card-style="plate"], [data-card-style="seal"]) .pc-skel-title {
     font-size: 15px;
   }
 }
+
+/* productCardStyle "seal" (SealProductCard): the discount as a wax seal on the
+   photo's top corner, in the tenant's sale colours; smaller on narrow cards. */
+.pc-seal {
+  position: absolute; top: 10px; right: 10px; z-index: 10;
+  width: 54px; height: 54px; display: grid; place-items: center; text-align: center; line-height: 1;
+  border-radius: 52% 48% 50% 46% / 47% 53% 45% 55%;
+  color: var(--color-sale-badge-text);
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--color-sale-badge-bg) 82%, white) 0,
+    var(--color-sale-badge-bg) 55%,
+    color-mix(in srgb, var(--color-sale-badge-bg) 76%, black) 100%);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--color-sale-badge-bg) 76%, black), 0 6px 12px rgb(27 26 23 / 0.25);
+  transition: transform 450ms var(--ease-out-expo);
+}
+.pc-seal::before {
+  content: ""; position: absolute; inset: 5px; border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--color-sale-badge-text) 60%, transparent);
+}
+.pc-seal b { display: block; font: 600 18px/1 var(--font-heading, var(--font-family)); font-variant-numeric: tabular-nums; }
+.pc-seal small { display: block; margin-top: 1px; font: 600 8px/1 var(--font-family); letter-spacing: 0.12em; text-transform: uppercase; }
+.group:hover .pc-seal, .group:focus-visible .pc-seal { transform: rotate(-12deg) scale(1.05); }
+@container (max-width: 200px) {
+  .pc-seal { width: 44px; height: 44px; top: 8px; right: 8px; }
+  .pc-seal::before { inset: 4px; }
+  .pc-seal b { font-size: 14px; }
+  .pc-seal small { font-size: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-seal { transition: none; }
+  .group:hover .pc-seal, .group:focus-visible .pc-seal { transform: none; }
+}
+/* "S · M · L": a dot between sizes (not before the first, nor after the sr-only label). */
+.pc-sizes > span:not(.sr-only) ~ span::before { content: "·"; margin-inline-end: 0.5rem; font-weight: 400; color: var(--color-text-tertiary); }
 
 /* Catalogue photography at night (productCardStyle "plate", categoryStyle "plates"):
    studio shots on white sweeps settle a step into the dark page and come back to

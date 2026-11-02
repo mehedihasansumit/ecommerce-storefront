@@ -7,6 +7,7 @@ import { Price } from "@/shared/components/ui";
 import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 import { useStoreStyles } from "@/shared/hooks/useStoreStyles";
 import { EditorialProductCard } from "./EditorialProductCard";
+import { SealProductCard } from "./SealProductCard";
 import {
   ProductCardBadge,
   ProductCardCategory,
@@ -19,6 +20,7 @@ import {
 export function ProductCard({ product }: { product: IProduct }) {
   const { productCardStyle } = useStoreStyles();
   if (productCardStyle === "boxed") return <BoxedProductCard product={product} />;
+  if (productCardStyle === "seal") return <SealProductCard product={product} />;
   return <EditorialProductCard product={product} plate={productCardStyle === "plate"} />;
 }
 

@@ -92,6 +92,13 @@
       "when": 1793563044707,
       "tag": "0012_store_low_stock_threshold",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793612240339,
+      "tag": "0013_product_size_guide",
+      "breakpoints": true
     }
   ]
 }

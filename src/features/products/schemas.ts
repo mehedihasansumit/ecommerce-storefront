@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sizeGuideSchema } from "@/features/categories/schemas";
 
 const productImageSchema = z.object({
   url: z.string(),
@@ -92,6 +93,7 @@ export const createProductSchema = z.object({
   options: z.array(productOptionSchema).optional().default([]),
   variants: z.array(productVariantSchema).optional().default([]),
   details: z.array(productDetailSchema).max(20).optional(),
+  sizeGuide: sizeGuideSchema.nullable().optional(),
   pricingTiers: pricingTiersSchema,
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),

@@ -15,7 +15,7 @@ const requiredLocalizedStringSchema = z.union([
   z.string().min(1, "Category name is required").transform((s) => ({ en: s })),
 ]);
 
-const sizeGuideSchema = z
+export const sizeGuideSchema = z
   .object({
     columns: z.array(z.record(z.string(), z.string().max(40))).min(1).max(8),
     rows: z.array(z.array(z.string().max(40)).max(8)).max(30),

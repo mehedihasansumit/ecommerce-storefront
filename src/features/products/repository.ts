@@ -10,6 +10,7 @@ import {
 } from "@/db/schema/products";
 import type { LocalizedString } from "@/shared/types/i18n";
 import type { PaginatedResponse, SearchParams } from "@/shared/types/common";
+import type { ISizeGuide } from "@/features/categories/types";
 import type {
   IPricingTier,
   IProduct,
@@ -75,6 +76,7 @@ function toIProduct(
     options: (row.options as IProductOption[]) ?? [],
     variants: variantList.map((v) => toIVariant(v, variantImagesByVariantId.get(v.id) ?? [])),
     details: (row.details as IProductDetail[]) ?? [],
+    sizeGuide: (row.sizeGuide as ISizeGuide | null) ?? null,
     pricingTiers: (row.pricingTiers as IPricingTier[]) ?? [],
     isActive: row.isActive,
     isFeatured: row.isFeatured,

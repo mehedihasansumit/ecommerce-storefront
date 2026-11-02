@@ -1,4 +1,5 @@
 import type { LocalizedString } from "@/shared/types/i18n";
+import type { ISizeGuide } from "@/features/categories/types";
 
 export interface IProductOption {
   name: string;
@@ -63,6 +64,8 @@ export interface IProduct {
   options: IProductOption[];
   variants: IProductVariant[];
   details: IProductDetail[];
+  /** Own size chart; null = the category's chart is shown instead. */
+  sizeGuide: ISizeGuide | null;
   pricingTiers: IPricingTier[];
   isActive: boolean;
   isFeatured: boolean;

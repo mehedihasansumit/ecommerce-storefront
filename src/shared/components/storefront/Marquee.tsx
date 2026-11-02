@@ -27,7 +27,8 @@ import { MARQUEE_SET, MARQUEE_STATIC, MARQUEE_VIEWPORT } from "./marquee-classes
 //   ("rtl": items travel leftwards) or, played in reverse, from -50% to 0 ("ltr":
 //   items travel rightwards), so the loop is seamless. The duration is set from the
 //   measured width of one set (ResizeObserver), so the speed stays `speed` px/s
-//   whatever the item count. The copy is aria-hidden and inert.
+//   whatever the item count. The copy is aria-hidden and out of the Tab order
+//   but stays clickable (it is on screen half the time).
 // - The server renders the track paused; motion starts after mount, only when motion
 //   is allowed. Under prefers-reduced-motion CSS hides the row (and the toggle) and
 //   shows MarqueeStatic instead, so nothing shifts and nothing mismatches.
@@ -113,7 +114,7 @@ interface MarqueeRowProps {
   children: ReactNode;
 }
 
-/** The moving row: one real list, one aria-hidden + inert copy right after it. */
+/** The moving row: one real list, one aria-hidden copy (clickable, out of the Tab order) right after it. */
 export function MarqueeRow({
   id,
   direction = "rtl",
@@ -125,13 +126,23 @@ export function MarqueeRow({
   const paused = useContext(MarqueeContext)?.paused ?? false;
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const copyRef = useRef<HTMLUListElement>(null);
   useMarquee({ viewportRef, trackRef, paused, direction, speed });
+
+  // The copy must stay clickable: while the row moves, the copy is often the half on
+  // screen. (`inert` made it ignore clicks, so most visible cards were dead.) It is
+  // hidden from screen readers and taken out of the Tab order instead.
+  useEffect(() => {
+    copyRef.current
+      ?.querySelectorAll<HTMLElement>("a[href], button, input, select, textarea, [tabindex]")
+      .forEach((el) => el.setAttribute("tabindex", "-1"));
+  }, [children]);
 
   return (
     <div ref={viewportRef} id={id} className={`${MARQUEE_VIEWPORT} ${className}`}>
       <div ref={trackRef} className="marquee-track" data-direction={direction}>
         <ul className={`${MARQUEE_SET} ${setClassName}`}>{children}</ul>
-        <ul className={`${MARQUEE_SET} ${setClassName}`} aria-hidden="true" inert>
+        <ul ref={copyRef} className={`${MARQUEE_SET} ${setClassName}`} aria-hidden="true">
           {children}
         </ul>
       </div>
@@ -214,7 +225,7 @@ export function useMarquee({
     const enterManual = () => {
       if (manual || setWidth <= 0) return;
       // Keep the raw position (not modulo one set): when focus scrolled an item into
-      // view, the window must stay on that real item, not on its inert copy.
+      // view, the window must stay on that real item, not on its copy.
       const max = viewport.scrollWidth - viewport.clientWidth;
       let px = viewport.scrollLeft - new DOMMatrixReadOnly(getComputedStyle(track).transform).m41;
       if (px > max) px -= setWidth;

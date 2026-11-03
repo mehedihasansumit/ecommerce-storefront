@@ -104,11 +104,20 @@ export function generateFileKey(
   return `${storeId}/${folder}/${id}.${safeExt}`;
 }
 
-export function variantKey(originalKey: string, suffix: string): string {
+export function variantKey(originalKey: string, suffix: string, ext: "webp" | "avif" = "webp"): string {
   const dot = originalKey.lastIndexOf(".");
   const base = dot >= 0 ? originalKey.slice(0, dot) : originalKey;
-  return `${base}-${suffix}.webp`;
+  return `${base}-${suffix}.${ext}`;
 }
+
+/** Widths of the WebP copies an upload gets (`variants.w600` → `<base>-w600.webp`). */
+export const VARIANT_WIDTHS = [400, 600, 800, 1200, 2000] as const;
+/**
+ * Widths of the AVIF copies a banner upload also gets (`variants.avif600` →
+ * `<base>-w600.avif`). Banners only: AVIF is slow to encode, and the hero photo is the
+ * one image where the smaller file shortens Largest Contentful Paint.
+ */
+export const AVIF_VARIANT_WIDTHS = [400, 600, 800, 1200] as const;
 
 export interface StoredBlob {
   key: string;
@@ -172,13 +181,12 @@ export function urlToKey(value: string): string | null {
   return null;
 }
 
-const VARIANT_SUFFIXES = ["w400", "w800", "w1200", "w2000"] as const;
-
 /** Best-effort delete of an object key plus its responsive variants. Never throws. */
 export async function deleteBlobWithVariants(key: string): Promise<void> {
   await Promise.allSettled([
     deleteFile(key),
-    ...VARIANT_SUFFIXES.map((s) => deleteFile(variantKey(key, s))),
+    ...VARIANT_WIDTHS.map((w) => deleteFile(variantKey(key, `w${w}`))),
+    ...AVIF_VARIANT_WIDTHS.map((w) => deleteFile(variantKey(key, `w${w}`, "avif"))),
   ]);
 }
 
@@ -198,7 +206,7 @@ export async function deleteUnreferencedBlobs(
   // resolve it to the original so the original and all its variants go together.
   const toOriginal = (v: string) => {
     const k = urlToKey(v);
-    return k ? k.replace(/-w(?:400|800|1200|2000)\.webp$/, ".webp") : null;
+    return k ? k.replace(/-w\d+\.(?:webp|avif)$/, ".webp") : null;
   };
   const keepKeys = new Set<string>();
   for (const v of keep) {

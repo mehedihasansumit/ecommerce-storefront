@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { preload } from "react-dom";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import type { ImageProps } from "next/image";
@@ -8,8 +9,10 @@ import { imageGuardProps } from "@/shared/lib/imageGuard";
 
 type Variants = Record<string, string>;
 
-interface StoreImageProps
-  extends Omit<ImageProps, "src" | "loader" | "placeholder" | "blurDataURL"> {
+interface StoreImageProps extends Omit<
+  ImageProps,
+  "src" | "loader" | "placeholder" | "blurDataURL"
+> {
   src: string;
   variants?: Variants;
   alt: string;
@@ -61,15 +64,12 @@ export function StoreImage({
       setLoaded(true);
       onLoad?.(e);
     },
-    [onLoad]
+    [onLoad],
   );
   // Catch already-cached images: onLoad may not fire if complete on mount.
-  const imgRef = useCallback(
-    (node: HTMLImageElement | null) => {
-      if (node?.complete) setLoaded(true);
-    },
-    []
-  );
+  const imgRef = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete) setLoaded(true);
+  }, []);
 
   const skeleton = showSkeleton ? (
     <span
@@ -82,7 +82,7 @@ export function StoreImage({
   // ── No variants: keep next/image (external URLs, favicons, legacy uploads) ──
   if (!hasVariants) {
     const placeholderProps = blurDataURL
-      ? ({ placeholder: "blur" as const, blurDataURL })
+      ? { placeholder: "blur" as const, blurDataURL }
       : {};
     return (
       <>
@@ -112,14 +112,32 @@ export function StoreImage({
   // ── Variants present: plain responsive <img> ──
   // fullRes → load the capped original (sharp under zoom), no srcSet downgrade.
   // otherwise → srcSet so the browser picks the smallest sufficient variant.
-  const srcSet = fullRes
-    ? undefined
-    : Object.entries(variants!)
-        .map(([k, url]) => [parseInt(k.replace(/\D/g, ""), 10), url] as const)
-        .filter(([w]) => Number.isFinite(w))
-        .sort((a, b) => a[0] - b[0])
-        .map(([w, url]) => `${url} ${w}w`)
-        .join(", ");
+  // `w800` keys are WebP copies, `avif800` keys AVIF copies (banners only).
+  const srcSetFor = (prefix: "w" | "avif") =>
+    Object.entries(variants!)
+      .map(
+        ([k, url]) =>
+          [k.match(new RegExp(`^${prefix}(\\d+)$`))?.[1], url] as const,
+      )
+      .filter((e): e is readonly [string, string] => Boolean(e[0]))
+      .map(([w, url]) => [Number(w), url] as const)
+      .sort((a, b) => a[0] - b[0])
+      .map(([w, url]) => `${url} ${w}w`)
+      .join(", ");
+  const srcSet = fullRes ? undefined : srcSetFor("w");
+  const avifSrcSet = fullRes ? "" : srcSetFor("avif");
+
+  // React preloads a high-priority <img> on its own, but not one inside <picture>,
+  // so the AVIF hero needs its own preload. Browsers without AVIF skip it (type).
+  if (priority && avifSrcSet) {
+    preload(src, {
+      as: "image",
+      imageSrcSet: avifSrcSet,
+      imageSizes: sizes,
+      type: "image/avif",
+      fetchPriority: "high",
+    });
+  }
 
   const fillStyle: CSSProperties = fill
     ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
@@ -133,26 +151,37 @@ export function StoreImage({
         }
       : {};
 
+  const img = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      ref={imgRef}
+      src={src}
+      srcSet={srcSet}
+      sizes={srcSet ? sizes : undefined}
+      alt={alt}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      fetchPriority={priority ? "high" : undefined}
+      className={className}
+      style={{ ...fillStyle, ...blurStyle, ...style }}
+      width={width as number | undefined}
+      height={height as number | undefined}
+      onLoad={markLoaded}
+      {...imageGuardProps}
+    />
+  );
+
   return (
     <>
       {skeleton}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        ref={imgRef}
-        src={src}
-        srcSet={srcSet}
-        sizes={srcSet ? sizes : undefined}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        fetchPriority={priority ? "high" : undefined}
-        className={className}
-        style={{ ...fillStyle, ...blurStyle, ...style }}
-        width={width as number | undefined}
-        height={height as number | undefined}
-        onLoad={markLoaded}
-        {...imageGuardProps}
-      />
+      {avifSrcSet ? (
+        <picture>
+          <source type="image/avif" srcSet={avifSrcSet} sizes={sizes} />
+          {img}
+        </picture>
+      ) : (
+        img
+      )}
     </>
   );
 }

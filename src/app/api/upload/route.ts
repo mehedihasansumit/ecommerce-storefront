@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import {
   uploadFile,
-  deleteFile,
   generateFileKey,
   variantKey,
   publicUrlFor,
+  deleteBlobWithVariants,
+  VARIANT_WIDTHS,
+  AVIF_VARIANT_WIDTHS,
 } from "@/shared/lib/storage";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { canAccessStore } from "@/shared/lib/permissions";
@@ -17,8 +19,6 @@ import {
 
 const ALLOWED_FOLDERS = ["products", "categories", "stores", "banners"] as const;
 type Folder = (typeof ALLOWED_FOLDERS)[number];
-
-const VARIANT_WIDTHS = [400, 800, 1200, 2000] as const;
 
 // Longest side of the stored "full" image (feeds hover-zoom + lightbox). Capped
 // and re-encoded to WebP so a 4000px camera photo doesn't ship as a 1-2MB blob.
@@ -103,6 +103,19 @@ export async function POST(request: NextRequest) {
           await uploadFile(vKey, vBuffer, "image/webp");
           variants[`w${w}`] = publicUrlFor(vKey);
         }
+        if (folder === "banners") {
+          for (const w of AVIF_VARIANT_WIDTHS) {
+            if (w >= fullWidth!) continue;
+            const aKey = variantKey(originalKey, `w${w}`, "avif");
+            const aBuffer = await sharp(buffer)
+              .rotate()
+              .resize({ width: w, withoutEnlargement: true })
+              .avif({ quality: 55 })
+              .toBuffer();
+            await uploadFile(aKey, aBuffer, "image/avif");
+            variants[`avif${w}`] = publicUrlFor(aKey);
+          }
+        }
         return variants;
       })(),
       sharp(buffer)
@@ -142,10 +155,7 @@ export async function DELETE(request: NextRequest) {
     const storeId = key.split("/")[0];
     if (!canAccessStore(admin, storeId)) return storeAccessDeniedResponse();
 
-    await deleteFile(key);
-    await Promise.allSettled(
-      VARIANT_WIDTHS.map((w) => deleteFile(variantKey(key, `w${w}`)))
-    );
+    await deleteBlobWithVariants(key);
 
     return NextResponse.json({ ok: true });
   } catch {

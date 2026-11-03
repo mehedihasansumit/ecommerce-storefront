@@ -3,11 +3,11 @@ import {
   deleteFile,
   variantKey,
   urlToKey,
+  VARIANT_WIDTHS,
+  AVIF_VARIANT_WIDTHS,
 } from "@/shared/lib/storage";
 import { MaintenanceRepository } from "./repository";
 import type { ScanResult, DeleteResult } from "./types";
-
-const VARIANT_SUFFIXES = ["w400", "w800", "w1200", "w2000"] as const;
 
 // Skip blobs modified within this window — protects files that were just
 // uploaded but not yet saved to a DB record (upload-then-save flow).
@@ -23,9 +23,8 @@ function buildReferencedSet(rawValues: string[]): Set<string> {
   const referenced = new Set<string>();
   const add = (key: string) => {
     referenced.add(key);
-    for (const suffix of VARIANT_SUFFIXES) {
-      referenced.add(variantKey(key, suffix));
-    }
+    for (const w of VARIANT_WIDTHS) referenced.add(variantKey(key, `w${w}`));
+    for (const w of AVIF_VARIANT_WIDTHS) referenced.add(variantKey(key, `w${w}`, "avif"));
   };
 
   for (const raw of rawValues) {

@@ -194,14 +194,20 @@ export async function deleteUnreferencedBlobs(
   removed: Iterable<string>,
   keep: Iterable<string> = []
 ): Promise<void> {
+  // A saved URL may point at a variant (a category keeps its `-w400.webp` copy);
+  // resolve it to the original so the original and all its variants go together.
+  const toOriginal = (v: string) => {
+    const k = urlToKey(v);
+    return k ? k.replace(/-w(?:400|800|1200|2000)\.webp$/, ".webp") : null;
+  };
   const keepKeys = new Set<string>();
   for (const v of keep) {
-    const k = urlToKey(v);
+    const k = toOriginal(v);
     if (k) keepKeys.add(k);
   }
   const toDelete = new Set<string>();
   for (const v of removed) {
-    const k = urlToKey(v);
+    const k = toOriginal(v);
     if (k && !keepKeys.has(k)) toDelete.add(k);
   }
   await Promise.allSettled(

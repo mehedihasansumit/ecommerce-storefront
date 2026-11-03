@@ -55,7 +55,8 @@ export function ProductCardMedia({
   const tr = useTranslations("productCard");
   // A product whose photos are all tied to a variant (e.g. one gallery per colour) has
   // no product-level images; use the first variant photo so the card still gets its
-  // small srcSet sizes instead of the full-size thumbnail.
+  // small srcSet sizes instead of the full-size thumbnail. Its alt describes the
+  // variant ("Away"), so the card keeps the product name as alt.
   const variantPhoto = product.variants.find((v) => v.images?.length)?.images[0];
   const src = product.thumbnail || product.images[0]?.url || variantPhoto?.url;
   const first =
@@ -76,7 +77,7 @@ export function ProductCardMedia({
         src={src}
         variants={first?.variants}
         blurDataURL={first?.blurDataURL}
-        alt={first?.alt || name}
+        alt={(product.images[0]?.alt) || name}
         fill
         sizes={CARD_SIZES}
         className={imageClassName}

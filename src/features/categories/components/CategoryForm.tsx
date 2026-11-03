@@ -156,7 +156,10 @@ export function CategoryForm({
           <ImageInput
             label="Image"
             value={form.image}
-            onChange={(url) => set("image", url)}
+            // Category tiles are at most ~450px wide on screen; save the 800px copy
+            // the upload made instead of the full (up to 2048px) image. Images under
+            // 800px get no such copy and keep their own URL.
+            onChange={(url, meta) => set("image", meta?.variants?.w800 ?? url)}
             storeId={storeId}
             folder="categories"
             aspect="16/9"

@@ -10,8 +10,8 @@ import { Button } from "@/shared/components/ui";
  *
  * - Decided only after `window.load` + idle, so the poster image (the banner's
  *   `image`) stays the LCP element and the mp4 never competes with it.
- * - `prefers-reduced-motion: reduce` or `Save-Data` → starts paused; the video is
- *   not even downloaded until the visitor presses Play.
+ * - `prefers-reduced-motion: reduce`, `Save-Data` or a 2G/3G connection → starts
+ *   paused; the video is not even downloaded until the visitor presses Play.
  */
 export function useHeroVideoPlayback(enabled: boolean) {
   const [state, setState] = useState({ decided: false, paused: true });
@@ -22,9 +22,20 @@ export function useHeroVideoPlayback(enabled: boolean) {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const decide = () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-      setState({ decided: true, paused: reduced || conn?.saveData === true });
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const conn = (
+        navigator as Navigator & {
+          connection?: { saveData?: boolean; effectiveType?: string };
+        }
+      ).connection;
+      // effectiveType is Chromium-only; elsewhere it is undefined and the video plays.
+      const slow = ["slow-2g", "2g", "3g"].includes(conn?.effectiveType ?? "");
+      setState({
+        decided: true,
+        paused: reduced || conn?.saveData === true || slow,
+      });
     };
     const schedule = () => {
       if ("requestIdleCallback" in window) {
@@ -53,7 +64,7 @@ export function useHeroVideoPlayback(enabled: boolean) {
 
   const toggle = useCallback(
     () => setState((s) => ({ decided: true, paused: !s.paused })),
-    []
+    [],
   );
 
   return { ...state, toggle };
@@ -67,12 +78,18 @@ export type HeroVideoPlayback = ReturnType<typeof useHeroVideoPlayback>;
  * and pauses whenever the hero is off-screen or the tab is hidden.
  * Must be rendered inside a positioned container; fills it with object-cover.
  */
+/** Screens that get the banner's `videoMobile` copy when it has one. */
+const MOBILE_VIDEO_QUERY = "(max-width: 767px)";
+
 export function HeroVideo({
   src,
+  mobileSrc,
   playing,
   className,
 }: {
   src: string;
+  /** Smaller copy for phones; chosen once, when the video is first attached. */
+  mobileSrc?: string;
   /** Desired state: preference allows it AND this slide is the active one. */
   playing: boolean;
   className?: string;
@@ -83,15 +100,25 @@ export function HeroVideo({
   const [inView, setInView] = useState(true);
   const [tabVisible, setTabVisible] = useState(true);
 
+  const [chosenSrc, setChosenSrc] = useState(src);
+
   // Attach the <video> (and start the download) only once playback is first wanted.
-  if (playing && !requested) setRequested(true);
+  // This runs only in the browser (playing starts false), so matchMedia is safe here.
+  if (playing && !requested) {
+    setRequested(true);
+    setChosenSrc(
+      mobileSrc && window.matchMedia(MOBILE_VIDEO_QUERY).matches
+        ? mobileSrc
+        : src,
+    );
+  }
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -121,7 +148,7 @@ export function HeroVideo({
   return (
     <video
       ref={ref}
-      src={src}
+      src={chosenSrc}
       muted
       loop
       playsInline
@@ -157,7 +184,12 @@ export function HeroVideoToggle({
       className={`hero-video-toggle h-11 w-11 ${className ?? ""}`}
     >
       {playback.paused ? (
-        <Play size={16} strokeWidth={1.75} className="translate-x-px" aria-hidden />
+        <Play
+          size={16}
+          strokeWidth={1.75}
+          className="translate-x-px"
+          aria-hidden
+        />
       ) : (
         <Pause size={16} strokeWidth={1.75} aria-hidden />
       )}

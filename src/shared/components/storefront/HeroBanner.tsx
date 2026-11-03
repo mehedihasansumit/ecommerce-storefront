@@ -516,7 +516,7 @@ function SplitLayout({
               />
             )}
             {activated.has(i) && b.video && (
-              <HeroVideo src={b.video} playing={playback.decided && !playback.paused && i === current} />
+              <HeroVideo src={b.video} mobileSrc={b.videoMobile} playing={playback.decided && !playback.paused && i === current} />
             )}
           </div>
         ))}
@@ -684,7 +684,7 @@ function CenteredLayout({
             />
           )}
           {activated.has(i) && b.video && (
-            <HeroVideo src={b.video} playing={playback.decided && !playback.paused && i === current} />
+            <HeroVideo src={b.video} mobileSrc={b.videoMobile} playing={playback.decided && !playback.paused && i === current} />
           )}
         </div>
       ))}
@@ -854,7 +854,7 @@ function MinimalLayout({
             />
           )}
           {activated.has(i) && b.video && (
-            <HeroVideo src={b.video} playing={playback.decided && !playback.paused && i === current} />
+            <HeroVideo src={b.video} mobileSrc={b.videoMobile} playing={playback.decided && !playback.paused && i === current} />
           )}
         </div>
       ))}
@@ -1000,7 +1000,7 @@ function GridLayout({
             />
           )}
           {main.video && (
-            <HeroVideo src={main.video} playing={playback.decided && !playback.paused} />
+            <HeroVideo src={main.video} mobileSrc={main.videoMobile} playing={playback.decided && !playback.paused} />
           )}
           {main.showOverlay !== false && (
             <div
@@ -1236,6 +1236,7 @@ function ImageOnlyLayout({
           {activated.has(i) && b.video && (
             <HeroVideo
               src={b.video}
+              mobileSrc={b.videoMobile}
               playing={playback.decided && !playback.paused && i === current}
               className="!object-contain"
             />
@@ -1386,6 +1387,7 @@ function CinematicLayout({
           {activated.has(i) && b.video && (
             <HeroVideo
               src={b.video}
+              mobileSrc={b.videoMobile}
               playing={playback.decided && !playback.paused && i === current}
             />
           )}

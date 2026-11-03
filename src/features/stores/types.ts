@@ -104,6 +104,11 @@ export interface IHeroBanner {
    * (+ variants/blurDataURL) stays the poster, LCP element and fallback.
    */
   video?: string;
+  /**
+   * Optional smaller copy of `video` for phones (e.g. 480p). Used on screens up to
+   * 767px wide; falls back to `video`. Must show the same footage as `video`.
+   */
+  videoMobile?: string;
   title: LocalizedString;
   subtitle?: LocalizedString;
   linkUrl?: string;

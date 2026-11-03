@@ -103,6 +103,8 @@ interface BannerState {
   showOverlay: boolean;
   /** Optional background video (mp4 URL); `image` stays the poster. */
   video?: string;
+  /** Optional smaller copy of `video` for phones. */
+  videoMobile?: string;
 }
 
 type Tab =
@@ -370,6 +372,7 @@ export default function StoreEditForm({
       linkText: b.linkText || "",
       showOverlay: b.showOverlay ?? true,
       video: b.video || undefined,
+      videoMobile: b.videoMobile || undefined,
     }))
   );
 
@@ -529,13 +532,17 @@ export default function StoreEditForm({
 
   const handleBannerField = (
     index: number,
-    field: "image" | "linkUrl" | "linkText" | "video",
+    field: "image" | "linkUrl" | "linkText" | "video" | "videoMobile",
     value: string
   ) => {
     setHeroBanners((prev) =>
       prev.map((b, i) =>
         i === index
-          ? { ...b, [field]: field === "video" ? value.trim() || undefined : value }
+          ? {
+              ...b,
+              [field]:
+                field === "video" || field === "videoMobile" ? value.trim() || undefined : value,
+            }
           : b
       )
     );
@@ -1751,6 +1758,26 @@ export default function StoreEditForm({
                                 />
                                 <p className="mt-1 text-xs text-admin-text-subtle">
                                   Muted looping MP4 (H.264, ≤ 4 MB). The image above is its poster.
+                                </p>
+                              </Field>
+                              <Field label="Mobile Video URL (optional)">
+                                <input
+                                  type="url"
+                                  inputMode="url"
+                                  value={banner.videoMobile ?? ""}
+                                  onChange={(e) =>
+                                    handleBannerField(
+                                      index,
+                                      "videoMobile",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="/media/hero-480p.mp4"
+                                  className={inputCls}
+                                  disabled={loading}
+                                />
+                                <p className="mt-1 text-xs text-admin-text-subtle">
+                                  A smaller copy of the same video (480p) for phones; saves shoppers mobile data. Change it whenever you change the video above.
                                 </p>
                               </Field>
                             </div>

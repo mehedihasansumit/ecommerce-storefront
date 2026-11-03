@@ -131,6 +131,7 @@ export const updateStoreSchema = z.object({
         linkText: z.string().optional(),
         showOverlay: z.boolean().optional(),
         video: heroVideoSchema.optional(),
+        videoMobile: heroVideoSchema.optional(),
       })
     )
     .optional(),

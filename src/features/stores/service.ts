@@ -13,6 +13,7 @@ function storeBlobValues(s: IStore): string[] {
   for (const b of s.heroBanners ?? []) {
     if (b.image) out.push(b.image);
     if (b.video) out.push(b.video);
+    if (b.videoMobile) out.push(b.videoMobile);
   }
   return out;
 }

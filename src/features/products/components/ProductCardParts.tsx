@@ -53,8 +53,13 @@ export function ProductCardMedia({
   imageClassName: string;
 }) {
   const tr = useTranslations("productCard");
-  const first = product.images[0];
-  const src = product.thumbnail || first?.url;
+  // A product whose photos are all tied to a variant (e.g. one gallery per colour) has
+  // no product-level images; use the first variant photo so the card still gets its
+  // small srcSet sizes instead of the full-size thumbnail.
+  const variantPhoto = product.variants.find((v) => v.images?.length)?.images[0];
+  const src = product.thumbnail || product.images[0]?.url || variantPhoto?.url;
+  const first =
+    product.images[0] ?? (variantPhoto && variantPhoto.url === src ? variantPhoto : undefined);
   const second = product.images[1];
 
   if (!src) {

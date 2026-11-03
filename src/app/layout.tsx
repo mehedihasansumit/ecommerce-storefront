@@ -142,6 +142,8 @@ export default async function RootLayout({
 
   const darkCss = buildDarkCss(resolveThemeVars(theme, "dark"));
 
+  const fontSwapScript = `document.querySelectorAll('link[data-store-font]').forEach(function(l){function on(){l.media='all'}if(l.sheet)on();else l.addEventListener('load',on)})`;
+
   const antiFlashScript = `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');})()`;
 
   return (
@@ -173,9 +175,22 @@ export default async function RootLayout({
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
           </>
         )}
+        {/* Store fonts must not block the first paint (a third-party CSS request costs
+            ~0.8s on slow mobile). Load them as print-only, switch to all once loaded;
+            text shows in the fallback font until then (font-display: swap anyway). */}
         {fontHrefs.map((href) => (
-          <link key={href} href={href} rel="stylesheet" />
+          <link key={href} href={href} rel="stylesheet" media="print" data-store-font="" suppressHydrationWarning />
         ))}
+        {fontHrefs.length > 0 && (
+          <script dangerouslySetInnerHTML={{ __html: fontSwapScript }} />
+        )}
+        {fontHrefs.length > 0 && (
+          <noscript>
+            {fontHrefs.map((href) => (
+              <link key={href} href={href} rel="stylesheet" />
+            ))}
+          </noscript>
+        )}
       </head>
       <body className="min-h-screen flex flex-col antialiased">
         <NextIntlClientProvider>

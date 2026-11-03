@@ -160,6 +160,25 @@ export function absoluteUrl(baseUrl: string, url: string): string {
   return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
+/**
+ * Where a request on one of the store's other domains should go: the same
+ * path on the primary domain (`domains[0]`), the one the canonical tags name.
+ * Null on the primary domain, or for a host the store doesn't list. A redirect
+ * is a stronger signal to Google than canonical tags alone.
+ */
+export function primaryDomainRedirect(
+  store: Pick<IStore, "domains">,
+  host: string,
+  pathWithQuery: string,
+): string | null {
+  const hostname = host.split(":")[0].toLowerCase();
+  const domains = (store.domains ?? []).map((d) => d.toLowerCase());
+  const primary = domains[0];
+  if (!primary || hostname === primary || !domains.includes(hostname)) return null;
+  const path = pathWithQuery.startsWith("/") ? pathWithQuery : `/${pathWithQuery}`;
+  return `https://${primary}${path}`;
+}
+
 /** schema.org properties Google accepts in a ProductGroup's `variesBy`. */
 const VARIES_BY: Record<string, "size" | "color" | "material" | "pattern"> = {
   size: "size", "সাইজ": "size",

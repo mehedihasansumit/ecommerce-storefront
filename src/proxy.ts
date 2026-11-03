@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { APP_SURFACE_HEADER } from "@/shared/lib/app-surface";
+import { APP_SURFACE_HEADER, STOREFRONT_PATH_HEADER } from "@/shared/lib/app-surface";
 import { routing } from "@/i18n/routing";
 
 // Storefront language routing: /bn/products/x → [locale]=bn, /products/x → en.
@@ -13,7 +13,11 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname !== "/admin" && !pathname.startsWith("/admin/")) {
-    return handleI18nRouting(request);
+    // next-intl copies the request headers it is given, so the path header
+    // reaches the storefront layout (domain redirect).
+    const headers = new Headers(request.headers);
+    headers.set(STOREFRONT_PATH_HEADER, pathname + request.nextUrl.search);
+    return handleI18nRouting(new NextRequest(request, { headers }));
   }
 
   // Admin auth guard: protect /admin/* except /admin/login

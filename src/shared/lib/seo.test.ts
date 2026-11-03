@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { IStore } from "@/features/stores/types";
 import type { IProduct } from "@/features/products/types";
-import { buildOrganizationJsonLd, buildProductJsonLd, buildSitemapEntries, createStoreMetadata, hasBanglaContent } from "./seo";
+import { buildOrganizationJsonLd, buildProductJsonLd, buildSitemapEntries, createStoreMetadata, hasBanglaContent, primaryDomainRedirect } from "./seo";
 
 /** What the page actually ships: JSON, with undefined keys dropped. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -218,5 +218,25 @@ describe("buildSitemapEntries", () => {
     const rows = buildSitemapEntries(makeStore({ supportedLanguages: ["en"] }), [page]);
     expect(rows).toHaveLength(1);
     expect(rows[0]).not.toHaveProperty("alternates");
+  });
+});
+
+describe("primaryDomainRedirect", () => {
+  const store = makeStore({ domains: ["www.lourhaus.com", "lourhaus.com"] });
+
+  it("sends a secondary domain to the primary one, keeping path and query", () => {
+    expect(primaryDomainRedirect(store, "lourhaus.com", "/bn/products/x?Size=M")).toBe(
+      "https://www.lourhaus.com/bn/products/x?Size=M",
+    );
+  });
+
+  it("ignores port and letter case", () => {
+    expect(primaryDomainRedirect(store, "LourHaus.com:443", "/")).toBe("https://www.lourhaus.com/");
+    expect(primaryDomainRedirect(store, "WWW.lourhaus.com:5000", "/")).toBeNull();
+  });
+
+  it("does nothing on the primary domain or for a host the store does not own", () => {
+    expect(primaryDomainRedirect(store, "www.lourhaus.com", "/")).toBeNull();
+    expect(primaryDomainRedirect(store, "evil.example", "/")).toBeNull();
   });
 });

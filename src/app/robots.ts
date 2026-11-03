@@ -11,7 +11,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       {
         userAgent: "*",
         allow: ["/", "/api/media/"],
-        disallow: ["/api/", "/admin/", "/checkout/", "/account/"],
+        // Bangla copies of the private pages live under /bn (ADR 0004).
+        disallow: ["/api/", "/admin/", "/checkout/", "/account/", "/bn/checkout/", "/bn/account/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

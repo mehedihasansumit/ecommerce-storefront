@@ -3,7 +3,9 @@ export type { ButtonVariant, ButtonSize } from "./Button";
 
 export { Input } from "./Input";
 export { Textarea } from "./Textarea";
-export { RichTextEditor } from "./RichTextEditor";
+// RichTextEditor is NOT exported here: it pulls in TipTap/ProseMirror (~450KB), and
+// storefront pages import this barrel, so exporting it shipped the editor to every
+// shopper. Import it directly: `@/shared/components/ui/RichTextEditor`.
 export { Select } from "./Select";
 export { LocationSelect } from "./LocationSelect";
 export type { LocationValue } from "./LocationSelect";

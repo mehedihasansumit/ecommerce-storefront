@@ -670,6 +670,7 @@ import { Button, Input, Field, Card, Alert, Modal, ConfirmDialog,
 - Error responses follow: `{ error: "message" }` format
 - Use named exports for components, default exports only for page/layout files
 - Use barrel exports (`index.ts`) for shared/ui components
+- Keep heavy, admin-only components out of the shared/ui barrel (storefront imports it, so everything it exports ships to shoppers). `RichTextEditor` (TipTap) is imported directly from `@/shared/components/ui/RichTextEditor`.
 - Import features via `@/features/...`, shared via `@/shared/...`
 - Repositories return plain mapped `I*` objects (never raw Drizzle row builders / query objects to services)
 - Services throw typed errors, API routes catch and map to HTTP status codes

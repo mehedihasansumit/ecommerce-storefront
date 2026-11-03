@@ -22,10 +22,10 @@ import {
   ImageInput,
   Input,
   LangTabs,
-  RichTextEditor,
   Select,
   Textarea,
 } from "@/shared/components/ui";
+import { RichTextEditor } from "@/shared/components/ui/RichTextEditor";
 
 interface ProductFormProps {
   storeId: string;

@@ -14,9 +14,9 @@ import type { Metadata } from "next";
 import { ITEMS_PER_PAGE } from "@/shared/lib/constants";
 import { getTranslations, getLocale, getFormatter } from "next-intl/server";
 import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { CategoryFilterSheet } from "@/features/categories/components/CategoryFilterSheet";
 import { SearchFormWithTracking } from "@/features/products/components/SearchFormWithTracking";
 import { formatNumber, t as tl } from "@/shared/lib/i18n";
-import { ScrollCurrentIntoView } from "@/features/categories/components/ScrollCurrentIntoView";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -43,6 +43,7 @@ export default async function ProductsPage({
 }) {
   const tenant = await getTenant();
   const t = await getTranslations("products");
+  const th = await getTranslations("header");
   const locale = await getLocale();
   const format = await getFormatter();
   if (!tenant) return null;
@@ -93,6 +94,7 @@ export default async function ProductsPage({
     : [{} as Record<string, number>, []];
   // A sub-category highlights its top-level parent chip.
   const activeChipId = categoryParentId ?? categoryId;
+  const activeChip = chipCategories.find(({ category }) => category._id === activeChipId)?.category;
 
   const buildUrl = (p: number) => {
     const parts = [`/products?page=${p}`];
@@ -134,56 +136,42 @@ export default async function ProductsPage({
         </p>
       </div>
 
-      {/* Phones/tablets: one horizontally scrollable chip row of the top-level
-          categories (same set and order as the home tiles), then a compact search,
-          so the first products still land on the first screen at 390px. Desktop
-          uses the sidebar below. */}
+      {/* Phones/tablets: one button naming the current category opens a bottom sheet
+          with every top-level category (same set and order as the home tiles), with sort
+          beside it and a compact search below, so the first products still land on the
+          first screen at 390px. Desktop uses the sidebar below. */}
       {categories.length > 0 && (
         <div className="lg:hidden mb-5 space-y-3">
-          {chipCategories.length > 0 && (
-            <nav aria-label={t("categories")}>
-              <ul
-                id="products-category-chips"
-                className="-mx-4 px-4 sm:-mx-6 sm:px-6 flex gap-2 overflow-x-auto overscroll-x-contain snap-x scroll-px-4 sm:scroll-px-6 no-scrollbar py-0.5"
-              >
-                {[{ key: "all", href: "/products", label: t("all"), active: !categorySlug },
-                  ...chipCategories.map(({ category: cat }) => ({
+          <div className="flex gap-2">
+            {chipCategories.length > 0 && (
+              <CategoryFilterSheet
+                prefix={`${t("categories")}:`}
+                current={activeChip ? tl(activeChip.name, locale) : t("all")}
+                title={t("categories")}
+                closeLabel={th("close")}
+                items={[
+                  {
+                    key: "all",
+                    href: "/products",
+                    label: t("all"),
+                    image: "",
+                    count: formatNumber(allCount, locale),
+                    active: !categorySlug,
+                    isAll: true,
+                  },
+                  ...chipCategories.map(({ category: cat, count }) => ({
                     key: cat._id,
                     href: `/products?category=${cat.slug}`,
                     label: tl(cat.name, locale),
+                    image: cat.image,
+                    count: formatNumber(count, locale),
                     active: activeChipId === cat._id,
                   })),
-                ].map((chip) => (
-                  <li key={chip.key} className="shrink-0 snap-start">
-                    <Link
-                      href={chip.href}
-                      aria-current={chip.active ? "page" : undefined}
-                      className={`focus-ring inline-flex min-h-10 items-center whitespace-nowrap rounded-full border px-4 text-sm transition-[color,background-color,transform] duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 ${
-                        chip.active
-                          ? "font-semibold"
-                          : "border-border-subtle text-text-secondary hover:bg-surface hover:text-[var(--color-text)]"
-                      }`}
-                      style={
-                        chip.active
-                          ? {
-                              backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                              borderColor: "color-mix(in srgb, var(--color-primary) 35%, transparent)",
-                              color: "var(--color-link)",
-                            }
-                          : undefined
-                      }
-                    >
-                      {chip.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <ScrollCurrentIntoView
-                targetId="products-category-chips"
-                activeKey={activeChipId ?? "all"}
+                ]}
               />
-            </nav>
-          )}
+            )}
+            <SortDropdown currentSort={sort} currentOrder={order} compact />
+          </div>
           <SearchFormWithTracking
             defaultValue={search || ""}
             placeholder={t("searchPlaceholder")}
@@ -283,7 +271,9 @@ export default async function ProductsPage({
               {t("of")}{" "}
               <span className="font-medium text-[var(--color-text)]">{format.number(result.total)}</span>
             </p>
-            <SortDropdown currentSort={sort} currentOrder={order} />
+            <div className={categories.length > 0 ? "hidden lg:block" : undefined}>
+              <SortDropdown currentSort={sort} currentOrder={order} />
+            </div>
           </div>
 
           {/* Active filter chips */}

@@ -16,9 +16,11 @@ interface SortDropdownProps {
   currentSort?: string;
   currentOrder?: string;
   label?: string;
+  /** Fixed-share width for a shared phone row: no icon, select fills its box. */
+  compact?: boolean;
 }
 
-export function SortDropdown({ currentSort, currentOrder, label }: SortDropdownProps) {
+export function SortDropdown({ currentSort, currentOrder, label, compact }: SortDropdownProps) {
   const t = useTranslations("products");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,12 +37,12 @@ export function SortDropdown({ currentSort, currentOrder, label }: SortDropdownP
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <ArrowUpDown size={14} aria-hidden className="text-text-tertiary shrink-0" />
+    <div className={compact ? "flex w-2/5 shrink-0" : "flex items-center gap-2"}>
+      {!compact && <ArrowUpDown size={14} aria-hidden className="text-text-tertiary shrink-0" />}
       <select
         value={value}
         onChange={handleChange}
-        className="focus-ring min-h-10 text-sm border border-input-border bg-[var(--color-card-bg)] py-1.5 pl-3 pr-8 appearance-none cursor-pointer text-[var(--color-text)]"
+        className={`focus-ring min-h-10 ${compact ? "w-full min-w-0 truncate " : ""}text-base sm:text-sm border border-input-border bg-[var(--color-card-bg)] py-1.5 pl-3 pr-8 appearance-none cursor-pointer text-[var(--color-text)]`}
         style={{
           borderRadius: "var(--border-radius)",
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,

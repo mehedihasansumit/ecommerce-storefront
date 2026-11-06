@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Link } from "@/i18n/navigation";
 import { getTenant } from "@/shared/lib/tenant";
 import { getFeaturedProducts, getNewArrivalProducts } from "@/features/products/storefront";
@@ -17,6 +18,9 @@ import { usesStyledHero } from "@/shared/components/storefront/hero-styles";
 import { CategorySection } from "@/features/categories/components/CategorySection";
 import { resolveTheme } from "@/features/stores/presets";
 import { newArrivalsMarquee } from "@/features/products/layout";
+import { ProductRailSkeleton } from "@/features/products/components/ProductSkeletons";
+import { SkeletonRegion } from "@/shared/components/ui";
+import type { NewsletterStyle } from "@/features/stores/styles";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenant();
@@ -29,6 +33,7 @@ export default async function HomePage() {
   const tenant = await getTenant();
   const locale = await getLocale();
   const tr = await getTranslations("home");
+  const tc = await getTranslations("common");
 
   if (!tenant) {
     return (
@@ -41,15 +46,13 @@ export default async function HomePage() {
     );
   }
 
-  const [featuredProducts, newArrivals, showcase] = await Promise.all([
-    getFeaturedProducts(tenant._id),
-    getNewArrivalProducts(tenant._id),
-    getTopLevelCategoriesWithProducts(tenant._id),
-  ]);
+  // Only store config + the category showcase gate the first flush. The hero must be
+  // in that first flush: inside a Suspense boundary its <img> arrives hidden and only
+  // shows once React's reveal script lands after every product card (~2s LCP render
+  // delay on slow 4G). Product queries stream in below via <HomeProducts>.
+  const showcase = await getTopLevelCategoriesWithProducts(tenant._id);
 
   const orgJsonLd = buildOrganizationJsonLd(tenant);
-  const railIds = new Set(newArrivals.map((p) => p._id));
-  const featuredOnly = featuredProducts.filter((p) => !railIds.has(p._id));
   const { styles, motion } = resolveTheme(tenant.theme);
   // The styled full-bleed hero sits flush under the header (no gap strip).
   const flushHero =
@@ -111,15 +114,52 @@ export default async function HomePage() {
         viewAllLabel={tr("viewAll")}
       />
 
+      <Suspense
+        fallback={
+          <SkeletonRegion label={tc("loading")}>
+            <ProductRailSkeleton />
+          </SkeletonRegion>
+        }
+      >
+        <HomeProducts
+          storeId={tenant._id}
+          newArrivalsMotion={motion.newArrivals}
+          newsletterStyle={styles.newsletterStyle}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+/** Product sections below the fold-line; streamed so they never hold back the hero. */
+async function HomeProducts({
+  storeId,
+  newArrivalsMotion,
+  newsletterStyle,
+}: {
+  storeId: string;
+  newArrivalsMotion: Parameters<typeof newArrivalsMarquee>[1];
+  newsletterStyle: NewsletterStyle;
+}) {
+  const tr = await getTranslations("home");
+  const [featuredProducts, newArrivals] = await Promise.all([
+    getFeaturedProducts(storeId),
+    getNewArrivalProducts(storeId),
+  ]);
+  const railIds = new Set(newArrivals.map((p) => p._id));
+  const featuredOnly = featuredProducts.filter((p) => !railIds.has(p._id));
+
+  return (
+    <>
       {/* New arrivals rail: first products land on the first mobile screen. From
-          NEW_ARRIVALS_MARQUEE_MIN products it moves left to right (theme.motion.newArrivals). */}
+          NEW_ARRIVALS_MARQUEE_MIN products it moves left to right (theme.newArrivalsMotion). */}
       <ProductRail
         title={tr("newArrivals")}
         products={newArrivals}
         viewAllHref="/products"
         viewAllLabel={tr("viewAll")}
         marquee={
-          newArrivalsMarquee(newArrivals.length, motion.newArrivals)
+          newArrivalsMarquee(newArrivals.length, newArrivalsMotion)
             ? { id: "home-new-arrivals-marquee", pauseLabel: tr("newArrivalsPause") }
             : undefined
         }
@@ -167,7 +207,7 @@ export default async function HomePage() {
       )}
 
       {/* Newsletter / CTA in the newsletterStyle Style Switch */}
-      <HomeNewsletter storeId={tenant._id} newsletterStyle={styles.newsletterStyle} />
-    </div>
+      <HomeNewsletter storeId={storeId} newsletterStyle={newsletterStyle} />
+    </>
   );
 }

@@ -61,7 +61,7 @@ const initialForm: FormData = {
 // Same metrics and focus treatment as the <Input>/<Select> primitives, so the text
 // fields and the location selects line up (they were 44px vs 40px).
 const inputBase =
-  "w-full min-h-10 px-3 py-2 border rounded-lg text-sm bg-[var(--color-card-bg)] text-[var(--color-text)] transition-colors placeholder:text-text-tertiary focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--focus-ring,var(--color-primary))]";
+  "w-full min-h-10 px-3 py-2 border rounded-lg text-base sm:text-sm bg-[var(--color-card-bg)] text-[var(--color-text)] transition-colors placeholder:text-text-tertiary focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--focus-ring,var(--color-primary))]";
 const inputNormal = `${inputBase} border-input-border hover:border-text-secondary`;
 const inputError = `${inputBase} border-error`;
 const inputReadOnly = `${inputBase} border-border-subtle bg-surface text-text-secondary cursor-default`;

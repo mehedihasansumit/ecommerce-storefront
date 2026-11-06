@@ -32,7 +32,7 @@ export function SearchFormWithTracking({
           placeholder={placeholder}
           aria-label={placeholder}
           enterKeyHint="search"
-          className="focus-ring w-full min-h-11 pl-9 pr-3 py-2 text-sm bg-[var(--color-card-bg)] text-[var(--color-text)] placeholder:text-text-tertiary border border-input-border transition-colors"
+          className="focus-ring w-full min-h-11 pl-9 pr-3 py-2 text-base sm:text-sm bg-[var(--color-card-bg)] text-[var(--color-text)] placeholder:text-text-tertiary border border-input-border transition-colors"
           style={{ borderRadius: "var(--border-radius)" }}
         />
         <Search

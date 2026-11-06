@@ -64,7 +64,7 @@ export function AddressForm({
   }
 
   const inputBase =
-    "w-full px-3 py-2.5 border rounded-lg text-sm bg-bg text-[var(--color-text)] placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors";
+    "w-full px-3 py-2.5 border rounded-lg text-base sm:text-sm bg-bg text-[var(--color-text)] placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors";
   const inputClass = (field: string) =>
     `${inputBase} ${
       fieldErrors[field]

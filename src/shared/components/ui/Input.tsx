@@ -22,7 +22,7 @@ const BORDER_INVALID =
   "border-[var(--ui-field-border-invalid,#f87171)] dark:border-[var(--ui-field-border-invalid-dark,#dc2626)]";
 
 const BASE =
-  `w-full min-h-10 px-3 py-2 text-sm ${FIELD_BG} ${FIELD_TEXT} border rounded-lg transition-colors ` +
+  `w-full min-h-10 px-3 py-2 text-base sm:text-sm ${FIELD_BG} ${FIELD_TEXT} border rounded-lg transition-colors ` +
   "focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--focus-ring,var(--color-primary))] " +
   "disabled:bg-[var(--ui-field-disabled-bg,#f9fafb)] disabled:text-[var(--ui-field-disabled-text,#6b7280)] disabled:cursor-not-allowed dark:disabled:bg-[var(--ui-field-disabled-bg-dark,#1f2937)] dark:disabled:text-[var(--ui-field-disabled-text-dark,#6b7280)]";
 
@@ -47,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         <input
           ref={ref}
           aria-invalid={isInvalid || undefined}
-          className={`min-w-0 flex-1 bg-transparent py-2 pr-3 text-sm outline-none disabled:cursor-not-allowed ${FIELD_TEXT}`}
+          className={`min-w-0 flex-1 bg-transparent py-2 pr-3 text-base sm:text-sm outline-none disabled:cursor-not-allowed ${FIELD_TEXT}`}
           {...rest}
         />
       </div>

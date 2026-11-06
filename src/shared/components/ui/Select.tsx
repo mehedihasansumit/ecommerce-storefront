@@ -9,7 +9,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 const BASE =
-  "w-full min-h-10 appearance-none pl-3 pr-9 py-2 text-sm bg-[var(--ui-field-bg,#fff)] text-[var(--ui-field-text,inherit)] border rounded-lg transition-colors " +
+  "w-full min-h-10 appearance-none pl-3 pr-9 py-2 text-base sm:text-sm bg-[var(--ui-field-bg,#fff)] text-[var(--ui-field-text,inherit)] border rounded-lg transition-colors " +
   "dark:bg-[var(--ui-field-bg-dark,#111827)] dark:text-[var(--ui-field-text-dark,#f3f4f6)] " +
   "focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--focus-ring,var(--color-primary))] " +
   "disabled:bg-[var(--ui-field-disabled-bg,#f9fafb)] disabled:text-[var(--ui-field-disabled-text,#6b7280)] disabled:cursor-not-allowed dark:disabled:bg-[var(--ui-field-disabled-bg-dark,#1f2937)] dark:disabled:text-[var(--ui-field-disabled-text-dark,#6b7280)]";

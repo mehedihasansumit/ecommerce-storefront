@@ -35,7 +35,7 @@ export function ProductRail({ title, products, viewAllHref, viewAllLabel, marque
   const viewAll = viewAllHref && viewAllLabel && (
     <Link
       href={viewAllHref}
-      className="focus-ring shrink-0 inline-flex items-center gap-1 text-sm font-medium rounded-lg"
+      className="focus-ring shrink-0 inline-flex items-center gap-1 min-h-11 px-1 text-sm font-medium rounded-lg"
       style={{ color: "var(--color-primary)" }}
     >
       {viewAllLabel}

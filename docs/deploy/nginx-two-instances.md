@@ -71,6 +71,29 @@ Check: after `nginx -t && systemctl reload nginx`, `/var/log/nginx/access.log`
 shows visitors' own IPs instead of 104.x / 162.158.x / 172.64-71.x addresses.
 **Apply this before deploying the rate limiting**, or all visitors share a limit.
 
+## Refuse bare RSC requests (before Cloudflare page caching)
+
+Next answers a page URL with its RSC payload when the request carries `RSC: 1`.
+Cloudflare ignores `Vary: rsc`, so if it cached such a response, every visitor
+of that page would get raw RSC (`cloudflare-page-cache.md`). Next's router
+always adds `?_rsc=`, so refuse the bare form. Next strips the header before the
+app's proxy runs, which is why this check lives in Nginx:
+
+```nginx
+map "$http_rsc:$arg__rsc" $lourhaus_bare_rsc {
+    default 0;
+    "1:" 1;
+}
+
+server {
+    # ...
+    location / {
+        if ($lourhaus_bare_rsc) { return 400; }
+        # ...
+    }
+}
+```
+
 ## Firewall
 
 With host networking the app ports are reachable from the internet, skipping

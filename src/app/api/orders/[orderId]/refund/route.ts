@@ -19,7 +19,7 @@ export async function POST(
       return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
     const payload = await getCustomerToken();
-    if (!payload)
+    if (payload?.type !== "customer")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const userId = (payload as JwtCustomerPayload).userId;
 
@@ -50,7 +50,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
     const payload = await getCustomerToken();
-    if (!payload)
+    if (payload?.type !== "customer")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const userId = (payload as JwtCustomerPayload).userId;
 

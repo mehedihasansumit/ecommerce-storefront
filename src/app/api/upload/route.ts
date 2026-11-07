@@ -10,15 +10,43 @@ import {
   AVIF_VARIANT_WIDTHS,
 } from "@/shared/lib/storage";
 import { getAdminDbUser } from "@/shared/lib/auth";
-import { canAccessStore } from "@/shared/lib/permissions";
+import { canAccessStore, hasPermission, PERMISSIONS, type Permission } from "@/shared/lib/permissions";
 import {
   errorResponse,
   unauthorizedResponse,
   storeAccessDeniedResponse,
+  forbiddenResponse,
 } from "@/shared/lib/api-response";
 
 const ALLOWED_FOLDERS = ["products", "categories", "stores", "banners"] as const;
 type Folder = (typeof ALLOWED_FOLDERS)[number];
+
+/** Who may add or remove images in each folder: the people who edit what they belong to. */
+const FOLDER_PERMISSIONS: Record<Folder, { upload: Permission[]; remove: Permission[] }> = {
+  products: {
+    upload: [PERMISSIONS.PRODUCTS_CREATE, PERMISSIONS.PRODUCTS_EDIT],
+    remove: [PERMISSIONS.PRODUCTS_EDIT, PERMISSIONS.PRODUCTS_DELETE],
+  },
+  categories: {
+    upload: [PERMISSIONS.PRODUCTS_CREATE, PERMISSIONS.PRODUCTS_EDIT],
+    remove: [PERMISSIONS.PRODUCTS_EDIT, PERMISSIONS.PRODUCTS_DELETE],
+  },
+  stores: { upload: [PERMISSIONS.STORES_EDIT], remove: [PERMISSIONS.STORES_EDIT] },
+  banners: { upload: [PERMISSIONS.STORES_EDIT], remove: [PERMISSIONS.STORES_EDIT] },
+};
+
+type Admin = NonNullable<Awaited<ReturnType<typeof getAdminDbUser>>>;
+const hasAny = (admin: Admin, permissions: Permission[]) =>
+  permissions.some((p) => hasPermission(admin, p));
+
+/**
+ * An image this route uploaded: `<storeId>/<folder>/<file>`, nothing else. Keeps
+ * DELETE away from avatars, review photos and anything outside these folders.
+ */
+const UPLOAD_KEY = new RegExp(
+  `^([0-9a-f-]{36})/(${ALLOWED_FOLDERS.join("|")})/([A-Za-z0-9_-]+\\.[a-z0-9]{1,8})$`,
+  "i",
+);
 
 // Longest side of the stored "full" image (feeds hover-zoom + lightbox). Capped
 // and re-encoded to WebP so a 4000px camera photo doesn't ship as a 1-2MB blob.
@@ -43,6 +71,9 @@ export async function POST(request: NextRequest) {
       return errorResponse("invalid folder", 400);
     }
     if (!canAccessStore(admin, storeId)) return storeAccessDeniedResponse();
+    if (!hasAny(admin, FOLDER_PERMISSIONS[folder].upload)) {
+      return forbiddenResponse(`Missing permission to upload ${folder} images`);
+    }
 
     if (file.size > MAX_BYTES) {
       return errorResponse(`file too large (max ${MAX_BYTES} bytes)`, 413);
@@ -152,8 +183,13 @@ export async function DELETE(request: NextRequest) {
     const key = request.nextUrl.searchParams.get("key");
     if (!key) return errorResponse("key is required", 400);
 
-    const storeId = key.split("/")[0];
+    const match = UPLOAD_KEY.exec(key);
+    if (!match) return errorResponse("invalid key", 400);
+    const [, storeId, folder] = match;
     if (!canAccessStore(admin, storeId)) return storeAccessDeniedResponse();
+    if (!hasAny(admin, FOLDER_PERMISSIONS[folder.toLowerCase() as Folder].remove)) {
+      return forbiddenResponse(`Missing permission to delete ${folder} images`);
+    }
 
     await deleteBlobWithVariants(key);
 

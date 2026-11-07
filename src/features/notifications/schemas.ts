@@ -1,11 +1,15 @@
 import { z } from "zod";
+import { isHexColor } from "./color";
+
+const hexColor = (fallback: string) =>
+  z.string().refine(isHexColor, "Use a hex colour like #1e40af").default(fallback);
 
 export const createAnnouncementSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   message: z.string().min(1, "Message is required").max(2000),
   displayType: z.enum(["banner", "modal", "bar", "float"]).default("float"),
-  backgroundColor: z.string().default("#1e40af"),
-  textColor: z.string().default("#ffffff"),
+  backgroundColor: hexColor("#1e40af"),
+  textColor: hexColor("#ffffff"),
   linkUrl: z.string().url().or(z.string().startsWith("/")).or(z.literal("")).default(""),
   linkText: z.string().max(50).default(""),
   startDate: z.coerce.date(),

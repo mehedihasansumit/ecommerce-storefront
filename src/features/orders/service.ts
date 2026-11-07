@@ -420,6 +420,8 @@ export const OrderService = {
   ): Promise<IOrder> {
     const order = await OrderRepository.findById(orderId);
     if (!order || order.storeId !== storeId) throw new Error("Order not found");
+    // Only the customer who placed it; someone else's order looks the same as none.
+    if (!userId || order.userId !== userId) throw new Error("Order not found");
 
     if (order.status !== "cancelled") {
       throw new Error("Refunds can only be requested for cancelled orders");

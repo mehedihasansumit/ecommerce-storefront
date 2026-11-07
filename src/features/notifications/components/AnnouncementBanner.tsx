@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { X, ArrowRight, Tag, Sparkles, Gift, Bell } from "lucide-react";
 import type { IAnnouncement } from "../types";
+import { safeHexColor } from "../color";
 
 const DISMISSED_KEY = "dismissed-announcements";
 
@@ -35,9 +36,11 @@ function applyInline(text: string, bgColor?: string): string {
     .replace(/\*(.+?)\*/g, "<em>$1</em>");
 
   if (bgColor) {
+    // Written into an HTML attribute: only a plain hex colour may get through.
+    const color = safeHexColor(bgColor, "#1e40af");
     out = out.replace(
       /==(.+?)==/g,
-      `<span style="background-color:${bgColor};color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;font-size:0.9em;">$1</span>`
+      `<span style="background-color:${color};color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;font-size:0.9em;">$1</span>`
     );
   } else {
     out = out.replace(

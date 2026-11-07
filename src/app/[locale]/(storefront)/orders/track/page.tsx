@@ -1,15 +1,18 @@
 "use client";
 
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Search, Package, ChevronRight } from "lucide-react";
 import { Alert, Button, Card, Field, Input, PageHeader, formatPrice } from "@/shared/components/ui";
 import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 
+// Mirrors TrackResultOrder in @/features/orders/tracking.
 type TrackResult = {
-  orderId: string;
+  /** Set only when order number + phone matched; then the full order can open. */
+  orderId: string | null;
   orderNumber: string;
+  masked: boolean;
   status: string;
   paymentStatus: string;
   total: number;
@@ -28,11 +31,18 @@ export default function TrackOrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<TrackResult[]>([]);
+  // What the shopper searched with; the verify step asks for the other one.
+  const [searched, setSearched] = useState<{ orderNumber: string; phone: string }>({
+    orderNumber: "",
+    phone: "",
+  });
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setResults([]);
+    setOpenIndex(null);
 
     const trimmedNumber = orderNumber.trim();
     const trimmedPhone = phone.trim();
@@ -48,7 +58,7 @@ export default function TrackOrderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...(trimmedNumber ? { orderNumber: trimmedNumber } : {}),
-          ...(trimmedPhone ? { phone: `+88${trimmedPhone}` } : {}),
+          ...(trimmedPhone ? { phone: withCountryCode(trimmedPhone) } : {}),
         }),
       });
       const data = await res.json();
@@ -61,11 +71,14 @@ export default function TrackOrderPage() {
         setError(t("notFound"));
         return;
       }
-      if (orders.length === 1) {
+      // Order number + phone matched: open the full order straight away.
+      if (orders.length === 1 && orders[0].orderId) {
         router.push(`/orders/${orders[0].orderId}`);
         return;
       }
+      setSearched({ orderNumber: trimmedNumber, phone: trimmedPhone });
       setResults(orders);
+      if (orders.length === 1) setOpenIndex(0);
     } catch {
       setError(t("networkError"));
     } finally {
@@ -129,60 +142,167 @@ export default function TrackOrderPage() {
         </form>
       </Card>
 
-      {results.length > 1 && (
+      {results.length > 0 && (
         <div className="mt-6 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary px-1">
             {t("resultsCount", { count: results.length })}
           </p>
-          {results.map((o) => (
-            <Link
-              key={o.orderId}
-              href={`/orders/${o.orderId}`}
-              className="flex items-center gap-3 p-4 rounded-xl bg-bg border border-border-subtle hover:border-[color-mix(in_srgb,var(--color-primary)_40%,transparent)] hover:shadow-sm transition-all"
+          {results.map((o, i) => (
+            <div
+              key={`${o.orderNumber}-${o.createdAt}`}
+              className="rounded-xl bg-bg border border-border-subtle overflow-hidden"
             >
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{
-                  background:
-                    "color-mix(in srgb, var(--color-primary) 14%, transparent)",
-                }}
+              <button
+                type="button"
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                aria-expanded={openIndex === i}
+                className="focus-ring w-full flex items-center gap-3 p-4 text-start hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)] transition-colors"
               >
-                <Package size={16} style={{ color: "var(--color-primary)" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p
-                  className="text-sm font-bold truncate"
-                  style={{ color: "var(--color-primary)" }}
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-primary) 14%, transparent)",
+                  }}
                 >
-                  {o.orderNumber}
-                </p>
-                <p className="text-[11px] text-text-tertiary">
-                  {new Date(o.createdAt).toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                  {" · "}
-                  {formatPrice(o.total, currency, locale)}
-                </p>
-              </div>
-              <span
-                className="px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0"
-                style={{
-                  background:
-                    "color-mix(in srgb, var(--color-primary) 14%, transparent)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                {tDetail(`status${o.status.charAt(0).toUpperCase() + o.status.slice(1)}` as never)}
-              </span>
-              <ChevronRight size={16} className="text-text-tertiary shrink-0" />
-            </Link>
+                  <Package size={16} style={{ color: "var(--color-primary)" }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm font-bold truncate"
+                    style={{ color: "var(--color-primary)" }}
+                  >
+                    {o.orderNumber}
+                  </p>
+                  <p className="text-[11px] text-text-tertiary">
+                    {new Date(o.createdAt).toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {" · "}
+                    {formatPrice(o.total, currency, locale)}
+                  </p>
+                </div>
+                <span
+                  className="px-2.5 py-1 rounded-full text-[10px] font-semibold shrink-0"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-primary) 14%, transparent)",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  {tDetail(`status${o.status.charAt(0).toUpperCase() + o.status.slice(1)}` as never)}
+                </span>
+                <ChevronRight
+                  size={16}
+                  className={`text-text-tertiary shrink-0 transition-transform ${openIndex === i ? "rotate-90" : ""}`}
+                />
+              </button>
+              {openIndex === i && (
+                <VerifyOrder
+                  result={o}
+                  searched={searched}
+                  onVerified={(orderId) => router.push(`/orders/${orderId}`)}
+                />
+              )}
+            </div>
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+/** The track API and checkout store phones as +88 followed by the 11-digit number. */
+function withCountryCode(localDigits: string): string {
+  return `+88${localDigits}`;
+}
+
+/**
+ * Asks for the piece the shopper didn't search with (the full order number after
+ * a phone search, the phone after an order-number search). When both match, the
+ * server grants this browser the order pass and returns the id to open.
+ */
+function VerifyOrder({
+  result,
+  searched,
+  onVerified,
+}: {
+  result: TrackResult;
+  searched: { orderNumber: string; phone: string };
+  onVerified: (orderId: string) => void;
+}) {
+  const t = useTranslations("orderTrack");
+  const tc = useTranslations("common");
+  const askNumber = result.masked; // searched by phone → need the order number
+  const [value, setValue] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  async function verify(e: React.FormEvent) {
+    e.preventDefault();
+    const entered = value.trim();
+    if (!entered) return;
+    setError("");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/orders/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          askNumber
+            ? { orderNumber: entered, phone: withCountryCode(searched.phone) }
+            : { orderNumber: result.orderNumber, phone: withCountryCode(entered) },
+        ),
+      });
+      const data = await res.json().catch(() => ({}));
+      const orderId: string | null | undefined = data.orders?.[0]?.orderId;
+      if (!res.ok || !orderId) {
+        setError(res.status === 404 || res.ok ? t("verifyMismatch") : t("networkError"));
+        return;
+      }
+      onVerified(orderId);
+    } catch {
+      setError(t("networkError"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={verify} className="border-t border-border-subtle p-4 space-y-3">
+      {error && <Alert tone="error">{error}</Alert>}
+      {askNumber ? (
+        <Field label={t("verifyNumberLabel")} hint={t("verifyNumberHint")}>
+          <Input
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value.toUpperCase())}
+            placeholder="ORD-XXXXXXXX"
+            autoComplete="off"
+            autoFocus
+          />
+        </Field>
+      ) : (
+        <Field label={t("verifyPhoneLabel")} hint={t("phoneHint")}>
+          <Input
+            type="tel"
+            inputMode="numeric"
+            prefix="+88"
+            value={value}
+            onChange={(e) => setValue(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            placeholder={tc("phonePlaceholder")}
+            autoComplete="tel-national"
+            autoFocus
+          />
+        </Field>
+      )}
+      <Button type="submit" variant="brand" fullWidth loading={submitting}>
+        {t("verifySubmit")}
+      </Button>
+    </form>
   );
 }

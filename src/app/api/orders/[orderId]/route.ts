@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreId } from "@/shared/lib/tenant";
-import { getAdminDbUser } from "@/shared/lib/auth";
+import { getAdminDbUser, getCustomerToken } from "@/shared/lib/auth";
+import { hasOrderAccess } from "@/shared/lib/order-access";
+import type { JwtCustomerPayload } from "@/features/auth/types";
+import type { IOrder } from "@/features/orders/types";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { permissionDeniedResponse, storeAccessDeniedResponse } from "@/shared/lib/api-response";
 import { OrderService } from "@/features/orders/service";
@@ -23,6 +26,21 @@ const updatePaymentSchema = z.object({
   discount: z.number().min(0).optional(),
 });
 
+/**
+ * The logged-in customer who placed it, or a browser holding the order pass
+ * (given at checkout, or after order number + phone matched on the track page).
+ */
+async function canViewOrder(storeId: string, order: IOrder): Promise<boolean> {
+  const payload = await getCustomerToken();
+  if (payload?.type === "customer") {
+    const customer = payload as JwtCustomerPayload;
+    if (customer.storeId === storeId && order.userId && order.userId === customer.userId) {
+      return true;
+    }
+  }
+  return hasOrderAccess(storeId, order._id);
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }
@@ -34,10 +52,15 @@ export async function GET(
 
     const { orderId } = await params;
     const order = await OrderService.getById(storeId, orderId);
-    if (!order)
+    // Same 404 whether the order doesn't exist or isn't this shopper's, so an id
+    // alone reveals nothing.
+    if (!order || !(await canViewOrder(storeId, order)))
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-    return NextResponse.json({ order });
+    // The shopper's own IP is kept for fraud checks; it's not theirs to download.
+    const { clientIp: _ip, ...publicOrder } = order;
+    void _ip;
+    return NextResponse.json({ order: publicOrder });
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },

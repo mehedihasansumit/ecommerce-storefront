@@ -1,9 +1,15 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import type { JwtPayload, JwtAdminPayload, IAdminUserWithRole } from "@/features/auth/types";
+import type { JwtPayload, JwtAdminPayload, JwtCustomerPayload, IAdminUserWithRole } from "@/features/auth/types";
+import { getStoreId } from "./tenant";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d";
+
+/** Signing key for other signed cookies (e.g. the guest order pass in order-access.ts). */
+export function jwtKey(): Uint8Array {
+  return JWT_SECRET;
+}
 
 export async function signToken(payload: JwtPayload): Promise<string> {
   return new SignJWT(payload as unknown as Record<string, unknown>)
@@ -22,11 +28,21 @@ export async function verifyToken(token: string): Promise<JwtPayload | null> {
   }
 }
 
+/**
+ * The logged-in customer, or null. A customer account belongs to one store, so
+ * its token only counts on that store's domain: one copied to another store's
+ * domain is ignored (it used to read store A's points while redeeming on store B).
+ */
 export async function getCustomerToken(): Promise<JwtPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("customer-token")?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const payload = await verifyToken(token);
+  if (payload?.type === "customer") {
+    const storeId = await getStoreId();
+    if (!storeId || (payload as JwtCustomerPayload).storeId !== storeId) return null;
+  }
+  return payload;
 }
 
 export async function getAdminToken(): Promise<JwtPayload | null> {

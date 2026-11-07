@@ -267,6 +267,10 @@ export const OrderService = {
     return order;
   },
 
+  async getByOrderNumber(storeId: string, orderNumber: string): Promise<IOrder | null> {
+    return OrderRepository.findByOrderNumber(storeId, orderNumber.toUpperCase());
+  },
+
   async getByOrderNumberAndPhone(
     storeId: string,
     orderNumber: string,

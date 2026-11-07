@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/shared/lib/api-response";
 import { StoreService } from "@/features/stores/service";
+import { toPublicStore } from "@/features/stores/public-store";
 
 export async function GET(request: NextRequest) {
   const domain = request.nextUrl.searchParams.get("domain");
@@ -16,7 +17,8 @@ export async function GET(request: NextRequest) {
       return errorResponse("Store not found", 404);
     }
 
-    return successResponse(store);
+    // Public endpoint: never return payment secrets (Stripe key, SSLCommerz password).
+    return successResponse(toPublicStore(store));
   } catch {
     return errorResponse("Failed to resolve store", 500);
   }

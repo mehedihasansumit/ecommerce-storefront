@@ -77,8 +77,10 @@ export const PointService = {
       );
     }
 
-    const balance = await PointService.getBalance(storeId, userId);
-    if (balance.points < pointsToRedeem) {
+    // Spend first, in one guarded update (this store's balance only, never below
+    // zero), so parallel redeems can't mint more coupons than the points cover.
+    const spent = await AuthRepository.trySpendPoints(storeId, userId, pointsToRedeem);
+    if (!spent) {
       throw new Error("Insufficient points balance");
     }
 
@@ -92,24 +94,31 @@ export const PointService = {
     const now = new Date();
     const validUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 days
 
-    const coupon = await CouponRepository.create({
-      storeId,
-      code,
-      description: `Points redemption: ${pointsToRedeem} pts = ৳${discountValue}`,
-      type: "fixed",
-      value: discountValue,
-      minOrderAmount: 0,
-      maxDiscountAmount: null,
-      validFrom: now,
-      validUntil,
-      usageLimit: 1,
-      usedCount: 0,
-      perCustomerLimit: 1,
-      requiresLogin: true,
-      isActive: true,
-      applicableProducts: [],
-      applicableCategories: [],
-    });
+    let coupon: Awaited<ReturnType<typeof CouponRepository.create>>;
+    try {
+      coupon = await CouponRepository.create({
+        storeId,
+        code,
+        description: `Points redemption: ${pointsToRedeem} pts = ৳${discountValue}`,
+        type: "fixed",
+        value: discountValue,
+        minOrderAmount: 0,
+        maxDiscountAmount: null,
+        validFrom: now,
+        validUntil,
+        usageLimit: 1,
+        usedCount: 0,
+        perCustomerLimit: 1,
+        requiresLogin: true,
+        isActive: true,
+        applicableProducts: [],
+        applicableCategories: [],
+      });
+    } catch (err) {
+      // No coupon was made: give the points back.
+      await AuthRepository.incrementPoints(userId, storeId, pointsToRedeem);
+      throw err;
+    }
 
     await PointRepository.create({
       storeId,
@@ -119,8 +128,6 @@ export const PointService = {
       couponId: coupon._id,
     } as Partial<IPointTransaction>);
 
-    await AuthRepository.incrementPoints(userId, storeId, -pointsToRedeem);
-
     return { coupon, pointsRedeemed: pointsToRedeem, discountValue };
   },
 
@@ -129,7 +136,7 @@ export const PointService = {
     userId: string
   ): Promise<{ points: number; equivalentBDT: number; pointsNeeded: number }> {
     const config = await resolveConfig(storeId);
-    const user = await AuthRepository.findUserById(userId);
+    const user = await AuthRepository.findUserInStore(storeId, userId);
     const points = user?.points ?? 0;
     const equivalentBDT = Math.floor(points / config.pointsPerBdt);
     const pointsNeeded =

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
+import { grantOrderAccess } from "@/shared/lib/order-access";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
@@ -47,6 +48,8 @@ export async function POST(request: NextRequest) {
       "";
 
     const order = await OrderService.create(storeId, validated, userId, clientIp);
+    // Lets this browser open the confirmation page without logging in.
+    await grantOrderAccess(storeId, order._id);
 
     return NextResponse.json(
       { orderNumber: order.orderNumber, orderId: order._id },

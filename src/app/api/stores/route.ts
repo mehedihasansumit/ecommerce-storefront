@@ -3,15 +3,20 @@ import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse
 import { StoreService } from "@/features/stores/service";
 import { createStoreSchema } from "@/features/stores/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
-import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
+import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import { toPublicStore } from "@/features/stores/public-store";
 
 export async function GET() {
   try {
     const admin = await getAdminDbUser();
     if (!admin) return unauthorizedResponse();
 
+    // Only the stores this admin may manage, and never their payment secrets
+    // (Stripe secret key, SSLCommerz password); nothing that lists stores needs them.
     const stores = await StoreService.getAll();
-    return successResponse(stores);
+    return successResponse(
+      stores.filter((store) => canAccessStore(admin, store._id)).map(toPublicStore),
+    );
   } catch {
     return errorResponse("Failed to fetch stores", 500);
   }

@@ -544,13 +544,24 @@ export default function OrderDetailPage({
   if (error || !order) {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
-        <p className="text-text-secondary mb-4">{error || t("notFound")}</p>
-        <Link
-          href="/products"
-          className="text-sm underline text-text-secondary hover:text-[var(--color-text)]"
-        >
-          {t("continueShopping")}
-        </Link>
+        <p className="text-text-secondary mb-2">{error || t("notFound")}</p>
+        {/* Orders open only for their owner; a guest re-opens one via the track page. */}
+        <p className="text-sm text-text-tertiary mb-6">{t("notFoundHint")}</p>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href="/orders/track"
+            className="text-sm font-semibold underline"
+            style={{ color: "var(--color-primary)" }}
+          >
+            {t("trackOrder")}
+          </Link>
+          <Link
+            href="/products"
+            className="text-sm underline text-text-secondary hover:text-[var(--color-text)]"
+          >
+            {t("continueShopping")}
+          </Link>
+        </div>
       </div>
     );
   }

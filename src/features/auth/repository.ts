@@ -128,6 +128,29 @@ export const AuthRepository = {
     return hydrateUser(row);
   },
 
+  async findUserInStore(storeId: string, id: string): Promise<IUser | null> {
+    const [row] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id), eq(users.storeId, storeId)))
+      .limit(1);
+    return hydrateUser(row);
+  },
+
+  /**
+   * Takes `amount` points off only if the customer (in this store) has at least
+   * that many, in one statement, so two redeems at once can't both spend them.
+   * Returns false when the balance is too low.
+   */
+  async trySpendPoints(storeId: string, userId: string, amount: number): Promise<boolean> {
+    const rows = await db
+      .update(users)
+      .set({ points: sql`${users.points} - ${amount}`, updatedAt: new Date() })
+      .where(and(eq(users.id, userId), eq(users.storeId, storeId), gte(users.points, amount)))
+      .returning({ id: users.id });
+    return rows.length > 0;
+  },
+
   async findUserById(id: string): Promise<IUser | null> {
     const [row] = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return hydrateUser(row);

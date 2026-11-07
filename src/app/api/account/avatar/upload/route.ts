@@ -3,6 +3,8 @@ import sharp from "sharp";
 import { uploadFile, generateFileKey } from "@/shared/lib/storage";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
+import { avatarFolder } from "@/features/auth/service";
+import type { JwtCustomerPayload } from "@/features/auth/types";
 
 const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 5 * 1024 * 1024;
 const MAX_DIMENSION = 512;
@@ -15,6 +17,11 @@ export async function POST(request: NextRequest) {
 
     const payload = await getCustomerToken();
     if (!payload || payload.type !== "customer") {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+    const { userId, storeId: tokenStoreId } = payload as JwtCustomerPayload;
+    // A customer account belongs to one store; its token is no good on another.
+    if (tokenStoreId !== storeId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
@@ -45,7 +52,10 @@ export async function POST(request: NextRequest) {
       .webp({ quality: WEBP_QUALITY })
       .toBuffer();
 
-    const key = generateFileKey(storeId, "avatars", "avatar.webp");
+    // Each customer's avatars live in their own folder; the profile update only
+    // accepts (and only deletes) files from it.
+    const key = generateFileKey(storeId, `avatars/${userId}`, "avatar.webp");
+    if (!key.startsWith(avatarFolder(storeId, userId))) throw new Error("avatar key mismatch");
     const url = await uploadFile(key, out, "image/webp");
 
     return NextResponse.json({ url, key }, { status: 201 });

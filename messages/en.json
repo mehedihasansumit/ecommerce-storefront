@@ -388,11 +388,12 @@
     "trackCredsDesc": "Keep this order number and phone. Tap \"Track Order\" below to check your order anytime.",
     "phoneLabelShort": "Phone",
     "copy": "Copy",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "notFoundHint": "If this is your order, open it from the Track Order page with your order number and phone."
   },
   "orderTrack": {
     "title": "Track Your Order",
-    "description": "Enter your order number or the phone number you used at checkout.",
+    "description": "Enter your order number or the phone number you used at checkout. Use both to see the full order.",
     "orderNumberLabel": "Order Number",
     "orderNumberHint": "e.g. ORD-XXXXXXXX",
     "phoneLabel": "Phone Number",
@@ -403,7 +404,12 @@
     "notFound": "We couldn't find any order matching that. Please double-check and try again.",
     "invalidInput": "Please enter an order number or phone number.",
     "networkError": "Something went wrong. Please try again.",
-    "resultsCount": "{count, plural, one {# order found} other {# orders found}}"
+    "resultsCount": "{count, plural, one {# order found} other {# orders found}}",
+    "verifyNumberLabel": "Full order number",
+    "verifyNumberHint": "It's in the SMS or email you got for this order.",
+    "verifyPhoneLabel": "Phone number used for this order",
+    "verifySubmit": "View order",
+    "verifyMismatch": "That doesn't match this order. Please check and try again."
   },
   "common": {
     "loading": "Loading...",

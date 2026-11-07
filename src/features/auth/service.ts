@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { AuthRepository } from "./repository";
 import { signToken } from "@/shared/lib/auth";
-import { keyFromUrl, deleteFile } from "@/shared/lib/storage";
+import { keyFromUrl, deleteFile, publicUrlFor } from "@/shared/lib/storage";
 import { RoleRepository } from "@/features/roles/repository";
 import type { Permission } from "@/shared/lib/permissions";
 import type { IUser, IAdminUser, IAdminUserWithRole, IAddress, IAvatarPosition, JwtCustomerPayload, JwtAdminPayload } from "./types";
@@ -280,16 +280,24 @@ export const AuthService = {
     const current = await AuthRepository.findUserById(userId);
     if (!current) throw new Error("User not found");
 
+    // The avatar must be a file this customer uploaded (their own folder), so
+    // nobody can point it at a product image and get that file deleted below.
+    const ownFolder = avatarFolder(current.storeId, userId);
+    const newKey = keyFromUrl(data.avatarUrl);
+    if (!isInFolder(newKey, ownFolder)) throw new Error("Invalid avatar");
+    const avatarUrl = publicUrlFor(newKey);
+
     const updated = await AuthRepository.updateUser(userId, {
-      avatarUrl: data.avatarUrl,
+      avatarUrl,
       avatarPosition: data.avatarPosition,
     });
     if (!updated) throw new Error("Failed to update profile");
 
-    // Best-effort cleanup of the replaced avatar file.
-    if (current.avatarUrl && current.avatarUrl !== data.avatarUrl) {
+    // Best-effort cleanup of the replaced avatar file, only from the same folder.
+    // Avatars uploaded before per-customer folders are left to the orphan scan.
+    if (current.avatarUrl && current.avatarUrl !== avatarUrl) {
       const oldKey = keyFromUrl(current.avatarUrl);
-      if (oldKey) {
+      if (isInFolder(oldKey, ownFolder)) {
         try {
           await deleteFile(oldKey);
         } catch {
@@ -303,3 +311,15 @@ export const AuthService = {
     return safe;
   },
 };
+
+/** Storage folder holding one customer's avatars: `<storeId>/avatars/<userId>/`. */
+export function avatarFolder(storeId: string, userId: string): string {
+  return `${storeId}/avatars/${userId}/`;
+}
+
+/** True when `key` is a file directly inside `folder` (no `..`, no sub-folders). */
+export function isInFolder(key: string | null, folder: string): key is string {
+  if (!key || !key.startsWith(folder)) return false;
+  const name = key.slice(folder.length);
+  return name.length > 0 && !name.includes("/") && !name.includes("..");
+}

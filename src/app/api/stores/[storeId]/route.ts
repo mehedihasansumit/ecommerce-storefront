@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
 import { StoreService } from "@/features/stores/service";
+import { toPublicStore } from "@/features/stores/public-store";
 import { updateStoreSchema } from "@/features/stores/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
@@ -14,7 +15,8 @@ export async function GET(
     const { storeId } = await params;
     const store = await StoreService.getById(storeId);
     if (!store) return notFoundResponse("Store not found");
-    return successResponse(store);
+    // Public endpoint: never return payment secrets (Stripe key, SSLCommerz password).
+    return successResponse(toPublicStore(store));
   } catch {
     return errorResponse("Failed to fetch store", 500);
   }

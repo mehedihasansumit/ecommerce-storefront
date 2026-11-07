@@ -17,7 +17,8 @@ function buildDb(): DrizzleDb {
   const client =
     global.__pgClient ??
     postgres(url, {
-      max: 10,
+      // Per app instance. Two instances share Postgres' max_connections (30).
+      max: Number(process.env.DB_POOL_MAX) || 10,
       idle_timeout: 30,
       connect_timeout: 10,
       prepare: false,

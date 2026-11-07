@@ -6,19 +6,74 @@
 # old Garage container from before the R2 move is still running).
 # Only Nginx (manual on host) should expose 80/443.
 
+#
+# Two app instances (app, app2) use both CPU cores; Nginx balances between
+# them (docs/deploy/nginx-two-instances.md). They share one data cache in Redis
+# (ADR 0005), so an admin save on either clears it for both.
+
+x-app: &app
+  image: ecommerce-website:latest
+  restart: unless-stopped
+  network_mode: host
+  env_file:
+    - .env.production
+  depends_on:
+    - postgres
+    - redis
+
+# Shared by both instances; `environment` wins over .env.production.
+x-app-env: &app-env
+  # Don't set HOSTNAME=127.0.0.1 to hide the app ports: Next's internal rewrite
+  # then targets a different host and every storefront page 307-loops to itself.
+  # Block 5001/5002 with the firewall instead.
+  REDIS_URL: redis://127.0.0.1:6379
+  # 2 instances x 8 = 16 of Postgres' 30 connections.
+  DB_POOL_MAX: "8"
+
 services:
   app:
+    <<: *app
     build:
       context: .
       dockerfile: Dockerfile
-    image: ecommerce-website:latest
     container_name: ecommerce-app
+    environment:
+      <<: *app-env
+      PORT: "5001"
+
+  app2:
+    <<: *app
+    container_name: ecommerce-app2
+    environment:
+      <<: *app-env
+      PORT: "5002"
+
+  # Cache only: no disk persistence. Entries have a TTL and `volatile-lru` evicts
+  # only those, never the tag-expiry hash (which has no TTL).
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
     restart: unless-stopped
     network_mode: host
-    env_file:
-      - .env.production
-    depends_on:
-      - postgres
+    command:
+      - "redis-server"
+      - "--bind"
+      - "127.0.0.1"
+      - "--port"
+      - "6379"
+      - "--maxmemory"
+      - "128mb"
+      - "--maxmemory-policy"
+      - "volatile-lru"
+      - "--save"
+      - ""
+      - "--appendonly"
+      - "no"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   postgres:
     image: postgres:16-alpine

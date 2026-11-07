@@ -24,6 +24,11 @@ const s3Pattern =
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Data cache shared by every app instance via Redis (ADR 0005). Without
+  // REDIS_URL it falls back to in-process memory. Next's own memory layer is off
+  // so every read goes through the handler and sees other instances' expiries.
+  cacheHandler: require.resolve("./cache-handler.mjs"),
+  cacheMaxMemorySize: 0,
   async headers() {
     return [
       {

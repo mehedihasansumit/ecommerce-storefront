@@ -41,10 +41,10 @@ serve media from a Cloudflare R2 bucket on our own domain.
 
 ## Consequences
 
-- **Single instance only.** The built-in data cache lives on each Next.js
-  process's disk. With more than one app instance, an admin save only expires
-  the instance that handled it; the others serve stale data for up to 300
-  seconds. Scaling out requires a shared cache handler (e.g. Redis) first.
+- ~~**Single instance only.**~~ Superseded by ADR 0005: the cache now lives in
+  Redis through a custom `cacheHandler`, shared by two app instances. (The
+  built-in handler kept it per process, so an admin save only expired the
+  instance that handled it.)
 - Media is tied to Cloudflare. Leaving means copying the bucket and rewriting
   stored links again (`scripts/copy-media-to-r2.ts` and
   `scripts/rewrite-media-urls.ts` work for any S3-compatible target).

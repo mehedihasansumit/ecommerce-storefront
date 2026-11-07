@@ -4,6 +4,7 @@ import { getStoreId } from "@/shared/lib/tenant";
 import { OrderService } from "@/features/orders/service";
 import { toTrackResult } from "@/features/orders/tracking";
 import { grantOrderAccess } from "@/shared/lib/order-access";
+import { RATE_RULES, checkRateLimits, getClientIp, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 const trackSchema = z
   .object({
@@ -29,6 +30,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { orderNumber, phone } = trackSchema.parse(body);
+
+    // Stops trying phone numbers one by one, and guessing the hidden order number.
+    const limited = await checkRateLimits([
+      [RATE_RULES.trackIp, getClientIp(request)],
+      [RATE_RULES.trackPhone, phone ? `${storeId}:${phone}` : null],
+    ]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
 
     if (orderNumber && phone) {
       const order = await OrderService.getByOrderNumberAndPhone(storeId, orderNumber, phone);

@@ -29,6 +29,48 @@ Apply: `nginx -t && systemctl reload nginx`.
 requests go to the other. (Nginx never retries POST, so a checkout in flight
 during the restart can still fail once.)
 
+## Real visitor IPs behind Cloudflare
+
+The app rate-limits by IP (`src/shared/lib/rate-limit.ts`) and reads it from the
+`X-Real-IP` header Nginx sets. Behind Cloudflare, Nginx's `$remote_addr` is a
+Cloudflare edge, so every visitor would share one IP and one limit. Restore the
+visitor IP inside the site's `server` block, trusting `CF-Connecting-IP` only
+from Cloudflare's ranges (current list: https://www.cloudflare.com/ips):
+
+```nginx
+server {
+    server_name www.lourhaus.com lourhaus.com;
+    set_real_ip_from 173.245.48.0/20;
+    set_real_ip_from 103.21.244.0/22;
+    set_real_ip_from 103.22.200.0/22;
+    set_real_ip_from 103.31.4.0/22;
+    set_real_ip_from 141.101.64.0/18;
+    set_real_ip_from 108.162.192.0/18;
+    set_real_ip_from 190.93.240.0/20;
+    set_real_ip_from 188.114.96.0/20;
+    set_real_ip_from 197.234.240.0/22;
+    set_real_ip_from 198.41.128.0/17;
+    set_real_ip_from 162.158.0.0/15;
+    set_real_ip_from 104.16.0.0/13;
+    set_real_ip_from 104.24.0.0/14;
+    set_real_ip_from 172.64.0.0/13;
+    set_real_ip_from 131.0.72.0/22;
+    set_real_ip_from 2400:cb00::/32;
+    set_real_ip_from 2606:4700::/32;
+    set_real_ip_from 2803:f800::/32;
+    set_real_ip_from 2405:b500::/32;
+    set_real_ip_from 2405:8100::/32;
+    set_real_ip_from 2a06:98c0::/29;
+    set_real_ip_from 2c0f:f248::/32;
+    real_ip_header CF-Connecting-IP;
+    # ...
+}
+```
+
+Check: after `nginx -t && systemctl reload nginx`, `/var/log/nginx/access.log`
+shows visitors' own IPs instead of 104.x / 162.158.x / 172.64-71.x addresses.
+**Apply this before deploying the rate limiting**, or all visitors share a limit.
+
 ## Firewall
 
 With host networking the app ports are reachable from the internet, skipping

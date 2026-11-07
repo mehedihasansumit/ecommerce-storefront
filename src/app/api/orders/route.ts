@@ -7,6 +7,7 @@ import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
 import { ZodError } from "zod";
 import { serviceErrorResponse } from "@/shared/lib/api-response";
+import { RATE_RULES, checkRateLimits, getClientIp, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 export async function GET(_request: NextRequest) {
   try {
@@ -36,6 +37,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createOrderSchema.parse(body);
 
+    // Stops scripted fake orders (cash on delivery costs a courier trip each).
+    const limited = await checkRateLimits([
+      [RATE_RULES.checkoutIp, getClientIp(request)],
+      [RATE_RULES.checkoutPhone, `${storeId}:${validated.shippingAddress.phone}`],
+    ]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
+
     // Get userId if logged in (for coupon tracking)
     let userId: string | undefined;
     const payload = await getCustomerToken();
@@ -43,10 +51,7 @@ export async function POST(request: NextRequest) {
       userId = (payload as JwtCustomerPayload).userId;
     }
 
-    const clientIp =
-      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-      request.headers.get("x-real-ip") ||
-      "";
+    const clientIp = getClientIp(request);
 
     const order = await OrderService.create(storeId, validated, userId, clientIp);
     // Lets this browser open the confirmation page without logging in.

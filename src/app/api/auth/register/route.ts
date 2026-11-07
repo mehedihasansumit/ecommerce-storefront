@@ -4,6 +4,7 @@ import { registerSchema } from "@/features/auth/schemas";
 import { AuthService } from "@/features/auth/service";
 import { getStoreId } from "@/shared/lib/tenant";
 import { serviceErrorResponse } from "@/shared/lib/api-response";
+import { RATE_RULES, checkRateLimits, getClientIp, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +14,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = registerSchema.parse(body);
+
+    // Stops mass sign-ups and probing which emails/phones already have accounts.
+    const limited = await checkRateLimits([[RATE_RULES.registerIp, getClientIp(request)]]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
 
     const { user, token } = await AuthService.registerCustomer(storeId, validated);
 

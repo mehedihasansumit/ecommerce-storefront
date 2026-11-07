@@ -6,6 +6,7 @@ import { getCustomerToken } from "@/shared/lib/auth";
 import { avatarFolder } from "@/features/auth/service";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { publicErrorMessage } from "@/shared/lib/api-response";
+import { RATE_RULES, checkRateLimits, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 5 * 1024 * 1024;
 const MAX_DIMENSION = 512;
@@ -25,6 +26,9 @@ export async function POST(request: NextRequest) {
     if (tokenStoreId !== storeId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
+    // Uploads cost storage; one customer can't fill the bucket.
+    const limited = await checkRateLimits([[RATE_RULES.uploadUser, userId]]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
 
     const form = await request.formData();
     const file = form.get("file");

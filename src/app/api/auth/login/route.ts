@@ -4,6 +4,7 @@ import { loginSchema } from "@/features/auth/schemas";
 import { AuthService } from "@/features/auth/service";
 import { getStoreId } from "@/shared/lib/tenant";
 import { serviceErrorResponse } from "@/shared/lib/api-response";
+import { RATE_RULES, checkRateLimits, getClientIp, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +14,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { email, password } = loginSchema.parse(body);
+
+    // Before the password check: stops guessing a customer's password.
+    const limited = await checkRateLimits([
+      [RATE_RULES.loginIp, getClientIp(request)],
+      [RATE_RULES.loginEmail, `${storeId}:${email}`],
+    ]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
 
     const { user, token } = await AuthService.loginCustomer(storeId, email, password);
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/features/auth/service";
 import { z } from "zod";
 import { fa } from "zod/locales";
+import { RATE_RULES, checkRateLimits, getClientIp, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -12,6 +13,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = loginSchema.parse(body);
+
+    // Before the password check: stops guessing an admin's password.
+    const limited = await checkRateLimits([
+      [RATE_RULES.adminLoginIp, getClientIp(request)],
+      [RATE_RULES.adminLoginEmail, email],
+    ]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
 
     const { admin, token } = await AuthService.loginAdmin(email, password);
 

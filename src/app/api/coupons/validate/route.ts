@@ -8,6 +8,7 @@ import { getCustomerToken } from "@/shared/lib/auth";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { ZodError } from "zod";
 import { getBulkUnitPrice, normalizeTiers } from "@/shared/lib/pricing";
+import { RATE_RULES, checkRateLimits, getClientIp, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = applyCouponSchema.parse(body);
+
+    // Stops guessing coupon codes.
+    const limited = await checkRateLimits([[RATE_RULES.couponIp, getClientIp(request)]]);
+    if (!limited.ok) return tooManyRequestsResponse(limited.retryAfterSeconds);
 
     // Get userId if logged in (optional for validation)
     let userId: string | undefined;

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, ne, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, ne, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   products,
@@ -443,6 +443,35 @@ export const ProductRepository = {
       .update(products)
       .set({ stock: sql`${products.stock} - ${quantity}`, updatedAt: new Date() })
       .where(eq(products.id, id));
+  },
+
+  /**
+   * Takes `quantity` out of stock only if that much is left, in one statement,
+   * so two orders at once can't both take the last item. False when too few.
+   */
+  async tryTakeStock(id: string, quantity: number): Promise<boolean> {
+    const rows = await db
+      .update(products)
+      .set({ stock: sql`${products.stock} - ${quantity}`, updatedAt: new Date() })
+      .where(and(eq(products.id, id), gte(products.stock, quantity)))
+      .returning({ id: products.id });
+    return rows.length > 0;
+  },
+
+  /** tryTakeStock for one variant of a product. */
+  async tryTakeVariantStock(productId: string, variantId: string, quantity: number): Promise<boolean> {
+    const rows = await db
+      .update(productVariants)
+      .set({ stock: sql`${productVariants.stock} - ${quantity}`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(productVariants.id, variantId),
+          eq(productVariants.productId, productId),
+          gte(productVariants.stock, quantity),
+        ),
+      )
+      .returning({ id: productVariants.id });
+    return rows.length > 0;
   },
 
   async increaseStock(id: string, quantity: number): Promise<void> {

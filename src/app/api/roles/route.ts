@@ -1,10 +1,5 @@
 import { NextRequest } from "next/server";
-import {
-  successResponse,
-  errorResponse,
-  unauthorizedResponse,
-  forbiddenResponse,
-} from "@/shared/lib/api-response";
+import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { RoleService } from "@/features/roles/service";
 import { createRoleSchema } from "@/features/roles/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -38,7 +33,7 @@ export async function POST(request: NextRequest) {
       return errorResponse(error.issues[0]?.message ?? "Validation failed", 422);
     }
     if (error instanceof Error) {
-      return errorResponse(error.message, 400);
+      return serviceErrorResponse(error, 400);
     }
     return errorResponse("Failed to create role", 500);
   }

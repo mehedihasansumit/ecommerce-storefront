@@ -5,7 +5,7 @@ import { hasOrderAccess } from "@/shared/lib/order-access";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import type { IOrder } from "@/features/orders/types";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import { permissionDeniedResponse, storeAccessDeniedResponse } from "@/shared/lib/api-response";
+import { permissionDeniedResponse, storeAccessDeniedResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { OrderService } from "@/features/orders/service";
 import { z } from "zod";
 
@@ -148,7 +148,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid input", details: error.issues }, { status: 400 });
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

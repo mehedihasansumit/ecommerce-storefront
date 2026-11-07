@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
-import { StoreService } from "@/features/stores/service";
+import { StoreService, DomainTakenError } from "@/features/stores/service";
 import { toPublicStore } from "@/features/stores/public-store";
 import { updateStoreSchema } from "@/features/stores/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -57,6 +57,7 @@ export async function PUT(
     if (error instanceof ZodError) {
       return errorResponse(error.issues[0]?.message || "Validation failed", 422);
     }
+    if (error instanceof DomainTakenError) return errorResponse(error.message, 409);
     console.error("[PUT /api/stores] error:", error);
     return errorResponse("Failed to update store", 500);
   }

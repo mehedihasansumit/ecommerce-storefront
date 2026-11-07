@@ -69,7 +69,9 @@ export const CouponService = {
     storeId: string,
     code: string,
     items: CartItemForValidation[],
-    userId?: string
+    userId?: string,
+    /** Checkout phone; counts a guest's uses toward perCustomerLimit. */
+    phone?: string
   ): Promise<CouponValidationResult> {
     const coupon = await CouponRepository.findByCode(storeId, code);
     if (!coupon) {
@@ -96,18 +98,22 @@ export const CouponService = {
       return { valid: false, discount: 0, reason: "Coupon usage limit reached" };
     }
 
-    if (userId) {
-      const userUsageCount = await CouponRepository.countUserUsage(
-        coupon._id,
-        userId
-      );
-      if (userUsageCount >= coupon.perCustomerLimit) {
-        return {
-          valid: false,
-          discount: 0,
-          reason: "You have already used this coupon the maximum number of times",
-        };
-      }
+    // Per-customer limit: by account, or by phone for guests (who have no account).
+    // 0 means no limit (a NULL in the database is read as 0).
+    const perCustomerLimit = coupon.perCustomerLimit > 0 ? coupon.perCustomerLimit : null;
+    const customerUsageCount = !perCustomerLimit
+      ? 0
+      : userId
+        ? await CouponRepository.countUserUsage(coupon._id, userId)
+        : phone
+          ? await CouponRepository.countUsageByPhone(storeId, coupon.code, phone)
+          : 0;
+    if (perCustomerLimit !== null && customerUsageCount >= perCustomerLimit) {
+      return {
+        valid: false,
+        discount: 0,
+        reason: "You have already used this coupon the maximum number of times",
+      };
     }
 
     // Filter applicable items
@@ -169,8 +175,18 @@ export const CouponService = {
     };
   },
 
+  /** Counts one use if the coupon is still under its limit (atomic). False when it isn't. */
+  async reserve(couponId: string): Promise<boolean> {
+    return CouponRepository.tryReserveUsage(couponId);
+  },
+
+  /** Gives back a use from reserve() when the order couldn't be placed. */
+  async release(couponId: string): Promise<void> {
+    await CouponRepository.releaseUsage(couponId);
+  },
+
+  /** Records which customer used it on which order (the use was counted by reserve()). */
   async apply(couponId: string, userId: string, orderId: string, storeId: string): Promise<void> {
-    await CouponRepository.incrementUsage(couponId);
     if (userId) {
       await CouponRepository.createUsage({ couponId, userId, orderId, storeId });
     }

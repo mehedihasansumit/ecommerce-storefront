@@ -3,6 +3,7 @@ import { getCustomerToken } from "@/shared/lib/auth";
 import { AuthService } from "@/features/auth/service";
 import { updateProfileSchema } from "@/features/auth/schemas";
 import type { JwtCustomerPayload } from "@/features/auth/types";
+import { publicErrorMessage } from "@/shared/lib/api-response";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function PATCH(request: NextRequest) {
     const user = await AuthService.updateCustomerProfile(userId, validated);
     return NextResponse.json({ user });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "update failed";
+    const message = publicErrorMessage(err) ?? "update failed";
     const status = message.toLowerCase().includes("not found") ? 404 : 400;
     return NextResponse.json({ error: message }, { status });
   }

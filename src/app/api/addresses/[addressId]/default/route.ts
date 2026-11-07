@@ -3,6 +3,7 @@ import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
 import { AuthService } from "@/features/auth/service";
 import type { JwtCustomerPayload } from "@/features/auth/types";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function PUT(
   _request: NextRequest,
@@ -25,7 +26,7 @@ export async function PUT(
     return NextResponse.json({ addresses });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

@@ -185,6 +185,33 @@ export const AnnouncementRepository = {
     return rows.map(toIAnnouncement);
   },
 
+  /**
+   * Marks the announcement as broadcast if it wasn't yet, in one statement, so
+   * it is emailed once even if Send is clicked twice. False when already sent.
+   */
+  async claimBroadcast(id: string, storeId: string): Promise<boolean> {
+    const rows = await db
+      .update(announcements)
+      .set({ broadcastSentAt: new Date(), updatedAt: new Date() })
+      .where(
+        and(
+          eq(announcements.id, id),
+          eq(announcements.storeId, storeId),
+          isNull(announcements.broadcastSentAt),
+        ),
+      )
+      .returning({ id: announcements.id });
+    return rows.length > 0;
+  },
+
+  /** Undoes claimBroadcast when nothing could be sent, so the admin can retry. */
+  async unclaimBroadcast(id: string): Promise<void> {
+    await db
+      .update(announcements)
+      .set({ broadcastSentAt: null, updatedAt: new Date() })
+      .where(eq(announcements.id, id));
+  },
+
   async update(id: string, data: Partial<IAnnouncement>): Promise<IAnnouncement | null> {
     const insert = toAnnouncementInsert(data);
     const [row] = await db

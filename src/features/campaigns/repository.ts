@@ -1,4 +1,5 @@
-import { and, asc, count, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lte, ne, sql } from "drizzle-orm";
+import { orders } from "@/db/schema/orders";
 import { db } from "@/db/client";
 import {
   campaigns,
@@ -176,6 +177,23 @@ export const CampaignRepository = {
       .update(campaigns)
       .set({ usageCount: sql`GREATEST(${campaigns.usageCount} - 1, 0)`, updatedAt: new Date() })
       .where(eq(campaigns.id, id));
+  },
+
+  /** Redemptions on this store's live orders placed with this phone (guests' per-user limit). */
+  async countPhoneRedemptions(campaignId: string, storeId: string, phone: string): Promise<number> {
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(campaignRedemptions)
+      .innerJoin(orders, eq(orders.id, campaignRedemptions.orderId))
+      .where(
+        and(
+          eq(campaignRedemptions.campaignId, campaignId),
+          eq(orders.storeId, storeId),
+          eq(orders.guestPhone, phone),
+          ne(orders.status, "cancelled"),
+        ),
+      );
+    return Number(total);
   },
 
   async countUserRedemptions(campaignId: string, userId: string): Promise<number> {

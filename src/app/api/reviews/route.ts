@@ -6,6 +6,7 @@ import { ReviewService } from "@/features/reviews/service";
 import { createReviewSchema, getReviewsQuerySchema } from "@/features/reviews/schemas";
 import { AuthRepository } from "@/features/auth/repository";
 import type { JwtCustomerPayload } from "@/features/auth/types";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function GET(request: NextRequest) {
   try {
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

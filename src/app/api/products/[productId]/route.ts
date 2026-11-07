@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProductService } from "@/features/products/service";
+import { withoutCost } from "@/features/products/public-product";
 import { updateProductSchema } from "@/features/products/schemas";
 import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -24,7 +25,16 @@ export async function GET(
     }
 
     if (!product) return errorResponse("Product not found", 404);
-    return successResponse(product);
+
+    // Shoppers see active products only, without the cost price; an admin of the
+    // store with a products permission sees everything.
+    const admin = await getAdminDbUser();
+    const isStoreAdmin = !!admin && canAccessStore(admin, product.storeId);
+    if (!isStoreAdmin && !product.isActive) return errorResponse("Product not found", 404);
+    const seesCost =
+      isStoreAdmin &&
+      (hasPermission(admin, PERMISSIONS.PRODUCTS_EDIT) || hasPermission(admin, PERMISSIONS.PRODUCTS_CREATE));
+    return successResponse(seesCost ? product : withoutCost(product));
   } catch {
     return errorResponse("Internal server error", 500);
   }

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse } from "@/shared/lib/api-response";
-import { StoreService } from "@/features/stores/service";
+import { StoreService, DomainTakenError } from "@/features/stores/service";
 import { createStoreSchema } from "@/features/stores/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return errorResponse("Validation failed", 422);
     }
+    if (error instanceof DomainTakenError) return errorResponse(error.message, 409);
     return errorResponse("Failed to create store", 500);
   }
 }

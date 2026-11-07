@@ -10,6 +10,9 @@ import {
 import { THEME_PRESET_IDS } from "./presets";
 import { DEFAULT_CURRENCY } from "@/shared/lib/constants";
 
+/** Host names are case-insensitive; store them lowercase so lookups and the uniqueness check agree. */
+const domainSchema = z.string().trim().toLowerCase().min(1);
+
 /** Accepts { en: "...", bn: "..." } or a plain string (wrapped to { en: value }). */
 const localizedStringSchema = z
   .union([
@@ -83,7 +86,7 @@ export const storeThemeSchema = z.object({
 
 export const createStoreSchema = z.object({
   name: z.string().min(1, "Store name is required"),
-  domains: z.array(z.string()).min(1, "At least one domain is required"),
+  domains: z.array(domainSchema).min(1, "At least one domain is required"),
   theme: storeThemeSchema.optional(),
   seo: z
     .object({
@@ -107,7 +110,7 @@ export const createStoreSchema = z.object({
 
 export const updateStoreSchema = z.object({
   name: z.string().min(1).optional(),
-  domains: z.array(z.string()).optional(),
+  domains: z.array(domainSchema).optional(),
   isActive: z.boolean().optional(),
   logo: z.string().optional(),
   logoDark: z.string().optional(),

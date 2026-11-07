@@ -5,6 +5,7 @@ import { AuthService } from "@/features/auth/service";
 import { addressSchema } from "@/features/auth/schemas";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { ZodError } from "zod";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function GET() {
   try {
@@ -22,7 +23,7 @@ export async function GET() {
     return NextResponse.json({ addresses });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       );
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

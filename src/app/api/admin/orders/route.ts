@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import { permissionDeniedResponse, storeAccessDeniedResponse } from "@/shared/lib/api-response";
+import { permissionDeniedResponse, storeAccessDeniedResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
 import { ZodError } from "zod";
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

@@ -69,6 +69,10 @@ export const AuthService = {
     if (!isValid) {
       throw new Error("Invalid email or password");
     }
+    // A deactivated account can't log in (same message: don't reveal the account state).
+    if (!user.isActive) {
+      throw new Error("Invalid email or password");
+    }
 
     const payload: JwtCustomerPayload = {
       userId: user._id,

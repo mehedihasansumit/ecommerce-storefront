@@ -214,6 +214,11 @@ export const NotificationService = {
       throw new Error("No email subscribers found");
     }
 
+    // Each announcement is emailed once: a repeat (or a double click) is refused.
+    if (!(await AnnouncementRepository.claimBroadcast(announcementId, storeId))) {
+      throw new Error("Announcement already sent");
+    }
+
     const storeName = await getStoreName(storeId);
     const html = announcementEmail(announcement.title, announcement.message, storeName);
 
@@ -224,6 +229,11 @@ export const NotificationService = {
     );
 
     const sent = results.filter(Boolean).length;
+    if (sent === 0) {
+      // Nothing went out (e.g. mail server down): allow a retry.
+      await AnnouncementRepository.unclaimBroadcast(announcementId);
+      throw new Error("Failed to send");
+    }
 
     await AnnouncementRepository.update(announcementId, {
       broadcastSentAt: new Date(),

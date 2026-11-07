@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { CampaignService } from "@/features/campaigns/service";
 import { evaluateCartSchema } from "@/features/campaigns/schemas";
 import { ProductRepository } from "@/features/products/repository";
-import { successResponse, errorResponse } from "@/shared/lib/api-response";
+import { successResponse, errorResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
 import type { JwtCustomerPayload } from "@/features/auth/types";
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       return errorResponse(err.issues[0]?.message || "Validation error", 400);
     }
     if (err instanceof Error) {
-      return errorResponse(err.message, 400);
+      return serviceErrorResponse(err, 400);
     }
     return errorResponse("Internal server error", 500);
   }

@@ -1,6 +1,7 @@
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { coupons, couponUsages, type Coupon } from "@/db/schema/coupons";
+import { orders } from "@/db/schema/orders";
 import type { CouponType, ICoupon } from "./types";
 
 function toICoupon(row: Coupon): ICoupon {
@@ -93,11 +94,50 @@ export const CouponRepository = {
     return result.length > 0;
   },
 
-  async incrementUsage(couponId: string): Promise<void> {
-    await db
+  /**
+   * Counts one use only while the coupon is under its usage limit, in one
+   * statement, so parallel checkouts can't use a single-use coupon twice.
+   * False when the limit is already reached.
+   */
+  async tryReserveUsage(couponId: string): Promise<boolean> {
+    const rows = await db
       .update(coupons)
       .set({ usedCount: sql`${coupons.usedCount} + 1`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(coupons.id, couponId),
+          or(isNull(coupons.usageLimit), lt(coupons.usedCount, coupons.usageLimit)),
+        ),
+      )
+      .returning({ id: coupons.id });
+    return rows.length > 0;
+  },
+
+  /** Gives back a use reserved by tryReserveUsage (the order wasn't placed). */
+  async releaseUsage(couponId: string): Promise<void> {
+    await db
+      .update(coupons)
+      .set({ usedCount: sql`GREATEST(${coupons.usedCount} - 1, 0)`, updatedAt: new Date() })
       .where(eq(coupons.id, couponId));
+  },
+
+  /**
+   * How many of this store's live orders used `code` with this phone number.
+   * Guests have no account, so their per-customer limit is counted by phone.
+   */
+  async countUsageByPhone(storeId: string, code: string, phone: string): Promise<number> {
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(orders)
+      .where(
+        and(
+          eq(orders.storeId, storeId),
+          eq(orders.couponCode, code.toUpperCase()),
+          eq(orders.guestPhone, phone),
+          ne(orders.status, "cancelled"),
+        ),
+      );
+    return Number(total);
   },
 
   async createUsage(data: {

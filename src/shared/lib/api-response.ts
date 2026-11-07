@@ -9,6 +9,26 @@ export function errorResponse(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
 
+/**
+ * The error's message if it is safe to show the client, else null. Services throw
+ * a plain `new Error("Coupon has expired")` on purpose; anything else (a database
+ * error carrying the SQL and its parameters, a TypeError, a library error) is an
+ * internal detail.
+ */
+export function publicErrorMessage(err: unknown): string | null {
+  return err instanceof Error && Object.getPrototypeOf(err) === Error.prototype ? err.message : null;
+}
+
+/** A service's own error as `status`; anything unexpected as a logged, generic 500. */
+export function serviceErrorResponse(err: unknown, status = 400) {
+  const message = publicErrorMessage(err);
+  if (message === null) {
+    console.error("[api] unexpected error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+  return NextResponse.json({ error: message }, { status });
+}
+
 export function notFoundResponse(message = "Not found") {
   return NextResponse.json({ error: message }, { status: 404 });
 }

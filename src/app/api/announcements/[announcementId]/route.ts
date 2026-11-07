@@ -1,13 +1,7 @@
 import { NextRequest } from "next/server";
 import { NotificationService } from "@/features/notifications/service";
 import { updateAnnouncementSchema } from "@/features/notifications/schemas";
-import {
-  successResponse,
-  errorResponse,
-  notFoundResponse,
-  unauthorizedResponse,
-  forbiddenResponse,
-} from "@/shared/lib/api-response";
+import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse, forbiddenResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { ZodError } from "zod";
@@ -60,7 +54,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (err instanceof ZodError) {
       return errorResponse(err.issues[0]?.message || "Validation error", 400);
     }
-    if (err instanceof Error) return errorResponse(err.message, 400);
+    if (err instanceof Error) return serviceErrorResponse(err, 400);
     return errorResponse("Internal server error", 500);
   }
 }

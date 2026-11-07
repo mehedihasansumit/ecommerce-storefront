@@ -6,6 +6,7 @@ import type { JwtCustomerPayload } from "@/features/auth/types";
 import { OrderService } from "@/features/orders/service";
 import { createOrderSchema } from "@/features/orders/schemas";
 import { ZodError } from "zod";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function GET(_request: NextRequest) {
   try {
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json(
       { error: "Internal server error" },

@@ -1,11 +1,5 @@
 import { NextRequest } from "next/server";
-import {
-  successResponse,
-  errorResponse,
-  unauthorizedResponse,
-  forbiddenResponse,
-  notFoundResponse,
-} from "@/shared/lib/api-response";
+import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse, notFoundResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { AuthService } from "@/features/auth/service";
 import { updateAdminSchema } from "@/features/auth/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -50,7 +44,7 @@ export async function PUT(
       return errorResponse(error.issues[0]?.message ?? "Validation failed", 422);
     }
     if (error instanceof Error) {
-      return errorResponse(error.message, 400);
+      return serviceErrorResponse(error, 400);
     }
     return errorResponse("Failed to update admin", 500);
   }
@@ -74,7 +68,7 @@ export async function DELETE(
     return successResponse({ message: "Admin deleted" });
   } catch (error) {
     if (error instanceof Error) {
-      return errorResponse(error.message, 400);
+      return serviceErrorResponse(error, 400);
     }
     return errorResponse("Failed to delete admin", 500);
   }

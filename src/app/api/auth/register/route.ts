@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { registerSchema } from "@/features/auth/schemas";
 import { AuthService } from "@/features/auth/service";
 import { getStoreId } from "@/shared/lib/tenant";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,8 +19,8 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ user }, { status: 201 });
     response.cookies.set("customer-token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      secure:false, // Set to true in production
+      // HTTPS-only in production, so the login token never travels over plain HTTP.
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

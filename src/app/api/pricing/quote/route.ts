@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z, ZodError } from "zod";
 import { ProductRepository } from "@/features/products/repository";
-import { successResponse, errorResponse } from "@/shared/lib/api-response";
+import { successResponse, errorResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { getStoreId } from "@/shared/lib/tenant";
 import {
   allocateBulkLineTotals,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       return errorResponse(err.issues[0]?.message || "Validation error", 400);
     }
     if (err instanceof Error) {
-      return errorResponse(err.message, 400);
+      return serviceErrorResponse(err, 400);
     }
     return errorResponse("Internal server error", 500);
   }

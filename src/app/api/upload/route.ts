@@ -11,12 +11,7 @@ import {
 } from "@/shared/lib/storage";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { canAccessStore, hasPermission, PERMISSIONS, type Permission } from "@/shared/lib/permissions";
-import {
-  errorResponse,
-  unauthorizedResponse,
-  storeAccessDeniedResponse,
-  forbiddenResponse,
-} from "@/shared/lib/api-response";
+import { errorResponse, unauthorizedResponse, storeAccessDeniedResponse, forbiddenResponse, publicErrorMessage } from "@/shared/lib/api-response";
 
 const ALLOWED_FOLDERS = ["products", "categories", "stores", "banners"] as const;
 type Folder = (typeof ALLOWED_FOLDERS)[number];
@@ -170,7 +165,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (err) {
-    const message = err instanceof Error ? err.message : "upload failed";
+    const message = publicErrorMessage(err) ?? "upload failed";
     return errorResponse(message, 500);
   }
 }

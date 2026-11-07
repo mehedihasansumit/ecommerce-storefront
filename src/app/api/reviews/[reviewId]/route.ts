@@ -4,6 +4,7 @@ import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { ReviewService } from "@/features/reviews/service";
 import { updateReviewSchema } from "@/features/reviews/schemas";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function PATCH(
   request: NextRequest,
@@ -47,7 +48,7 @@ export async function PATCH(
       const status = error.message === "Review not found" ? 404
         : error.message === "Forbidden" ? 403
         : 400;
-      return NextResponse.json({ error: error.message }, { status });
+      return serviceErrorResponse(error, status);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -84,7 +85,7 @@ export async function DELETE(
       const status = error.message === "Review not found" ? 404
         : error.message === "Forbidden" ? 403
         : 400;
-      return NextResponse.json({ error: error.message }, { status });
+      return serviceErrorResponse(error, status);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

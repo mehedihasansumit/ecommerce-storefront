@@ -45,7 +45,8 @@ export const OrderService = {
       let product = productCache.get(lineItem.productId) ?? null;
       if (!product) {
         const fetched = await ProductRepository.findById(lineItem.productId);
-        if (!fetched || fetched.storeId !== storeId) {
+        // Hidden (inactive) products can't be ordered, even by id.
+        if (!fetched || fetched.storeId !== storeId || !fetched.isActive) {
           throw new Error(`Product not found: ${lineItem.productId}`);
         }
         product = fetched;
@@ -148,7 +149,8 @@ export const OrderService = {
         storeId,
         input.couponCode,
         productDetails,
-        userId
+        userId,
+        input.shippingAddress.phone
       );
       if (!validation.valid) {
         throw new Error(validation.reason || "Invalid coupon");
@@ -170,6 +172,7 @@ export const OrderService = {
         quantity: d.quantity,
         unitPrice: d.price,
       })),
+      { phone: input.shippingAddress.phone },
     );
 
     const campaignIdsToReserve = campaignEval.appliedCampaigns.map((c) => c.campaignId);
@@ -195,6 +198,25 @@ export const OrderService = {
     const total = Math.max(0, round2(subtotal - discount + shippingCost));
     const orderNumber = generateOrderNumber();
 
+    // Reserve the coupon use and the stock before saving the order. Each is one
+    // guarded update, so parallel checkouts can't both get the last item or the
+    // last coupon use; whatever was reserved is given back if a later step fails.
+    if (couponId && !(await CouponService.reserve(couponId))) {
+      await CampaignService.releaseUsageSlots(reserved);
+      throw new Error("Coupon usage limit reached");
+    }
+    const releaseReservations = async () => {
+      await CampaignService.releaseUsageSlots(reserved);
+      if (couponId) await CouponService.release(couponId);
+    };
+
+    const shortLine = await takeStock(storeId, productDetails);
+    if (shortLine) {
+      await releaseReservations();
+      const product = productCache.get(shortLine.productId);
+      throw new Error(`Insufficient stock for: ${product ? tAdmin(product.name) : shortLine.productId}`);
+    }
+
     let order: IOrder;
     try {
       order = await OrderRepository.create({
@@ -219,14 +241,12 @@ export const OrderService = {
         clientIp: clientIp || "",
       });
     } catch (err) {
-      await CampaignService.releaseUsageSlots(reserved);
+      await releaseReservations();
+      await restoreStock(storeId, productDetails);
       throw err;
     }
 
-    // Decrement stock for each ordered item
-    await takeStock(storeId, productDetails);
-
-    // Record coupon usage after order is created
+    // Record which customer used the coupon (the use itself was reserved above)
     if (couponId) {
       await CouponService.apply(couponId, userId || "", order._id, storeId);
     }

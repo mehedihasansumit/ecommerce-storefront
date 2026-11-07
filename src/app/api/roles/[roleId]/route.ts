@@ -1,11 +1,5 @@
 import { NextRequest } from "next/server";
-import {
-  successResponse,
-  errorResponse,
-  unauthorizedResponse,
-  forbiddenResponse,
-  notFoundResponse,
-} from "@/shared/lib/api-response";
+import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse, notFoundResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { RoleService } from "@/features/roles/service";
 import { updateRoleSchema } from "@/features/roles/schemas";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -48,7 +42,7 @@ export async function PUT(
       return errorResponse(error.issues[0]?.message ?? "Validation failed", 422);
     }
     if (error instanceof Error) {
-      return errorResponse(error.message, 400);
+      return serviceErrorResponse(error, 400);
     }
     return errorResponse("Failed to update role", 500);
   }
@@ -68,7 +62,7 @@ export async function DELETE(
     return successResponse({ message: "Role deleted" });
   } catch (error) {
     if (error instanceof Error) {
-      return errorResponse(error.message, 400);
+      return serviceErrorResponse(error, 400);
     }
     return errorResponse("Failed to delete role", 500);
   }

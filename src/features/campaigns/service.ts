@@ -76,7 +76,8 @@ export const CampaignService = {
     storeId: string,
     userId: string | undefined,
     items: EvaluationCartItem[],
-    options: { shippingCost?: number } = {},
+    /** phone: checkout phone; counts a guest's redemptions toward perUserLimit. */
+    options: { shippingCost?: number; phone?: string } = {},
   ): Promise<CampaignEvaluationResult> {
     const active = await CampaignRepository.findActiveByStore(storeId);
     if (active.length === 0) {
@@ -99,8 +100,13 @@ export const CampaignService = {
     // Filter perUserLimit campaigns
     const eligibleByUserLimit: ICampaign[] = [];
     for (const c of active) {
-      if (userId && c.perUserLimit !== null) {
-        const used = await CampaignRepository.countUserRedemptions(c._id, userId);
+      if (c.perUserLimit !== null) {
+        // By account, or by phone for guests (who have no account).
+        const used = userId
+          ? await CampaignRepository.countUserRedemptions(c._id, userId)
+          : options.phone
+            ? await CampaignRepository.countPhoneRedemptions(c._id, storeId, options.phone)
+            : 0;
         if (used >= c.perUserLimit) continue;
       }
       eligibleByUserLimit.push(c);

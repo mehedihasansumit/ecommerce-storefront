@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql, arrayOverlaps, ne } from "drizzle-orm";
 import { db } from "@/db/client";
 import { stores, type Store } from "@/db/schema/stores";
 import type {
@@ -60,6 +60,19 @@ function toInsert(data: Partial<IStore>): typeof stores.$inferInsert {
 }
 
 export const StoreRepository = {
+  /** Stores (other than `excludeId`, active or not) that already list any of `domains`. */
+  async findUsingDomains(
+    domains: string[],
+    excludeId?: string,
+  ): Promise<{ id: string; domains: string[] }[]> {
+    if (domains.length === 0) return [];
+    const overlap = arrayOverlaps(stores.domains, domains);
+    return db
+      .select({ id: stores.id, domains: stores.domains })
+      .from(stores)
+      .where(excludeId ? and(overlap, ne(stores.id, excludeId)) : overlap);
+  },
+
   async findByDomain(domain: string): Promise<IStore | null> {
     const [row] = await db
       .select()

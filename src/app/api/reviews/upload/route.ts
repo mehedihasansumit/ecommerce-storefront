@@ -3,6 +3,7 @@ import sharp from "sharp";
 import { uploadFile, generateFileKey } from "@/shared/lib/storage";
 import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
+import { publicErrorMessage } from "@/shared/lib/api-response";
 
 const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 5 * 1024 * 1024;
 const MAX_DIMENSION = 1000;
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url, key }, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "upload failed";
+    const message = publicErrorMessage(err) ?? "upload failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

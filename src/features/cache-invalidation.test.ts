@@ -21,6 +21,7 @@ vi.mock("@/features/stores/repository", () => ({
     findById: vi.fn(async () => store),
     update: vi.fn(async () => store),
     delete: vi.fn(async () => true),
+    findUsingDomains: vi.fn(async () => []),
   },
 }));
 
@@ -44,6 +45,8 @@ vi.mock("@/features/products/repository", () => ({
     delete: vi.fn(async () => true),
     updateRatingStats: vi.fn(async () => {}),
     decreaseStock: vi.fn(async () => {}),
+    tryTakeStock: vi.fn(async () => true),
+    tryTakeVariantStock: vi.fn(async () => true),
     increaseStock: vi.fn(async () => {}),
     decreaseVariantStock: vi.fn(async () => {}),
     increaseVariantStock: vi.fn(async () => {}),

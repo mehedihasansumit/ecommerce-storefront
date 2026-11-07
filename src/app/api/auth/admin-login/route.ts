@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
       name: "admin-token",
       value: token,
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      secure:false, // Set to true in production
+      // HTTPS-only in production, so the login token never travels over plain HTTP.
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",

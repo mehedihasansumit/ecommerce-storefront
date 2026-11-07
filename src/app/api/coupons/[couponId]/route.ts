@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CouponService } from "@/features/coupons/service";
 import { updateCouponSchema } from "@/features/coupons/schemas";
-import {
-  successResponse,
-  errorResponse,
-  notFoundResponse,
-  unauthorizedResponse,
-  forbiddenResponse,
-} from "@/shared/lib/api-response";
+import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse, forbiddenResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { ZodError } from "zod";
@@ -57,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return errorResponse(err.issues[0]?.message || "Validation error", 400);
     }
     if (err instanceof Error) {
-      return errorResponse(err.message, 400);
+      return serviceErrorResponse(err, 400);
     }
     return errorResponse("Internal server error", 500);
   }

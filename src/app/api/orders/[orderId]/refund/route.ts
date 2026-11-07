@@ -3,7 +3,7 @@ import { getStoreId } from "@/shared/lib/tenant";
 import { getCustomerToken } from "@/shared/lib/auth";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
-import { permissionDeniedResponse, storeAccessDeniedResponse } from "@/shared/lib/api-response";
+import { permissionDeniedResponse, storeAccessDeniedResponse, serviceErrorResponse } from "@/shared/lib/api-response";
 import { OrderService } from "@/features/orders/service";
 import { createRefundRequestSchema, reviewRefundRequestSchema } from "@/features/orders/schemas";
 import type { JwtCustomerPayload } from "@/features/auth/types";
@@ -34,7 +34,7 @@ export async function POST(
       return NextResponse.json({ error: "Invalid input", details: error.issues }, { status: 400 });
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -59,7 +59,7 @@ export async function DELETE(
     return NextResponse.json({ order });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -93,7 +93,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid input", details: error.issues }, { status: 400 });
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

@@ -5,6 +5,7 @@ import { getCustomerToken } from "@/shared/lib/auth";
 import { PointService } from "@/features/points/service";
 import { redeemPointsSchema } from "@/features/reviews/schemas";
 import type { JwtCustomerPayload } from "@/features/auth/types";
+import { serviceErrorResponse } from "@/shared/lib/api-response";
 
 export async function GET() {
   try {
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       );
     }
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serviceErrorResponse(error, 400);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

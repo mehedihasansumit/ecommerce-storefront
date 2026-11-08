@@ -7,6 +7,7 @@ import { avatarFolder } from "@/features/auth/service";
 import type { JwtCustomerPayload } from "@/features/auth/types";
 import { publicErrorMessage } from "@/shared/lib/api-response";
 import { RATE_RULES, checkRateLimits, tooManyRequestsResponse } from "@/shared/lib/rate-limit";
+import { CUSTOMER_IMAGE_TYPES, isAllowedImage } from "@/shared/lib/image-type";
 
 const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES) || 5 * 1024 * 1024;
 const MAX_DIMENSION = 512;
@@ -44,6 +45,11 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    // Check the real file type from its bytes before any image library reads it:
+    // shoppers can't send SVG or HEIC, whose decoders are where image exploits live.
+    if (!isAllowedImage(buffer, CUSTOMER_IMAGE_TYPES)) {
+      return NextResponse.json({ error: "Please upload a JPG, PNG, WebP, GIF or AVIF image" }, { status: 415 });
+    }
 
     // Compress to a single small webp: cap longest side, strip metadata via rotate.
     const out = await sharp(buffer, { failOn: "error" })

@@ -12,6 +12,7 @@ import {
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { canAccessStore, hasPermission, PERMISSIONS, type Permission } from "@/shared/lib/permissions";
 import { errorResponse, unauthorizedResponse, storeAccessDeniedResponse, forbiddenResponse, publicErrorMessage } from "@/shared/lib/api-response";
+import { ADMIN_IMAGE_TYPES, isAllowedImage } from "@/shared/lib/image-type";
 
 const ALLOWED_FOLDERS = ["products", "categories", "stores", "banners"] as const;
 type Folder = (typeof ALLOWED_FOLDERS)[number];
@@ -78,6 +79,10 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    // Check the real file type from its bytes before any image library reads it.
+    if (!isAllowedImage(buffer, ADMIN_IMAGE_TYPES)) {
+      return errorResponse("Please upload a JPG, PNG, WebP, GIF, AVIF or SVG image", 415);
+    }
 
     const image = sharp(buffer, { failOn: "error" }).rotate();
     const metadata = await image.metadata();

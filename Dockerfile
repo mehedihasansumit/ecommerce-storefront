@@ -27,7 +27,7 @@ WORKDIR /sharp
 RUN npm init -y >/dev/null \
  && npm install --no-save --no-audit --no-fund --omit=optional \
       --os=linux --cpu=x64 --libc=musl \
-      sharp@0.34.5 \
+      sharp@0.35.5 \
  && rm -rf node_modules/@img/sharp-libvips-linux-x64 \
            node_modules/@img/sharp-linux-x64 \
            /root/.npm

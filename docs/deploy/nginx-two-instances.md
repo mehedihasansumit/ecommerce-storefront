@@ -126,9 +126,10 @@ Deploy first (so the tracker container is running), then apply this.
 
 ## Firewall
 
-With host networking the app ports are reachable from the internet, skipping
-Cloudflare and Nginx. Close them; do **not** set `HOSTNAME=127.0.0.1` instead
-(ADR 0005):
+The app instances listen on loopback only (`HOSTNAME=localhost` with
+IPv4-first resolution, see ADR 0005), and the tracker binds 127.0.0.1, so
+5001-5003 are not reachable from outside. Other services on the VPS may still
+expose ports; close what does not need to be public:
 
 ```sh
 ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp

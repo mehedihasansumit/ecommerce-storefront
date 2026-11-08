@@ -23,9 +23,15 @@ x-app: &app
 
 # Shared by both instances; `environment` wins over .env.production.
 x-app-env: &app-env
-  # Don't set HOSTNAME=127.0.0.1 to hide the app ports: Next's internal rewrite
-  # then targets a different host and every storefront page 307-loops to itself.
-  # Block 5001/5002 with the firewall instead.
+  # Listen on loopback only, so 5001/5002 can't be reached from the internet
+  # (that would skip Cloudflare and Nginx, and with them the real-IP rate limits).
+  # Not HOSTNAME=127.0.0.1: Next builds its internal middleware URLs with
+  # "localhost" and compares them with the hostname it was given, so 127.0.0.1
+  # makes every next-intl rewrite look external and pages 307-loop. "localhost"
+  # matches; ipv4first makes Node resolve it to 127.0.0.1 (not ::1), where
+  # Nginx connects.
+  HOSTNAME: localhost
+  NODE_OPTIONS: "--dns-result-order=ipv4first"
   REDIS_URL: redis://127.0.0.1:6379
   # 2 instances x 8 = 16 of Postgres' 30 connections.
   DB_POOL_MAX: "8"

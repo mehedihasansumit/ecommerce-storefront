@@ -44,8 +44,10 @@ We decided to move that cache to Redis through a custom Next.js `cacheHandler`
 ## Consequences
 
 - One more container (`ecommerce-redis`, 128 MB cap) on the VPS.
-- The app no longer pins `HOSTNAME=127.0.0.1`: Next's internal rewrite then
-  targets another host and every storefront page 307-loops to itself. The app
-  ports (5001, 5002) must be closed by the firewall instead.
+- The app listens on loopback only with `HOSTNAME=localhost` and
+  `NODE_OPTIONS=--dns-result-order=ipv4first`. `HOSTNAME=127.0.0.1` does not
+  work: Next builds its internal middleware URLs with "localhost" and compares
+  them with the given hostname, so every next-intl rewrite looks external and
+  storefront pages 307-loop to themselves.
 - Anything else kept in process memory is per-instance. Today that is only
   React `cache()` (per request), so nothing else needed to move.

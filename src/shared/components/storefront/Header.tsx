@@ -1,6 +1,9 @@
 "use client";
 
-import { Link, useRouter, usePathname, getPathname } from "@/i18n/navigation";
+import { useRouter, usePathname, getPathname } from "@/i18n/navigation";
+// Links prefetch on hover/touch only; see HoverPrefetchLink.
+import { HoverPrefetchLink as Link } from "./HoverPrefetchLink";
+import { fetchCustomerSession } from "@/shared/lib/customer-session";
 import {
   ShoppingCart,
   User,
@@ -42,13 +45,12 @@ export function Header() {
   const isBn = locale === "bn";
 
   useEffect(() => {
-    fetch("/api/auth/customer", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => {
-        setUserEmail(data.user?.email ?? null);
-        setUserName(data.user?.name ?? null);
-        setUserAvatar(data.user?.avatarUrl ?? null);
-        setUserAvatarPos(data.user?.avatarPosition ?? null);
+    fetchCustomerSession()
+      .then((user) => {
+        setUserEmail(user?.email ?? null);
+        setUserName(user?.name ?? null);
+        setUserAvatar(user?.avatarUrl ?? null);
+        setUserAvatarPos(user?.avatarPosition ?? null);
       })
       .catch(() => {});
   }, [pathname]);

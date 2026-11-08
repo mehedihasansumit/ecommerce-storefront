@@ -1,6 +1,9 @@
 "use client";
 
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
+// Links prefetch on hover/touch only; see HoverPrefetchLink.
+import { HoverPrefetchLink as Link } from "./HoverPrefetchLink";
+import { fetchCustomerSession } from "@/shared/lib/customer-session";
 import { useState, useEffect, useRef } from "react";
 import {
   Home,
@@ -33,11 +36,10 @@ export function MobileBottomNav() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/auth/customer", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => {
-        setUserEmail(data.user?.email ?? null);
-        setUserName(data.user?.name ?? null);
+    fetchCustomerSession()
+      .then((user) => {
+        setUserEmail(user?.email ?? null);
+        setUserName(user?.name ?? null);
       })
       .catch(() => {});
   }, [pathname]);

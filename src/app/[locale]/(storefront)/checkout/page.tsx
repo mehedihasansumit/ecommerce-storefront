@@ -29,6 +29,7 @@ import { DELIVERY_CURRENCY, calcDeliveryCharge, isInsideDhaka } from "@/shared/l
 import { useStoreCurrency } from "@/shared/hooks/useStoreCurrency";
 import { useOptionLabels } from "@/shared/hooks/useOptionLabels";
 import { formatNumber } from "@/shared/lib/i18n";
+import { fetchCustomerSession } from "@/shared/lib/customer-session";
 
 interface FormData {
   name: string;
@@ -108,9 +109,8 @@ export default function CheckoutPage() {
 
   const loadSavedAddresses = useCallback(async () => {
     try {
-      const authRes = await fetch("/api/auth/customer", { cache: "no-store" });
-      const authData = await authRes.json();
-      if (!authData.user) return;
+      const user = await fetchCustomerSession();
+      if (!user) return;
 
       setIsLoggedIn(true);
       const addrRes = await fetch("/api/addresses");

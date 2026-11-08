@@ -1,6 +1,7 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+// Links prefetch on hover/touch only; see HoverPrefetchLink.
+import { HoverPrefetchLink as Link } from "./HoverPrefetchLink";
 import { useLocale, useTranslations } from "next-intl";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { useTenant } from "@/shared/hooks/useTenant";

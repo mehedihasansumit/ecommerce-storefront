@@ -42,7 +42,7 @@ export function Header() {
   const isBn = locale === "bn";
 
   useEffect(() => {
-    fetch("/api/auth/customer")
+    fetch("/api/auth/customer", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         setUserEmail(data.user?.email ?? null);

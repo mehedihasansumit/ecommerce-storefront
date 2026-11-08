@@ -8,7 +8,11 @@ export async function GET() {
     if (!storeId) return errorResponse("Store not found", 400);
 
     const announcements = await NotificationService.getActiveAnnouncements(storeId);
-    return successResponse({ announcements });
+    const res = successResponse({ announcements });
+    // Cloudflare keeps a 1-minute edge copy; browsers keep none, so a new or
+    // ended announcement shows on the next page view after that minute.
+    res.headers.set("Cache-Control", "private, no-store");
+    return res;
   } catch {
     return errorResponse("Internal server error", 500);
   }

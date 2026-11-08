@@ -33,7 +33,7 @@ export function MobileBottomNav() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/auth/customer")
+    fetch("/api/auth/customer", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         setUserEmail(data.user?.email ?? null);

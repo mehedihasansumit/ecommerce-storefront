@@ -108,7 +108,7 @@ export default function CheckoutPage() {
 
   const loadSavedAddresses = useCallback(async () => {
     try {
-      const authRes = await fetch("/api/auth/customer");
+      const authRes = await fetch("/api/auth/customer", { cache: "no-store" });
       const authData = await authRes.json();
       if (!authData.user) return;
 

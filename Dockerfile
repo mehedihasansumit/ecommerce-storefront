@@ -32,6 +32,12 @@ RUN npm init -y >/dev/null \
            node_modules/@img/sharp-linux-x64 \
            /root/.npm
 
+# ---------- tracker deps (the visit tracker runs outside Next; ADR 0006) ----------
+FROM node:22-alpine AS tracker-deps
+WORKDIR /tracker
+RUN npm init -y >/dev/null \
+ && npm install --no-save --no-audit --no-fund --omit=dev postgres@3.4.9 jose@6.2.3
+
 # ---------- runner ----------
 FROM node:22-alpine AS runner
 RUN apk add --no-cache libc6-compat
@@ -51,6 +57,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=sharp --chown=nextjs:nodejs /sharp/node_modules/sharp ./node_modules/sharp
 COPY --from=sharp --chown=nextjs:nodejs /sharp/node_modules/@img ./node_modules/@img
+# Visit tracker: its own deps (Next bundles the app's), same image, own container.
+COPY --from=tracker-deps --chown=nextjs:nodejs /tracker/node_modules ./tracker/node_modules
+COPY --chown=nextjs:nodejs tracker/core.mjs tracker/server.mjs ./tracker/
 
 USER nextjs
 EXPOSE 5000

@@ -48,6 +48,21 @@ services:
       <<: *app-env
       PORT: "5002"
 
+  # Visit tracker (ADR 0006): answers POST /api/track without Next.js. Same image,
+  # its own small Node server on loopback; Nginx falls back to the app if it's down.
+  tracker:
+    image: ecommerce-website:latest
+    container_name: ecommerce-tracker
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env.production
+    environment:
+      TRACKER_PORT: "5003"
+    command: ["node", "tracker/server.mjs"]
+    depends_on:
+      - postgres
+
   # Cache only: no disk persistence. Entries have a TTL and `volatile-lru` evicts
   # only those, never the tag-expiry hash (which has no TTL).
   redis:

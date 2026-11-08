@@ -94,6 +94,36 @@ server {
 }
 ```
 
+## Visit tracker (ADR 0006)
+
+`POST /api/track` goes to the tracker container on 127.0.0.1:5003, with the app
+instances as backup so the Next route answers if the tracker is down. Put the
+upstream next to `lourhaus_app` and the location before `location /`:
+
+```nginx
+upstream lourhaus_tracker {
+    server 127.0.0.1:5003 max_fails=3 fail_timeout=10s;
+    server 127.0.0.1:5001 backup;
+    server 127.0.0.1:5002 backup;
+}
+
+server {
+    # ...
+    location = /api/track {
+        client_max_body_size 32k;
+        proxy_pass http://lourhaus_tracker;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    # ...
+}
+```
+
+Deploy first (so the tracker container is running), then apply this.
+
 ## Firewall
 
 With host networking the app ports are reachable from the internet, skipping

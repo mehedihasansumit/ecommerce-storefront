@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { HoverPrefetchLink } from "@/shared/components/storefront/HoverPrefetchLink";
 import { useLocale, useTranslations } from "next-intl";
 import type { IProduct } from "../types";
 import { Price } from "@/shared/components/ui";
@@ -26,7 +26,7 @@ export function EditorialProductCard({ product, plate }: { product: IProduct; pl
   const card = useProductCardData(product);
 
   return (
-    <Link href={`/products/${product.slug}`} className="focus-ring group relative block" style={{ borderRadius: "var(--border-radius)" }}>
+    <HoverPrefetchLink href={`/products/${product.slug}`} className="focus-ring group relative block" style={{ borderRadius: "var(--border-radius)" }}>
       <div
         className="relative aspect-[4/5] overflow-hidden bg-surface"
         style={{ borderRadius: "var(--border-radius)" }}
@@ -68,6 +68,6 @@ export function EditorialProductCard({ product, plate }: { product: IProduct; pl
           )}
         </div>
       </div>
-    </Link>
+    </HoverPrefetchLink>
   );
 }

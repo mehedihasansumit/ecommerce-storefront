@@ -29,6 +29,15 @@ const nextConfig: NextConfig = {
   // so every read goes through the handler and sees other instances' expiries.
   cacheHandler: require.resolve("./cache-handler.mjs"),
   cacheMaxMemorySize: 0,
+  experimental: {
+    // Cloudflare caches storefront responses by URL only (it ignores `Vary: rsc`;
+    // docs/deploy/cloudflare-page-cache.md). Next's router puts a hash of the
+    // headers an RSC response depends on in `?_rsc=`; with this on, the server
+    // checks that hash and redirects a mismatch, so nobody can store a response
+    // for one set of headers under another's URL. Makes `?_rsc=` requests safe
+    // to cache.
+    validateRSCRequestHeaders: true,
+  },
   async headers() {
     return [
       {

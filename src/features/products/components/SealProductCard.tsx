@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { HoverPrefetchLink } from "@/shared/components/storefront/HoverPrefetchLink";
 import { Banknote } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { IProduct } from "../types";
@@ -37,7 +37,7 @@ export function SealProductCard({ product }: { product: IProduct }) {
   const sizes = card.soldOut ? [] : sizesInStock(product);
 
   return (
-    <Link
+    <HoverPrefetchLink
       href={`/products/${product.slug}`}
       className="focus-ring group relative block @container"
       style={{ borderRadius: "var(--border-radius)" }}
@@ -91,6 +91,6 @@ export function SealProductCard({ product }: { product: IProduct }) {
           {tt("codShort")}
         </p>
       </div>
-    </Link>
+    </HoverPrefetchLink>
   );
 }

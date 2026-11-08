@@ -42,17 +42,21 @@ function mergeByDate(
 }
 
 export const AnalyticsRepository = {
-  async track(data: TrackEventInput): Promise<void> {
-    await db.insert(activityEvents).values({
-      storeId: data.storeId,
-      eventType: data.eventType,
-      productId: data.productId || null,
-      productName: data.productName || null,
-      categoryId: data.categoryId || null,
-      searchQuery: data.searchQuery || null,
-      sessionId: data.sessionId || null,
-      userId: data.userId || null,
-    });
+  /** Saves many events in one INSERT (see the buffer in service.ts). */
+  async trackMany(events: TrackEventInput[]): Promise<void> {
+    if (events.length === 0) return;
+    await db.insert(activityEvents).values(
+      events.map((data) => ({
+        storeId: data.storeId,
+        eventType: data.eventType,
+        productId: data.productId || null,
+        productName: data.productName || null,
+        categoryId: data.categoryId || null,
+        searchQuery: data.searchQuery || null,
+        sessionId: data.sessionId || null,
+        userId: data.userId || null,
+      })),
+    );
   },
 
   async getTopViewedProducts(

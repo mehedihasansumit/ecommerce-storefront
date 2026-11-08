@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { HoverPrefetchLink } from "@/shared/components/storefront/HoverPrefetchLink";
 import type { IProduct } from "../types";
 import { useTranslations, useLocale } from "next-intl";
 import { Price } from "@/shared/components/ui";
@@ -32,7 +32,7 @@ function BoxedProductCard({ product }: { product: IProduct }) {
   const card = useProductCardData(product);
 
   return (
-    <Link
+    <HoverPrefetchLink
       href={`/products/${product.slug}`}
       className="focus-ring group relative flex flex-col overflow-hidden border border-border-subtle transition-[box-shadow,transform] duration-300 ease-(--ease-out-expo) hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] motion-reduce:hover:translate-y-0"
       style={{ backgroundColor: "var(--color-card-bg)", borderRadius: "var(--border-radius)" }}
@@ -73,6 +73,6 @@ function BoxedProductCard({ product }: { product: IProduct }) {
           )}
         </div>
       </div>
-    </Link>
+    </HoverPrefetchLink>
   );
 }

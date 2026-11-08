@@ -17,6 +17,42 @@ function parseDateRange(
   return { fromDate, toDate };
 }
 
+/**
+ * Activity events are buffered in memory and written in one multi-row INSERT
+ * every FLUSH_MS (or as soon as MAX_BUFFER pile up), instead of one INSERT per
+ * product view. Analytics only: up to FLUSH_MS of events can be lost if the
+ * process dies, which is acceptable for view counts.
+ */
+const FLUSH_MS = 2000;
+const MAX_BUFFER = 500;
+let buffer: TrackEventInput[] = [];
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function queueEvent(event: TrackEventInput): void {
+  buffer.push(event);
+  if (buffer.length >= MAX_BUFFER) {
+    void flushEvents();
+  } else if (!flushTimer) {
+    flushTimer = setTimeout(() => void flushEvents(), FLUSH_MS);
+  }
+}
+
+/** Writes everything buffered so far. Exported for tests and shutdown hooks. */
+export async function flushEvents(): Promise<void> {
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
+  if (buffer.length === 0) return;
+  const batch = buffer;
+  buffer = [];
+  try {
+    await AnalyticsRepository.trackMany(batch);
+  } catch (err) {
+    console.error(`[analytics] dropped ${batch.length} events:`, err instanceof Error ? err.message : err);
+  }
+}
+
 export const AnalyticsService = {
   async track(input: TrackEventInput): Promise<void> {
     if (
@@ -32,7 +68,7 @@ export const AnalyticsService = {
     ) {
       return; // silently drop empty searches
     }
-    return AnalyticsRepository.track(input);
+    queueEvent(input);
   },
 
   async getSummary(

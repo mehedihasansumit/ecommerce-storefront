@@ -110,7 +110,7 @@ export function MobileAdminNav({
       {/* Top bar */}
       <header className="bg-gray-950 text-white border-b border-white/[0.06] flex items-center justify-between px-4 h-14">
         <Link href="/admin" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-900/40">
+          <div className="w-7 h-7 rounded-md bg-white/[0.1] ring-1 ring-inset ring-white/[0.12] flex items-center justify-center">
             <LayoutDashboard size={14} className="text-white" />
           </div>
           <span className="text-[13px] font-semibold tracking-tight">Admin Panel</span>
@@ -119,7 +119,7 @@ export function MobileAdminNav({
           ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(true)}
-          className="p-2.5 rounded-lg hover:bg-admin-surface/[0.07] transition-colors focus-ring"
+          className="p-2.5 rounded-lg hover:bg-white/[0.07] transition-colors focus-ring"
           aria-label="Open menu"
           aria-expanded={isOpen}
           aria-controls={drawerId}
@@ -159,19 +159,19 @@ export function MobileAdminNav({
             {/* Header */}
             <div className="relative flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/40">
+                <div className="w-8 h-8 rounded-lg bg-white/[0.1] ring-1 ring-inset ring-white/[0.12] flex items-center justify-center">
                   <LayoutDashboard size={15} className="text-white" />
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-white leading-none">Admin Panel</p>
-                  <p className="text-[10px] text-admin-text-muted mt-0.5">Management Console</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Management Console</p>
                 </div>
               </div>
               <button
                 ref={closeRef}
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2.5 rounded-lg focus-ring hover:bg-admin-surface/[0.07] transition-colors text-admin-text-subtle hover:text-white"
+                className="p-2.5 rounded-lg focus-ring hover:bg-white/[0.07] transition-colors text-gray-400 hover:text-white"
                 aria-label="Close menu"
               >
                 <X size={18} />
@@ -180,7 +180,7 @@ export function MobileAdminNav({
 
             {/* Nav links */}
             <div className="relative flex-1 overflow-y-auto px-3 py-4">
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-admin-text-secondary">
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">
                 Overview
               </p>
               <div className="space-y-0.5 mb-5">
@@ -190,23 +190,24 @@ export function MobileAdminNav({
                     <Link
                       key={href}
                       href={href}
+                      aria-current={active ? "page" : undefined}
                       onClick={() => setIsOpen(false)}
                       className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group ${
                         active
-                          ? "bg-admin-surface/[0.08] text-white"
-                          : "text-admin-text-subtle hover:text-gray-100 hover:bg-admin-surface/[0.05]"
+                          ? "bg-white/[0.08] text-white"
+                          : "text-gray-300 hover:text-white hover:bg-white/[0.05]"
                       }`}
                     >
                       {active && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-400" />
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white" />
                       )}
                       <Icon
                         size={16}
-                        className={active ? "text-indigo-400" : "text-admin-text-secondary group-hover:text-admin-text-subtle transition-colors"}
+                        className={active ? "text-white" : "text-gray-400 group-hover:text-gray-200 transition-colors"}
                       />
                       <span>{label}</span>
                       {active && (
-                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500/80" />
+                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />
                       )}
                     </Link>
                   );
@@ -215,7 +216,7 @@ export function MobileAdminNav({
 
               {superItems.length > 0 && (
                 <>
-                  <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-admin-text-secondary">
+                  <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">
                     Administration
                   </p>
                   <div className="space-y-0.5">
@@ -225,23 +226,24 @@ export function MobileAdminNav({
                         <Link
                           key={href}
                           href={href}
+                          aria-current={active ? "page" : undefined}
                           onClick={() => setIsOpen(false)}
                           className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group ${
                             active
-                              ? "bg-admin-surface/[0.08] text-white"
-                              : "text-admin-text-subtle hover:text-gray-100 hover:bg-admin-surface/[0.05]"
+                              ? "bg-white/[0.08] text-white"
+                              : "text-gray-300 hover:text-white hover:bg-white/[0.05]"
                           }`}
                         >
                           {active && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-violet-400" />
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white" />
                           )}
                           <Icon
                             size={16}
-                            className={active ? "text-violet-400" : "text-admin-text-secondary group-hover:text-admin-text-subtle transition-colors"}
+                            className={active ? "text-white" : "text-gray-400 group-hover:text-gray-200 transition-colors"}
                           />
                           <span>{label}</span>
                           {active && (
-                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500/80" />
+                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />
                           )}
                         </Link>
                       );
@@ -253,8 +255,8 @@ export function MobileAdminNav({
 
             {/* User footer */}
             <div className="relative px-3 pb-4 pt-3 border-t border-white/[0.06]">
-              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-admin-surface/[0.04] mb-1">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.04] mb-1">
+                <div className="w-7 h-7 rounded-full bg-white/[0.1] ring-1 ring-inset ring-white/[0.12] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -264,7 +266,7 @@ export function MobileAdminNav({
                     </p>
                   )}
                   {adminRole && (
-                    <p className="text-[10px] text-admin-text-muted capitalize truncate leading-tight mt-0.5">
+                    <p className="text-[10px] text-gray-400 capitalize truncate leading-tight mt-0.5">
                       {adminRole}
                     </p>
                   )}
@@ -274,7 +276,7 @@ export function MobileAdminNav({
                 <ThemeToggle variant="sidebar" />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2.5 flex-1 px-3 py-2 rounded-lg text-admin-text-subtle hover:text-red-400 hover:bg-red-950/30 transition-all text-[13px] font-medium"
+                  className="flex items-center gap-2.5 flex-1 px-3 py-2 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-950/30 transition-all text-[13px] font-medium"
                 >
                   <LogOut size={15} />
                   <span>Sign out</span>

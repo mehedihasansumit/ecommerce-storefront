@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { STORE_FONTS } from "@/shared/lib/fonts";
 import {
-  ChevronLeft,
   Palette,
   Globe,
   Languages,
@@ -16,6 +15,7 @@ import {
 import {
   Alert,
   Button,
+  buttonClassName,
   Card,
   CardHeader,
   Field,
@@ -23,6 +23,7 @@ import {
   PageHeader,
   Select,
 } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../_components/AdminBreadcrumbs";
 
 const DEFAULT_THEME = {
   primaryColor: "#2563EB",
@@ -142,40 +143,41 @@ export default function NewStorePage() {
     <div className="max-w-3xl">
       <PageHeader
         breadcrumbs={
-          <Link
-            href="/admin/stores"
-            className="inline-flex items-center gap-1 text-xs text-admin-text-subtle hover:text-admin-text-primary transition-colors"
-          >
-            <ChevronLeft size={14} />
-            Back to stores
-          </Link>
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: "New Store" },
+            ]}
+          />
         }
         title="Create New Store"
         description="Configure brand, languages, and theme for a new tenant."
       />
 
       {error && (
-        <div className="mb-6">
-          <Alert tone="error">{error}</Alert>
-        </div>
+        <Alert tone="error" className="mb-6">
+          {error}
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Brand Preview */}
-        <Card padding="lg" className="overflow-hidden">
+        <Card padding="lg" className="overflow-hidden" aria-live="polite">
           <div className="flex items-center gap-4">
             <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-sm shrink-0 transition-colors"
+              aria-hidden
+              className="w-14 h-14 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-sm shrink-0"
               style={{ backgroundColor: formData.theme.primaryColor }}
             >
               {initial}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-admin-text-subtle">Live preview</p>
-              <h3 className="text-lg font-semibold truncate">
+              <p className="text-sm text-admin-text-muted">Live preview</p>
+              <p className="text-lg font-semibold text-admin-text-primary truncate">
                 {formData.name.trim() || "Your store name"}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-1.5">
+              </p>
+              <div aria-hidden className="flex items-center gap-1.5 mt-1.5">
                 {[
                   formData.theme.primaryColor,
                   formData.theme.secondaryColor,
@@ -185,7 +187,7 @@ export default function NewStorePage() {
                 ].map((c, i) => (
                   <div
                     key={i}
-                    className="w-4 h-4 rounded-full border border-white shadow-sm"
+                    className="w-4 h-4 rounded-full border border-admin-border-md shadow-sm"
                     style={{ backgroundColor: c }}
                     title={c}
                   />
@@ -200,7 +202,7 @@ export default function NewStorePage() {
           <CardHeader
             title={
               <span className="inline-flex items-center gap-2">
-                <Globe size={16} className="text-admin-text-subtle" />
+                <Globe size={16} aria-hidden className="text-admin-text-muted" />
                 Store Basics
               </span>
             }
@@ -242,14 +244,16 @@ export default function NewStorePage() {
           <CardHeader
             title={
               <span className="inline-flex items-center gap-2">
-                <Languages size={16} className="text-admin-text-subtle" />
+                <Languages size={16} aria-hidden className="text-admin-text-muted" />
                 Languages
               </span>
             }
             description="Locales available on the storefront."
           />
           <div className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <fieldset>
+              <legend className="sr-only">Supported languages</legend>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { code: "en", label: "English" },
                 { code: "bn", label: "বাংলা (Bangla)" },
@@ -258,7 +262,7 @@ export default function NewStorePage() {
                 return (
                   <label
                     key={l.code}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-colors ${
                       active
                         ? "border-gray-900 bg-gray-900/5 dark:border-gray-200 dark:bg-gray-100/5"
                         : "border-admin-border-md hover:border-admin-text-subtle"
@@ -269,13 +273,14 @@ export default function NewStorePage() {
                       checked={active}
                       onChange={(e) => toggleLanguage(l.code, e.target.checked)}
                       disabled={loading}
-                      className="w-4 h-4 accent-gray-900"
+                      className="w-4 h-4 rounded accent-gray-900 dark:accent-gray-100 focus-ring"
                     />
-                    <span className="text-sm font-medium">{l.label}</span>
+                    <span className="text-sm font-medium text-admin-text-primary">{l.label}</span>
                   </label>
                 );
               })}
-            </div>
+              </div>
+            </fieldset>
 
             <Field label="Default Language" hint="Used when no locale cookie is set.">
               <Select
@@ -304,7 +309,7 @@ export default function NewStorePage() {
           <CardHeader
             title={
               <span className="inline-flex items-center gap-2">
-                <Palette size={16} className="text-admin-text-subtle" />
+                <Palette size={16} aria-hidden className="text-admin-text-muted" />
                 Theme
               </span>
             }
@@ -313,8 +318,8 @@ export default function NewStorePage() {
 
           <div className="space-y-6">
             <div>
-              <p className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 inline-flex items-center gap-1.5">
-                <Sparkles size={12} />
+              <p className="text-xs font-semibold text-admin-text-muted uppercase tracking-wider mb-3 inline-flex items-center gap-1.5">
+                <Sparkles size={12} aria-hidden />
                 Palette
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -335,7 +340,7 @@ export default function NewStorePage() {
               <Field
                 label={
                   <span className="inline-flex items-center gap-1.5">
-                    <Type size={13} className="text-admin-text-subtle" />
+                    <Type size={13} aria-hidden className="text-admin-text-muted" />
                     Font Family
                   </span>
                 }
@@ -356,7 +361,7 @@ export default function NewStorePage() {
               <Field
                 label={
                   <span className="inline-flex items-center gap-1.5">
-                    <Square size={13} className="text-admin-text-subtle" />
+                    <Square size={13} aria-hidden className="text-admin-text-muted" />
                     Border Radius
                   </span>
                 }
@@ -380,15 +385,24 @@ export default function NewStorePage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <Link href="/admin/stores">
-            <Button type="button" variant="secondary" disabled={loading}>
-              Cancel
+        <div className="flex flex-wrap items-start justify-between gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit" variant="primary" loading={loading}>
+              Create Store
             </Button>
-          </Link>
-          <Button type="submit" variant="primary" loading={loading}>
-            {loading ? "Creating…" : "Create Store"}
-          </Button>
+            <Link
+              href="/admin/stores"
+              aria-disabled={loading || undefined}
+              tabIndex={loading ? -1 : undefined}
+              className={buttonClassName({
+                variant: "secondary",
+                size: "md",
+                className: loading ? "pointer-events-none opacity-50" : "",
+              })}
+            >
+              Cancel
+            </Link>
+          </div>
         </div>
       </form>
     </div>
@@ -404,10 +418,12 @@ interface ColorInputProps {
 }
 
 function ColorInput({ label, hint, value, onChange, disabled }: ColorInputProps) {
+  const id = useId();
   return (
-    <Field label={label} hint={hint}>
+    // htmlFor: the label targets the hex text input; Field leaves the wrapper untouched.
+    <Field label={label} hint={hint} htmlFor={id}>
       <div
-        className={`flex items-stretch gap-2 rounded-lg border border-admin-border-md bg-admin-surface focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent transition-all ${
+        className={`flex items-stretch gap-2 min-h-10 rounded-lg border border-admin-border-md bg-admin-surface transition-colors focus-within:outline-2 focus-within:outline-offset-[-1px] focus-within:outline-[var(--focus-ring)] ${
           disabled ? "opacity-50" : ""
         }`}
       >
@@ -425,10 +441,12 @@ function ColorInput({ label, hint, value, onChange, disabled }: ColorInputProps)
           />
         </label>
         <input
+          id={id}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-transparent px-3 py-2 text-sm font-mono uppercase outline-none"
+          aria-describedby={hint ? `${id}-hint` : undefined}
+          className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm font-mono uppercase text-admin-text-primary outline-none disabled:cursor-not-allowed"
           disabled={disabled}
           spellCheck={false}
           aria-label={`${label} hex value`}

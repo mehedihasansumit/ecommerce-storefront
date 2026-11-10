@@ -6,6 +6,9 @@ import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
 import type { Metadata } from "next";
 import { resolveTheme } from "@/features/stores/presets";
 import { Store, Plus, Globe, ExternalLink, Settings } from "lucide-react";
+import type { IStore } from "@/features/stores/types";
+import { buttonClassName, Card, EmptyState, PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
 
 export const metadata: Metadata = { title: "Manage Stores" };
 
@@ -48,232 +51,124 @@ export default async function StoresPage() {
       ? await StoreService.getAll()
       : await StoreService.getByIds(adminUser.assignedStores);
 
+  const manageClass = buttonClassName({ variant: "secondary", size: "sm", className: "min-h-10 sm:min-h-0" });
+  const visitClass =
+    "inline-flex items-center gap-1 py-1 rounded text-xs text-admin-text-muted hover:text-admin-text-primary transition-colors focus-ring";
+  const thClass = "text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide";
+
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Stores</h1>
-          <p className="text-sm text-admin-text-muted mt-1">
-            {stores.length} {stores.length === 1 ? "store" : "stores"} total
-          </p>
-        </div>
-        {canCreateStore && (
-          <Link
-            href="/admin/stores/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Store
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Stores"
+        description={`${stores.length} ${stores.length === 1 ? "store" : "stores"} total`}
+        breadcrumbs={
+          <AdminBreadcrumbs items={[{ label: "Dashboard", href: "/admin" }, { label: "Stores" }]} />
+        }
+        actions={
+          canCreateStore && (
+            <Link href="/admin/stores/new" className={buttonClassName({ variant: "primary", size: "md" })}>
+              <Plus size={16} aria-hidden />
+              New Store
+            </Link>
+          )
+        }
+      />
 
       {/* Empty state */}
       {stores.length === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <Store className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No stores yet</h3>
-          <p className="text-sm text-admin-text-muted mb-6">Create your first store to get started.</p>
-          {canCreateStore && (
-            <Link
-              href="/admin/stores/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Create Store
-            </Link>
-          )}
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={Store}
+            title="No stores yet"
+            description="Create your first store to get started."
+            action={
+              canCreateStore && (
+                <Link href="/admin/stores/new" className={buttonClassName({ variant: "primary", size: "md" })}>
+                  <Plus size={16} aria-hidden />
+                  Create Store
+                </Link>
+              )
+            }
+          />
+        </Card>
       ) : (
         <>
           {/* Mobile card list */}
-          <div className="flex flex-col gap-3 sm:hidden">
-            {stores.map((store) => {
-              const primary = resolveTheme(store.theme).primaryColor || "#111827";
-              const initials = store.name
-                .split(" ")
-                .slice(0, 2)
-                .map((w) => w[0])
-                .join("")
-                .toUpperCase();
-
-              return (
-                <div
-                  key={store._id}
-                  className="bg-admin-surface rounded-xl border border-admin-border p-4 flex flex-col gap-3"
-                >
+          <ul className="flex flex-col gap-3 sm:hidden">
+            {stores.map((store) => (
+              <li key={store._id}>
+                <Card padding="md" className="flex flex-col gap-3">
                   {/* Top row: avatar + name + status */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ backgroundColor: primary }}
-                      >
-                        {store.logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={store.logo}
-                            alt={store.name}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          initials
-                        )}
-                      </div>
+                      <StoreAvatar store={store} />
                       <span className="text-sm font-medium text-admin-text-primary truncate">{store.name}</span>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${
-                        store.isActive ? "bg-green-100 text-green-700" : "bg-admin-chip text-admin-chip-text"
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          store.isActive ? "bg-green-500" : "bg-admin-text-subtle"
-                        }`}
-                      />
-                      {store.isActive ? "Active" : "Inactive"}
-                    </span>
+                    <StoreStatus active={store.isActive} />
                   </div>
 
                   {/* Domains */}
-                  {store.domains.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {store.domains.slice(0, 2).map((domain) => (
-                        <span
-                          key={domain}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-admin-chip text-admin-chip-text text-xs rounded-md"
-                        >
-                          <Globe className="w-3 h-3 shrink-0" />
-                          {domain}
-                        </span>
-                      ))}
-                      {store.domains.length > 2 && (
-                        <span className="px-2 py-0.5 bg-admin-chip text-admin-chip-text text-xs rounded-md">
-                          +{store.domains.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  {store.domains.length > 0 && <DomainChips domains={store.domains} />}
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-1 border-t border-admin-border">
+                  <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-admin-border">
                     {store.domains[0] && (
                       <a
                         href={`http://${store.domains[0]}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-admin-text-subtle hover:text-admin-text-primary transition-colors"
+                        aria-label={`Visit ${store.name} (opens in a new tab)`}
+                        className={visitClass}
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <ExternalLink aria-hidden className="w-3.5 h-3.5" />
                         Visit
                       </a>
                     )}
                     <Link
                       href={`/admin/stores/${store._id}`}
-                      className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
+                      aria-label={`Manage ${store.name}`}
+                      className={`ml-auto ${manageClass}`}
                     >
-                      <Settings className="w-3.5 h-3.5" />
+                      <Settings aria-hidden className="w-3.5 h-3.5" />
                       Manage
                     </Link>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
 
           {/* Desktop table */}
-          <div className="hidden sm:block bg-admin-surface rounded-xl border border-admin-border overflow-x-auto">
-            <table className="w-full min-w-[600px]">
-              <thead>
-                <tr className="border-b border-admin-border bg-admin-surface-raised">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">
-                    Store
-                  </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">
-                    Domains
-                  </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">
-                    Status
-                  </th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-admin-border">
-                {stores.map((store) => {
-                  const primary = resolveTheme(store.theme).primaryColor || "#111827";
-                  const initials = store.name
-                    .split(" ")
-                    .slice(0, 2)
-                    .map((w) => w[0])
-                    .join("")
-                    .toUpperCase();
-
-                  return (
+          <Card padding="none" className="hidden sm:block overflow-hidden">
+            <div className="relative overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-admin-border bg-admin-surface-raised">
+                    <th scope="col" className={thClass}>Store</th>
+                    <th scope="col" className={thClass}>Domains</th>
+                    <th scope="col" className={thClass}>Status</th>
+                    <th scope="col" className={`${thClass} text-right`}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-admin-border">
+                  {stores.map((store) => (
                     <tr key={store._id} className="hover:bg-admin-surface-hover transition-colors">
                       {/* Store name + avatar */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                            style={{ backgroundColor: primary }}
-                          >
-                            {store.logo ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={store.logo}
-                                alt={store.name}
-                                className="w-full h-full object-cover rounded-lg"
-                              />
-                            ) : (
-                              initials
-                            )}
-                          </div>
+                          <StoreAvatar store={store} />
                           <span className="text-sm font-medium text-admin-text-primary">{store.name}</span>
                         </div>
                       </td>
 
                       {/* Domains */}
                       <td className="px-5 py-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {store.domains.slice(0, 2).map((domain) => (
-                            <span
-                              key={domain}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-admin-chip text-admin-chip-text text-xs rounded-md"
-                            >
-                              <Globe className="w-3 h-3 shrink-0" />
-                              {domain}
-                            </span>
-                          ))}
-                          {store.domains.length > 2 && (
-                            <span className="px-2 py-0.5 bg-admin-chip text-admin-chip-text text-xs rounded-md">
-                              +{store.domains.length - 2}
-                            </span>
-                          )}
-                        </div>
+                        <DomainChips domains={store.domains} />
                       </td>
 
                       {/* Status */}
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                            store.isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-admin-chip text-admin-chip-text"
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              store.isActive ? "bg-green-500" : "bg-admin-text-subtle"
-                            }`}
-                          />
-                          {store.isActive ? "Active" : "Inactive"}
-                        </span>
+                        <StoreStatus active={store.isActive} />
                       </td>
 
                       {/* Actions */}
@@ -284,29 +179,97 @@ export default async function StoresPage() {
                               href={`http://${store.domains[0]}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs text-admin-text-subtle hover:text-admin-text-primary transition-colors"
+                              aria-label={`Visit ${store.name} (opens in a new tab)`}
+                              className={visitClass}
                             >
-                              <ExternalLink className="w-3.5 h-3.5" />
+                              <ExternalLink aria-hidden className="w-3.5 h-3.5" />
                               Visit
                             </a>
                           )}
                           <Link
                             href={`/admin/stores/${store._id}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
+                            aria-label={`Manage ${store.name}`}
+                            className={manageClass}
                           >
-                            <Settings className="w-3.5 h-3.5" />
+                            <Settings aria-hidden className="w-3.5 h-3.5" />
                             Manage
                           </Link>
                         </div>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         </>
       )}
     </div>
+  );
+}
+
+/** Store identity swatch: logo, or initials on the store's own brand colour. */
+function StoreAvatar({ store }: { store: IStore }) {
+  const primary = resolveTheme(store.theme).primaryColor || "#111827";
+  const initials = store.name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+  return (
+    <div
+      aria-hidden
+      className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+      style={{ backgroundColor: primary }}
+    >
+      {store.logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={store.logo} alt="" className="w-full h-full object-cover rounded-lg" />
+      ) : (
+        initials
+      )}
+    </div>
+  );
+}
+
+function DomainChips({ domains }: { domains: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {domains.slice(0, 2).map((domain) => (
+        <span
+          key={domain}
+          className="inline-flex items-center gap-1 px-2 py-0.5 bg-admin-chip text-admin-chip-text text-xs rounded-md"
+        >
+          <Globe aria-hidden className="w-3 h-3 shrink-0" />
+          {domain}
+        </span>
+      ))}
+      {domains.length > 2 && (
+        <span className="px-2 py-0.5 bg-admin-chip text-admin-chip-text text-xs rounded-md">
+          +{domains.length - 2}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/** Dot + text label, so status never relies on colour alone. */
+function StoreStatus({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${
+        active
+          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300"
+          : "bg-admin-chip text-admin-chip-text"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`w-1.5 h-1.5 rounded-full ${active ? "bg-green-500" : "bg-admin-text-subtle"}`}
+      />
+      {active ? "Active" : "Inactive"}
+    </span>
   );
 }

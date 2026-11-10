@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CalendarDays } from "lucide-react";
+import { Button, Input } from "@/shared/components/ui";
 
 interface Props {
   storeId: string;
@@ -48,44 +49,53 @@ export function DateRangeFilter({ storeId, from, to }: Props) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
       {/* Presets */}
-      <div className="flex items-center gap-1 bg-admin-chip rounded-lg p-1 self-start sm:self-auto">
-        {PRESETS.map(({ label, days }) => (
-          <button
-            key={label}
-            onClick={() => applyPreset(days)}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-              isPresetActive(from, to, days)
-                ? "bg-admin-surface text-admin-text-primary shadow-sm"
-                : "text-admin-text-muted hover:text-admin-text-secondary"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      <div
+        role="group"
+        aria-label="Date range presets"
+        className="flex items-center gap-1 bg-admin-chip rounded-lg p-1 self-start sm:self-auto"
+      >
+        {PRESETS.map(({ label, days }) => {
+          const active = isPresetActive(from, to, days);
+          return (
+            <button
+              key={label}
+              type="button"
+              onClick={() => applyPreset(days)}
+              aria-pressed={active}
+              aria-label={`Last ${days} days`}
+              className={`min-h-8 px-3 py-1 text-xs font-medium rounded-md transition-colors focus-ring ${
+                active
+                  ? "bg-admin-surface text-admin-text-primary shadow-sm"
+                  : "text-admin-text-muted hover:text-admin-text-secondary"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Custom range */}
       <form onSubmit={applyCustom} className="flex flex-wrap items-center gap-1.5">
-        <CalendarDays className="w-4 h-4 text-admin-text-subtle shrink-0" />
-        <input
+        <CalendarDays aria-hidden className="w-4 h-4 text-admin-text-muted shrink-0" />
+        <Input
           type="date"
+          aria-label="From date"
           value={localFrom}
           onChange={(e) => setLocalFrom(e.target.value)}
-          className="text-xs border border-admin-border rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
+          className="w-auto min-w-0"
         />
-        <span className="text-gray-300 text-sm">—</span>
-        <input
+        <span aria-hidden className="text-admin-text-muted text-sm">—</span>
+        <Input
           type="date"
+          aria-label="To date"
           value={localTo}
           onChange={(e) => setLocalTo(e.target.value)}
-          className="text-xs border border-admin-border rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-gray-200 text-admin-text-secondary min-w-0"
+          className="w-auto min-w-0"
         />
-        <button
-          type="submit"
-          className="px-6 py-2 text-xs bg-gray-900 dark:bg-gray-700 p-2 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium shrink-0"
-        >
+        <Button type="submit" variant="primary" size="md" className="shrink-0">
           Apply
-        </button>
+        </Button>
       </form>
     </div>
   );

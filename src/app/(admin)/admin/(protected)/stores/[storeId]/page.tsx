@@ -24,6 +24,8 @@ import StoreEditForm from "@/features/stores/components/StoreEditForm";
 import { resolveTheme } from "@/features/stores/presets";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
+import { Card, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../_components/AdminBreadcrumbs";
 
 type ModuleAccent =
   | "blue"
@@ -287,138 +289,142 @@ export default async function StoreDetailPage({
 
   return (
     <div className="space-y-6">
-      {/* Store Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-admin-surface border border-admin-border-md shadow-sm">
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.accentColor} 100%)`,
-          }}
+      <div className="space-y-2">
+        <AdminBreadcrumbs
+          items={[
+            { label: "Dashboard", href: "/admin" },
+            { label: "Stores", href: "/admin/stores" },
+            { label: store.name },
+          ]}
         />
-        <div
-          className="absolute top-0 left-0 w-1 h-full"
-          style={{ backgroundColor: theme.primaryColor }}
-        />
-        <div className="relative p-6">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-4 min-w-0">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-md flex-shrink-0 select-none ring-4 ring-white/30 dark:ring-black/20"
-                style={{ backgroundColor: theme.primaryColor }}
-              >
-                {store.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold text-admin-text-primary leading-tight tracking-tight truncate">
-                  {store.name}
-                </h1>
-                <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                  <Globe size={12} className="text-admin-text-subtle" />
-                  {store.domains.map((domain) => (
-                    <span
-                      key={domain}
-                      className="text-xs px-2 py-0.5 bg-admin-chip rounded-md text-admin-text-muted font-mono border border-admin-border-md"
-                    >
-                      {domain}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
-                  store.isActive
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
-                    : "bg-admin-chip text-admin-text-muted border border-admin-border-md"
-                }`}
-              >
-                <span className="relative flex w-2 h-2">
-                  {store.isActive && (
-                    <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                  )}
-                  <span
-                    className={`relative w-2 h-2 rounded-full ${
-                      store.isActive ? "bg-emerald-500" : "bg-gray-400"
-                    }`}
-                  />
-                </span>
-                {store.isActive ? "Active" : "Inactive"}
-              </span>
-
-              {storefrontUrl && (
-                <a
-                  href={storefrontUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-admin-surface border border-admin-border-md text-admin-text-secondary hover:text-admin-text-primary hover:border-admin-text-subtle transition-colors"
+        {/* Store Header */}
+        <Card padding="none" className="relative overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute top-0 left-0 w-1 h-full"
+            style={{ backgroundColor: theme.primaryColor }}
+          />
+          <div className="relative p-6">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-4 min-w-0">
+                <div
+                  aria-hidden
+                  className="w-14 h-14 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-sm flex-shrink-0 select-none"
+                  style={{ backgroundColor: theme.primaryColor }}
                 >
-                  <ExternalLink size={13} />
-                  Visit storefront
-                </a>
-              )}
-            </div>
-          </div>
-
-          {canEditStore && (
-            <div className="mt-5 pt-4 border-t border-admin-border flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-admin-text-subtle">
-              {/* Theme palette */}
-              <div className="inline-flex items-center gap-2">
-                <span className="font-medium text-admin-text-muted">Light</span>
-                <div className="flex items-center -space-x-1">
-                  {lightColors.map((color, i) => (
-                    <div
-                      key={i}
-                      className="w-5 h-5 rounded-full border-2 border-white dark:border-admin-surface shadow-sm"
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
+                  {store.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-bold text-admin-text-primary leading-tight tracking-tight truncate">
+                    {store.name}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    <Globe aria-hidden size={12} className="text-admin-text-muted" />
+                    {store.domains.map((domain) => (
+                      <span
+                        key={domain}
+                        className="text-xs px-2 py-0.5 bg-admin-chip rounded-md text-admin-text-muted font-mono border border-admin-border-md"
+                      >
+                        {domain}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {darkColors.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                    store.isActive
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
+                      : "bg-admin-chip text-admin-text-muted border border-admin-border-md"
+                  }`}
+                >
+                  <span aria-hidden className="relative flex w-2 h-2">
+                    <span
+                      className={`relative w-2 h-2 rounded-full ${
+                        store.isActive ? "bg-emerald-500" : "bg-gray-400"
+                      }`}
+                    />
+                  </span>
+                  {store.isActive ? "Active" : "Inactive"}
+                </span>
+
+                {storefrontUrl && (
+                  <a
+                    href={storefrontUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={buttonClassName({ variant: "secondary", size: "sm" })}
+                  >
+                    <ExternalLink aria-hidden size={14} />
+                    Visit storefront
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {canEditStore && (
+              <div className="mt-5 pt-4 border-t border-admin-border flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-admin-text-muted">
+                {/* Theme palette */}
                 <div className="inline-flex items-center gap-2">
-                  <span className="font-medium text-admin-text-muted">Dark</span>
+                  <span className="font-medium text-admin-text-muted">Light</span>
                   <div className="flex items-center -space-x-1">
-                    {darkColors.map((color, i) => (
+                    {lightColors.map((color, i) => (
                       <div
                         key={i}
-                        className="w-5 h-5 rounded-full border-2 border-white dark:border-admin-surface shadow-sm"
-                        style={{ backgroundColor: color as string }}
-                        title={`dark: ${color}`}
+                        className="w-5 h-5 rounded-full border-2 border-admin-surface shadow-sm"
+                        style={{ backgroundColor: color }}
+                        title={color}
                       />
                     ))}
                   </div>
                 </div>
-              )}
 
-              <span className="hidden md:inline text-admin-border-md">·</span>
+                {darkColors.length > 0 && (
+                  <div className="inline-flex items-center gap-2">
+                    <span className="font-medium text-admin-text-muted">Dark</span>
+                    <div className="flex items-center -space-x-1">
+                      {darkColors.map((color, i) => (
+                        <div
+                          key={i}
+                          className="w-5 h-5 rounded-full border-2 border-admin-surface shadow-sm"
+                          style={{ backgroundColor: color as string }}
+                          title={`dark: ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              <span className="inline-flex items-center gap-1.5">
-                <Type size={12} />
-                {theme.fontFamily}
-              </span>
-              <span className="capitalize">{theme.layoutStyle} layout</span>
-              <span>
-                {theme.borderRadius === "0rem"
-                  ? "No radius"
-                  : `${theme.borderRadius} radius`}
-              </span>
-            </div>
-          )}
-        </div>
+                <span aria-hidden className="hidden md:inline text-admin-text-muted">·</span>
+
+                <span className="inline-flex items-center gap-1.5">
+                  <Type aria-hidden size={12} />
+                  {theme.fontFamily}
+                </span>
+                <span className="capitalize">{theme.layoutStyle} layout</span>
+                <span>
+                  {theme.borderRadius === "0rem"
+                    ? "No radius"
+                    : `${theme.borderRadius} radius`}
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Module Navigation */}
       {modules.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3 px-0.5">
-            <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wider">
               Store Modules
             </h2>
-            <span className="text-xs text-admin-text-subtle">
+            <span className="text-xs text-admin-text-muted">
               {modules.length} available
             </span>
           </div>
@@ -430,12 +436,14 @@ export default async function StoreDetailPage({
                 <Link
                   key={mod.href}
                   href={mod.href}
-                  className={`group relative overflow-hidden flex items-center gap-3 p-4 bg-admin-surface rounded-xl border border-admin-border-md ring-2 ring-transparent ${a.ring} hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-[var(--ease-out-expo)]`}
+                  className={`group relative overflow-hidden flex items-center gap-3 p-4 bg-admin-surface rounded-lg border border-admin-border-md ring-2 ring-transparent ${a.ring} hover:bg-admin-surface-hover transition-colors focus-ring`}
                 >
                   <span
+                    aria-hidden
                     className={`absolute left-0 top-0 bottom-0 w-1 ${a.bar} opacity-0 group-hover:opacity-100 transition-opacity`}
                   />
                   <div
+                    aria-hidden
                     className={`w-10 h-10 rounded-lg ${a.idle} ${a.hover} flex items-center justify-center flex-shrink-0 transition-colors duration-200`}
                   >
                     <Icon size={18} />
@@ -444,13 +452,14 @@ export default async function StoreDetailPage({
                     <p className="text-sm font-semibold text-admin-text-secondary truncate">
                       {mod.label}
                     </p>
-                    <p className="text-xs text-admin-text-subtle truncate">
+                    <p className="text-xs text-admin-text-muted truncate">
                       {mod.description}
                     </p>
                   </div>
                   <ArrowRight
+                    aria-hidden
                     size={14}
-                    className="text-admin-text-subtle flex-shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                    className="text-admin-text-muted flex-shrink-0 group-hover:text-admin-text-secondary transition-colors"
                   />
                 </Link>
               );
@@ -462,8 +471,8 @@ export default async function StoreDetailPage({
       {/* Store Settings Form */}
       {(canEditStore || canManagePoints) && (
         <div id="loyalty-points">
-          <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 px-0.5 inline-flex items-center gap-1.5">
-            <Settings2 size={12} />
+          <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wider mb-3 px-0.5 inline-flex items-center gap-1.5">
+            <Settings2 aria-hidden size={12} />
             Store Settings
           </h2>
           <StoreEditForm

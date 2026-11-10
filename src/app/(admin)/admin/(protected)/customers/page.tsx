@@ -6,6 +6,10 @@ import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
 import { Users, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { buttonClassName, Card, EmptyState, PageHeader } from "@/shared/components/ui";
+import { FilterChip } from "@/shared/components/admin/FilterChip";
+import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
 
 export const metadata: Metadata = { title: "All Customers" };
 
@@ -61,179 +65,137 @@ export default async function AllCustomersPage({
     return `/admin/customers${qs ? `?${qs}` : ""}`;
   }
 
+  const thClass = "text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide";
+  const viewInStoreClass = buttonClassName({ variant: "secondary", size: "sm", className: "min-h-10 sm:min-h-0" });
+  const formatJoined = (d: Date | string) =>
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Customers</h1>
-          <p className="text-sm text-admin-text-muted mt-1">
-            {total} {total === 1 ? "customer" : "customers"}
-            {storeFilter ? " in this store" : " across all stores"}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Customers"
+        description={`${total} ${total === 1 ? "customer" : "customers"}${storeFilter ? " in this store" : " across all stores"}`}
+        breadcrumbs={
+          <AdminBreadcrumbs items={[{ label: "Dashboard", href: "/admin" }, { label: "Customers" }]} />
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap items-start gap-3 mb-6">
         {/* Store filter */}
         {stores.length > 1 && (
-          <div className="flex flex-wrap gap-1.5">
-            <Link
-              href={buildHref({ store: undefined, page: 1 })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!storeFilter
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-                }`}
-            >
+          <div role="group" aria-label="Filter by store" className="flex flex-wrap gap-1.5">
+            <FilterChip href={buildHref({ store: undefined, page: 1 })} selected={!storeFilter}>
               All Stores
-            </Link>
+            </FilterChip>
             {stores.map((s) => (
-              <Link
-                key={s._id}
-                href={buildHref({ store: s._id, page: 1 })}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${storeFilter === s._id
-                    ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-                  }`}
-              >
+              <FilterChip key={s._id} href={buildHref({ store: s._id, page: 1 })} selected={storeFilter === s._id}>
                 {s.name}
-              </Link>
+              </FilterChip>
             ))}
           </div>
         )}
 
         {/* Status filter */}
-        <div className="flex items-center gap-1 ml-auto">
+        <div role="group" aria-label="Filter by status" className="flex flex-wrap items-center gap-1.5 sm:ml-auto">
           {(["all", "active", "inactive"] as Status[]).map((s) => (
-            <Link
-              key={s}
-              href={buildHref({ status: s, page: 1 })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-                }`}
-            >
+            <FilterChip key={s} href={buildHref({ status: s, page: 1 })} selected={status === s} className="capitalize">
               {s}
-            </Link>
+            </FilterChip>
           ))}
         </div>
       </div>
 
       {/* Empty state */}
       {total === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No customers found</h3>
-          <p className="text-sm text-admin-text-muted">
-            {storeFilter || status !== "all"
-              ? "Try removing some filters."
-              : "Customers will appear here once they register."}
-          </p>
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={Users}
+            title="No customers found"
+            description={
+              storeFilter || status !== "all"
+                ? "Try removing some filters."
+                : "Customers will appear here once they register."
+            }
+          />
+        </Card>
       ) : (
         <>
           {/* Mobile card list */}
-          <div className="flex flex-col gap-3 sm:hidden">
+          <ul className="flex flex-col gap-3 sm:hidden">
             {customers.map((customer) => {
               const store = storeMap.get(customer.storeId);
               const defaultAddress =
                 customer.addresses?.find((a) => a.isDefault) ?? customer.addresses?.[0];
 
               return (
-                <div key={customer._id} className="bg-admin-surface rounded-xl border border-admin-border-md p-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                      {getInitials(customer.name)}
+                <li key={customer._id}>
+                  <Card padding="md" className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <InitialsAvatar name={customer.name} className="w-10 h-10" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-admin-text-primary truncate">{customer.name}</p>
+                        {store && (
+                          <p className="text-xs text-admin-text-muted truncate">{store.name}</p>
+                        )}
+                      </div>
+                      <ActiveStatus active={customer.isActive} className="ml-auto" />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-admin-text-primary truncate">{customer.name}</p>
-                      {store && (
-                        <p className="text-xs text-admin-text-subtle truncate">{store.name}</p>
+
+                    <div className="space-y-1">
+                      {customer.email && (
+                        <p className="text-xs text-admin-text-secondary flex items-center gap-1.5 min-w-0">
+                          <Mail aria-hidden className="w-3 h-3 shrink-0 text-admin-text-muted" />
+                          <span className="truncate">{customer.email}</span>
+                        </p>
+                      )}
+                      {customer.phone && (
+                        <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
+                          <Phone aria-hidden className="w-3 h-3 shrink-0 text-admin-text-muted" />
+                          {customer.phone}
+                        </p>
+                      )}
+                      {defaultAddress && (
+                        <p className="text-xs text-admin-text-muted flex items-center gap-1.5">
+                          <MapPin aria-hidden className="w-3 h-3 shrink-0 text-admin-text-muted" />
+                          {[defaultAddress.city, defaultAddress.country].filter(Boolean).join(", ") || "—"}
+                        </p>
                       )}
                     </div>
-                    <span
-                      className={`ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${customer.isActive ? "bg-green-100 text-green-700" : "bg-admin-chip text-admin-text-muted"
-                        }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${customer.isActive ? "bg-green-500" : "bg-gray-400"}`} />
-                      {customer.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
 
-                  <div className="space-y-1">
-                    {customer.email && (
-                      <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
-                        <Mail className="w-3 h-3 shrink-0 text-admin-text-subtle" />
-                        {customer.email}
-                      </p>
-                    )}
-                    {customer.phone && (
-                      <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
-                        <Phone className="w-3 h-3 shrink-0 text-admin-text-subtle" />
-                        {customer.phone}
-                      </p>
-                    )}
-                    {defaultAddress && (
-                      <p className="text-xs text-admin-text-muted flex items-center gap-1.5">
-                        <MapPin className="w-3 h-3 shrink-0 text-admin-text-subtle" />
-                        {[defaultAddress.city, defaultAddress.country].filter(Boolean).join(", ") || "—"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-admin-border">
-                    <span className="text-xs text-admin-text-subtle">
-                      Joined{" "}
-                      {new Date(customer.createdAt).toLocaleDateString("en-GB", {
-                        day: "2-digit", month: "short", year: "numeric",
-                      })}
-                    </span>
-                    {store && (
-                      <Link
-                        href={`/admin/stores/${store._id}/customers`}
-                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
-                      >
-                        View in Store
-                      </Link>
-                    )}
-                  </div>
-                </div>
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-admin-border">
+                      <span className="text-xs text-admin-text-muted">
+                        Joined {formatJoined(customer.createdAt)}
+                      </span>
+                      {store && (
+                        <Link
+                          href={`/admin/stores/${store._id}/customers`}
+                          aria-label={`View ${customer.name} in ${store.name}`}
+                          className={viewInStoreClass}
+                        >
+                          View in Store
+                        </Link>
+                      )}
+                    </div>
+                  </Card>
+                </li>
               );
             })}
-          </div>
+          </ul>
 
           {/* Desktop table */}
-          <div className="hidden sm:block bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
-            <div className="overflow-x-auto">
+          <Card padding="none" className="hidden sm:block overflow-hidden">
+            <div className="relative overflow-x-auto">
               <table className="w-full min-w-175">
                 <thead>
                   <tr className="border-b border-admin-border-md bg-admin-surface-raised">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Customer
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Contact
-                    </th>
-                    {!storeFilter && (
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                        Store
-                      </th>
-                    )}
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Location
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Status
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Joined
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Actions
-                    </th>
+                    <th scope="col" className={thClass}>Customer</th>
+                    <th scope="col" className={thClass}>Contact</th>
+                    {!storeFilter && <th scope="col" className={thClass}>Store</th>}
+                    <th scope="col" className={thClass}>Location</th>
+                    <th scope="col" className={thClass}>Status</th>
+                    <th scope="col" className={thClass}>Joined</th>
+                    <th scope="col" className={thClass}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -243,12 +205,10 @@ export default async function AllCustomersPage({
                       customer.addresses?.find((a) => a.isDefault) ?? customer.addresses?.[0];
 
                     return (
-                      <tr key={customer._id} className="hover:bg-admin-surface-raised/60 transition-colors group">
+                      <tr key={customer._id} className="hover:bg-admin-surface-hover transition-colors">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                              {getInitials(customer.name)}
-                            </div>
+                            <InitialsAvatar name={customer.name} className="w-9 h-9" />
                             <span className="text-sm font-medium text-admin-text-primary">{customer.name}</span>
                           </div>
                         </td>
@@ -257,18 +217,18 @@ export default async function AllCustomersPage({
                           <div className="space-y-1">
                             {customer.email && (
                               <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
-                                <Mail className="w-3 h-3 shrink-0 text-admin-text-subtle" />
+                                <Mail aria-hidden className="w-3 h-3 shrink-0 text-admin-text-muted" />
                                 {customer.email}
                               </p>
                             )}
                             {customer.phone && (
                               <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
-                                <Phone className="w-3 h-3 shrink-0 text-admin-text-subtle" />
+                                <Phone aria-hidden className="w-3 h-3 shrink-0 text-admin-text-muted" />
                                 {customer.phone}
                               </p>
                             )}
                             {!customer.email && !customer.phone && (
-                              <span className="text-xs text-admin-text-subtle">—</span>
+                              <span className="text-xs text-admin-text-muted">—</span>
                             )}
                           </div>
                         </td>
@@ -278,12 +238,12 @@ export default async function AllCustomersPage({
                             {store ? (
                               <Link
                                 href={`/admin/stores/${store._id}/customers`}
-                                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                className="rounded text-xs font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 underline-offset-2 hover:underline transition-colors focus-ring"
                               >
                                 {store.name}
                               </Link>
                             ) : (
-                              <span className="text-xs text-admin-text-subtle">—</span>
+                              <span className="text-xs text-admin-text-muted">—</span>
                             )}
                           </td>
                         )}
@@ -291,42 +251,30 @@ export default async function AllCustomersPage({
                         <td className="px-5 py-4">
                           {defaultAddress ? (
                             <span className="text-xs text-admin-text-muted flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-admin-text-subtle shrink-0" />
+                              <MapPin aria-hidden className="w-3 h-3 text-admin-text-muted shrink-0" />
                               {[defaultAddress.city, defaultAddress.country]
                                 .filter(Boolean)
                                 .join(", ") || "—"}
                             </span>
                           ) : (
-                            <span className="text-xs text-admin-text-subtle">—</span>
+                            <span className="text-xs text-admin-text-muted">—</span>
                           )}
                         </td>
 
                         <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${customer.isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-admin-chip text-admin-text-muted"
-                              }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${customer.isActive ? "bg-green-500" : "bg-gray-400"
-                                }`}
-                            />
-                            {customer.isActive ? "Active" : "Inactive"}
-                          </span>
+                          <ActiveStatus active={customer.isActive} />
                         </td>
 
-                        <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
-                          {new Date(customer.createdAt).toLocaleDateString("en-GB", {
-                            day: "2-digit", month: "short", year: "numeric",
-                          })}
+                        <td className="px-5 py-4 text-xs text-admin-text-muted whitespace-nowrap">
+                          {formatJoined(customer.createdAt)}
                         </td>
 
                         <td className="px-5 py-4">
                           {store && (
                             <Link
                               href={`/admin/stores/${store._id}/customers`}
-                              className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
+                              aria-label={`View ${customer.name} in ${store.name}`}
+                              className={viewInStoreClass}
                             >
                               View in Store
                             </Link>
@@ -338,26 +286,23 @@ export default async function AllCustomersPage({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 mt-4">
               <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
-              <div className="flex items-center gap-1">
-                <Link
+              <div className="flex flex-wrap items-center gap-1">
+                <PageArrow
                   href={buildHref({ page: currentPage - 1 })}
-                  aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
-                      : "border-admin-border-md hover:bg-admin-chip"
-                    }`}
+                  disabled={currentPage <= 1}
+                  label="Previous page"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                </Link>
+                  <ChevronLeft aria-hidden className="w-4 h-4" />
+                </PageArrow>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
@@ -370,7 +315,8 @@ export default async function AllCustomersPage({
                     item === "..." ? (
                       <span
                         key={`ellipsis-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle"
+                        aria-hidden
+                        className="w-10 h-10 flex items-center justify-center text-xs text-admin-text-muted"
                       >
                         …
                       </span>
@@ -378,31 +324,84 @@ export default async function AllCustomersPage({
                       <Link
                         key={item}
                         href={buildHref({ page: item as number })}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
-                            ? "bg-gray-900 text-white"
-                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
-                          }`}
+                        aria-label={`Page ${item}`}
+                        aria-current={currentPage === item ? "page" : undefined}
+                        className={`w-10 h-10 flex items-center justify-center rounded-lg text-xs font-medium transition-colors focus-ring ${
+                          currentPage === item
+                            ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-surface-hover"
+                        }`}
                       >
                         {item}
                       </Link>
                     )
                   )}
 
-                <Link
+                <PageArrow
                   href={buildHref({ page: currentPage + 1 })}
-                  aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
-                      : "border-admin-border-md hover:bg-admin-chip"
-                    }`}
+                  disabled={currentPage >= totalPages}
+                  label="Next page"
                 >
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
+                  <ChevronRight aria-hidden className="w-4 h-4" />
+                </PageArrow>
               </div>
-            </div>
+            </nav>
           )}
         </>
       )}
     </div>
+  );
+}
+
+function InitialsAvatar({ name, className }: { name: string; className: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`${className} rounded-full bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 text-xs font-bold shrink-0`}
+    >
+      {getInitials(name)}
+    </div>
+  );
+}
+
+/** Dot + text label, so status never relies on colour alone. */
+function ActiveStatus({ active, className }: { active: boolean; className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${
+        active
+          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300"
+          : "bg-admin-chip text-admin-chip-text"
+      } ${className ?? ""}`}
+    >
+      <span aria-hidden className={`w-1.5 h-1.5 rounded-full ${active ? "bg-green-500" : "bg-admin-text-subtle"}`} />
+      {active ? "Active" : "Inactive"}
+    </span>
+  );
+}
+
+function PageArrow({
+  href,
+  disabled,
+  label,
+  children,
+}: {
+  href: string;
+  disabled: boolean;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : undefined}
+      className={`w-10 h-10 flex items-center justify-center rounded-lg border border-admin-border-md text-admin-text-muted transition-colors focus-ring ${
+        disabled ? "opacity-30 pointer-events-none" : "hover:bg-admin-surface-hover"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }

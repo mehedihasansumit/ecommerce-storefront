@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { Plus, Megaphone, Radio, Clock, XCircle, ChevronRight } from "lucide-react";
+import { Plus, Megaphone, Radio, Clock, XCircle } from "lucide-react";
+import { Card, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { NotificationService } from "@/features/notifications/service";
@@ -76,97 +78,66 @@ export default async function AnnouncementsPage({
 
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Announcements</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Announcements</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {announcements.length}{" "}
-            {announcements.length === 1 ? "announcement" : "announcements"} ·{" "}
-            {stats.live} live
-          </p>
-        </div>
-        {canCreate && (
-          <Link
-            href={`/admin/stores/${storeId}/announcements/new`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Announcement
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Announcements"
+        description={`${announcements.length} ${announcements.length === 1 ? "announcement" : "announcements"} · ${stats.live} live`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Announcements" },
+            ]}
+          />
+        }
+        actions={
+          canCreate && (
+            <Link
+              href={`/admin/stores/${storeId}/announcements/new`}
+              className={buttonClassName({ variant: "primary", size: "md" })}
+            >
+              <Plus aria-hidden className="w-4 h-4" />
+              New Announcement
+            </Link>
+          )
+        }
+      />
 
       {/* Stats cards */}
       {announcements.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Megaphone className="w-4 h-4 text-admin-text-subtle" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-                Total
-              </span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{announcements.length}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">all announcements</p>
-          </div>
-
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Radio className="w-4 h-4 text-green-500" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-                Live
-              </span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{stats.live}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">showing now</p>
-          </div>
-
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="w-4 h-4 text-blue-500" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-                Scheduled
-              </span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{stats.scheduled}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">upcoming</p>
-          </div>
-
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <XCircle className="w-4 h-4 text-red-400" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-                Expired
-              </span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{stats.expired}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">no longer active</p>
-          </div>
+          {[
+            { icon: Megaphone, iconClass: "text-admin-text-muted", label: "Total", value: announcements.length, hint: "all announcements" },
+            { icon: Radio, iconClass: "text-green-500", label: "Live", value: stats.live, hint: "showing now" },
+            { icon: Clock, iconClass: "text-blue-500", label: "Scheduled", value: stats.scheduled, hint: "upcoming" },
+            { icon: XCircle, iconClass: "text-red-400", label: "Expired", value: stats.expired, hint: "no longer active" },
+          ].map(({ icon: Icon, iconClass, label, value, hint }) => (
+            <Card key={label} padding="md">
+              <div className="flex items-center gap-2 mb-1">
+                <Icon aria-hidden className={`w-4 h-4 ${iconClass}`} />
+                <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
+                  {label}
+                </span>
+              </div>
+              <p className="text-xl font-bold text-admin-text-primary">{value}</p>
+              <p className="text-xs text-admin-text-muted mt-0.5">{hint}</p>
+            </Card>
+          ))}
         </div>
       )}
 
       {/* Status filter tabs */}
-      <div className="flex flex-wrap gap-1.5 mb-5">
+      <div className="flex flex-wrap gap-1.5 mb-5" role="group" aria-label="Filter announcements by status">
         {statuses.map(({ key, label }) => (
           <Link
             key={key}
             href={buildHref(key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
+            aria-current={filterStatus === key ? "page" : undefined}
+            className={`focus-ring px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
               filterStatus === key
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                ? "bg-admin-text-primary text-admin-surface border-admin-text-primary"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-admin-text-subtle"
             }`}
           >
             {label}

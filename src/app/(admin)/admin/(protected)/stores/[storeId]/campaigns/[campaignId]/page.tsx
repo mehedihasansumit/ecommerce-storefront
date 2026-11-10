@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { CampaignService } from "@/features/campaigns/service";
@@ -9,10 +7,11 @@ import { CategoryService } from "@/features/categories/service";
 import { CampaignForm } from "@/features/campaigns/components/CampaignForm";
 import { tAdmin } from "@/shared/lib/i18n";
 import { PageHeader, Badge } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 
 const STATUS_TONE = {
   active: "success",
-  scheduled: "brand",
+  scheduled: "warning",
   paused: "warning",
   expired: "neutral",
   archived: "neutral",
@@ -46,33 +45,15 @@ export default async function EditCampaignPage({
       <PageHeader
         title={tAdmin(campaign.name)}
         breadcrumbs={
-          <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted flex-wrap">
-            <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">
-              Dashboard
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">
-              Stores
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <Link
-              href={`/admin/stores/${storeId}`}
-              className="hover:text-admin-text-secondary transition-colors"
-            >
-              {store.name}
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <Link
-              href={`/admin/stores/${storeId}/campaigns`}
-              className="hover:text-admin-text-secondary transition-colors"
-            >
-              Campaigns
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-admin-text-secondary font-medium">
-              {tAdmin(campaign.name)}
-            </span>
-          </nav>
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Campaigns", href: `/admin/stores/${storeId}/campaigns` },
+              { label: tAdmin(campaign.name) },
+            ]}
+          />
         }
         actions={
           <div className="flex items-center gap-2">

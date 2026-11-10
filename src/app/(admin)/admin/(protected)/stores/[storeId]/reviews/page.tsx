@@ -1,6 +1,8 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge, PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { ReviewService } from "@/features/reviews/service";
@@ -8,6 +10,9 @@ import { StoreService } from "@/features/stores/service";
 import { ReviewModerationTable } from "./ReviewModerationTable";
 
 const PAGE_SIZE = 20;
+
+const PAGE_BTN =
+  "focus-ring min-w-10 h-10 flex items-center justify-center rounded-lg border transition-colors";
 
 export default async function AdminReviewsPage({
   params,
@@ -53,34 +58,33 @@ export default async function AdminReviewsPage({
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Reviews</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Customer Reviews</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
+      <PageHeader
+        className="mb-0"
+        title="Customer Reviews"
+        description={
+          <>
             {total} review{total !== 1 ? "s" : ""} total
             {pendingCount > 0 && (
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">
+              <Badge tone="warning" className="ml-2">
                 {pendingCount} pending
-              </span>
+              </Badge>
             )}
-          </p>
-        </div>
-      </div>
+          </>
+        }
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Reviews" },
+            ]}
+          />
+        }
+      />
 
       {/* Filter tabs */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter reviews">
         {[
           { label: "All", value: undefined },
           { label: "Pending", value: "pending" },
@@ -91,10 +95,11 @@ export default async function AdminReviewsPage({
             <Link
               key={tab.label}
               href={`/admin/stores/${storeId}/reviews${tab.value ? `?filter=${tab.value}` : ""}`}
-              className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
+              aria-current={active ? "page" : undefined}
+              className={`focus-ring px-3 py-1.5 text-sm rounded-lg font-medium border transition-colors ${
                 active
-                  ? "bg-gray-900 text-white"
-                  : "bg-admin-surface border border-admin-border-md text-admin-text-secondary hover:bg-admin-surface-raised"
+                  ? "bg-admin-text-primary text-admin-surface border-admin-text-primary"
+                  : "bg-admin-surface border-admin-border-md text-admin-text-secondary hover:bg-admin-surface-hover"
               }`}
             >
               {tab.label}
@@ -108,22 +113,23 @@ export default async function AdminReviewsPage({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-admin-text-muted">
+        <nav aria-label="Pagination" className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-admin-text-muted">
           <span>
             Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center justify-center gap-1">
             {/* Previous */}
             {page > 1 ? (
               <Link
                 href={`/admin/stores/${storeId}/reviews?page=${page - 1}${filter ? `&filter=${filter}` : ""}`}
-                className="px-3 py-1.5 rounded-lg border border-admin-border-md bg-admin-surface hover:bg-admin-surface-raised transition-colors"
+                aria-label="Previous page"
+                className={`${PAGE_BTN} border-admin-border-md bg-admin-surface text-admin-text-secondary hover:bg-admin-surface-hover`}
               >
-                ‹
+                <ChevronLeft aria-hidden className="w-4 h-4" />
               </Link>
             ) : (
-              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-admin-text-subtle cursor-default">
-                ‹
+              <span aria-hidden className={`${PAGE_BTN} border-admin-border bg-admin-surface-raised text-admin-text-subtle opacity-50 cursor-default`}>
+                <ChevronLeft className="w-4 h-4" />
               </span>
             )}
 
@@ -147,17 +153,19 @@ export default async function AdminReviewsPage({
               }
               return pages.map((p, idx) =>
                 p === "…" ? (
-                  <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-admin-text-subtle">
+                  <span key={`ellipsis-${idx}`} aria-hidden className="px-2 py-1.5 text-admin-text-muted">
                     …
                   </span>
                 ) : (
                   <Link
                     key={p}
                     href={`/admin/stores/${storeId}/reviews?page=${p}${filter ? `&filter=${filter}` : ""}`}
-                    className={`min-w-8 px-2.5 py-1.5 rounded-lg border text-center transition-colors ${
+                    aria-label={`Page ${p}`}
+                    aria-current={p === page ? "page" : undefined}
+                    className={`${PAGE_BTN} px-2.5 ${
                       p === page
-                        ? "border-gray-900 bg-gray-900 text-white font-medium"
-                        : "border-admin-border-md bg-admin-surface hover:bg-admin-surface-raised text-admin-text-secondary"
+                        ? "border-admin-text-primary bg-admin-text-primary text-admin-surface font-medium"
+                        : "border-admin-border-md bg-admin-surface hover:bg-admin-surface-hover text-admin-text-secondary"
                     }`}
                   >
                     {p}
@@ -170,17 +178,18 @@ export default async function AdminReviewsPage({
             {page < totalPages ? (
               <Link
                 href={`/admin/stores/${storeId}/reviews?page=${page + 1}${filter ? `&filter=${filter}` : ""}`}
-                className="px-3 py-1.5 rounded-lg border border-admin-border-md bg-admin-surface hover:bg-admin-surface-raised transition-colors"
+                aria-label="Next page"
+                className={`${PAGE_BTN} border-admin-border-md bg-admin-surface text-admin-text-secondary hover:bg-admin-surface-hover`}
               >
-                ›
+                <ChevronRight aria-hidden className="w-4 h-4" />
               </Link>
             ) : (
-              <span className="px-3 py-1.5 rounded-lg border border-admin-border bg-admin-surface-raised text-admin-text-subtle cursor-default">
-                ›
+              <span aria-hidden className={`${PAGE_BTN} border-admin-border bg-admin-surface-raised text-admin-text-subtle opacity-50 cursor-default`}>
+                <ChevronRight className="w-4 h-4" />
               </span>
             )}
           </div>
-        </div>
+        </nav>
       )}
     </div>
   );

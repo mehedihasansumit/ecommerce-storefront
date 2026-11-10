@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FolderOpen, Package, ChevronRight } from "lucide-react";
+import { FolderOpen, Package, ChevronRight, Plus } from "lucide-react";
 import { CategoryService } from "@/features/categories/service";
 import { ProductService } from "@/features/products/service";
 import { StoreService } from "@/features/stores/service";
 import { tAdmin } from "@/shared/lib/i18n";
+import { FilterChip } from "@/shared/components/admin/FilterChip";
+import { Badge, Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../../_components/AdminBreadcrumbs";
 import { DeleteCategoryButton } from "./DeleteCategoryButton";
 
 type Status = "all" | "active" | "inactive";
@@ -47,95 +50,93 @@ export default async function StoreCategoriesPage({
 
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Categories</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Categories</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {total} {total === 1 ? "category" : "categories"}
-          </p>
-        </div>
-        <Link
-          href={`/admin/stores/${storeId}/categories/new`}
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
-        >
-          + New Category
-        </Link>
-      </div>
+      <PageHeader
+        title="Categories"
+        description={`${total} ${total === 1 ? "category" : "categories"}`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Categories" },
+            ]}
+          />
+        }
+        actions={
+          <Link
+            href={`/admin/stores/${storeId}/categories/new`}
+            className={buttonClassName({ variant: "primary", size: "md" })}
+          >
+            <Plus aria-hidden size={16} />
+            New Category
+          </Link>
+        }
+      />
 
       {/* Status filter tabs */}
-      <div className="flex items-center gap-1 mb-5">
+      <div role="group" aria-label="Filter by status" className="flex flex-wrap items-center gap-1 mb-5">
         {(["all", "active", "inactive"] as Status[]).map((s) => (
-          <Link
+          <FilterChip
             key={s}
             href={buildHref(storeId, s)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${status === s
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
-              }`}
+            selected={status === s}
+            className="capitalize"
           >
             {s}
-          </Link>
+          </FilterChip>
         ))}
       </div>
 
       {categories.length === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <FolderOpen className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No categories found</h3>
-          <p className="text-sm text-admin-text-muted mb-4">
-            {status !== "all"
-              ? `No ${status} categories.`
-              : "Create categories to organize your products."}
-          </p>
-          {status === "all" && (
-            <Link
-              href={`/admin/stores/${storeId}/categories/new`}
-              className="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              + New Category
-            </Link>
-          )}
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={FolderOpen}
+            title="No categories found"
+            description={
+              status !== "all"
+                ? `No ${status} categories.`
+                : "Create categories to organize your products."
+            }
+            action={
+              status === "all" ? (
+                <Link
+                  href={`/admin/stores/${storeId}/categories/new`}
+                  className={buttonClassName({ variant: "primary", size: "md" })}
+                >
+                  <Plus aria-hidden size={16} />
+                  New Category
+                </Link>
+              ) : undefined
+            }
+          />
+        </Card>
       ) : (
-        <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
-          <div className="overflow-x-auto">
+        <Card padding="none" className="overflow-hidden">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-150">
               <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                 <tr>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Category
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Slug
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Parent
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Products
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Order
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                     Status
                   </th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                    Actions
+                  <th scope="col" className="px-5 py-3">
+                    <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
@@ -156,12 +157,12 @@ export default async function StoreCategoriesPage({
                           {cat.image ? (
                             <img
                               src={cat.image}
-                              alt={name}
+                              alt=""
                               className="w-9 h-9 rounded-lg object-cover border border-admin-border shrink-0"
                             />
                           ) : (
                             <div className="w-9 h-9 rounded-lg bg-admin-chip flex items-center justify-center shrink-0">
-                              <FolderOpen className="w-4 h-4 text-admin-text-subtle" />
+                              <FolderOpen aria-hidden className="w-4 h-4 text-admin-text-muted" />
                             </div>
                           )}
                           <span className="text-sm font-medium text-admin-text-primary">
@@ -181,18 +182,18 @@ export default async function StoreCategoriesPage({
                       <td className="px-5 py-4 text-sm text-admin-text-muted">
                         {parentName ? (
                           <span className="inline-flex items-center gap-1 text-xs text-admin-text-muted">
-                            <ChevronRight className="w-3 h-3 text-admin-text-subtle" />
+                            <ChevronRight aria-hidden className="w-3 h-3 text-admin-text-muted" />
                             {parentName}
                           </span>
                         ) : (
-                          <span className="text-xs text-admin-text-subtle">—</span>
+                          <span className="text-xs text-admin-text-muted">—</span>
                         )}
                       </td>
 
                       {/* Product count */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-1.5 text-sm">
-                          <Package className="w-3.5 h-3.5 text-admin-text-subtle" />
+                          <Package aria-hidden className="w-3.5 h-3.5 text-admin-text-muted" />
                           <span className="font-medium text-admin-text-secondary">{count}</span>
                         </div>
                       </td>
@@ -204,26 +205,23 @@ export default async function StoreCategoriesPage({
 
                       {/* Status */}
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${cat.isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-admin-chip text-admin-text-muted"
-                            }`}
-                        >
+                        <Badge tone={cat.isActive ? "success" : "neutral"}>
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${cat.isActive ? "bg-green-500" : "bg-gray-400"
+                            aria-hidden
+                            className={`w-1.5 h-1.5 rounded-full ${cat.isActive ? "bg-emerald-500" : "bg-gray-400"
                               }`}
                           />
                           {cat.isActive ? "Active" : "Inactive"}
-                        </span>
+                        </Badge>
                       </td>
 
                       {/* Actions */}
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           <Link
                             href={`/admin/stores/${storeId}/categories/${cat._id}`}
-                            className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors"
+                            className={buttonClassName({ variant: "secondary", size: "sm" })}
+                            aria-label={`Edit ${name}`}
                           >
                             Edit
                           </Link>
@@ -239,7 +237,7 @@ export default async function StoreCategoriesPage({
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

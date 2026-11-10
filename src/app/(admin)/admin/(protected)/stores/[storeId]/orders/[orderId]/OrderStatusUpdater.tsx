@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, Loader2, RotateCcw } from "lucide-react";
+import { Alert, Button, Card, ConfirmDialog } from "@/shared/components/ui";
 import type { OrderStatus } from "@/features/orders/types";
 
 const FLOW: OrderStatus[] = [
@@ -33,6 +34,7 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
   const [status, setStatus] = useState<OrderStatus>(currentStatus);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   async function handleChange(newStatus: OrderStatus) {
     if (newStatus === status || saving) return;
@@ -61,64 +63,69 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
   const currentIdx = FLOW.indexOf(status);
 
   return (
-    <div className="bg-admin-surface rounded-xl border border-admin-border px-5 py-4">
+    <Card padding="none" className="px-5 py-4">
       {isCancelled ? (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-              <XCircle className="w-4 h-4 text-red-500" />
+            <span className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+              <XCircle aria-hidden className="w-4 h-4 text-red-600 dark:text-red-400" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-red-600">Order Cancelled</p>
-              <p className="text-xs text-admin-text-subtle mt-0.5">This order has been cancelled</p>
+              <p className="text-sm font-semibold text-red-600 dark:text-red-400">Order Cancelled</p>
+              <p className="text-xs text-admin-text-muted mt-0.5">This order has been cancelled</p>
             </div>
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => handleChange("pending")}
-            disabled={saving}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors disabled:opacity-50"
+            loading={saving}
+            leftIcon={<RotateCcw aria-hidden className="w-3.5 h-3.5" />}
           >
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
             Reopen
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="space-y-3">
           {/* Step progress */}
-          <div className="flex items-start">
+          <ol aria-label="Order status" className="flex items-start">
             {FLOW.map((step, idx) => {
               const isCompleted = currentIdx > idx;
               const isCurrent = currentIdx === idx;
 
               return (
-                <div key={step} className="flex items-center flex-1 last:flex-none">
+                <li key={step} className="flex items-center flex-1 last:flex-none">
                   <button
+                    type="button"
                     onClick={() => handleChange(step)}
                     disabled={saving}
-                    className="flex flex-col items-center gap-1.5 group disabled:cursor-not-allowed min-w-0"
+                    aria-current={isCurrent ? "step" : undefined}
+                    aria-label={`${STEP_LABELS[step]}${isCompleted ? " (completed)" : isCurrent ? " (current)" : ""}`}
+                    className="flex flex-col items-center gap-1.5 group min-w-10 min-h-10 rounded-lg disabled:cursor-not-allowed focus-ring"
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shrink-0 ${
                         isCompleted
-                          ? "bg-green-500 text-white"
+                          ? "bg-green-600 text-white"
                           : isCurrent
-                          ? "bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-2"
-                          : "bg-admin-chip text-admin-text-subtle group-hover:bg-admin-surface-hover group-hover:text-admin-text-secondary"
+                          ? "bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-2 ring-offset-admin-surface dark:bg-gray-100 dark:text-gray-900 dark:ring-gray-100"
+                          : "bg-admin-chip text-admin-text-muted group-hover:bg-admin-surface-hover group-hover:text-admin-text-secondary"
                       }`}
                     >
                       {isCompleted ? (
-                        <CheckCircle2 className="w-4 h-4" />
+                        <CheckCircle2 aria-hidden className="w-4 h-4" />
                       ) : (
-                        <span className="text-xs font-bold">{idx + 1}</span>
+                        <span aria-hidden className="text-xs font-bold">{idx + 1}</span>
                       )}
                     </div>
                     <span
+                      aria-hidden
                       className={`text-xs text-center leading-tight hidden sm:block ${
                         isCurrent
-                          ? "font-semibold text-gray-900"
+                          ? "font-semibold text-admin-text-primary"
                           : isCompleted
-                          ? "text-green-600 font-medium"
-                          : "text-admin-text-subtle group-hover:text-admin-text-muted"
+                          ? "text-green-700 dark:text-green-400 font-medium"
+                          : "text-admin-text-muted group-hover:text-admin-text-secondary"
                       }`}
                     >
                       {STEP_LABELS[step]}
@@ -127,41 +134,58 @@ export function OrderStatusUpdater({ orderId, storeId, currentStatus }: Props) {
 
                   {idx < FLOW.length - 1 && (
                     <div
-                      className={`flex-1 h-0.5 mx-1 mb-5 transition-all ${
-                        currentIdx > idx ? "bg-green-400" : "bg-gray-200"
+                      aria-hidden
+                      className={`flex-1 h-0.5 mx-1 mb-5 transition-colors ${
+                        currentIdx > idx ? "bg-green-500" : "bg-admin-border-md"
                       }`}
                     />
                   )}
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ol>
 
           {/* Footer row */}
-          <div className="flex items-center justify-between pt-1 border-t border-admin-border">
-            <span className="text-xs text-admin-text-subtle">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-admin-border">
+            <span className="text-xs text-admin-text-muted" aria-live="polite">
               {saving ? (
-                <span className="flex items-center gap-1 text-admin-text-muted">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Saving…
+                <span className="flex items-center gap-1">
+                  <Loader2 aria-hidden className="w-3 h-3 animate-spin" /> Saving…
                 </span>
               ) : (
                 "Click a step to update status"
               )}
             </span>
-            <button
-              onClick={() => handleChange("cancelled")}
+            <Button
+              variant="danger-outline"
+              size="sm"
+              onClick={() => setConfirmCancel(true)}
               disabled={saving}
-              className="text-xs text-red-500 hover:text-red-700 font-medium disabled:opacity-50 transition-colors"
             >
               Cancel order
-            </button>
+            </Button>
+            <ConfirmDialog
+              open={confirmCancel}
+              onClose={() => setConfirmCancel(false)}
+              onConfirm={async () => {
+                setConfirmCancel(false);
+                await handleChange("cancelled");
+              }}
+              tone="danger"
+              title="Cancel this order?"
+              description="The order will be marked as cancelled. You can reopen it later."
+              confirmLabel="Cancel order"
+              cancelLabel="Keep order"
+            />
           </div>
         </div>
       )}
 
       {error && (
-        <p className="text-xs text-red-500 mt-2 pt-2 border-t border-red-100">{error}</p>
+        <Alert tone="error" className="mt-3">
+          {error}
+        </Alert>
       )}
-    </div>
+    </Card>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { Package, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Package, ChevronLeft, ChevronRight, Star, Plus } from "lucide-react";
 import { ProductService } from "@/features/products/service";
 import { CategoryService } from "@/features/categories/service";
 import { StoreService } from "@/features/stores/service";
@@ -11,6 +11,8 @@ import { ProductsSearch } from "./ProductsSearch";
 import { CategoryFilter } from "./CategoryFilter";
 import { DeleteProductButton } from "./DeleteProductButton";
 import { FilterChip } from "@/shared/components/admin/FilterChip";
+import { Badge, Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../../_components/AdminBreadcrumbs";
 
 const PAGE_SIZE = 20;
 type Status = "all" | "active" | "inactive";
@@ -79,30 +81,29 @@ export default async function StoreProductsPage({
 
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Products</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Products</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">{total} {total === 1 ? "product" : "products"}</p>
-        </div>
-        <Link
-          href={`/admin/stores/${storeId}/products/new`}
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
-        >
-          + New Product
-        </Link>
-      </div>
+      <PageHeader
+        title="Products"
+        description={`${total} ${total === 1 ? "product" : "products"}`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Products" },
+            ]}
+          />
+        }
+        actions={
+          <Link
+            href={`/admin/stores/${storeId}/products/new`}
+            className={buttonClassName({ variant: "primary", size: "md" })}
+          >
+            <Plus aria-hidden size={16} />
+            New Product
+          </Link>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
@@ -117,7 +118,7 @@ export default async function StoreProductsPage({
         )}
 
         {/* Status tabs */}
-        <div className="flex items-center gap-1 ml-auto">
+        <div role="group" aria-label="Filter by status" className="flex flex-wrap items-center gap-1 sm:ml-auto">
           {(["all", "active", "inactive"] as Status[]).map((s) => (
             <FilterChip
               key={s}
@@ -133,57 +134,60 @@ export default async function StoreProductsPage({
 
       {/* Table / Empty state */}
       {products.length === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <Package className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No products found</h3>
-          <p className="text-sm text-admin-text-muted mb-4">
-            {q
-              ? `No products match "${q}".`
-              : status !== "all"
-                ? `No ${status} products.`
-                : "Add your first product to get started."}
-          </p>
-          {!q && status === "all" && (
-            <Link
-              href={`/admin/stores/${storeId}/products/new`}
-              className="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              + New Product
-            </Link>
-          )}
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={Package}
+            title="No products found"
+            description={
+              q
+                ? `No products match "${q}".`
+                : status !== "all"
+                  ? `No ${status} products.`
+                  : "Add your first product to get started."
+            }
+            action={
+              !q && status === "all" ? (
+                <Link
+                  href={`/admin/stores/${storeId}/products/new`}
+                  className={buttonClassName({ variant: "primary", size: "md" })}
+                >
+                  <Plus aria-hidden size={16} />
+                  New Product
+                </Link>
+              ) : undefined
+            }
+          />
+        </Card>
       ) : (
         <>
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
-            <div className="overflow-x-auto">
+          <Card padding="none" className="overflow-hidden">
+            <div className="relative overflow-x-auto">
               <table className="w-full min-w-175">
                 <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Product
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       SKU
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Category
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Price
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Stock
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Status
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Added
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
-                      Actions
+                    <th scope="col" className="px-5 py-3">
+                      <span className="sr-only">Actions</span>
                     </th>
                   </tr>
                 </thead>
@@ -212,12 +216,12 @@ export default async function StoreProductsPage({
                             {product.thumbnail ? (
                               <img
                                 src={product.thumbnail}
-                                alt={name}
+                                alt=""
                                 className="w-10 h-10 rounded-lg object-cover border border-admin-border shrink-0"
                               />
                             ) : (
                               <div className="w-10 h-10 rounded-lg bg-admin-chip flex items-center justify-center shrink-0">
-                                <Package className="w-4 h-4 text-admin-text-subtle" />
+                                <Package aria-hidden className="w-4 h-4 text-admin-text-muted" />
                               </div>
                             )}
                             <div className="min-w-0">
@@ -225,10 +229,10 @@ export default async function StoreProductsPage({
                                 {name}
                               </p>
                               {product.isFeatured && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded mt-0.5">
-                                  <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                                <Badge tone="warning" size="sm" className="mt-0.5">
+                                  <Star aria-hidden className="w-2.5 h-2.5 fill-current" />
                                   Featured
-                                </span>
+                                </Badge>
                               )}
                             </div>
                           </div>
@@ -253,7 +257,7 @@ export default async function StoreProductsPage({
                               ৳{product.price.toLocaleString()}
                             </span>
                             {hasDiscount && (
-                              <span className="text-xs text-admin-text-subtle line-through">
+                              <span className="text-xs text-admin-text-muted line-through">
                                 ৳{product.compareAtPrice.toLocaleString()}
                               </span>
                             )}
@@ -264,21 +268,21 @@ export default async function StoreProductsPage({
                         <td className="px-5 py-4">
                           <span
                             className={`text-sm font-medium ${product.stock === 0
-                                ? "text-red-600"
+                                ? "text-red-600 dark:text-red-400"
                                 : isLowStock
-                                  ? "text-amber-600"
+                                  ? "text-amber-700 dark:text-amber-400"
                                   : "text-admin-text-secondary"
                               }`}
                           >
                             {product.stock}
                           </span>
                           {product.stock === 0 && (
-                            <span className="ml-1.5 text-[10px] font-medium text-red-500">
+                            <span className="ml-1.5 text-[10px] font-medium text-red-600 dark:text-red-400">
                               Out
                             </span>
                           )}
                           {isLowStock && (
-                            <span className="ml-1.5 text-[10px] font-medium text-amber-500">
+                            <span className="ml-1.5 text-[10px] font-medium text-amber-700 dark:text-amber-400">
                               Low
                             </span>
                           )}
@@ -286,22 +290,18 @@ export default async function StoreProductsPage({
 
                         {/* Status */}
                         <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${product.isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-admin-chip text-admin-text-muted"
-                              }`}
-                          >
+                          <Badge tone={product.isActive ? "success" : "neutral"}>
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${product.isActive ? "bg-green-500" : "bg-gray-400"
+                              aria-hidden
+                              className={`w-1.5 h-1.5 rounded-full ${product.isActive ? "bg-emerald-500" : "bg-gray-400"
                                 }`}
                             />
                             {product.isActive ? "Active" : "Inactive"}
-                          </span>
+                          </Badge>
                         </td>
 
                         {/* Date */}
-                        <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
+                        <td className="px-5 py-4 text-xs text-admin-text-muted whitespace-nowrap">
                           {new Date(product.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
@@ -314,7 +314,8 @@ export default async function StoreProductsPage({
                           <div className="flex items-center justify-end gap-1">
                             <Link
                               href={`/admin/stores/${storeId}/products/${product._id}`}
-                              className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg transition-colors"
+                              className={buttonClassName({ variant: "secondary", size: "sm" })}
+                              aria-label={`Edit ${name}`}
                             >
                               Edit
                             </Link>
@@ -332,11 +333,11 @@ export default async function StoreProductsPage({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 mt-4">
               <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
@@ -345,12 +346,14 @@ export default async function StoreProductsPage({
                 <Link
                   href={buildHref(storeId, { q, category, status, page: currentPage - 1 })}
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                  aria-label="Previous page"
+                  tabIndex={currentPage <= 1 ? -1 : undefined}
+                  className={`w-10 h-10 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors focus-ring ${currentPage <= 1
+                      ? "opacity-40 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden className="w-4 h-4" />
                 </Link>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -367,7 +370,8 @@ export default async function StoreProductsPage({
                     item === "..." ? (
                       <span
                         key={`ellipsis-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle"
+                        aria-hidden
+                        className="w-10 h-10 flex items-center justify-center text-xs text-admin-text-muted"
                       >
                         …
                       </span>
@@ -375,8 +379,10 @@ export default async function StoreProductsPage({
                       <Link
                         key={item}
                         href={buildHref(storeId, { q, category, status, page: item as number })}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${currentPage === item
-                            ? "bg-gray-900 text-white"
+                        aria-label={`Page ${item}`}
+                        aria-current={currentPage === item ? "page" : undefined}
+                        className={`w-10 h-10 flex items-center justify-center rounded-lg text-xs font-medium transition-colors focus-ring ${currentPage === item
+                            ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
                             : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                           }`}
                       >
@@ -388,15 +394,17 @@ export default async function StoreProductsPage({
                 <Link
                   href={buildHref(storeId, { q, category, status, page: currentPage + 1 })}
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
+                  aria-label="Next page"
+                  tabIndex={currentPage >= totalPages ? -1 : undefined}
+                  className={`w-10 h-10 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors focus-ring ${currentPage >= totalPages
+                      ? "opacity-40 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </nav>
           )}
         </>
       )}

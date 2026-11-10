@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import {
-  Sparkles,
   Coins,
   TrendingDown,
   Users,
@@ -15,10 +14,15 @@ import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { PointService } from "@/features/points/service";
 import { StoreService } from "@/features/stores/service";
+import { Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { PointsCustomerSearch } from "./PointsCustomerSearch";
 
 const PAGE_SIZE = 15;
 const LEDGER_SIZE = 20;
+
+const PAGE_BTN =
+  "focus-ring w-10 h-10 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors";
 
 function formatDate(d: string | Date) {
   return new Date(d).toLocaleDateString("en-GB", {
@@ -87,149 +91,130 @@ export default async function StorePointsPage({
 
   const currentPage = Math.min(page, totalPages);
 
+  const statCards = [
+    {
+      icon: Coins,
+      iconClass: "text-amber-500",
+      label: "Outstanding",
+      value: stats.outstanding.toLocaleString(),
+      hint: `≈ ৳${Math.floor(stats.outstanding / config.pointsPerBdt).toLocaleString()} liability`,
+    },
+    {
+      icon: Star,
+      iconClass: "text-emerald-500",
+      label: "Earned",
+      value: stats.totalEarned.toLocaleString(),
+      hint: "lifetime",
+    },
+    {
+      icon: TrendingDown,
+      iconClass: "text-rose-500",
+      label: "Redeemed",
+      value: stats.totalRedeemed.toLocaleString(),
+      hint: `${stats.transactionCount} transactions`,
+    },
+    {
+      icon: Users,
+      iconClass: "text-violet-500",
+      label: "Holders",
+      value: stats.activeHolders.toLocaleString(),
+      hint: "with balance > 0",
+    },
+  ];
+
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Loyalty Points</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            Loyalty Points
-          </h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {config.enabled ? (
-              <>
-                {config.pointsPerReview} pts per review · {config.minRedemptionPoints} pts min redemption · {config.pointsPerBdt} pts = ৳1
-              </>
-            ) : (
-              <span className="text-red-600">Points earning is disabled for this store</span>
-            )}
-          </p>
-        </div>
-        {canManage && (
-          <Link
-            href={`/admin/stores/${storeId}#loyalty-points`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-300 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            Configure
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Loyalty Points"
+        description={
+          config.enabled ? (
+            <>
+              {config.pointsPerReview} pts per review · {config.minRedemptionPoints} pts min redemption · {config.pointsPerBdt} pts = ৳1
+            </>
+          ) : (
+            <span className="text-red-600 dark:text-red-400">Points earning is disabled for this store</span>
+          )
+        }
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Loyalty Points" },
+            ]}
+          />
+        }
+        actions={
+          canManage && (
+            <Link
+              href={`/admin/stores/${storeId}#loyalty-points`}
+              className={buttonClassName({ variant: "primary", size: "md" })}
+            >
+              <Settings aria-hidden className="w-4 h-4" />
+              Configure
+            </Link>
+          )
+        }
+      />
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Coins className="w-4 h-4 text-amber-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-              Outstanding
-            </span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">
-            {stats.outstanding.toLocaleString()}
-          </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">
-            ≈ ৳{Math.floor(stats.outstanding / config.pointsPerBdt).toLocaleString()} liability
-          </p>
-        </div>
-
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Star className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-              Earned
-            </span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">
-            {stats.totalEarned.toLocaleString()}
-          </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">lifetime</p>
-        </div>
-
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingDown className="w-4 h-4 text-rose-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-              Redeemed
-            </span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">
-            {stats.totalRedeemed.toLocaleString()}
-          </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">
-            {stats.transactionCount} transactions
-          </p>
-        </div>
-
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-violet-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-              Holders
-            </span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">
-            {stats.activeHolders.toLocaleString()}
-          </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">with balance {">"} 0</p>
-        </div>
+        {statCards.map(({ icon: Icon, iconClass, label, value, hint }) => (
+          <Card key={label} padding="md">
+            <div className="flex items-center gap-2 mb-1">
+              <Icon aria-hidden className={`w-4 h-4 ${iconClass}`} />
+              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
+                {label}
+              </span>
+            </div>
+            <p className="text-xl font-bold text-admin-text-primary">{value}</p>
+            <p className="text-xs text-admin-text-muted mt-0.5">{hint}</p>
+          </Card>
+        ))}
       </div>
 
       {/* Search */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <PointsCustomerSearch storeId={storeId} defaultValue={q} />
-        <p className="text-xs text-admin-text-subtle ml-auto">
+        <p className="text-xs text-admin-text-muted ml-auto">
           {total} {total === 1 ? "customer" : "customers"}
         </p>
       </div>
 
       {/* Top customers table */}
       {total === 0 ? (
-        <div className="text-center py-16 bg-admin-surface rounded-xl border border-admin-border">
-          <div className="w-12 h-12 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-3">
-            <Coins className="w-6 h-6 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">
-            No customers yet
-          </h3>
-          <p className="text-sm text-admin-text-muted">
-            {q
-              ? `No customers match "${q}".`
-              : "Customer points will appear here once they earn or redeem."}
-          </p>
-        </div>
+        <Card padding="none" className="mb-6">
+          <EmptyState
+            icon={Coins}
+            title="No customers yet"
+            description={
+              q
+                ? `No customers match "${q}".`
+                : "Customer points will appear here once they earn or redeem."
+            }
+          />
+        </Card>
       ) : (
         <>
-          <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden mb-6">
-            <div className="overflow-x-auto">
+          <Card padding="none" className="overflow-hidden mb-6">
+            <div className="relative overflow-x-auto">
               <table className="w-full min-w-150">
                 <thead>
                   <tr className="border-b border-admin-border bg-admin-surface-raised">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Customer
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Contact
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Points
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       ≈ BDT
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Actions
                     </th>
                   </tr>
@@ -242,7 +227,7 @@ export default async function StorePointsPage({
                     return (
                       <tr
                         key={c._id}
-                        className="hover:bg-admin-surface-hover/60 transition-colors group"
+                        className="hover:bg-admin-surface-hover transition-colors"
                       >
                         <td className="px-5 py-4">
                           <p className="text-sm font-medium text-admin-text-primary">
@@ -263,7 +248,7 @@ export default async function StorePointsPage({
                         <td className="px-5 py-4 text-right">
                           <Link
                             href={`/admin/stores/${storeId}/points/${c._id}`}
-                            className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
+                            className={buttonClassName({ variant: "ghost", size: "sm" })}
                           >
                             View ledger
                           </Link>
@@ -274,47 +259,51 @@ export default async function StorePointsPage({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mb-8">
-              <p className="text-xs text-admin-text-subtle">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 mb-8">
+              <p className="text-xs text-admin-text-muted">
                 Page {currentPage} of {totalPages}
               </p>
               <div className="flex items-center gap-1">
                 <Link
                   href={buildHref(storeId, { q, page: currentPage - 1 })}
+                  aria-label="Previous page"
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage <= 1
+                  tabIndex={currentPage <= 1 ? -1 : undefined}
+                  className={`${PAGE_BTN} ${currentPage <= 1
                       ? "opacity-30 pointer-events-none border-admin-border"
-                      : "border-admin-border hover:bg-admin-chip"
+                      : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden className="w-4 h-4" />
                 </Link>
                 <Link
                   href={buildHref(storeId, { q, page: currentPage + 1 })}
+                  aria-label="Next page"
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${currentPage >= totalPages
+                  tabIndex={currentPage >= totalPages ? -1 : undefined}
+                  className={`${PAGE_BTN} ${currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-admin-border"
-                      : "border-admin-border hover:bg-admin-chip"
+                      : "border-admin-border-md hover:bg-admin-chip"
                     }`}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </nav>
           )}
         </>
       )}
 
       {/* Recent ledger */}
       {ledger.transactions.length > 0 && (
-        <div>
-          <h2 className="text-xs font-semibold text-admin-text-subtle uppercase tracking-wider mb-3 px-0.5">
+        <section aria-labelledby="recent-transactions">
+          <h2 id="recent-transactions" className="text-xs font-semibold text-admin-text-muted uppercase tracking-wider mb-3 px-0.5">
             Recent Transactions
           </h2>
-          <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden">
+          <Card padding="none" className="overflow-hidden">
             <div className="divide-y divide-admin-border">
               {ledger.transactions.map((t) => {
                 const Icon = reasonIcon(t.reason);
@@ -324,12 +313,13 @@ export default async function StorePointsPage({
                   <Link
                     key={t._id}
                     href={`/admin/stores/${storeId}/points/${t.userId}`}
-                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-admin-surface-hover transition-colors"
+                    className="focus-ring-inset flex items-center gap-4 px-5 py-3.5 hover:bg-admin-surface-hover transition-colors"
                   >
                     <div
+                      aria-hidden
                       className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${positive
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-rose-50 text-rose-600"
+                          ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+                          : "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
                         }`}
                     >
                       <Icon size={15} />
@@ -338,12 +328,12 @@ export default async function StorePointsPage({
                       <p className="text-sm font-medium text-admin-text-primary truncate">
                         {user?.name ?? "Unknown customer"}
                       </p>
-                      <p className="text-xs text-admin-text-subtle">
+                      <p className="text-xs text-admin-text-muted">
                         {reasonLabel(t.reason)} · {formatDate(t.createdAt)}
                       </p>
                     </div>
                     <span
-                      className={`text-sm font-semibold ${positive ? "text-emerald-600" : "text-rose-600"
+                      className={`text-sm font-semibold ${positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                         }`}
                     >
                       {positive ? "+" : ""}
@@ -353,8 +343,8 @@ export default async function StorePointsPage({
                 );
               })}
             </div>
-          </div>
-        </div>
+          </Card>
+        </section>
       )}
     </div>
   );

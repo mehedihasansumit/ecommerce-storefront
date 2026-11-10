@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Search, X } from "lucide-react";
+import { Input } from "@/shared/components/ui";
 
 interface Props {
   storeId: string;
@@ -33,22 +34,27 @@ export function CustomersSearch({ storeId, defaultValue }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="relative flex-1 max-w-xs">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-text-subtle pointer-events-none" />
-      <input
+    <form role="search" onSubmit={handleSubmit} className="relative w-full sm:flex-1 sm:max-w-xs">
+      <Search
+        aria-hidden
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-text-subtle pointer-events-none"
+      />
+      <Input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Name, email, phone…"
-        className="w-full pl-9 pr-8 py-2 text-sm border border-admin-border rounded-lg bg-admin-surface focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent placeholder:text-admin-text-subtle"
+        aria-label="Search customers"
+        className="pl-9 pr-10"
       />
       {value && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-admin-text-subtle hover:text-admin-text-secondary"
+          aria-label="Clear search"
+          className="focus-ring absolute right-0.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-admin-text-muted hover:text-admin-text-primary transition-colors"
         >
-          <X className="w-3.5 h-3.5" />
+          <X aria-hidden className="w-3.5 h-3.5" />
         </button>
       )}
     </form>

@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PaymentStatus } from "@/features/orders/types";
 import { CreditCard, Tag, Check, Loader2 } from "lucide-react";
+import { Button, Card, Input } from "@/shared/components/ui";
 
 const PAYMENT_STATUSES: PaymentStatus[] = ["pending", "paid", "failed", "refunded"];
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  pending:  "bg-yellow-100 text-yellow-800",
-  paid:     "bg-green-100 text-green-800",
-  failed:   "bg-red-100 text-red-800",
+  pending:  "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300",
+  paid:     "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300",
+  failed:   "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
   refunded: "bg-admin-chip text-admin-text-secondary",
 };
 
@@ -108,105 +109,116 @@ export function PaymentUpdater({
   }
 
   return (
-    <div className="bg-admin-surface rounded-lg border border-admin-border px-5 py-4 space-y-5">
-      <h2 className="font-semibold text-sm text-admin-text-secondary uppercase tracking-wide">
+    <Card padding="none" className="px-5 py-4 space-y-5">
+      <h2 className="font-semibold text-sm text-admin-text-primary uppercase tracking-wide">
         Payment
       </h2>
 
       {/* Payment status */}
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-medium text-admin-text-muted mb-2">
-          <CreditCard className="w-3.5 h-3.5" />
+      <div role="group" aria-labelledby="payment-status-label">
+        <p
+          id="payment-status-label"
+          className="flex items-center gap-1.5 text-xs font-medium text-admin-text-muted mb-2"
+        >
+          <CreditCard aria-hidden className="w-3.5 h-3.5" />
           Payment Status
-        </label>
+        </p>
         <div className="flex flex-wrap gap-2">
           {PAYMENT_STATUSES.map((s) => (
             <button
               key={s}
+              type="button"
               onClick={() => handlePaymentStatusChange(s)}
               disabled={savingPayment}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all capitalize disabled:opacity-50 ${
+              aria-pressed={paymentStatus === s}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors capitalize disabled:opacity-50 focus-ring ${
                 paymentStatus === s
-                  ? `${PAYMENT_STYLES[s]} border-transparent ring-2 ring-offset-1 ${
+                  ? `${PAYMENT_STYLES[s]} border-transparent ring-2 ring-offset-1 ring-offset-admin-surface ${
                       s === "paid" ? "ring-green-400"
                       : s === "pending" ? "ring-yellow-400"
                       : s === "failed" ? "ring-red-400"
                       : "ring-gray-400"
                     }`
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border hover:border-gray-400"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:bg-admin-surface-hover"
               }`}
             >
+              {paymentStatus === s && <Check aria-hidden className="inline w-3 h-3 mr-1 -mt-0.5" />}
               {s}
             </button>
           ))}
         </div>
-        <div className="mt-1.5 h-4">
+        <div className="mt-1.5 min-h-4" aria-live="polite">
           {savingPayment && (
-            <p className="text-xs text-admin-text-subtle flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" /> Saving…
+            <p className="text-xs text-admin-text-muted flex items-center gap-1">
+              <Loader2 aria-hidden className="w-3 h-3 animate-spin" /> Saving…
             </p>
           )}
           {paymentSaved && (
-            <p className="text-xs text-green-600 flex items-center gap-1">
-              <Check className="w-3 h-3" /> Saved
+            <p className="text-xs text-green-700 dark:text-green-400 flex items-center gap-1">
+              <Check aria-hidden className="w-3 h-3" /> Saved
             </p>
           )}
-          {paymentError && <p className="text-xs text-red-500">{paymentError}</p>}
+          {paymentError && (
+            <p role="alert" className="text-xs text-red-600 dark:text-red-400">{paymentError}</p>
+          )}
         </div>
       </div>
 
       {/* Discount */}
       <form onSubmit={handleDiscountSubmit}>
-        <label className="flex items-center gap-1.5 text-xs font-medium text-admin-text-muted mb-2">
-          <Tag className="w-3.5 h-3.5" />
+        <label
+          htmlFor="order-discount"
+          className="flex items-center gap-1.5 text-xs font-medium text-admin-text-muted mb-2"
+        >
+          <Tag aria-hidden className="w-3.5 h-3.5" />
           Discount
         </label>
         <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-admin-text-subtle font-medium">
-              ৳
-            </span>
-            <input
+          <div className="flex-1">
+            <Input
+              id="order-discount"
               type="number"
               min="0"
               max={maxDiscount}
               step="0.01"
               value={discount}
               onChange={(e) => setDiscount(e.target.value)}
-              className="w-full pl-7 pr-3 py-1.5 text-sm border border-admin-border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
+              prefix="৳"
               placeholder="0"
+              invalid={!!discountError}
+              aria-describedby={discountError ? "order-discount-error" : undefined}
             />
           </div>
-          <button
+          <Button
             type="submit"
-            disabled={savingDiscount}
-            className="px-3 py-1.5 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+            variant="primary"
+            loading={savingDiscount}
+            leftIcon={<Check aria-hidden className="w-3.5 h-3.5" />}
           >
-            {savingDiscount ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Check className="w-3.5 h-3.5" />
-            )}
             Apply
-          </button>
+          </Button>
         </div>
 
         {discountNum > 0 && (
           <p className="mt-1.5 text-xs text-admin-text-muted">
-            New total: <span className="font-semibold text-gray-900">৳{newTotal.toLocaleString()}</span>
-            <span className="ml-1 text-admin-text-subtle">(was ৳{maxDiscount.toLocaleString()})</span>
+            New total: <span className="font-semibold text-admin-text-primary">৳{newTotal.toLocaleString()}</span>
+            <span className="ml-1">(was ৳{maxDiscount.toLocaleString()})</span>
           </p>
         )}
 
-        <div className="mt-1 h-4">
+        <div className="mt-1 min-h-4" aria-live="polite">
           {discountSaved && (
-            <p className="text-xs text-green-600 flex items-center gap-1">
-              <Check className="w-3 h-3" /> Discount applied
+            <p className="text-xs text-green-700 dark:text-green-400 flex items-center gap-1">
+              <Check aria-hidden className="w-3 h-3" /> Discount applied
             </p>
           )}
-          {discountError && <p className="text-xs text-red-500">{discountError}</p>}
+          {discountError && (
+            <p id="order-discount-error" role="alert" className="text-xs text-red-600 dark:text-red-400">
+              {discountError}
+            </p>
+          )}
         </div>
       </form>
-    </div>
+    </Card>
   );
 }

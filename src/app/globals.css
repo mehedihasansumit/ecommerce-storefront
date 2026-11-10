@@ -80,9 +80,11 @@
   --admin-border-md:        #E5E7EB;
   --admin-text-primary:     #111827;
   --admin-text-secondary:   #374151;
-  --admin-text-muted:       #6B7280;
-  --admin-text-subtle:      #9CA3AF;
-  --admin-chip-text:        #6B7280;
+  /* muted 7.6:1, subtle 4.8:1 on white: both pass WCAG AA for small text
+     (the old subtle #9CA3AF read at 2.5:1). */
+  --admin-text-muted:       #4B5563;
+  --admin-text-subtle:      #6B7280;
+  --admin-chip-text:        #4B5563;
 }
 
 html.dark {
@@ -95,9 +97,10 @@ html.dark {
   --admin-border-md:        #374151;
   --admin-text-primary:     #F9FAFB;
   --admin-text-secondary:   #D1D5DB;
-  --admin-text-muted:       #9CA3AF;
-  --admin-text-subtle:      #6B7280;
-  --admin-chip-text:        #9CA3AF;
+  /* AA on #1F2937 surfaces (old subtle #6B7280 read at 2.9:1). */
+  --admin-text-muted:       #B6BDC8;
+  --admin-text-subtle:      #9CA3AF;
+  --admin-chip-text:        #B6BDC8;
 
   /* Storefront tokens — fallbacks if layout.tsx injection doesn't apply */
   --color-bg:               #111827;
@@ -187,6 +190,14 @@ body {
    today's neutral admin greys when they are unset. Declared on <html>, the same element
    that carries the tenant's light vars (inline) and dark vars (html.dark), so they
    follow light/dark switching. */
+/* Admin scope (no tenant): shared primitives (Card, CardHeader, focus rings) pick up the
+   admin surface tokens so they sit flush with the admin panel in light and dark. */
+html:not([data-tenant]) {
+  --color-card-bg: var(--admin-surface);
+  --color-border-subtle: var(--admin-border-md);
+  --focus-ring: var(--admin-text-primary);
+}
+
 html[data-tenant] {
   --ui-field-bg: var(--color-card-bg);
   --ui-field-bg-dark: var(--color-card-bg);

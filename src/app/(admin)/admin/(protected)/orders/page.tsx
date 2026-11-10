@@ -9,7 +9,11 @@ import {
   CheckCircle,
   Truck,
   XCircle,
+  type LucideIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
+import { buttonClassName, Card, EmptyState, PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
 import { OrderRepository } from "@/features/orders/repository";
 import { StoreService } from "@/features/stores/service";
 import { getAdminDbUser } from "@/shared/lib/auth";
@@ -22,18 +26,18 @@ export const metadata: Metadata = { title: "All Orders" };
 const LIMIT = 10;
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  processing: "bg-purple-100 text-purple-800",
-  shipped: "bg-indigo-100 text-indigo-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
+  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300",
+  confirmed: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300",
+  processing: "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300",
+  shipped: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300",
+  delivered: "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300",
+  cancelled: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
 };
 
 const PAYMENT_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  paid: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-800",
+  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300",
+  paid: "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300",
+  failed: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
   refunded: "bg-admin-chip text-admin-text-secondary",
 };
 
@@ -88,135 +92,123 @@ export default async function AllOrdersPage({
     return href({ offset: o > 0 ? String(o) : undefined, status, storeId: filterStore });
   }
 
+  const thClass = "text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide";
+  const viewClass = buttonClassName({ variant: "secondary", size: "sm", className: "min-h-10 sm:min-h-0" });
+  const formatDay = (d: Date | string) =>
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">All Orders</h1>
-          <p className="text-sm text-admin-text-muted mt-1">
-            {total} {total === 1 ? "order" : "orders"} across all stores
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="All Orders"
+        description={`${total} ${total === 1 ? "order" : "orders"} across all stores`}
+        breadcrumbs={
+          <AdminBreadcrumbs items={[{ label: "Dashboard", href: "/admin" }, { label: "All Orders" }]} />
+        }
+      />
 
-      {/* Status filter */}
-      <div className="flex gap-1.5 flex-wrap mb-3">
-        <FilterChip href={href({ status: undefined })} selected={!status}>
-          All Status
-        </FilterChip>
-        {ALL_STATUSES.map((s) => (
-          <FilterChip key={s} href={href({ status: s })} selected={status === s} className="capitalize">
-            {s}
+      <div className="space-y-3 mb-6">
+        {/* Status filter */}
+        <div role="group" aria-label="Filter by status" className="flex gap-1.5 flex-wrap">
+          <FilterChip href={href({ status: undefined })} selected={!status}>
+            All Status
           </FilterChip>
-        ))}
-      </div>
-
-      {/* Store filter */}
-      {stores.length > 1 && (
-        <div className="flex gap-1.5 flex-wrap mb-6">
-          <FilterChip href={href({ storeId: undefined })} selected={!filterStore}>
-            All Stores
-          </FilterChip>
-          {stores.map((s) => (
-            <FilterChip key={s._id} href={href({ storeId: s._id })} selected={filterStore === s._id}>
-              {s.name}
+          {ALL_STATUSES.map((s) => (
+            <FilterChip key={s} href={href({ status: s })} selected={status === s} className="capitalize">
+              {s}
             </FilterChip>
           ))}
         </div>
-      )}
+
+        {/* Store filter */}
+        {stores.length > 1 && (
+          <div role="group" aria-label="Filter by store" className="flex gap-1.5 flex-wrap">
+            <FilterChip href={href({ storeId: undefined })} selected={!filterStore}>
+              All Stores
+            </FilterChip>
+            {stores.map((s) => (
+              <FilterChip key={s._id} href={href({ storeId: s._id })} selected={filterStore === s._id}>
+                {s.name}
+              </FilterChip>
+            ))}
+          </div>
+        )}
+      </div>
 
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No orders found</h3>
-          <p className="text-sm text-admin-text-muted">
-            {status || filterStore ? "Try removing some filters." : "Orders will appear here once placed."}
-          </p>
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={ShoppingBag}
+            title="No orders found"
+            description={status || filterStore ? "Try removing some filters." : "Orders will appear here once placed."}
+          />
+        </Card>
       ) : (
         <>
           {/* Mobile card list */}
-          <div className="flex flex-col gap-3 sm:hidden">
+          <ul className="flex flex-col gap-3 sm:hidden">
             {orders.map((order) => (
-              <div key={order._id} className="bg-admin-surface rounded-xl border border-admin-border-md p-4 flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-mono text-sm font-semibold text-admin-text-primary">{order.orderNumber}</p>
-                    <p className="text-xs text-admin-text-muted mt-0.5">{storeMap[order.storeId] ?? "—"}</p>
+              <li key={order._id}>
+                <Card padding="md" className="flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-mono text-sm font-semibold text-admin-text-primary">{order.orderNumber}</p>
+                      <p className="text-xs text-admin-text-muted mt-0.5">{storeMap[order.storeId] ?? "—"}</p>
+                    </div>
+                    <OrderStatusPill status={order.status} />
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize shrink-0 ${STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
-                      }`}
-                  >
-                    {order.status === "pending" && <Clock className="w-3 h-3" />}
-                    {order.status === "delivered" && <CheckCircle className="w-3 h-3" />}
-                    {order.status === "shipped" && <Truck className="w-3 h-3" />}
-                    {order.status === "cancelled" && <XCircle className="w-3 h-3" />}
-                    {order.status}
-                  </span>
-                </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <div>
-                    <p className="font-medium text-admin-text-primary">{order.shippingAddress.name}</p>
-                    <p className="text-xs text-admin-text-subtle">{order.shippingAddress.phone || "—"}</p>
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-admin-text-primary truncate">{order.shippingAddress.name}</p>
+                      <p className="text-xs text-admin-text-muted">{order.shippingAddress.phone || "—"}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-admin-text-primary">৳{order.total.toLocaleString()}</p>
+                      <p className="text-xs text-admin-text-muted">
+                        {order.items.length} {order.items.length === 1 ? "item" : "items"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-admin-text-primary">৳{order.total.toLocaleString()}</p>
-                    <p className="text-xs text-admin-text-subtle">
-                      {order.items.length} {order.items.length === 1 ? "item" : "items"}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-admin-border">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
-                      }`}
-                  >
-                    {order.paymentStatus}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-admin-text-subtle">
-                      {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                        day: "2-digit", month: "short", year: "numeric",
-                      })}
-                    </span>
-                    <Link
-                      href={`/admin/stores/${order.storeId}/orders/${order._id}`}
-                      className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-surface border border-admin-border-md rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-colors"
-                    >
-                      View
-                    </Link>
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-admin-border">
+                    <PaymentPill status={order.paymentStatus} />
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-admin-text-muted">{formatDay(order.createdAt)}</span>
+                      <Link
+                        href={`/admin/stores/${order.storeId}/orders/${order._id}`}
+                        aria-label={`View order ${order.orderNumber}`}
+                        className={viewClass}
+                      >
+                        View
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </Card>
+              </li>
             ))}
-          </div>
+          </ul>
 
           {/* Desktop table */}
-          <div className="hidden sm:block bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
-            <div className="overflow-x-auto">
+          <Card padding="none" className="hidden sm:block overflow-hidden">
+            <div className="relative overflow-x-auto">
               <table className="w-full min-w-200">
                 <thead className="bg-admin-surface-raised border-b border-admin-border-md">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Store</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Customer</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Items</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Total</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Status</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Payment</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Date</th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Actions</th>
+                    <th scope="col" className={thClass}>Order</th>
+                    <th scope="col" className={thClass}>Store</th>
+                    <th scope="col" className={thClass}>Customer</th>
+                    <th scope="col" className={thClass}>Items</th>
+                    <th scope="col" className={thClass}>Total</th>
+                    <th scope="col" className={thClass}>Status</th>
+                    <th scope="col" className={thClass}>Payment</th>
+                    <th scope="col" className={thClass}>Date</th>
+                    <th scope="col" className={thClass}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
                   {orders.map((order) => (
-                    <tr key={order._id} className="hover:bg-admin-surface-raised/60 transition-colors group">
+                    <tr key={order._id} className="hover:bg-admin-surface-hover transition-colors">
                       <td className="px-5 py-4">
                         <span className="font-mono text-sm font-semibold text-admin-text-primary">
                           {order.orderNumber}
@@ -227,13 +219,13 @@ export default async function AllOrdersPage({
                       </td>
                       <td className="px-5 py-4">
                         <p className="text-sm font-medium text-admin-text-primary">{order.shippingAddress.name}</p>
-                        <p className="text-xs text-admin-text-subtle mt-0.5">{order.shippingAddress.phone || "—"}</p>
+                        <p className="text-xs text-admin-text-muted mt-0.5">{order.shippingAddress.phone || "—"}</p>
                       </td>
                       <td className="px-5 py-4">
                         <div className="text-sm text-admin-text-secondary">
                           {order.items.length} {order.items.length === 1 ? "item" : "items"}
                         </div>
-                        <div className="text-xs text-admin-text-subtle mt-0.5 max-w-40 truncate">
+                        <div className="text-xs text-admin-text-muted mt-0.5 max-w-40 truncate">
                           {order.items.map((i) => i.productName).join(", ")}
                         </div>
                       </td>
@@ -243,31 +235,15 @@ export default async function AllOrdersPage({
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-text-secondary"
-                            }`}
-                        >
-                          {order.status === "pending" && <Clock className="w-3 h-3" />}
-                          {order.status === "delivered" && <CheckCircle className="w-3 h-3" />}
-                          {order.status === "shipped" && <Truck className="w-3 h-3" />}
-                          {order.status === "cancelled" && <XCircle className="w-3 h-3" />}
-                          {order.status}
-                        </span>
+                        <OrderStatusPill status={order.status} />
                       </td>
                       <td className="px-5 py-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PAYMENT_STYLES[order.paymentStatus] ?? "bg-admin-chip text-admin-text-secondary"
-                            }`}
-                        >
-                          {order.paymentStatus}
-                        </span>
+                        <PaymentPill status={order.paymentStatus} />
                       </td>
-                      <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
-                        {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                          day: "2-digit", month: "short", year: "numeric",
-                        })}
+                      <td className="px-5 py-4 text-xs text-admin-text-muted whitespace-nowrap">
+                        {formatDay(order.createdAt)}
                         <br />
-                        <span className="text-admin-text-subtle">
+                        <span>
                           {new Date(order.createdAt).toLocaleTimeString("en-GB", {
                             hour: "2-digit", minute: "2-digit",
                           })}
@@ -276,7 +252,8 @@ export default async function AllOrdersPage({
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/stores/${order.storeId}/orders/${order._id}`}
-                          className="px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg"
+                          aria-label={`View order ${order.orderNumber}`}
+                          className={viewClass}
                         >
                           View
                         </Link>
@@ -286,42 +263,87 @@ export default async function AllOrdersPage({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {/* Pagination */}
           {(hasPrev || hasNext) && (
-            <div className="flex items-center justify-between mt-4">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 mt-4">
               <p className="text-sm text-admin-text-muted">
                 Showing {rangeStart}–{rangeEnd} of {total}
               </p>
               <div className="flex items-center gap-1">
-                <Link
-                  href={offsetHref(prevOffset)}
-                  aria-disabled={!hasPrev}
-                  aria-label="Previous page"
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${!hasPrev
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
-                      : "border-admin-border-md hover:bg-admin-chip"
-                    }`}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Link>
-                <Link
-                  href={offsetHref(nextOffset)}
-                  aria-disabled={!hasNext}
-                  aria-label="Next page"
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${!hasNext
-                      ? "opacity-30 pointer-events-none border-admin-border-md"
-                      : "border-admin-border-md hover:bg-admin-chip"
-                    }`}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
+                <PageArrow href={offsetHref(prevOffset)} disabled={!hasPrev} label="Previous page">
+                  <ChevronLeft aria-hidden className="w-4 h-4" />
+                </PageArrow>
+                <PageArrow href={offsetHref(nextOffset)} disabled={!hasNext} label="Next page">
+                  <ChevronRight aria-hidden className="w-4 h-4" />
+                </PageArrow>
               </div>
-            </div>
+            </nav>
           )}
         </>
       )}
     </div>
+  );
+}
+
+const STATUS_ICONS: Partial<Record<OrderStatus, LucideIcon>> = {
+  pending: Clock,
+  delivered: CheckCircle,
+  shipped: Truck,
+  cancelled: XCircle,
+};
+
+/** Status text is always shown, so colour is never the only signal. */
+function OrderStatusPill({ status }: { status: OrderStatus }) {
+  const Icon = STATUS_ICONS[status];
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize shrink-0 ${
+        STATUS_STYLES[status] ?? "bg-admin-chip text-admin-text-secondary"
+      }`}
+    >
+      {Icon && <Icon aria-hidden className="w-3 h-3" />}
+      {status}
+    </span>
+  );
+}
+
+function PaymentPill({ status }: { status: string }) {
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+        PAYMENT_STYLES[status] ?? "bg-admin-chip text-admin-text-secondary"
+      }`}
+    >
+      <span className="sr-only">Payment: </span>
+      {status}
+    </span>
+  );
+}
+
+function PageArrow({
+  href,
+  disabled,
+  label,
+  children,
+}: {
+  href: string;
+  disabled: boolean;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : undefined}
+      className={`w-10 h-10 flex items-center justify-center rounded-lg border border-admin-border-md text-admin-text-muted transition-colors focus-ring ${
+        disabled ? "opacity-30 pointer-events-none" : "hover:bg-admin-surface-hover"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }

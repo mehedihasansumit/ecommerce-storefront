@@ -1,11 +1,10 @@
 import { CategoryService } from "@/features/categories/service";
 import { StoreService } from "@/features/stores/service";
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tAdmin } from "@/shared/lib/i18n";
-import { ChevronRight } from "lucide-react";
 import { PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../../../_components/AdminBreadcrumbs";
 
 export default async function EditCategoryPage({
   params,
@@ -25,20 +24,18 @@ export default async function EditCategoryPage({
   const name = tAdmin(category.name);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-2xl">
       <PageHeader
         breadcrumbs={
-          <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted flex-wrap">
-            <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <Link href={`/admin/stores/${storeId}/categories`} className="hover:text-admin-text-secondary transition-colors">Categories</Link>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-admin-text-secondary font-medium">{name}</span>
-          </nav>
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Categories", href: `/admin/stores/${storeId}/categories` },
+              { label: name },
+            ]}
+          />
         }
         title={`Edit · ${name}`}
         description="Update category name, slug, and visibility."

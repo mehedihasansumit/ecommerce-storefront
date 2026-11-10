@@ -6,23 +6,24 @@ import Link from "next/link";
 import type { IOrder, PaymentStatus } from "@/features/orders/types";
 import { Loader2, Check, Tag, ExternalLink } from "lucide-react";
 import type { OrderStatus } from "@/features/orders/types";
+import { Button, Card, Input } from "@/shared/components/ui";
 
 const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
-  pending:    "bg-yellow-50 text-yellow-700 border-yellow-200",
-  confirmed:  "bg-blue-50 text-blue-700 border-blue-200",
-  processing: "bg-purple-50 text-purple-700 border-purple-200",
-  shipped:    "bg-indigo-50 text-indigo-700 border-indigo-200",
-  delivered:  "bg-green-50 text-green-700 border-green-200",
-  cancelled:  "bg-red-50 text-red-700 border-red-200",
+  pending:    "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-900",
+  confirmed:  "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
+  processing: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900",
+  shipped:    "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900",
+  delivered:  "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  cancelled:  "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
 };
 
 const PAYMENT_STATUSES: PaymentStatus[] = ["pending", "paid", "failed", "refunded"];
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  pending:  "bg-yellow-100 text-yellow-800 border-yellow-200",
-  paid:     "bg-green-100 text-green-800 border-green-200",
-  failed:   "bg-red-100 text-red-800 border-red-200",
-  refunded: "bg-admin-chip text-admin-text-secondary border-admin-border",
+  pending:  "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-900",
+  paid:     "bg-green-100 text-green-800 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  failed:   "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
+  refunded: "bg-admin-chip text-admin-text-primary border-admin-text-subtle",
 };
 
 interface RowState {
@@ -122,20 +123,20 @@ export function PaymentsTable({ orders, storeId }: Props) {
   }
 
   return (
-    <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden">
-      <div className="overflow-x-auto">
+    <Card padding="none" className="overflow-hidden">
+      <div className="relative overflow-x-auto">
         <table className="w-full min-w-225">
           <thead>
             <tr className="border-b border-admin-border bg-admin-surface-raised">
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Customer</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Method</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order Status</th>
-              <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Subtotal</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Discount</th>
-              <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Total</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Payment</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Date</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Customer</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Method</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Order Status</th>
+              <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Subtotal</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Discount</th>
+              <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Total</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Payment</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">Date</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-admin-border">
@@ -152,13 +153,13 @@ export function PaymentsTable({ orders, storeId }: Props) {
                     <div className="flex flex-col gap-1">
                       <Link
                         href={`/admin/stores/${storeId}/orders/${order._id}`}
-                        className="inline-flex items-center gap-1 font-mono text-sm font-semibold text-blue-600 hover:text-blue-800"
+                        className="focus-ring rounded inline-flex items-center gap-1 font-mono text-sm font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                       >
                         {order.orderNumber}
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink aria-hidden className="w-3 h-3" />
                       </Link>
                       {order.couponCode && (
-                        <span className="self-start px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="self-start px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900">
                           {order.couponCode}
                         </span>
                       )}
@@ -167,8 +168,8 @@ export function PaymentsTable({ orders, storeId }: Props) {
 
                   {/* Customer */}
                   <td className="px-5 py-4">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300">{order.shippingAddress.name}</p>
-                    <p className="text-xs text-admin-text-subtle">{order.shippingAddress.phone}</p>
+                    <p className="text-sm font-medium text-admin-text-primary">{order.shippingAddress.name}</p>
+                    <p className="text-xs text-admin-text-muted">{order.shippingAddress.phone}</p>
                   </td>
 
                   {/* Method */}
@@ -195,78 +196,82 @@ export function PaymentsTable({ orders, storeId }: Props) {
                   {/* Discount input */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5">
-                      <div className="relative w-28">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-admin-text-subtle">৳</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={row.discount}
-                          onChange={(e) => setRow(order._id, { discount: e.target.value, discountError: "" })}
-                          className="w-full pl-6 pr-2 py-1.5 text-xs border border-admin-border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        />
-                      </div>
-                      <button
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        prefix="৳"
+                        value={row.discount}
+                        onChange={(e) => setRow(order._id, { discount: e.target.value, discountError: "" })}
+                        aria-label={`Discount for order ${order.orderNumber}`}
+                        invalid={!!row.discountError}
+                        className="w-28"
+                      />
+                      <Button
+                        variant="primary"
+                        size="icon"
                         onClick={() => handleDiscountApply(order)}
-                        disabled={row.savingDiscount}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50 transition-colors shrink-0"
+                        loading={row.savingDiscount}
+                        aria-label={row.discountSaved ? "Discount applied" : "Apply discount"}
                         title="Apply discount"
+                        className="shrink-0"
                       >
-                        {row.savingDiscount ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : row.discountSaved ? (
-                          <Check className="w-3.5 h-3.5" />
-                        ) : (
-                          <Tag className="w-3.5 h-3.5" />
-                        )}
-                      </button>
+                        {!row.savingDiscount &&
+                          (row.discountSaved ? (
+                            <Check aria-hidden className="w-3.5 h-3.5" />
+                          ) : (
+                            <Tag aria-hidden className="w-3.5 h-3.5" />
+                          ))}
+                      </Button>
                     </div>
                     {row.discountError && (
-                      <p className="text-xs text-red-500 mt-1">{row.discountError}</p>
+                      <p role="alert" className="text-xs text-red-600 dark:text-red-400 mt-1">{row.discountError}</p>
                     )}
                     {discountNum > 0 && (
-                      <p className="text-xs text-admin-text-subtle mt-1">
+                      <p className="text-xs text-admin-text-muted mt-1">
                         New: ৳{newTotal.toLocaleString()}
                       </p>
                     )}
                   </td>
 
                   {/* Total */}
-                  <td className="px-5 py-4 text-sm font-semibold text-right text-gray-900 dark:text-gray-300">
+                  <td className="px-5 py-4 text-sm font-semibold text-right text-admin-text-primary">
                     ৳{order.total.toLocaleString()}
                   </td>
 
                   {/* Payment status */}
                   <td className="px-5 py-4">
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Payment status for order ${order.orderNumber}`}>
                       {PAYMENT_STATUSES.map((s) => (
                         <button
                           key={s}
+                          type="button"
+                          aria-pressed={row.paymentStatus === s}
                           onClick={() => handleStatusChange(order, s)}
                           disabled={row.savingStatus}
-                          className={`px-2 py-0.5 rounded-md text-xs font-medium border capitalize transition-all disabled:opacity-50 ${
+                          className={`focus-ring px-2 py-0.5 rounded-md text-xs font-medium border capitalize transition-colors disabled:opacity-50 ${
                             row.paymentStatus === s
                               ? PAYMENT_STYLES[s]
-                              : "bg-admin-surface text-admin-text-muted border-admin-border hover:border-gray-400"
+                              : "bg-admin-surface text-admin-text-muted border-admin-border-md hover:border-admin-text-subtle"
                           }`}
                         >
                           {s}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-1 h-4">
+                    <div className="mt-1 h-4" aria-live="polite">
                       {row.savingStatus && (
-                        <p className="text-xs text-admin-text-subtle flex items-center gap-1">
-                          <Loader2 className="w-3 h-3 animate-spin" /> Saving…
+                        <p className="text-xs text-admin-text-muted flex items-center gap-1">
+                          <Loader2 aria-hidden className="w-3 h-3 animate-spin" /> Saving…
                         </p>
                       )}
                       {row.statusSaved && (
-                        <p className="text-xs text-green-600 flex items-center gap-1">
-                          <Check className="w-3 h-3" /> Saved
+                        <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                          <Check aria-hidden className="w-3 h-3" /> Saved
                         </p>
                       )}
                       {row.statusError && (
-                        <p className="text-xs text-red-500">{row.statusError}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400">{row.statusError}</p>
                       )}
                     </div>
                   </td>
@@ -285,6 +290,6 @@ export function PaymentsTable({ orders, storeId }: Props) {
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }

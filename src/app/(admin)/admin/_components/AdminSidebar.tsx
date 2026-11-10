@@ -59,14 +59,14 @@ export function AdminSidebar({
           href="/admin"
           className="flex items-center gap-3 group"
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-900/40 group-hover:shadow-indigo-800/60 transition-shadow">
+          <div className="w-8 h-8 rounded-lg bg-white/[0.1] ring-1 ring-inset ring-white/[0.12] flex items-center justify-center shrink-0">
             <LayoutDashboard size={15} className="text-white" />
           </div>
           <div>
             <p className="text-[13px] font-semibold tracking-tight text-white leading-none">
               Admin Panel
             </p>
-            <p className="text-[10px] text-gray-500 mt-0.5 tracking-wide">
+            <p className="text-[10px] text-gray-400 mt-0.5 tracking-wide">
               Management Console
             </p>
           </div>
@@ -76,7 +76,7 @@ export function AdminSidebar({
       {/* Nav */}
       <nav className="relative flex-1 px-3 py-4 overflow-y-auto">
         {/* Core section */}
-        <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600">
+        <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">
           Overview
         </p>
         <div className="space-y-0.5 mb-5">
@@ -86,26 +86,27 @@ export function AdminSidebar({
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group ${
                   active
                     ? "bg-white/[0.08] text-white"
-                    : "text-gray-400 hover:text-gray-100 hover:bg-white/[0.05]"
+                    : "text-gray-300 hover:text-white hover:bg-white/[0.05]"
                 }`}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-400" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white" />
                 )}
                 <Icon
                   size={16}
                   className={
                     active
-                      ? "text-indigo-400"
-                      : "text-gray-600 group-hover:text-gray-400 transition-colors"
+                      ? "text-white"
+                      : "text-gray-400 group-hover:text-gray-200 transition-colors"
                   }
                 />
                 <span>{label}</span>
                 {active && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500/80" />
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />
                 )}
               </Link>
             );
@@ -115,7 +116,7 @@ export function AdminSidebar({
         {/* Super admin section */}
         {superItems.length > 0 && (
           <>
-            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600">
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">
               Administration
             </p>
             <div className="space-y-0.5">
@@ -125,26 +126,27 @@ export function AdminSidebar({
                   <Link
                     key={href}
                     href={href}
+                    aria-current={active ? "page" : undefined}
                     className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group ${
                       active
                         ? "bg-white/[0.08] text-white"
-                        : "text-gray-400 hover:text-gray-100 hover:bg-white/[0.05]"
+                        : "text-gray-300 hover:text-white hover:bg-white/[0.05]"
                     }`}
                   >
                     {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-violet-400" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white" />
                     )}
                     <Icon
                       size={16}
                       className={
                         active
-                          ? "text-violet-400"
-                          : "text-gray-600 group-hover:text-gray-400 transition-colors"
+                          ? "text-white"
+                          : "text-gray-400 group-hover:text-gray-200 transition-colors"
                       }
                     />
                     <span>{label}</span>
                     {active && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500/80" />
+                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />
                     )}
                   </Link>
                 );
@@ -157,7 +159,7 @@ export function AdminSidebar({
       {/* User footer */}
       <div className="relative px-3 pb-4 pt-3 border-t border-white/[0.06]">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.04] mb-1">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+          <div className="w-7 h-7 rounded-full bg-white/[0.1] ring-1 ring-inset ring-white/[0.12] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
             {initials}
           </div>
           <div className="min-w-0 flex-1">
@@ -167,7 +169,7 @@ export function AdminSidebar({
               </p>
             )}
             {adminRole && (
-              <p className="text-[10px] text-gray-500 capitalize truncate leading-tight mt-0.5">
+              <p className="text-[10px] text-gray-400 capitalize truncate leading-tight mt-0.5">
                 {adminRole}
               </p>
             )}

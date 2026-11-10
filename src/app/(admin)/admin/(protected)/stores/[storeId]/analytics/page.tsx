@@ -14,8 +14,9 @@ import {
   ExternalLink,
   ShoppingCart,
   Receipt,
-  ChevronRight,
 } from "lucide-react";
+import { Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../../_components/AdminBreadcrumbs";
 import { DateRangeFilter } from "./DateRangeFilter";
 
 function formatCurrency(value: number) {
@@ -67,33 +68,27 @@ export default async function AnalyticsPage({
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Analytics</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Analytics</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {store.name} · {from} to {to}
-          </p>
-        </div>
-        <DateRangeFilter storeId={storeId} from={from} to={to} />
-      </div>
+      <PageHeader
+        title="Analytics"
+        description={`${store.name} · ${from} to ${to}`}
+        actions={<DateRangeFilter storeId={storeId} from={from} to={to} />}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Analytics" },
+            ]}
+          />
+        }
+      />
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
+        <Card padding="md">
           <div className="flex items-center gap-2 mb-1">
-            <Eye className="w-4 h-4 text-cyan-500" />
+            <Eye aria-hidden className="w-4 h-4 text-cyan-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Views
             </span>
@@ -101,12 +96,12 @@ export default async function AnalyticsPage({
           <p className="text-xl font-bold text-admin-text-primary">
             {summary.totalViews.toLocaleString()}
           </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">product views</p>
-        </div>
+          <p className="text-xs text-admin-text-muted mt-0.5">product views</p>
+        </Card>
 
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
+        <Card padding="md">
           <div className="flex items-center gap-2 mb-1">
-            <ShoppingCart className="w-4 h-4 text-amber-500" />
+            <ShoppingCart aria-hidden className="w-4 h-4 text-amber-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Cart Adds
             </span>
@@ -114,12 +109,12 @@ export default async function AnalyticsPage({
           <p className="text-xl font-bold text-admin-text-primary">
             {summary.totalCartAdds.toLocaleString()}
           </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">added to cart</p>
-        </div>
+          <p className="text-xs text-admin-text-muted mt-0.5">added to cart</p>
+        </Card>
 
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
+        <Card padding="md">
           <div className="flex items-center gap-2 mb-1">
-            <ShoppingBag className="w-4 h-4 text-emerald-500" />
+            <ShoppingBag aria-hidden className="w-4 h-4 text-emerald-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Orders
             </span>
@@ -127,12 +122,12 @@ export default async function AnalyticsPage({
           <p className="text-xl font-bold text-admin-text-primary">
             {summary.totalOrders.toLocaleString()}
           </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">completed</p>
-        </div>
+          <p className="text-xs text-admin-text-muted mt-0.5">completed</p>
+        </Card>
 
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
+        <Card padding="md">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-blue-500" />
+            <TrendingUp aria-hidden className="w-4 h-4 text-blue-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Revenue
             </span>
@@ -140,12 +135,12 @@ export default async function AnalyticsPage({
           <p className="text-xl font-bold text-admin-text-primary">
             {formatCurrency(summary.totalRevenue)}
           </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">total earned</p>
-        </div>
+          <p className="text-xs text-admin-text-muted mt-0.5">total earned</p>
+        </Card>
 
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4 col-span-2 sm:col-span-1">
+        <Card padding="md" className="col-span-2 sm:col-span-1">
           <div className="flex items-center gap-2 mb-1">
-            <Receipt className="w-4 h-4 text-violet-500" />
+            <Receipt aria-hidden className="w-4 h-4 text-violet-500" />
             <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
               Avg. Order
             </span>
@@ -153,12 +148,12 @@ export default async function AnalyticsPage({
           <p className="text-xl font-bold text-admin-text-primary">
             {formatCurrency(avgOrderValue)}
           </p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">per order</p>
-        </div>
+          <p className="text-xs text-admin-text-muted mt-0.5">per order</p>
+        </Card>
       </div>
 
       {/* Conversion Funnel */}
-      <div className="bg-admin-surface border border-admin-border rounded-xl p-6">
+      <Card padding="lg">
         <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide mb-5">
           Conversion Funnel
         </h2>
@@ -167,19 +162,19 @@ export default async function AnalyticsPage({
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-cyan-500" />
+                <Eye aria-hidden className="w-3.5 h-3.5 text-cyan-500" />
                 <span className="text-xs font-medium text-admin-text-secondary">Product Views</span>
               </div>
               <span className="text-xs font-bold text-admin-text-primary">
                 {summary.conversionFunnel.views.toLocaleString()}
               </span>
             </div>
-            <div className="h-2 bg-admin-chip rounded-full overflow-hidden">
+            <div aria-hidden className="h-2 bg-admin-chip rounded-full overflow-hidden">
               <div className="h-full bg-cyan-400 rounded-full w-full" />
             </div>
-            <p className="text-[11px] text-admin-text-subtle mt-1.5">
-              <span className="sm:hidden">↓ </span>
-              <span className="hidden sm:inline">→ </span>
+            <p className="text-[11px] text-admin-text-muted mt-1.5">
+              <span aria-hidden className="sm:hidden">↓ </span>
+              <span aria-hidden className="hidden sm:inline">→ </span>
               {summary.conversionFunnel.viewToCartRate}% added to cart
             </p>
           </div>
@@ -188,14 +183,14 @@ export default async function AnalyticsPage({
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <ShoppingCart className="w-3.5 h-3.5 text-amber-500" />
+                <ShoppingCart aria-hidden className="w-3.5 h-3.5 text-amber-500" />
                 <span className="text-xs font-medium text-admin-text-secondary">Cart Adds</span>
               </div>
               <span className="text-xs font-bold text-admin-text-primary">
                 {summary.conversionFunnel.cartAdds.toLocaleString()}
               </span>
             </div>
-            <div className="h-2 bg-admin-chip rounded-full overflow-hidden">
+            <div aria-hidden className="h-2 bg-admin-chip rounded-full overflow-hidden">
               <div
                 className="h-full bg-amber-400 rounded-full"
                 style={{
@@ -203,9 +198,9 @@ export default async function AnalyticsPage({
                 }}
               />
             </div>
-            <p className="text-[11px] text-admin-text-subtle mt-1.5">
-              <span className="sm:hidden">↓ </span>
-              <span className="hidden sm:inline">→ </span>
+            <p className="text-[11px] text-admin-text-muted mt-1.5">
+              <span aria-hidden className="sm:hidden">↓ </span>
+              <span aria-hidden className="hidden sm:inline">→ </span>
               {summary.conversionFunnel.cartToPurchaseRate}% purchased
             </p>
           </div>
@@ -214,14 +209,14 @@ export default async function AnalyticsPage({
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
+                <ShoppingBag aria-hidden className="w-3.5 h-3.5 text-emerald-500" />
                 <span className="text-xs font-medium text-admin-text-secondary">Purchases</span>
               </div>
               <span className="text-xs font-bold text-admin-text-primary">
                 {summary.conversionFunnel.purchases.toLocaleString()}
               </span>
             </div>
-            <div className="h-2 bg-admin-chip rounded-full overflow-hidden">
+            <div aria-hidden className="h-2 bg-admin-chip rounded-full overflow-hidden">
               <div
                 className="h-full bg-emerald-400 rounded-full"
                 style={{
@@ -229,32 +224,32 @@ export default async function AnalyticsPage({
                 }}
               />
             </div>
-            <p className="text-[11px] text-admin-text-subtle mt-1.5">
+            <p className="text-[11px] text-admin-text-muted mt-1.5">
               {summary.conversionFunnel.viewToPurchaseRate}% view-to-purchase
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Daily Trend Chart */}
       {summary.dailyTrend.length > 0 && (
-        <div className="bg-admin-surface border border-admin-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-5">
+        <Card padding="lg">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
               Daily Trend
             </h2>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-blue-400 rounded-sm" />
+                <div aria-hidden className="w-2.5 h-2.5 bg-blue-400 rounded-sm" />
                 <span className="text-xs text-admin-text-muted">Revenue</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-violet-300 rounded-sm" />
+                <div aria-hidden className="w-2.5 h-2.5 bg-violet-300 rounded-sm" />
                 <span className="text-xs text-admin-text-muted">Views</span>
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <div
               className="flex items-end gap-1 h-44 pb-6"
               style={{ minWidth: `${summary.dailyTrend.length * 28}px` }}
@@ -281,65 +276,64 @@ export default async function AnalyticsPage({
                       }}
                     />
                   </div>
-                  <span className="text-[9px] text-admin-text-subtle whitespace-nowrap rotate-45 origin-left mt-1 block">
+                  <span className="text-[9px] text-admin-text-muted whitespace-nowrap rotate-45 origin-left mt-1 block">
                     {formatDate(day.date)}
                   </span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Top Products — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Viewed */}
-        <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+        <Card padding="none" className="overflow-hidden">
           <div className="px-5 py-4 border-b border-admin-border">
             <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
               Top Viewed Products
             </h2>
           </div>
           {summary.topViewedProducts.length === 0 ? (
-            <div className="py-12 text-center">
-              <Eye className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-admin-text-subtle">No view data for this period</p>
-            </div>
+            <EmptyState icon={Eye} title="No view data for this period" />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="relative overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-admin-surface-raised">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide w-6">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide w-6">
                       #
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Product
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Views
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Uniq
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Guest
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Members
                     </th>
-                    <th className="px-5 py-3 w-8" />
+                    <th scope="col" className="px-5 py-3 w-8">
+                      <span className="sr-only">Actions</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
                   {summary.topViewedProducts.map((p, i) => (
                     <tr key={p.productId} className="hover:bg-admin-surface-hover/60 transition-colors">
-                      <td className="px-5 py-3 text-xs text-admin-text-subtle">{i + 1}</td>
+                      <td className="px-5 py-3 text-xs text-admin-text-muted">{i + 1}</td>
                       <td className="px-5 py-3">
                         <p className="text-sm font-medium text-admin-text-secondary truncate max-w-40">
                           {p.productName || "Unknown"}
                         </p>
-                        <div className="mt-1.5 h-1 bg-cyan-50 rounded-full overflow-hidden w-full">
+                        <div aria-hidden className="mt-1.5 h-1 bg-admin-chip rounded-full overflow-hidden w-full">
                           <div
                             className="h-full bg-cyan-400 rounded-full"
                             style={{ width: `${Math.round((p.count / maxViews) * 100)}%` }}
@@ -349,22 +343,23 @@ export default async function AnalyticsPage({
                       <td className="px-5 py-3 text-right font-semibold text-admin-text-secondary">
                         {p.count.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-right text-cyan-600 text-xs">
+                      <td className="px-5 py-3 text-right text-cyan-700 dark:text-cyan-400 text-xs">
                         {p.uniqueViews.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-right text-admin-text-subtle text-xs">
+                      <td className="px-5 py-3 text-right text-admin-text-muted text-xs">
                         {p.anonymousViews.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-right text-violet-600 text-xs">
+                      <td className="px-5 py-3 text-right text-violet-700 dark:text-violet-400 text-xs">
                         {p.loggedInViews.toLocaleString()}
                       </td>
                       <td className="px-5 py-3">
                         <Link
                           href={`/admin/stores/${storeId}/products/${p.productId}`}
-                          className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors inline-flex"
+                          className={buttonClassName({ variant: "ghost", size: "icon" })}
                           title="Open product"
+                          aria-label={`Open product ${p.productName || "Unknown"}`}
                         >
-                          <ExternalLink size={13} />
+                          <ExternalLink aria-hidden size={14} />
                         </Link>
                       </td>
                     </tr>
@@ -373,46 +368,45 @@ export default async function AnalyticsPage({
               </table>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Top Purchased */}
-        <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+        <Card padding="none" className="overflow-hidden">
           <div className="px-5 py-4 border-b border-admin-border">
             <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
               Top Purchased Products
             </h2>
           </div>
           {summary.topPurchasedProducts.length === 0 ? (
-            <div className="py-12 text-center">
-              <ShoppingBag className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-admin-text-subtle">No orders for this period</p>
-            </div>
+            <EmptyState icon={ShoppingBag} title="No orders for this period" />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="relative overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-admin-surface-raised">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide w-6">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide w-6">
                       #
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Product
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-right px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Units
                     </th>
-                    <th className="px-5 py-3 w-8" />
+                    <th scope="col" className="px-5 py-3 w-8">
+                      <span className="sr-only">Actions</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
                   {summary.topPurchasedProducts.map((p, i) => (
                     <tr key={p.productId} className="hover:bg-admin-surface-hover/60 transition-colors">
-                      <td className="px-5 py-3 text-xs text-admin-text-subtle">{i + 1}</td>
+                      <td className="px-5 py-3 text-xs text-admin-text-muted">{i + 1}</td>
                       <td className="px-5 py-3">
                         <p className="text-sm font-medium text-admin-text-secondary truncate max-w-44">
                           {p.productName || "Unknown"}
                         </p>
-                        <div className="mt-1.5 h-1 bg-emerald-50 rounded-full overflow-hidden w-full">
+                        <div aria-hidden className="mt-1.5 h-1 bg-admin-chip rounded-full overflow-hidden w-full">
                           <div
                             className="h-full bg-emerald-400 rounded-full"
                             style={{ width: `${Math.round((p.count / maxPurchased) * 100)}%` }}
@@ -425,10 +419,11 @@ export default async function AnalyticsPage({
                       <td className="px-5 py-3">
                         <Link
                           href={`/admin/stores/${storeId}/products/${p.productId}`}
-                          className="p-1.5 text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded transition-colors inline-flex"
+                          className={buttonClassName({ variant: "ghost", size: "icon" })}
                           title="Open product"
+                          aria-label={`Open product ${p.productName || "Unknown"}`}
                         >
-                          <ExternalLink size={13} />
+                          <ExternalLink aria-hidden size={14} />
                         </Link>
                       </td>
                     </tr>
@@ -437,14 +432,14 @@ export default async function AnalyticsPage({
               </table>
             </div>
           )}
-        </div>
+        </Card>
       </div>
 
       {/* Revenue by Category + Top Searches */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Category */}
         {summary.revenueByCategory.length > 0 && (
-          <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+          <Card padding="none" className="overflow-hidden">
             <div className="px-5 py-4 border-b border-admin-border">
               <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Revenue by Category
@@ -463,7 +458,7 @@ export default async function AnalyticsPage({
                         : tAdmin(cat.categoryName)}
                     </span>
                     <div className="flex items-center gap-3 text-right">
-                      <span className="text-xs text-admin-text-subtle">
+                      <span className="text-xs text-admin-text-muted">
                         {cat.orderCount} orders
                       </span>
                       <span className="text-sm font-semibold text-admin-text-secondary w-24 text-right">
@@ -471,7 +466,7 @@ export default async function AnalyticsPage({
                       </span>
                     </div>
                   </div>
-                  <div className="h-1 bg-admin-chip rounded-full overflow-hidden">
+                  <div aria-hidden className="h-1 bg-admin-chip rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-400 rounded-full"
                       style={{ width: `${Math.round((cat.revenue / maxCatRevenue) * 100)}%` }}
@@ -480,14 +475,14 @@ export default async function AnalyticsPage({
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Top Search Queries */}
         {summary.topSearchQueries.length > 0 && (
-          <div className="bg-admin-surface border border-admin-border rounded-xl overflow-hidden">
+          <Card padding="none" className="overflow-hidden">
             <div className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-admin-text-subtle" />
+              <Search aria-hidden className="w-3.5 h-3.5 text-admin-text-muted" />
               <h2 className="text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                 Top Search Queries
               </h2>
@@ -500,14 +495,14 @@ export default async function AnalyticsPage({
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-300 w-4">{i + 1}</span>
-                      <span className="text-sm font-medium text-admin-text-secondary">{q.query}</span>
+                      <span className="text-xs text-admin-text-muted w-4">{i + 1}</span>
+                      <span className="text-sm font-medium text-admin-text-secondary break-all">{q.query}</span>
                     </div>
                     <span className="text-sm font-semibold text-admin-text-secondary">
                       {q.count.toLocaleString()}
                     </span>
                   </div>
-                  <div className="h-1 bg-admin-chip rounded-full overflow-hidden ml-6">
+                  <div aria-hidden className="h-1 bg-admin-chip rounded-full overflow-hidden ml-6">
                     <div
                       className="h-full bg-violet-400 rounded-full"
                       style={{ width: `${Math.round((q.count / maxSearchCount) * 100)}%` }}
@@ -516,7 +511,7 @@ export default async function AnalyticsPage({
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         )}
       </div>
 
@@ -524,17 +519,13 @@ export default async function AnalyticsPage({
       {summary.totalViews === 0 &&
         summary.totalOrders === 0 &&
         summary.totalCartAdds === 0 && (
-          <div className="text-center py-16 bg-admin-surface rounded-xl border border-admin-border">
-            <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-              <BarChart2 className="w-7 h-7 text-admin-text-subtle" />
-            </div>
-            <h3 className="text-base font-semibold text-admin-text-primary mb-1">
-              No data for this period
-            </h3>
-            <p className="text-sm text-admin-text-muted">
-              Try selecting a wider date range or check back after customers visit your store.
-            </p>
-          </div>
+          <Card padding="none">
+            <EmptyState
+              icon={BarChart2}
+              title="No data for this period"
+              description="Try selecting a wider date range or check back after customers visit your store."
+            />
+          </Card>
         )}
     </div>
   );

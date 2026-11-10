@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RotateCcw, ChevronRight, ExternalLink } from "lucide-react";
+import { RotateCcw, ExternalLink } from "lucide-react";
+import { Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { OrderService } from "@/features/orders/service";
 import { StoreService } from "@/features/stores/service";
 import type { RefundRequestStatus } from "@/features/orders/types";
@@ -44,38 +46,28 @@ export default async function RefundsPage({
 
   return (
     <div className="space-y-5">
-      <div>
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-          <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">
-            Dashboard
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">
-            Stores
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <Link
-            href={`/admin/stores/${storeId}`}
-            className="hover:text-admin-text-secondary transition-colors"
-          >
-            {store.name}
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-admin-text-secondary font-medium">Refund Requests</span>
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <RotateCcw className="w-5 h-5 text-admin-text-subtle" />
-          <h1 className="text-2xl font-bold tracking-tight text-admin-text-primary">
-            Refund Requests
-          </h1>
-          <span className="text-sm text-admin-text-muted">({total})</span>
-        </div>
-      </div>
+      <PageHeader
+        className="mb-0"
+        title={
+          <>
+            Refund Requests{" "}
+            <span className="text-sm font-normal text-admin-text-muted">({total})</span>
+          </>
+        }
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Refund Requests" },
+            ]}
+          />
+        }
+      />
 
       {/* Status filter tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by status">
         {STATUS_TABS.map((tab) => {
           const isActive = (status ?? "all") === tab.value;
           const href =
@@ -86,10 +78,11 @@ export default async function RefundsPage({
             <Link
               key={tab.value}
               href={href}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              aria-current={isActive ? "page" : undefined}
+              className={`focus-ring px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-admin-text-primary text-admin-surface"
-                  : "bg-admin-chip text-admin-text-secondary hover:bg-admin-chip-hover"
+                  : "bg-admin-chip text-admin-text-secondary hover:bg-admin-surface-hover hover:text-admin-text-primary"
               }`}
             >
               {tab.label}
@@ -99,24 +92,21 @@ export default async function RefundsPage({
       </div>
 
       {/* Table */}
-      <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden">
+      <Card padding="none" className="overflow-hidden">
         {orders.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <RotateCcw className="w-8 h-8 text-admin-text-subtle mx-auto mb-3" />
-            <p className="text-sm text-admin-text-muted">No refund requests found</p>
-          </div>
+          <EmptyState icon={RotateCcw} title="No refund requests found" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="relative overflow-x-auto">
+            <table className="w-full min-w-175 text-sm">
               <thead>
                 <tr className="border-b border-admin-border bg-admin-surface-raised text-admin-text-muted text-xs font-semibold uppercase tracking-wide">
-                  <th className="text-left px-4 py-3">Order</th>
-                  <th className="text-left px-4 py-3">Customer</th>
-                  <th className="text-right px-4 py-3">Amount</th>
-                  <th className="text-left px-4 py-3">Reason</th>
-                  <th className="text-left px-4 py-3">Requested</th>
-                  <th className="text-left px-4 py-3">Status</th>
-                  <th className="text-left px-4 py-3">Actions </th>
+                  <th scope="col" className="text-left px-4 py-3">Order</th>
+                  <th scope="col" className="text-left px-4 py-3">Customer</th>
+                  <th scope="col" className="text-right px-4 py-3">Amount</th>
+                  <th scope="col" className="text-left px-4 py-3">Reason</th>
+                  <th scope="col" className="text-left px-4 py-3">Requested</th>
+                  <th scope="col" className="text-left px-4 py-3">Status</th>
+                  <th scope="col" className="text-left px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-admin-border">
@@ -133,7 +123,7 @@ export default async function RefundsPage({
                     <td className="px-4 py-3 text-right font-semibold text-admin-text-primary">
                       ৳{order.refundRequest!.refundAmount.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-admin-text-muted max-w-[200px] truncate">
+                    <td className="px-4 py-3 text-admin-text-muted max-w-50 truncate">
                       {order.refundRequest!.reason}
                     </td>
                     <td className="px-4 py-3 text-admin-text-muted whitespace-nowrap">
@@ -155,10 +145,10 @@ export default async function RefundsPage({
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/stores/${storeId}/orders/${order._id}`}
-                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                        className="focus-ring rounded inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
                       >
                         View
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink aria-hidden className="w-3 h-3" />
                       </Link>
                     </td>
                   </tr>
@@ -167,11 +157,11 @@ export default async function RefundsPage({
             </table>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-admin-text-muted">
+        <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 text-sm text-admin-text-muted">
           <span>
             Page {page} of {totalPages} · {total} total
           </span>
@@ -179,7 +169,7 @@ export default async function RefundsPage({
             {page > 1 && (
               <Link
                 href={`/admin/stores/${storeId}/refunds?${status ? `status=${status}&` : ""}page=${page - 1}`}
-                className="px-3 py-1.5 rounded-lg bg-admin-chip text-admin-text-secondary hover:bg-admin-chip-hover transition-colors"
+                className={buttonClassName({ variant: "secondary", size: "sm" })}
               >
                 Previous
               </Link>
@@ -187,13 +177,13 @@ export default async function RefundsPage({
             {page < totalPages && (
               <Link
                 href={`/admin/stores/${storeId}/refunds?${status ? `status=${status}&` : ""}page=${page + 1}`}
-                className="px-3 py-1.5 rounded-lg bg-admin-chip text-admin-text-secondary hover:bg-admin-chip-hover transition-colors"
+                className={buttonClassName({ variant: "secondary", size: "sm" })}
               >
                 Next
               </Link>
             )}
           </div>
-        </div>
+        </nav>
       )}
     </div>
   );

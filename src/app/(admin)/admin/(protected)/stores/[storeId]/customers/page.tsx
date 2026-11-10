@@ -5,11 +5,16 @@ import { Users, Mail, Phone, MapPin, ShoppingBag, ChevronLeft, ChevronRight, Coi
 import { AuthService } from "@/features/auth/service";
 import { OrderService } from "@/features/orders/service";
 import { StoreService } from "@/features/stores/service";
+import { Badge, Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { CustomersSearch } from "./CustomersSearch";
 
 export const metadata: Metadata = { title: "Customers" };
 
 const PAGE_SIZE = 15;
+
+const PAGE_BTN =
+  "focus-ring w-10 h-10 flex items-center justify-center rounded-lg transition-colors";
 
 type Status = "all" | "active" | "inactive";
 
@@ -67,40 +72,35 @@ export default async function StoreCustomersPage({
 
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Customers</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Customers</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {total} {total === 1 ? "customer" : "customers"}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Customers"
+        description={`${total} ${total === 1 ? "customer" : "customers"}`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Customers" },
+            ]}
+          />
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
         <CustomersSearch storeId={storeId} defaultValue={q} />
 
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="flex flex-wrap items-center gap-1 ml-auto" aria-label="Filter by status" role="group">
           {(["all", "active", "inactive"] as Status[]).map((s) => (
             <Link
               key={s}
               href={buildHref(storeId, { q, status: s })}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
+              aria-current={status === s ? "page" : undefined}
+              className={`focus-ring px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
                 status === s
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                  ? "bg-admin-text-primary text-admin-surface border-admin-text-primary"
+                  : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-admin-text-subtle"
               }`}
             >
               {s}
@@ -110,39 +110,41 @@ export default async function StoreCustomersPage({
       </div>
 
       {total === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border-md">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No customers found</h3>
-          <p className="text-sm text-admin-text-muted">
-            {q
-              ? `No customers match "${q}".`
-              : status !== "all"
-              ? `No ${status} customers yet.`
-              : "Customers will appear here once they register."}
-          </p>
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={Users}
+            title="No customers found"
+            description={
+              q
+                ? `No customers match "${q}".`
+                : status !== "all"
+                ? `No ${status} customers yet.`
+                : "Customers will appear here once they register."
+            }
+          />
+        </Card>
       ) : (
         <>
           {/* Pagination info */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mb-3">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 mb-3">
               <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 <Link
                   href={buildHref(storeId, { q, status, page: currentPage - 1 })}
+                  aria-label="Previous page"
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
+                  tabIndex={currentPage <= 1 ? -1 : undefined}
+                  className={`${PAGE_BTN} border text-admin-text-muted ${
                     currentPage <= 1
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden className="w-4 h-4" />
                 </Link>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -158,7 +160,8 @@ export default async function StoreCustomersPage({
                     item === "..." ? (
                       <span
                         key={`e-${idx}`}
-                        className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle"
+                        aria-hidden
+                        className="w-10 h-10 flex items-center justify-center text-xs text-admin-text-muted"
                       >
                         …
                       </span>
@@ -166,9 +169,11 @@ export default async function StoreCustomersPage({
                       <Link
                         key={item}
                         href={buildHref(storeId, { q, status, page: item as number })}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                        aria-label={`Page ${item}`}
+                        aria-current={currentPage === item ? "page" : undefined}
+                        className={`${PAGE_BTN} text-xs font-medium ${
                           currentPage === item
-                            ? "bg-gray-900 text-white"
+                            ? "bg-admin-text-primary text-admin-surface"
                             : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                         }`}
                       >
@@ -179,49 +184,53 @@ export default async function StoreCustomersPage({
 
                 <Link
                   href={buildHref(storeId, { q, status, page: currentPage + 1 })}
+                  aria-label="Next page"
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
+                  tabIndex={currentPage >= totalPages ? -1 : undefined}
+                  className={`${PAGE_BTN} border text-admin-text-muted ${
                     currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-admin-border-md"
                       : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </nav>
           )}
 
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md overflow-hidden">
-            <div className="overflow-x-auto">
+          <Card padding="none" className="overflow-hidden">
+            <div className="relative overflow-x-auto">
               <table className="w-full min-w-175">
                 <thead>
                   <tr className="border-b border-admin-border-md bg-admin-surface-raised">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Customer
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Contact
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Location
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Orders
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Spent
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Points
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Status
                     </th>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
+                    <th scope="col" className="text-left px-5 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide">
                       Joined
                     </th>
-                    <th className="px-5 py-3" />
+                    <th scope="col" className="px-5 py-3">
+                      <span className="sr-only">Actions</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
@@ -234,12 +243,13 @@ export default async function StoreCustomersPage({
                     return (
                       <tr
                         key={customer._id}
-                        className="hover:bg-admin-surface-raised/60 transition-colors group"
+                        className="hover:bg-admin-surface-hover transition-colors"
                       >
                         {/* Customer */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-admin-text-primary flex items-center justify-center text-admin-surface text-xs font-bold shrink-0"
+                              aria-hidden>
                               {getInitials(customer.name)}
                             </div>
                             <span className="text-sm font-medium text-admin-text-primary">
@@ -253,18 +263,18 @@ export default async function StoreCustomersPage({
                           <div className="space-y-1">
                             {customer.email && (
                               <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
-                                <Mail className="w-3 h-3 shrink-0 text-admin-text-subtle" />
+                                <Mail aria-hidden className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                                 {customer.email}
                               </p>
                             )}
                             {customer.phone && (
                               <p className="text-xs text-admin-text-secondary flex items-center gap-1.5">
-                                <Phone className="w-3 h-3 shrink-0 text-admin-text-subtle" />
+                                <Phone aria-hidden className="w-3 h-3 shrink-0 text-admin-text-subtle" />
                                 {customer.phone}
                               </p>
                             )}
                             {!customer.email && !customer.phone && (
-                              <span className="text-xs text-admin-text-subtle">—</span>
+                              <span className="text-xs text-admin-text-muted">—</span>
                             )}
                           </div>
                         </td>
@@ -273,26 +283,26 @@ export default async function StoreCustomersPage({
                         <td className="px-5 py-4">
                           {defaultAddress ? (
                             <span className="text-xs text-admin-text-muted flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-admin-text-subtle shrink-0" />
+                              <MapPin aria-hidden className="w-3 h-3 text-admin-text-subtle shrink-0" />
                               {[defaultAddress.city, defaultAddress.country]
                                 .filter(Boolean)
                                 .join(", ") || "—"}
                             </span>
                           ) : (
-                            <span className="text-xs text-admin-text-subtle">—</span>
+                            <span className="text-xs text-admin-text-muted">—</span>
                           )}
                         </td>
 
                         {/* Orders */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1.5">
-                            <ShoppingBag className="w-3.5 h-3.5 text-admin-text-subtle" />
+                            <ShoppingBag aria-hidden className="w-3.5 h-3.5 text-admin-text-subtle" />
                             <span className="text-sm font-medium text-admin-text-primary">
                               {stats?.orderCount ?? 0}
                             </span>
                           </div>
                           {stats?.lastOrderAt && (
-                            <p className="text-[10px] text-admin-text-subtle mt-0.5">
+                            <p className="text-xs text-admin-text-muted mt-0.5">
                               Last:{" "}
                               {new Date(stats.lastOrderAt).toLocaleDateString("en-GB", {
                                 day: "2-digit",
@@ -309,7 +319,7 @@ export default async function StoreCustomersPage({
                               ৳{stats.totalSpent.toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-sm text-admin-text-subtle">—</span>
+                            <span className="text-sm text-admin-text-muted">—</span>
                           )}
                         </td>
 
@@ -318,36 +328,31 @@ export default async function StoreCustomersPage({
                           {(customer.points ?? 0) > 0 ? (
                             <Link
                               href={`/admin/stores/${storeId}/points/${customer._id}`}
-                              className="inline-flex items-center gap-1.5 text-sm font-medium text-admin-text-primary hover:text-amber-600 transition-colors"
+                              className="focus-ring rounded inline-flex items-center gap-1.5 text-sm font-medium text-admin-text-primary hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                             >
-                              <Coins className="w-3.5 h-3.5 text-amber-500" />
+                              <Coins aria-hidden className="w-3.5 h-3.5 text-amber-500" />
                               {(customer.points ?? 0).toLocaleString()}
                             </Link>
                           ) : (
-                            <span className="text-sm text-admin-text-subtle">—</span>
+                            <span className="text-sm text-admin-text-muted">—</span>
                           )}
                         </td>
 
                         {/* Status */}
                         <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                              customer.isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-admin-chip text-admin-text-muted"
-                            }`}
-                          >
+                          <Badge tone={customer.isActive ? "success" : "neutral"}>
                             <span
+                              aria-hidden
                               className={`w-1.5 h-1.5 rounded-full ${
-                                customer.isActive ? "bg-green-500" : "bg-gray-400"
+                                customer.isActive ? "bg-emerald-500" : "bg-gray-400"
                               }`}
                             />
                             {customer.isActive ? "Active" : "Inactive"}
-                          </span>
+                          </Badge>
                         </td>
 
                         {/* Joined */}
-                        <td className="px-5 py-4 text-xs text-admin-text-subtle whitespace-nowrap">
+                        <td className="px-5 py-4 text-xs text-admin-text-muted whitespace-nowrap">
                           {new Date(customer.createdAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
@@ -360,7 +365,7 @@ export default async function StoreCustomersPage({
                           {(stats?.orderCount ?? 0) > 0 && (
                             <Link
                               href={`/admin/stores/${storeId}/orders?q=${encodeURIComponent(customer.phone || customer.email || customer.name)}`}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs font-medium text-admin-text-secondary bg-admin-chip hover:bg-admin-surface-hover rounded-lg whitespace-nowrap"
+                              className={buttonClassName({ variant: "ghost", size: "sm" })}
                             >
                               Orders
                             </Link>
@@ -372,7 +377,7 @@ export default async function StoreCustomersPage({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
         </>
       )}
     </div>

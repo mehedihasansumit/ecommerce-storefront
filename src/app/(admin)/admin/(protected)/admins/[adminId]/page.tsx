@@ -5,6 +5,8 @@ import { StoreService } from "@/features/stores/service";
 import { RoleService } from "@/features/roles/service";
 import { AdminForm } from "@/features/auth/components/AdminForm";
 
+import { AdminBreadcrumbs } from "../../../_components/AdminBreadcrumbs";
+import { PageHeader } from "@/shared/components/ui";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Edit Admin" };
@@ -30,10 +32,19 @@ export default async function EditAdminPage({
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-admin-text-primary">Edit Admin</h1>
-        <p className="text-sm text-admin-text-muted mt-1">{admin.email}</p>
-      </div>
+      <PageHeader
+        title="Edit Admin"
+        description={admin.email}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Admins", href: "/admin/admins" },
+              { label: admin.name || admin.email },
+            ]}
+          />
+        }
+      />
       <AdminForm admin={safeAdmin} stores={storeOptions} roles={roles} />
     </div>
   );

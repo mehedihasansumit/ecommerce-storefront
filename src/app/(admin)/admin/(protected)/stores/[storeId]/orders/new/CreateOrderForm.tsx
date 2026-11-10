@@ -16,11 +16,49 @@ import {
   X,
   ShoppingBag,
   Loader2,
-  AlertCircle,
   Phone,
   Mail,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import type { IProduct, IProductVariant } from "@/features/products/types";
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Input,
+  Modal,
+  Select,
+  Textarea,
+} from "@/shared/components/ui";
+
+const QTY_BTN =
+  "w-10 h-10 flex items-center justify-center text-admin-text-secondary hover:bg-admin-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-ring";
+
+function FormSection({
+  icon: Icon,
+  title,
+  meta,
+  children,
+}: {
+  icon?: LucideIcon;
+  title: string;
+  meta?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <Card padding="none" className="overflow-hidden">
+      <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
+        {Icon && <Icon aria-hidden className="w-4 h-4 text-admin-text-muted" />}
+        <h2 className="font-semibold text-sm text-admin-text-primary">{title}</h2>
+        {meta && <span className="ml-auto text-xs text-admin-text-muted">{meta}</span>}
+      </header>
+      {children}
+    </Card>
+  );
+}
 
 interface LineItem {
   key: string;
@@ -91,11 +129,8 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      setShowResults(false);
-      return;
-    }
+    // Clearing results for an empty query happens in handleQueryChange.
+    if (!query.trim()) return;
     if (searchTimer.current) clearTimeout(searchTimer.current);
     searchTimer.current = setTimeout(async () => {
       setSearching(true);
@@ -127,6 +162,14 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function handleQueryChange(next: string) {
+    setQuery(next);
+    if (!next.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+    }
+  }
 
   function handlePickProduct(product: IProduct) {
     if (product.stock < 1 && (!product.variants?.length)) return;
@@ -249,38 +292,49 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
         {/* LEFT COLUMN — main form */}
         <div className="lg:col-span-2 space-y-6">
           {/* Products */}
-          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
-              <Package className="w-4 h-4 text-admin-text-muted" />
-              <h2 className="font-semibold text-sm text-gray-800">Products</h2>
-              {items.length > 0 && (
-                <span className="ml-auto text-xs text-admin-text-muted">
-                  {itemCount} {itemCount === 1 ? "item" : "items"}
-                </span>
-              )}
-            </header>
-
+          <FormSection
+            icon={Package}
+            title="Products"
+            meta={
+              items.length > 0
+                ? `${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                : undefined
+            }
+          >
             <div className="p-5">
               <div className="relative" ref={searchBoxRef}>
-                <Search className="w-4 h-4 text-admin-text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
+                <Search
+                  aria-hidden
+                  className="w-4 h-4 text-admin-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+                />
+                <Input
+                  type="search"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => handleQueryChange(e.target.value)}
                   onFocus={() => query.trim() && setShowResults(true)}
                   placeholder="Search products by name or tag…"
-                  className="w-full border border-admin-border-md rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  aria-label="Search products"
+                  aria-expanded={showResults}
+                  aria-controls="product-search-results"
+                  autoComplete="off"
+                  className="pl-9"
                 />
                 {showResults && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-admin-surface border border-admin-border rounded-lg shadow-lg z-20 max-h-72 overflow-y-auto">
+                  <div
+                    id="product-search-results"
+                    className="absolute top-full left-0 right-0 mt-2 bg-admin-surface border border-admin-border rounded-xl shadow-lg z-20 max-h-72 overflow-y-auto"
+                  >
                     {searching && (
-                      <div className="px-3 py-3 flex items-center gap-2 text-sm text-admin-text-muted">
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                      <div
+                        role="status"
+                        className="px-3 py-3 flex items-center gap-2 text-sm text-admin-text-muted"
+                      >
+                        <Loader2 aria-hidden className="w-4 h-4 animate-spin" />
                         Searching…
                       </div>
                     )}
                     {!searching && searchResults.length === 0 && (
-                      <p className="px-3 py-3 text-sm text-admin-text-subtle">
+                      <p role="status" className="px-3 py-3 text-sm text-admin-text-muted">
                         No products found.
                       </p>
                     )}
@@ -295,38 +349,36 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                             type="button"
                             onClick={() => handlePickProduct(p)}
                             disabled={out}
-                            className="w-full text-left px-3 py-2 hover:bg-admin-surface-hover flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed border-b border-gray-50 last:border-0"
+                            className="w-full text-left px-3 py-2 hover:bg-admin-surface-hover flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed border-b border-admin-border last:border-0 transition-colors focus-ring"
                           >
                             <div className="w-10 h-10 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
                               {p.thumbnail ? (
                                 <Image
                                   src={p.thumbnail}
-                                  alt={pName}
+                                  alt=""
                                   fill
                                   className="object-cover"
                                   sizes="40px"
                                 />
                               ) : (
-                                <Package className="w-4 h-4 text-admin-text-subtle absolute inset-0 m-auto" />
+                                <Package aria-hidden className="w-4 h-4 text-admin-text-muted absolute inset-0 m-auto" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate text-gray-900">
+                              <p className="text-sm font-medium truncate text-admin-text-primary">
                                 {pName}
                               </p>
                               <p className="text-xs text-admin-text-muted">
                                 ৳{p.price.toLocaleString()} ·{" "}
                                 {hasOptions ? (
-                                  <span className="text-admin-text-muted">
+                                  <span>
                                     {p.options.length}{" "}
                                     {p.options.length === 1 ? "option" : "options"}
                                   </span>
                                 ) : (
                                   <span
                                     className={
-                                      out
-                                        ? "text-red-500 font-medium"
-                                        : "text-admin-text-muted"
+                                      out ? "text-red-600 dark:text-red-400 font-medium" : undefined
                                     }
                                   >
                                     {out ? "Out of stock" : `${p.stock} in stock`}
@@ -335,7 +387,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                               </p>
                             </div>
                             {!out && (
-                              <Plus className="w-4 h-4 text-admin-text-subtle shrink-0" />
+                              <Plus aria-hidden className="w-4 h-4 text-admin-text-muted shrink-0" />
                             )}
                           </button>
                         );
@@ -347,34 +399,34 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
               {/* Selected items */}
               <div className="mt-4">
                 {items.length === 0 ? (
-                  <div className="py-10 text-center">
-                    <ShoppingBag className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-admin-text-muted">
-                      No products added yet. Search above to add items.
-                    </p>
-                  </div>
+                  <EmptyState
+                    icon={ShoppingBag}
+                    title="No products added yet"
+                    description="Search above to add items."
+                    className="py-10"
+                  />
                 ) : (
                   <ul className="divide-y divide-admin-border">
                     {items.map((item) => (
                       <li
                         key={item.key}
-                        className="flex items-center gap-3 py-3"
+                        className="flex flex-wrap sm:flex-nowrap items-center gap-3 py-3"
                       >
                         <div className="w-12 h-12 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
                           {item.thumbnail ? (
                             <Image
                               src={item.thumbnail}
-                              alt={item.productName}
+                              alt=""
                               fill
                               className="object-cover"
                               sizes="48px"
                             />
                           ) : (
-                            <Package className="w-5 h-5 text-admin-text-subtle absolute inset-0 m-auto" />
+                            <Package aria-hidden className="w-5 h-5 text-admin-text-muted absolute inset-0 m-auto" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-admin-text-primary truncate">
                             {item.productName}
                           </p>
                           {Object.keys(item.variantSelections).length > 0 && (
@@ -383,7 +435,7 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                                 ([k, v]) => (
                                   <span
                                     key={k}
-                                    className="inline-flex items-center text-[10px] font-medium text-admin-text-secondary bg-admin-chip px-1.5 py-0.5 rounded"
+                                    className="inline-flex items-center text-xs font-medium text-admin-chip-text bg-admin-chip px-1.5 py-0.5 rounded"
                                   >
                                     {k}: {v}
                                   </span>
@@ -396,18 +448,25 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                             in stock
                           </p>
                         </div>
-                        <div className="flex items-center border border-admin-border rounded-lg overflow-hidden shrink-0">
+                        <div
+                          role="group"
+                          aria-label={`Quantity for ${item.productName}`}
+                          className="flex items-center border border-admin-border-md rounded-lg overflow-hidden shrink-0"
+                        >
                           <button
                             type="button"
                             onClick={() =>
                               updateQty(item.key, item.quantity - 1)
                             }
-                            className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover active:bg-admin-chip transition"
+                            className={QTY_BTN}
                             aria-label="Decrease quantity"
                           >
-                            <Minus className="w-3.5 h-3.5" />
+                            <Minus aria-hidden className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-9 text-center text-sm font-semibold">
+                          <span
+                            aria-live="polite"
+                            className="w-9 text-center text-sm font-semibold text-admin-text-primary"
+                          >
                             {item.quantity}
                           </span>
                           <button
@@ -416,251 +475,197 @@ export function CreateOrderForm({ storeId }: { storeId: string }) {
                               updateQty(item.key, item.quantity + 1)
                             }
                             disabled={item.quantity >= item.stock}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover active:bg-admin-chip disabled:opacity-40 disabled:cursor-not-allowed transition"
+                            className={QTY_BTN}
                             aria-label="Increase quantity"
                           >
-                            <Plus className="w-3.5 h-3.5" />
+                            <Plus aria-hidden className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <span className="w-20 text-right text-sm font-semibold text-gray-900 shrink-0">
+                        <span className="w-20 text-right text-sm font-semibold text-admin-text-primary shrink-0 ml-auto sm:ml-0">
                           ৳{(item.price * item.quantity).toLocaleString()}
                         </span>
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => removeItem(item.key)}
-                          className="w-8 h-8 flex items-center justify-center text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded-md transition shrink-0"
-                          aria-label="Remove item"
+                          className="shrink-0 hover:text-red-600 dark:hover:text-red-400"
+                          aria-label={`Remove ${item.productName}`}
                         >
-                          <X className="w-4 h-4" />
-                        </button>
+                          <X aria-hidden className="w-4 h-4" />
+                        </Button>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
             </div>
-          </section>
+          </FormSection>
 
           {/* Customer */}
-          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
-              <User className="w-4 h-4 text-admin-text-muted" />
-              <h2 className="font-semibold text-sm text-gray-800">Customer</h2>
-            </header>
+          <FormSection icon={User} title="Customer">
             <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
+              <Field label="Full Name" required className="sm:col-span-2">
+                <Input
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Rahim Uddin"
-                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  autoComplete="name"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  Phone <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-admin-text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="01XXXXXXXXX"
-                    className="w-full border border-admin-border-md rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-                  />
-                </div>
-                <p className="text-[11px] text-admin-text-subtle mt-1">
-                  Bangladesh format, e.g. 017XXXXXXXX
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-admin-text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="optional@example.com"
-                    className="w-full border border-admin-border-md rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-                  />
-                </div>
-              </div>
+              </Field>
+              <Field label="Phone" required hint="Bangladesh format, e.g. 017XXXXXXXX">
+                <Input
+                  required
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="01XXXXXXXXX"
+                  autoComplete="tel"
+                  prefix={<Phone aria-hidden className="w-4 h-4" />}
+                />
+              </Field>
+              <Field label="Email">
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="optional@example.com"
+                  autoComplete="email"
+                  prefix={<Mail aria-hidden className="w-4 h-4" />}
+                />
+              </Field>
             </div>
-          </section>
+          </FormSection>
 
           {/* Delivery */}
-          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-admin-text-muted" />
-              <h2 className="font-semibold text-sm text-gray-800">
-                Delivery Address
-              </h2>
-            </header>
+          <FormSection icon={MapPin} title="Delivery Address">
             <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  Street Address <span className="text-red-500">*</span>
-                </label>
-                <input
+              <Field label="Street Address" required className="sm:col-span-2">
+                <Input
                   required
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
                   placeholder="House, road, area"
-                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  autoComplete="street-address"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  City <span className="text-red-500">*</span>
-                </label>
-                <input
+              </Field>
+              <Field label="City" required>
+                <Input
                   required
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Dhaka"
-                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  autoComplete="address-level2"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  Postal Code
-                </label>
-                <input
+              </Field>
+              <Field label="Postal Code">
+                <Input
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                   placeholder="e.g. 1207"
-                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                  autoComplete="postal-code"
                 />
-              </div>
+              </Field>
             </div>
-          </section>
+          </FormSection>
 
           {/* Payment & notes */}
-          <section className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
-            <header className="px-5 py-4 border-b border-admin-border flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-admin-text-muted" />
-              <h2 className="font-semibold text-sm text-gray-800">
-                Payment &amp; Notes
-              </h2>
-            </header>
+          <FormSection icon={CreditCard} title="Payment & Notes">
             <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
-                  Payment Method
-                </label>
-                <select
+              <Field label="Payment Method">
+                <Select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition bg-admin-surface"
                 >
                   <option value="cod">Cash on Delivery</option>
                   <option value="bkash">bKash</option>
                   <option value="nagad">Nagad</option>
                   <option value="bank">Bank Transfer</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-admin-text-secondary mb-1.5 flex items-center gap-1.5">
-                  <StickyNote className="w-3.5 h-3.5" />
-                  Notes
-                </label>
-                <textarea
+                </Select>
+              </Field>
+              <Field
+                label={
+                  <span className="inline-flex items-center gap-1.5">
+                    <StickyNote aria-hidden className="w-3.5 h-3.5" />
+                    Notes
+                  </span>
+                }
+              >
+                <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Internal notes about this order (optional)"
-                  className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition resize-none"
+                  className="resize-none"
                 />
-              </div>
+              </Field>
             </div>
-          </section>
+          </FormSection>
         </div>
 
         {/* RIGHT COLUMN — sticky summary */}
         <aside className="lg:col-span-1">
           <div className="lg:sticky lg:top-6 space-y-4">
-            <div className="bg-admin-surface rounded-xl border border-admin-border shadow-sm overflow-hidden">
-              <header className="px-5 py-4 border-b border-admin-border">
-                <h2 className="font-semibold text-sm text-gray-800">
-                  Order Summary
-                </h2>
-              </header>
+            <FormSection title="Order Summary">
               <div className="p-5 space-y-4">
-                <div>
-                  <label className="text-xs font-medium text-admin-text-secondary mb-1.5 flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5" />
-                    Coupon Code
-                  </label>
-                  <input
+                <Field
+                  label={
+                    <span className="inline-flex items-center gap-1.5">
+                      <Tag aria-hidden className="w-3.5 h-3.5" />
+                      Coupon Code
+                    </span>
+                  }
+                  hint="Validated on submit."
+                >
+                  <Input
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Optional"
-                    className="w-full border border-admin-border-md rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition uppercase"
+                    className="uppercase"
                   />
-                  <p className="text-[11px] text-admin-text-subtle mt-1">
-                    Validated on submit.
-                  </p>
-                </div>
+                </Field>
 
-                <div className="space-y-2 pt-2 border-t border-admin-border">
+                <dl className="space-y-2 pt-2 border-t border-admin-border">
                   <div className="flex justify-between text-sm">
-                    <span className="text-admin-text-secondary">
+                    <dt className="text-admin-text-secondary">
                       Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
-                    </span>
-                    <span className="font-medium text-gray-900">
+                    </dt>
+                    <dd className="font-medium text-admin-text-primary">
                       ৳{subtotal.toLocaleString()}
-                    </span>
+                    </dd>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-admin-text-secondary">Shipping</span>
-                    <span className="text-admin-text-subtle">Calculated later</span>
+                    <dt className="text-admin-text-secondary">Shipping</dt>
+                    <dd className="text-admin-text-muted">Calculated later</dd>
                   </div>
-                  <div className="flex justify-between pt-3 mt-1 border-t border-admin-border text-base font-semibold">
-                    <span>Total</span>
-                    <span>৳{subtotal.toLocaleString()}</span>
+                  <div className="flex justify-between pt-3 mt-1 border-t border-admin-border text-base font-semibold text-admin-text-primary">
+                    <dt>Total</dt>
+                    <dd>৳{subtotal.toLocaleString()}</dd>
                   </div>
-                </div>
+                </dl>
 
-                {error && (
-                  <div className="flex gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{error}</span>
-                  </div>
-                )}
+                {error && <Alert tone="error">{error}</Alert>}
 
                 <div className="space-y-2 pt-2">
-                  <button
+                  <Button
                     type="submit"
-                    disabled={submitting || items.length === 0}
-                    className="w-full px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    variant="primary"
+                    fullWidth
+                    loading={submitting}
+                    disabled={items.length === 0}
                   >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Creating…
-                      </>
-                    ) : (
-                      "Create Order"
-                    )}
-                  </button>
-                  <button
-                    type="button"
+                    Create Order
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    fullWidth
                     onClick={() => router.back()}
-                    className="w-full px-5 py-2.5 bg-admin-surface border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover transition-colors"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
-            </div>
+            </FormSection>
           </div>
         </aside>
       </form>
@@ -718,150 +723,133 @@ function VariantPickerModal({
     );
   }
 
-  useEffect(() => {
-    function onEsc(e: KeyboardEvent) {
-      if (e.key === "Escape") onCancel();
-    }
-    document.addEventListener("keydown", onEsc);
-    return () => document.removeEventListener("keydown", onEsc);
-  }, [onCancel]);
-
   const thumb = activeVariant?.images?.[0]?.url || product.thumbnail || "";
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-      onClick={onCancel}
-    >
-      <div
-        className="bg-admin-surface rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="px-5 py-4 border-b border-admin-border flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-gray-900">Select Variant</h3>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="w-8 h-8 flex items-center justify-center text-admin-text-subtle hover:text-admin-text-secondary hover:bg-admin-chip rounded-md transition"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </header>
-        <div className="p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
-              {thumb ? (
-                <Image
-                  src={thumb}
-                  alt={productName}
-                  fill
-                  className="object-cover"
-                  sizes="56px"
-                />
-              ) : (
-                <Package className="w-5 h-5 text-admin-text-subtle absolute inset-0 m-auto" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {productName}
-              </p>
-              <p className="text-xs text-admin-text-muted">
-                ৳{displayPrice.toLocaleString()} ·{" "}
-                <span
-                  className={outOfStock ? "text-red-500 font-medium" : ""}
-                >
-                  {outOfStock ? "Out of stock" : `${displayStock} in stock`}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {options.map((option) => (
-            <div key={option.name}>
-              <label className="block text-xs font-semibold uppercase tracking-wide mb-2 text-admin-text-muted">
-                {option.name}
-                {selections[option.name] && (
-                  <span className="font-normal text-admin-text-secondary ml-1 normal-case">
-                    — {selections[option.name]}
-                  </span>
-                )}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {option.values.map((value) => {
-                  const available = isValueAvailable(option.name, value);
-                  const selected = selections[option.name] === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() =>
-                        setSelections((prev) => ({
-                          ...prev,
-                          [option.name]: value,
-                        }))
-                      }
-                      disabled={!available}
-                      className={`px-3 py-1.5 border text-xs font-medium rounded-md transition ${
-                        selected
-                          ? "border-gray-900 bg-gray-900 text-white"
-                          : available
-                          ? "border-admin-border-md text-admin-text-secondary hover:border-gray-500"
-                          : "border-admin-border text-gray-300 cursor-not-allowed line-through"
-                      }`}
-                    >
-                      {value}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          <div className="flex items-center gap-3 pt-2">
-            <label className="text-xs font-medium text-admin-text-secondary">Qty</label>
-            <div className="flex items-center border border-admin-border rounded-lg overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                disabled={qty <= 1}
-                className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover disabled:opacity-40 transition"
-              >
-                <Minus className="w-3.5 h-3.5" />
-              </button>
-              <span className="w-9 text-center text-sm font-semibold">
-                {qty}
-              </span>
-              <button
-                type="button"
-                onClick={() => setQty((q) => Math.min(displayStock, q + 1))}
-                disabled={qty >= displayStock || outOfStock}
-                className="w-8 h-8 flex items-center justify-center hover:bg-admin-surface-hover disabled:opacity-40 transition"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-        <footer className="px-5 py-4 border-t border-admin-border flex gap-2 justify-end bg-admin-surface-raised">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 bg-admin-surface border border-admin-border-md text-sm font-medium rounded-lg hover:bg-admin-surface-hover transition"
-          >
+    <Modal
+      open
+      onClose={onCancel}
+      title="Select Variant"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
             disabled={outOfStock}
             onClick={() => onConfirm(selections, qty)}
-            className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Add to Order
-          </button>
-        </footer>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-md bg-admin-chip overflow-hidden shrink-0 relative">
+            {thumb ? (
+              <Image
+                src={thumb}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
+            ) : (
+              <Package aria-hidden className="w-5 h-5 text-admin-text-muted absolute inset-0 m-auto" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-admin-text-primary truncate">
+              {productName}
+            </p>
+            <p className="text-xs text-admin-text-muted">
+              ৳{displayPrice.toLocaleString()} ·{" "}
+              <span
+                className={outOfStock ? "text-red-600 dark:text-red-400 font-medium" : ""}
+              >
+                {outOfStock ? "Out of stock" : `${displayStock} in stock`}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {options.map((option) => (
+          <div key={option.name} role="group" aria-label={option.name}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-admin-text-muted">
+              {option.name}
+              {selections[option.name] && (
+                <span className="font-normal text-admin-text-secondary ml-1 normal-case">
+                  — {selections[option.name]}
+                </span>
+              )}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {option.values.map((value) => {
+                const available = isValueAvailable(option.name, value);
+                const selected = selections[option.name] === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() =>
+                      setSelections((prev) => ({
+                        ...prev,
+                        [option.name]: value,
+                      }))
+                    }
+                    disabled={!available}
+                    aria-pressed={selected}
+                    className={`min-h-10 px-3 py-1.5 border text-xs font-medium rounded-lg transition-colors focus-ring ${
+                      selected
+                        ? "border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
+                        : available
+                        ? "border-admin-border-md text-admin-text-secondary hover:bg-admin-surface-hover"
+                        : "border-admin-border text-admin-text-subtle cursor-not-allowed line-through"
+                    }`}
+                  >
+                    {value}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <div className="flex items-center gap-3 pt-2">
+          <span id="variant-qty-label" className="text-sm font-medium text-admin-text-secondary">
+            Qty
+          </span>
+          <div
+            role="group"
+            aria-labelledby="variant-qty-label"
+            className="flex items-center border border-admin-border-md rounded-lg overflow-hidden"
+          >
+            <button
+              type="button"
+              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              disabled={qty <= 1}
+              className={QTY_BTN}
+              aria-label="Decrease quantity"
+            >
+              <Minus aria-hidden className="w-3.5 h-3.5" />
+            </button>
+            <span aria-live="polite" className="w-9 text-center text-sm font-semibold text-admin-text-primary">
+              {qty}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQty((q) => Math.min(displayStock, q + 1))}
+              disabled={qty >= displayStock || outOfStock}
+              className={QTY_BTN}
+              aria-label="Increase quantity"
+            >
+              <Plus aria-hidden className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </Modal>
   );
 }

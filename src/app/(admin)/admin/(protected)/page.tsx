@@ -7,14 +7,16 @@ import {
   TrendingUp,
   Plus,
   ExternalLink,
+  type LucideIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { and, count, desc, eq, inArray, sql, sum, type SQL } from "drizzle-orm";
 import { StoreService } from "@/features/stores/service";
 import { db } from "@/db/client";
 import { products } from "@/db/schema/products";
 import { orders } from "@/db/schema/orders";
 import { getAdminDbUser } from "@/shared/lib/auth";
-import { EmptyState } from "@/shared/components/ui";
+import { buttonClassName, Card, EmptyState, PageHeader } from "@/shared/components/ui";
 import { hasPermission, PERMISSIONS } from "@/shared/lib/permissions";
 import type { OrderStatus } from "@/features/orders/types";
 
@@ -131,346 +133,308 @@ export default async function AdminDashboardPage() {
   }));
   void sql;
 
+  const kpiClass = "shadow-sm";
+  const thClass = "px-4 py-3 text-xs font-semibold text-admin-text-muted uppercase tracking-wide";
+  type RecentOrder = (typeof recentOrders)[number];
+  const customerOf = (order: RecentOrder) =>
+    order.shippingAddress?.name || order.guestPhone || order.guestEmail || "Guest";
+
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Dashboard</h1>
-          {adminUser && (
-            <p className="text-sm text-admin-text-muted mt-0.5">
-              Welcome back, {adminUser.name}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {canCreateStore && (
-            <Link
-              href="/admin/stores/new"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <Plus size={15} />
-              <span className="hidden sm:inline">New Store</span>
-            </Link>
-          )}
-          {canViewOrders && (
-            <Link
-              href="/admin/orders"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm border border-admin-border-md text-admin-text-secondary rounded-lg hover:bg-admin-surface-hover transition-colors"
-            >
-              <ShoppingBag size={15} />
-              <span className="hidden sm:inline">All Orders</span>
-            </Link>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description={adminUser ? `Welcome back, ${adminUser.name}` : undefined}
+        actions={
+          <>
+            {canCreateStore && (
+              <Link href="/admin/stores/new" className={buttonClassName({ variant: "primary", size: "md" })}>
+                <Plus size={16} aria-hidden />
+                New Store
+              </Link>
+            )}
+            {canViewOrders && (
+              <Link href="/admin/orders" className={buttonClassName({ variant: "secondary", size: "md" })}>
+                <ShoppingBag size={16} aria-hidden />
+                All Orders
+              </Link>
+            )}
+          </>
+        }
+      />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <section aria-label="Key metrics" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stores — always visible */}
-        <div className="bg-admin-surface border border-admin-border rounded-xl p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-950 rounded-lg flex items-center justify-center">
-              <Store size={15} className="text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-              Stores
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-admin-text-primary">
-            {visibleStores.length}
-          </p>
-          <p className="text-xs text-admin-text-subtle mt-1">
+        <Card padding="md" className={`${kpiClass} sm:p-5`}>
+          <KpiLabel icon={Store} tint="bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+            Stores
+          </KpiLabel>
+          <p className="text-2xl font-bold text-admin-text-primary">{visibleStores.length}</p>
+          <p className="text-xs text-admin-text-muted mt-1">
             {visibleStores.filter((s) => s.isActive).length} active
           </p>
-        </div>
+        </Card>
 
         {/* Products — always visible */}
-        <div className="bg-admin-surface border border-admin-border rounded-xl p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-violet-50 dark:bg-violet-950 rounded-lg flex items-center justify-center">
-              <Package size={15} className="text-violet-600 dark:text-violet-400" />
-            </div>
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-              Products
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-admin-text-primary">
-            {productCount.toLocaleString()}
-          </p>
-          <p className="text-xs text-admin-text-subtle mt-1">across all stores</p>
-        </div>
+        <Card padding="md" className={`${kpiClass} sm:p-5`}>
+          <KpiLabel icon={Package} tint="bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-400">
+            Products
+          </KpiLabel>
+          <p className="text-2xl font-bold text-admin-text-primary">{productCount.toLocaleString()}</p>
+          <p className="text-xs text-admin-text-muted mt-1">across all stores</p>
+        </Card>
 
         {/* Orders — only with ORDERS_VIEW */}
         {canViewOrders && (
-          <div className="bg-admin-surface border border-admin-border rounded-xl p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-950 rounded-lg flex items-center justify-center">
-                <ShoppingBag size={15} className="text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-                Orders
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-admin-text-primary">
-              {(orderCount ?? 0).toLocaleString()}
-            </p>
+          <Card padding="md" className={`${kpiClass} sm:p-5`}>
+            <KpiLabel icon={ShoppingBag} tint="bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+              Orders
+            </KpiLabel>
+            <p className="text-2xl font-bold text-admin-text-primary">{(orderCount ?? 0).toLocaleString()}</p>
             {(pendingCount ?? 0) > 0 && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">
+              <p className="text-xs text-amber-700 dark:text-amber-400 font-medium mt-1">
                 {pendingCount} pending
               </p>
             )}
-          </div>
+          </Card>
         )}
 
         {/* Revenue — only with PAYMENTS_VIEW */}
         {canViewPayments && (
-          <div className="bg-admin-surface border border-admin-border rounded-xl p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-cyan-50 dark:bg-cyan-950 rounded-lg flex items-center justify-center">
-                <TrendingUp size={15} className="text-cyan-600 dark:text-cyan-400" />
-              </div>
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
-                Revenue
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-admin-text-primary">
-              {formatCurrency(totalRevenue)}
-            </p>
-            <p className="text-xs text-admin-text-subtle mt-1">paid orders only</p>
-          </div>
+          <Card padding="md" className={`${kpiClass} sm:p-5`}>
+            <KpiLabel icon={TrendingUp} tint="bg-cyan-50 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-400">
+              Revenue
+            </KpiLabel>
+            <p className="text-2xl font-bold text-admin-text-primary">{formatCurrency(totalRevenue)}</p>
+            <p className="text-xs text-admin-text-muted mt-1">paid orders only</p>
+          </Card>
         )}
-      </div>
+      </section>
 
       {/* Store Performance — visible if user can view/edit stores or has order/payment access */}
       {(canEditStore || canCreateStore || canViewOrders || canViewPayments) && visibleStores.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold text-admin-text-secondary uppercase tracking-wide mb-4">
+        <section aria-labelledby="store-performance-heading">
+          <h2
+            id="store-performance-heading"
+            className="text-sm font-semibold text-admin-text-secondary uppercase tracking-wide mb-4"
+          >
             Store Performance
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {visibleStores.map((store) => {
               const stats = storeStatsMap[store._id] ?? {
                 orderCount: 0,
                 revenue: 0,
               };
               return (
-                <div
-                  key={store._id}
-                  className="bg-admin-surface border border-admin-border rounded-xl p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="min-w-0">
-                      <p className="font-semibold text-admin-text-primary truncate">
-                        {store.name}
-                      </p>
-                      {store.domains?.[0] && (
-                        <span className="inline-block mt-1 text-xs text-admin-chip-text bg-admin-chip px-2 py-0.5 rounded-full truncate max-w-full">
-                          {store.domains[0]}
-                        </span>
+                <li key={store._id}>
+                  <Card padding="md" className="h-full shadow-sm sm:p-5">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-admin-text-primary truncate">{store.name}</h3>
+                        {store.domains?.[0] && (
+                          <span className="inline-block mt-1 text-xs text-admin-chip-text bg-admin-chip px-2 py-0.5 rounded-full truncate max-w-full">
+                            {store.domains[0]}
+                          </span>
+                        )}
+                      </div>
+                      <StoreStatus active={store.isActive} />
+                    </div>
+
+                    <div className="flex items-center gap-4 mb-4">
+                      {canViewOrders && (
+                        <div>
+                          <p className="text-lg font-bold text-admin-text-primary">
+                            {stats.orderCount.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-admin-text-muted">orders</p>
+                        </div>
+                      )}
+                      {canViewOrders && canViewPayments && (
+                        <div aria-hidden className="w-px h-8 bg-admin-border" />
+                      )}
+                      {canViewPayments && (
+                        <div>
+                          <p className="text-lg font-bold text-admin-text-primary">
+                            {formatCurrency(stats.revenue)}
+                          </p>
+                          <p className="text-xs text-admin-text-muted">revenue</p>
+                        </div>
                       )}
                     </div>
-                    <span
-                      className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${
-                        store.isActive
-                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                          : "bg-admin-chip text-admin-chip-text"
-                      }`}
-                    >
-                      {store.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center gap-4 mb-4">
-                    {canViewOrders && (
-                      <div>
-                        <p className="text-lg font-bold text-admin-text-primary">
-                          {stats.orderCount.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-admin-text-subtle">orders</p>
-                      </div>
+                    {(canEditStore || canCreateStore) && (
+                      <Link
+                        href={`/admin/stores/${store._id}`}
+                        aria-label={`Manage store ${store.name}`}
+                        className="inline-flex items-center gap-1 py-1 rounded text-xs font-medium text-admin-text-muted hover:text-admin-text-primary transition-colors focus-ring"
+                      >
+                        Manage store
+                        <ExternalLink size={11} aria-hidden />
+                      </Link>
                     )}
-                    {canViewOrders && canViewPayments && (
-                      <div className="w-px h-8 bg-admin-border" />
-                    )}
-                    {canViewPayments && (
-                      <div>
-                        <p className="text-lg font-bold text-admin-text-primary">
-                          {formatCurrency(stats.revenue)}
-                        </p>
-                        <p className="text-xs text-admin-text-subtle">revenue</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {(canEditStore || canCreateStore) && (
-                    <Link
-                      href={`/admin/stores/${store._id}`}
-                      className="flex items-center gap-1 text-xs font-medium text-admin-text-muted hover:text-admin-text-primary transition-colors"
-                    >
-                      Manage store
-                      <ExternalLink size={11} />
-                    </Link>
-                  )}
-                </div>
+                  </Card>
+                </li>
               );
             })}
-          </div>
-        </div>
+          </ul>
+        </section>
       )}
 
       {/* Recent Orders — only with ORDERS_VIEW */}
       {canViewOrders && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-admin-text-secondary uppercase tracking-wide">
+        <section aria-labelledby="recent-orders-heading">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2
+              id="recent-orders-heading"
+              className="text-sm font-semibold text-admin-text-secondary uppercase tracking-wide"
+            >
               Recent Orders
             </h2>
             <Link
               href="/admin/orders"
-              className="text-xs text-admin-text-muted hover:text-admin-text-primary transition-colors"
+              className="py-1 rounded text-xs text-admin-text-muted hover:text-admin-text-primary transition-colors focus-ring"
             >
-              View all →
+              View all <span aria-hidden>→</span>
             </Link>
           </div>
 
           {recentOrders.length === 0 ? (
-            <div className="bg-admin-surface border border-admin-border rounded-xl shadow-sm">
+            <Card padding="none" className="shadow-sm">
               <EmptyState
                 icon={ShoppingBag}
                 title="No orders yet"
                 description="New orders from your stores will show up here."
               />
-            </div>
+            </Card>
           ) : (
             <>
               {/* Mobile cards */}
-              <div className="flex flex-col gap-3 sm:hidden">
-                {recentOrders.map(
-                  (order: {
-                    _id: string;
-                    orderNumber: string;
-                    storeId: string;
-                    shippingAddress?: { name?: string };
-                    guestPhone?: string;
-                    guestEmail?: string;
-                    items: { length: number };
-                    total: number;
-                    status: OrderStatus;
-                    createdAt: string;
-                  }) => (
-                    <div key={order._id} className="bg-admin-surface border border-admin-border rounded-xl shadow-sm p-4">
+              <ul className="flex flex-col gap-3 sm:hidden">
+                {recentOrders.map((order) => (
+                  <li key={order._id}>
+                    <Card padding="md" className="shadow-sm">
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div>
                           <p className="font-mono text-xs font-semibold text-admin-text-secondary">
                             #{order.orderNumber}
                           </p>
-                          <p className="text-xs text-admin-text-subtle mt-0.5">
+                          <p className="text-xs text-admin-text-muted mt-0.5">
                             {storeNameMap[order.storeId] ?? "—"}
                           </p>
                         </div>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize shrink-0 ${
-                            STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-chip-text"
-                          }`}
-                        >
-                          {order.status}
-                        </span>
+                        <OrderStatusPill status={order.status} />
                       </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-admin-text-secondary truncate max-w-40">
-                          {order.shippingAddress?.name || order.guestPhone || order.guestEmail || "Guest"}
-                        </p>
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs text-admin-text-secondary truncate max-w-40">{customerOf(order)}</p>
                         <div className="text-right shrink-0">
                           {canViewPayments && (
-                            <p className="text-xs font-semibold text-admin-text-secondary">{formatCurrency(order.total)}</p>
+                            <p className="text-xs font-semibold text-admin-text-secondary">
+                              {formatCurrency(order.total)}
+                            </p>
                           )}
-                          <p className="text-xs text-admin-text-subtle">{formatDate(order.createdAt)}</p>
+                          <p className="text-xs text-admin-text-muted">{formatDate(order.createdAt)}</p>
                         </div>
                       </div>
-                    </div>
-                  )
-                )}
-              </div>
+                    </Card>
+                  </li>
+                ))}
+              </ul>
 
               {/* Desktop table */}
-              <div className="hidden sm:block bg-admin-surface border border-admin-border rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+              <Card padding="none" className="hidden sm:block shadow-sm overflow-hidden">
+                <div className="relative overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-admin-border bg-admin-surface-raised">
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">Order</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">Store</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">Customer</th>
+                        <th scope="col" className={`text-left ${thClass}`}>Order</th>
+                        <th scope="col" className={`text-left ${thClass}`}>Store</th>
+                        <th scope="col" className={`text-left ${thClass}`}>Customer</th>
                         {canViewPayments && (
-                          <th className="text-right px-4 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">Total</th>
+                          <th scope="col" className={`text-right ${thClass}`}>Total</th>
                         )}
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">Status</th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-admin-text-subtle uppercase tracking-wide">Date</th>
+                        <th scope="col" className={`text-left ${thClass}`}>Status</th>
+                        <th scope="col" className={`text-right ${thClass}`}>Date</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {recentOrders.map(
-                        (order: {
-                          _id: string;
-                          orderNumber: string;
-                          storeId: string;
-                          shippingAddress?: { name?: string };
-                          guestPhone?: string;
-                          guestEmail?: string;
-                          items: { length: number };
-                          total: number;
-                          status: OrderStatus;
-                          createdAt: string;
-                        }) => (
-                          <tr
-                            key={order._id}
-                            className="border-b border-admin-border hover:bg-admin-surface-hover transition-colors"
-                          >
-                            <td className="px-4 py-3">
-                              <Link
-                                href={`/admin/stores/${order.storeId}/orders/${order._id}`}
-                                className="font-mono text-xs font-semibold text-admin-text-secondary hover:text-admin-text-primary"
-                              >
-                                #{order.orderNumber}
-                              </Link>
+                    <tbody className="divide-y divide-admin-border">
+                      {recentOrders.map((order) => (
+                        <tr key={order._id} className="hover:bg-admin-surface-hover transition-colors">
+                          <td className="px-4 py-3">
+                            <Link
+                              href={`/admin/stores/${order.storeId}/orders/${order._id}`}
+                              className="rounded font-mono text-xs font-semibold text-admin-text-secondary hover:text-admin-text-primary transition-colors focus-ring"
+                            >
+                              #{order.orderNumber}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs text-admin-text-secondary">{storeNameMap[order.storeId] ?? "—"}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs text-admin-text-secondary truncate max-w-30 block">
+                              {customerOf(order)}
+                            </span>
+                          </td>
+                          {canViewPayments && (
+                            <td className="px-4 py-3 text-right font-semibold text-admin-text-secondary text-xs">
+                              {formatCurrency(order.total)}
                             </td>
-                            <td className="px-4 py-3">
-                              <span className="text-xs text-admin-text-secondary">{storeNameMap[order.storeId] ?? "—"}</span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="text-xs text-admin-text-secondary truncate max-w-30 block">
-                                {order.shippingAddress?.name || order.guestPhone || order.guestEmail || "Guest"}
-                              </span>
-                            </td>
-                            {canViewPayments && (
-                              <td className="px-4 py-3 text-right font-semibold text-admin-text-secondary text-xs">
-                                {formatCurrency(order.total)}
-                              </td>
-                            )}
-                            <td className="px-4 py-3">
-                              <span
-                                className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
-                                  STATUS_STYLES[order.status] ?? "bg-admin-chip text-admin-chip-text"
-                                }`}
-                              >
-                                {order.status}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right text-xs text-admin-text-subtle whitespace-nowrap">
-                              {formatDate(order.createdAt)}
-                            </td>
-                          </tr>
-                        )
-                      )}
+                          )}
+                          <td className="px-4 py-3">
+                            <OrderStatusPill status={order.status} />
+                          </td>
+                          <td className="px-4 py-3 text-right text-xs text-admin-text-muted whitespace-nowrap">
+                            {formatDate(order.createdAt)}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </Card>
             </>
           )}
-        </div>
+        </section>
       )}
     </div>
+  );
+}
+
+function KpiLabel({ icon: Icon, tint, children }: { icon: LucideIcon; tint: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <div aria-hidden className={`w-8 h-8 rounded-lg flex items-center justify-center ${tint}`}>
+        <Icon size={15} />
+      </div>
+      <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">{children}</span>
+    </div>
+  );
+}
+
+/** Status is spelled out in text, so colour is never the only signal. */
+function OrderStatusPill({ status }: { status: OrderStatus }) {
+  return (
+    <span
+      className={`inline-block shrink-0 text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
+        STATUS_STYLES[status] ?? "bg-admin-chip text-admin-chip-text"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function StoreStatus({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${
+        active
+          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+          : "bg-admin-chip text-admin-chip-text"
+      }`}
+    >
+      {active ? "Active" : "Inactive"}
+    </span>
   );
 }

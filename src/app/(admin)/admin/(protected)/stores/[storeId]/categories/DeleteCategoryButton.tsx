@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { ConfirmDialog } from "@/shared/components/ui";
+import { Button, ConfirmDialog } from "@/shared/components/ui";
 
 interface Props {
   categoryId: string;
@@ -36,16 +36,17 @@ export function DeleteCategoryButton({ categoryId, categoryName }: Props) {
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => setOpen(true)}
-        disabled={loading}
-        className="p-2.5 text-admin-text-subtle hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+        loading={loading}
+        className="text-admin-text-muted hover:text-red-600 dark:hover:text-red-400"
         aria-label={`Delete ${categoryName}`}
         title="Delete category"
       >
-        <Trash2 className="w-4 h-4" />
-      </button>
+        {!loading && <Trash2 aria-hidden className="w-4 h-4" />}
+      </Button>
       <ConfirmDialog
         open={open}
         onClose={() => setOpen(false)}

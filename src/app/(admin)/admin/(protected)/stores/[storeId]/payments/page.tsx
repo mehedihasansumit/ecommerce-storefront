@@ -9,18 +9,27 @@ import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permiss
 import type { Metadata } from "next";
 import type { PaymentStatus } from "@/features/orders/types";
 import Link from "next/link";
+import { Card, EmptyState, PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 
 export const metadata: Metadata = { title: "Payments" };
 
 const PAGE_SIZE = 20;
 
 const PAYMENT_FILTER_STYLES: Record<PaymentStatus | "all", string> = {
-  all:      "bg-gray-900 text-white border-gray-900",
-  pending:  "bg-yellow-100 text-yellow-800 border-yellow-200",
-  paid:     "bg-green-100 text-green-800 border-green-200",
-  failed:   "bg-red-100 text-red-800 border-red-200",
-  refunded: "bg-admin-chip text-admin-text-secondary border-admin-border",
+  all:      "bg-admin-text-primary text-admin-surface border-admin-text-primary",
+  pending:  "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-900",
+  paid:     "bg-green-100 text-green-800 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  failed:   "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
+  refunded: "bg-admin-chip text-admin-text-primary border-admin-text-subtle",
 };
+
+const PILL =
+  "focus-ring px-3 py-1.5 rounded-full text-xs font-medium border transition-colors";
+const PILL_IDLE =
+  "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-admin-text-subtle";
+const PAGE_BTN =
+  "focus-ring w-10 h-10 flex items-center justify-center rounded-lg transition-colors";
 
 export default async function PaymentsPage({
   params,
@@ -65,81 +74,53 @@ export default async function PaymentsPage({
     return `?${qs}`;
   }
 
+  const statCards = [
+    { icon: TrendingUp, iconClass: "text-green-500", label: "Revenue", value: `৳${stats.totalRevenue.toLocaleString()}`, hint: `${stats.paid} paid orders` },
+    { icon: Clock, iconClass: "text-yellow-500", label: "Pending", value: stats.pending, hint: "awaiting payment" },
+    { icon: XCircle, iconClass: "text-red-500", label: "Failed", value: stats.failed, hint: "failed transactions" },
+    { icon: RotateCcw, iconClass: "text-admin-text-muted", label: "Refunded", value: stats.refunded, hint: "orders refunded" },
+  ];
+
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Payments</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-admin-text-subtle" />
-            Payments
-          </h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">{total} orders</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Payments"
+        description={`${total} orders`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Payments" },
+            ]}
+          />
+        }
+      />
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Revenue</span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">৳{stats.totalRevenue.toLocaleString()}</p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">{stats.paid} paid orders</p>
-        </div>
-
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Clock className="w-4 h-4 text-yellow-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Pending</span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">{stats.pending}</p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">awaiting payment</p>
-        </div>
-
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <XCircle className="w-4 h-4 text-red-500" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Failed</span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">{stats.failed}</p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">failed transactions</p>
-        </div>
-
-        <div className="bg-admin-surface rounded-xl border border-admin-border p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <RotateCcw className="w-4 h-4 text-admin-text-muted" />
-            <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Refunded</span>
-          </div>
-          <p className="text-xl font-bold text-admin-text-primary">{stats.refunded}</p>
-          <p className="text-xs text-admin-text-subtle mt-0.5">orders refunded</p>
-        </div>
+        {statCards.map(({ icon: Icon, iconClass, label, value, hint }) => (
+          <Card key={label} padding="md">
+            <div className="flex items-center gap-2 mb-1">
+              <Icon aria-hidden className={`w-4 h-4 ${iconClass}`} />
+              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">{label}</span>
+            </div>
+            <p className="text-xl font-bold text-admin-text-primary">{value}</p>
+            <p className="text-xs text-admin-text-muted mt-0.5">{hint}</p>
+          </Card>
+        ))}
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
         <PaymentsSearch storeId={storeId} defaultValue={q} />
 
-        <div className="flex flex-wrap gap-1.5 ml-auto">
+        <div className="flex flex-wrap gap-1.5 ml-auto" role="group" aria-label="Filter by payment status">
           <Link
             href={buildHref(1, undefined, q)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              !status
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-admin-surface text-admin-text-secondary border-admin-border hover:border-gray-400"
-            }`}
+            aria-current={!status ? "page" : undefined}
+            className={`${PILL} ${!status ? PAYMENT_FILTER_STYLES.all : PILL_IDLE}`}
           >
             All
           </Link>
@@ -147,11 +128,8 @@ export default async function PaymentsPage({
             <Link
               key={s}
               href={buildHref(1, s, q)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
-                status === s
-                  ? PAYMENT_FILTER_STYLES[s]
-                  : "bg-admin-surface text-admin-text-secondary border-admin-border hover:border-gray-400"
-              }`}
+              aria-current={status === s ? "page" : undefined}
+              className={`${PILL} capitalize ${status === s ? PAYMENT_FILTER_STYLES[s] : PILL_IDLE}`}
             >
               {s}
             </Link>
@@ -161,41 +139,43 @@ export default async function PaymentsPage({
 
       {/* Empty state */}
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-admin-surface rounded-xl border border-admin-border">
-          <div className="w-14 h-14 bg-admin-chip rounded-full flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="w-7 h-7 text-admin-text-subtle" />
-          </div>
-          <h3 className="text-base font-semibold text-admin-text-primary mb-1">No orders found</h3>
-          <p className="text-sm text-admin-text-muted">
-            {q
-              ? `No orders match "${q}".`
-              : status
-              ? `No orders with payment status "${status}".`
-              : "No orders yet."}
-          </p>
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={CreditCard}
+            title="No orders found"
+            description={
+              q
+                ? `No orders match "${q}".`
+                : status
+                ? `No orders with payment status "${status}".`
+                : "No orders yet."
+            }
+          />
+        </Card>
       ) : (
         <>
           <PaymentsTable orders={orders} storeId={storeId} />
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 mt-4">
               <p className="text-sm text-admin-text-muted">
                 Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 <Link
                   href={buildHref(Math.max(1, currentPage - 1), status, q)}
+                  aria-label="Previous page"
                   aria-disabled={currentPage <= 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
+                  tabIndex={currentPage <= 1 ? -1 : undefined}
+                  className={`${PAGE_BTN} border text-admin-text-muted ${
                     currentPage <= 1
                       ? "opacity-30 pointer-events-none border-admin-border"
-                      : "border-admin-border hover:bg-admin-chip"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden className="w-4 h-4" />
                 </Link>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -207,15 +187,17 @@ export default async function PaymentsPage({
                   }, [])
                   .map((item, idx) =>
                     item === "..." ? (
-                      <span key={`e-${idx}`} className="w-8 h-8 flex items-center justify-center text-xs text-admin-text-subtle">…</span>
+                      <span key={`e-${idx}`} aria-hidden className="w-10 h-10 flex items-center justify-center text-xs text-admin-text-muted">…</span>
                     ) : (
                       <Link
                         key={item}
                         href={buildHref(item as number, status, q)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                        aria-label={`Page ${item}`}
+                        aria-current={currentPage === item ? "page" : undefined}
+                        className={`${PAGE_BTN} text-xs font-medium ${
                           currentPage === item
-                            ? "bg-gray-900 text-white"
-                            : "border border-admin-border text-admin-text-secondary hover:bg-admin-chip"
+                            ? "bg-admin-text-primary text-admin-surface"
+                            : "border border-admin-border-md text-admin-text-secondary hover:bg-admin-chip"
                         }`}
                       >
                         {item}
@@ -225,17 +207,19 @@ export default async function PaymentsPage({
 
                 <Link
                   href={buildHref(Math.min(totalPages, currentPage + 1), status, q)}
+                  aria-label="Next page"
                   aria-disabled={currentPage >= totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-admin-text-muted transition-colors ${
+                  tabIndex={currentPage >= totalPages ? -1 : undefined}
+                  className={`${PAGE_BTN} border text-admin-text-muted ${
                     currentPage >= totalPages
                       ? "opacity-30 pointer-events-none border-admin-border"
-                      : "border-admin-border hover:bg-admin-chip"
+                      : "border-admin-border-md hover:bg-admin-chip"
                   }`}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </nav>
           )}
         </>
       )}

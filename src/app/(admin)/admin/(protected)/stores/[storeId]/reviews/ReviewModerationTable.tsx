@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Check, X } from "lucide-react";
+import { Star, Check, X, Trash2, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
-import { ConfirmDialog } from "@/shared/components/ui";
+import { Alert, Badge, Button, Card, ConfirmDialog, EmptyState } from "@/shared/components/ui";
 import type { IReview } from "@/features/reviews/types";
 
 interface ReviewModerationTableProps {
@@ -13,15 +13,16 @@ interface ReviewModerationTableProps {
 
 function StarDisplay({ rating }: { rating: number }) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5" role="img" aria-label={`Rated ${rating} out of 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className="w-3.5 h-3.5"
-          style={{
-            color: i <= rating ? "#facc15" : "#e5e7eb",
-            fill: i <= rating ? "#facc15" : "#e5e7eb",
-          }}
+          aria-hidden
+          className={`w-3.5 h-3.5 ${
+            i <= rating
+              ? "text-yellow-400 fill-yellow-400"
+              : "text-gray-200 fill-gray-200 dark:text-gray-600 dark:fill-gray-600"
+          }`}
         />
       ))}
     </div>
@@ -86,121 +87,118 @@ export function ReviewModerationTable({
 
   if (reviews.length === 0) {
     return (
-      <div className="text-center py-16 text-admin-text-subtle text-sm">
-        No reviews found.
-      </div>
+      <Card padding="none">
+        <EmptyState icon={MessageSquare} title="No reviews found." />
+      </Card>
     );
   }
 
   return (
     <div className="space-y-3">
       {error && (
-        <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-2 text-sm text-red-700">
-          {error}
-        </div>
+        <Alert tone="error">{error}</Alert>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-admin-border bg-admin-surface">
-        <table className="w-full text-sm">
-          <thead className="bg-admin-surface-raised border-b border-admin-border">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
-                Reviewer
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
-                Rating
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
-                Review
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
-                Date
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
-                Status
-              </th>
-              <th className="text-right px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-admin-border">
-            {reviews.map((review) => {
-              const isLoading = loading === review._id;
-              return (
-                <tr key={review._id} className="hover:bg-admin-surface-hover transition-colors">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900 dark:text-gray-300 text-sm">
-                      {review.reviewerName || "Customer"}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <StarDisplay rating={review.rating} />
-                  </td>
-                  <td className="px-4 py-3 max-w-xs">
-                    {review.title && (
-                      <p className="font-medium text-gray-800 dark:text-gray-300 truncate">{review.title}</p>
-                    )}
-                    {review.comment && (
-                      <p className="text-admin-text-muted text-xs truncate mt-0.5">{review.comment}</p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-admin-text-muted text-xs whitespace-nowrap">
-                    {new Date(review.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
-                        review.isApproved
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {review.isApproved ? "Approved" : "Pending"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-2">
-                      {!review.isApproved && (
-                        <button
-                          onClick={() => handleModerate(review._id, true)}
-                          disabled={isLoading}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-60 transition-colors"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          Approve
-                        </button>
+      <Card padding="none" className="overflow-hidden">
+        <div className="relative overflow-x-auto">
+          <table className="w-full min-w-175 text-sm">
+            <thead className="bg-admin-surface-raised border-b border-admin-border">
+              <tr>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
+                  Reviewer
+                </th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
+                  Rating
+                </th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
+                  Review
+                </th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
+                  Date
+                </th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
+                  Status
+                </th>
+                <th scope="col" className="text-right px-4 py-3 font-medium text-admin-text-muted text-xs uppercase tracking-wide">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-admin-border">
+              {reviews.map((review) => {
+                const isLoading = loading === review._id;
+                return (
+                  <tr key={review._id} className="hover:bg-admin-surface-hover transition-colors">
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-admin-text-primary text-sm">
+                        {review.reviewerName || "Customer"}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <StarDisplay rating={review.rating} />
+                    </td>
+                    <td className="px-4 py-3 max-w-xs">
+                      {review.title && (
+                        <p className="font-medium text-admin-text-primary truncate">{review.title}</p>
                       )}
-                      {review.isApproved && (
-                        <button
-                          onClick={() => handleModerate(review._id, false)}
-                          disabled={isLoading}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg disabled:opacity-60 transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                          Reject
-                        </button>
+                      {review.comment && (
+                        <p className="text-admin-text-muted text-xs truncate mt-0.5">{review.comment}</p>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => setPendingDelete(review)}
-                        disabled={isLoading}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-60 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td className="px-4 py-3 text-admin-text-muted text-xs whitespace-nowrap">
+                      {new Date(review.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge tone={review.isApproved ? "success" : "warning"}>
+                        {review.isApproved ? "Approved" : "Pending"}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {!review.isApproved && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleModerate(review._id, true)}
+                            disabled={isLoading}
+                            leftIcon={<Check aria-hidden className="w-3.5 h-3.5" />}
+                          >
+                            Approve
+                          </Button>
+                        )}
+                        {review.isApproved && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleModerate(review._id, false)}
+                            disabled={isLoading}
+                            leftIcon={<X aria-hidden className="w-3.5 h-3.5" />}
+                          >
+                            Reject
+                          </Button>
+                        )}
+                        <Button
+                          variant="danger-outline"
+                          size="sm"
+                          onClick={() => setPendingDelete(review)}
+                          disabled={isLoading}
+                          leftIcon={<Trash2 aria-hidden className="w-3.5 h-3.5" />}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       <ConfirmDialog
         open={pendingDelete !== null}

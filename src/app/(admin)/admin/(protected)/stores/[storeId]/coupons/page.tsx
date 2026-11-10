@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { Plus, Ticket, CheckCircle, Clock, XCircle, ChevronRight } from "lucide-react";
+import { Plus, Ticket, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Card, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { CouponService } from "@/features/coupons/service";
@@ -79,87 +81,66 @@ export default async function CouponsPage({
 
   return (
     <div>
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Coupons</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Coupons</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {coupons.length} {coupons.length === 1 ? "coupon" : "coupons"} · {stats.totalUses} total uses
-          </p>
-        </div>
-        {canCreate && (
-          <Link
-            href={`/admin/stores/${storeId}/coupons/new`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:bg-gray-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Coupon
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Coupons"
+        description={`${coupons.length} ${coupons.length === 1 ? "coupon" : "coupons"} · ${stats.totalUses} total uses`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Coupons" },
+            ]}
+          />
+        }
+        actions={
+          canCreate && (
+            <Link
+              href={`/admin/stores/${storeId}/coupons/new`}
+              className={buttonClassName({ variant: "primary", size: "md" })}
+            >
+              <Plus aria-hidden className="w-4 h-4" />
+              New Coupon
+            </Link>
+          )
+        }
+      />
 
       {/* Stats cards */}
       {coupons.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Ticket className="w-4 h-4 text-admin-text-subtle" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Total</span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{coupons.length}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">{stats.totalUses} uses</p>
-          </div>
-
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Active</span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{stats.active}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">live now</p>
-          </div>
-
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="w-4 h-4 text-blue-500" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Scheduled</span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{stats.scheduled}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">upcoming</p>
-          </div>
-
-          <div className="bg-admin-surface rounded-xl border border-admin-border-md p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <XCircle className="w-4 h-4 text-red-400" />
-              <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">Expired</span>
-            </div>
-            <p className="text-xl font-bold text-admin-text-primary">{stats.expired}</p>
-            <p className="text-xs text-admin-text-subtle mt-0.5">no longer valid</p>
-          </div>
+          {[
+            { icon: Ticket, iconClass: "text-admin-text-muted", label: "Total", value: coupons.length, hint: `${stats.totalUses} uses` },
+            { icon: CheckCircle, iconClass: "text-green-500", label: "Active", value: stats.active, hint: "live now" },
+            { icon: Clock, iconClass: "text-blue-500", label: "Scheduled", value: stats.scheduled, hint: "upcoming" },
+            { icon: XCircle, iconClass: "text-red-400", label: "Expired", value: stats.expired, hint: "no longer valid" },
+          ].map(({ icon: Icon, iconClass, label, value, hint }) => (
+            <Card key={label} padding="md">
+              <div className="flex items-center gap-2 mb-1">
+                <Icon aria-hidden className={`w-4 h-4 ${iconClass}`} />
+                <span className="text-xs font-medium text-admin-text-muted uppercase tracking-wide">
+                  {label}
+                </span>
+              </div>
+              <p className="text-xl font-bold text-admin-text-primary">{value}</p>
+              <p className="text-xs text-admin-text-muted mt-0.5">{hint}</p>
+            </Card>
+          ))}
         </div>
       )}
 
       {/* Status filter tabs */}
-      <div className="flex flex-wrap gap-1.5 mb-5">
+      <div className="flex flex-wrap gap-1.5 mb-5" role="group" aria-label="Filter coupons by status">
         {statuses.map(({ key, label }) => (
           <Link
             key={key}
             href={buildHref(key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
+            aria-current={filterStatus === key ? "page" : undefined}
+            className={`focus-ring px-3 py-1.5 rounded-full text-xs font-medium border capitalize transition-colors ${
               filterStatus === key
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-gray-400"
+                ? "bg-admin-text-primary text-admin-surface border-admin-text-primary"
+                : "bg-admin-surface text-admin-text-secondary border-admin-border-md hover:border-admin-text-subtle"
             }`}
           >
             {label}

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { StoreService } from "@/features/stores/service";
@@ -27,22 +27,20 @@ export default async function NewCampaignPage({
 
   return (
     <div>
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">
-          Dashboard
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link
-          href={`/admin/stores/${storeId}/campaigns`}
-          className="hover:text-admin-text-secondary transition-colors"
-        >
-          Campaigns
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">New</span>
-      </nav>
-
-      <h1 className="text-2xl font-bold text-admin-text-primary mb-6">New Campaign</h1>
+      <PageHeader
+        title="New Campaign"
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Campaigns", href: `/admin/stores/${storeId}/campaigns` },
+              { label: "New" },
+            ]}
+          />
+        }
+      />
 
       <CampaignForm storeId={storeId} categories={categories} />
     </div>

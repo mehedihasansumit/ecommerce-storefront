@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ChevronRight,
   User,
   MapPin,
   CreditCard,
@@ -19,6 +18,8 @@ import { OrderService } from "@/features/orders/service";
 import { StoreService } from "@/features/stores/service";
 import { OrderStatusUpdater } from "./OrderStatusUpdater";
 import { RefundReviewer } from "./RefundReviewer";
+import { Card, PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "../../../../../_components/AdminBreadcrumbs";
 import type { OrderStatus, PaymentStatus, RefundRequestStatus } from "@/features/orders/types";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -65,16 +66,16 @@ function SectionCard({
   headerRight?: React.ReactNode;
 }) {
   return (
-    <div className="bg-admin-surface rounded-xl border border-admin-border overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-admin-border">
-        <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-admin-text-subtle" />
-          <h2 className="font-semibold text-sm text-admin-text-secondary">{title}</h2>
+    <Card padding="none" className="overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-admin-border">
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon aria-hidden className="w-4 h-4 text-admin-text-muted shrink-0" />
+          <h2 className="font-semibold text-sm text-admin-text-primary">{title}</h2>
         </div>
         {headerRight}
       </div>
       {children}
-    </div>
+    </Card>
   );
 }
 
@@ -98,58 +99,58 @@ export default async function OrderDetailPage({
   const totalItems = order.items.reduce((s, i) => s + i.quantity, 0);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* ── Header ── */}
-      <div>
-        <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-          <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <Link href={`/admin/stores/${storeId}/orders`} className="hover:text-admin-text-secondary transition-colors">Orders</Link>
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-admin-text-secondary font-medium">{order.orderNumber}</span>
-        </nav>
-
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold font-mono tracking-tight text-admin-text-primary">
-                {order.orderNumber}
-              </h1>
-              <span
-                className={`px-2.5 py-1 text-xs font-semibold rounded-full capitalize ${STATUS_STYLES[order.status]}`}
-              >
-                {order.status}
-              </span>
-              <span
-                className={`px-2.5 py-1 text-xs font-semibold rounded-full capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}
-              >
-                {order.paymentStatus}
-              </span>
-            </div>
-            <div className="flex items-center gap-3 mt-1.5 text-sm text-admin-text-muted flex-wrap">
-              <span>
-                {new Date(order.createdAt).toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-              <span className="text-gray-300">·</span>
-              <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span>
-              <span className="text-gray-300">·</span>
-              <span className="font-semibold text-admin-text-secondary">
-                ৳{order.total.toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        className="mb-0"
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Orders", href: `/admin/stores/${storeId}/orders` },
+              { label: order.orderNumber },
+            ]}
+          />
+        }
+        title={
+          <span className="flex items-center gap-3 flex-wrap">
+            <span className="font-mono">{order.orderNumber}</span>
+            <span
+              className={`px-2.5 py-1 font-sans text-xs font-semibold tracking-normal rounded-full capitalize ${STATUS_STYLES[order.status]}`}
+            >
+              <span className="sr-only">Order status: </span>
+              {order.status}
+            </span>
+            <span
+              className={`px-2.5 py-1 font-sans text-xs font-semibold tracking-normal rounded-full capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}
+            >
+              <span className="sr-only">Payment status: </span>
+              {order.paymentStatus}
+            </span>
+          </span>
+        }
+        description={
+          <span className="flex items-center gap-3 flex-wrap">
+            <span>
+              {new Date(order.createdAt).toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+            <span aria-hidden className="text-admin-text-subtle">·</span>
+            <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span>
+            <span aria-hidden className="text-admin-text-subtle">·</span>
+            <span className="font-semibold text-admin-text-secondary">
+              ৳{order.total.toLocaleString()}
+            </span>
+          </span>
+        }
+      />
 
       {/* ── Status updater (full width) ── */}
       <OrderStatusUpdater
@@ -159,17 +160,17 @@ export default async function OrderDetailPage({
       />
 
       {/* ── Two-column grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
         {/* ── Left: Items + History + Notes + IP ── */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-6">
 
           {/* Items */}
           <SectionCard
             icon={Package}
             title="Order Items"
             headerRight={
-              <span className="text-xs text-admin-text-subtle font-medium">
+              <span className="text-xs text-admin-text-muted font-medium">
                 {order.items.length} line{order.items.length !== 1 ? "s" : ""}
               </span>
             }
@@ -204,7 +205,7 @@ export default async function OrderDetailPage({
                     <p className="text-sm font-semibold text-admin-text-primary">
                       ৳{item.totalPrice.toLocaleString()}
                     </p>
-                    <p className="text-xs text-admin-text-subtle mt-0.5">
+                    <p className="text-xs text-admin-text-muted mt-0.5">
                       ৳{item.unitPrice.toLocaleString()} each
                     </p>
                   </div>
@@ -221,7 +222,7 @@ export default async function OrderDetailPage({
               {order.discount > 0 && (
                 <div className="flex justify-between text-green-600 dark:text-green-400">
                   <span className="flex items-center gap-1">
-                    <Tag className="w-3.5 h-3.5" />
+                    <Tag className="w-3.5 h-3.5" aria-hidden />
                     Discount{order.couponCode ? ` (${order.couponCode})` : ""}
                   </span>
                   <span>−৳{order.discount.toLocaleString()}</span>
@@ -229,7 +230,7 @@ export default async function OrderDetailPage({
               )}
               <div className="flex justify-between text-admin-text-muted">
                 <span className="flex items-center gap-1">
-                  <Truck className="w-3.5 h-3.5" />
+                  <Truck className="w-3.5 h-3.5" aria-hidden />
                   Shipping
                 </span>
                 <span>
@@ -261,6 +262,7 @@ export default async function OrderDetailPage({
                   {[...order.statusHistory].reverse().map((entry, idx) => (
                     <li key={idx} className="ml-4">
                       <span
+                        aria-hidden
                         className={`absolute -left-1.5 w-3 h-3 rounded-full border-2 border-admin-surface ${
                           HISTORY_DOT[entry.status] ?? "bg-gray-400"
                         }`}
@@ -274,7 +276,7 @@ export default async function OrderDetailPage({
                             <p className="text-xs text-admin-text-muted mt-0.5">{entry.note}</p>
                           )}
                         </div>
-                        <time className="text-xs text-admin-text-subtle shrink-0">
+                        <time className="text-xs text-admin-text-muted shrink-0">
                           {new Date(entry.changedAt).toLocaleString("en-GB", {
                             day: "2-digit",
                             month: "short",
@@ -317,7 +319,7 @@ export default async function OrderDetailPage({
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2.5 py-1 rounded-full">
-                        <ShieldAlert className="w-3.5 h-3.5" />
+                        <ShieldAlert className="w-3.5 h-3.5" aria-hidden />
                         {sameIpOrders.length} other order{sameIpOrders.length > 1 ? "s" : ""} from this IP
                       </span>
                     </div>
@@ -330,13 +332,13 @@ export default async function OrderDetailPage({
                           <Link
                             key={o._id}
                             href={`/admin/stores/${storeId}/orders/${o._id}`}
-                            className="flex items-center justify-between px-4 py-3 text-sm hover:bg-admin-surface-hover transition-colors group"
+                            className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm hover:bg-admin-surface-hover transition-colors focus-ring group"
                           >
                             <div>
                               <span className="font-mono font-semibold text-admin-text-secondary group-hover:text-admin-text-primary">
                                 {o.orderNumber}
                               </span>
-                              <span className="ml-2 text-admin-text-subtle text-xs">
+                              <span className="ml-2 text-admin-text-muted text-xs">
                                 {o.shippingAddress.name}
                               </span>
                             </div>
@@ -363,7 +365,7 @@ export default async function OrderDetailPage({
                   </p>
                 )
               ) : (
-                <p className="text-sm text-admin-text-subtle">No IP recorded for this order.</p>
+                <p className="text-sm text-admin-text-muted">No IP recorded for this order.</p>
               )}
             </div>
           </SectionCard>
@@ -408,7 +410,7 @@ export default async function OrderDetailPage({
                     </p>
                   )}
                   {order.refundRequest.processedAt && (
-                    <p className="text-xs text-admin-text-subtle">
+                    <p className="text-xs text-admin-text-muted">
                       Processed{" "}
                       {new Date(order.refundRequest.processedAt).toLocaleString("en-GB", {
                         day: "2-digit",
@@ -424,7 +426,7 @@ export default async function OrderDetailPage({
         </div>
 
         {/* ── Right: Customer + Address + Payment ── */}
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           {/* Customer */}
           <SectionCard icon={User} title="Customer">
@@ -432,12 +434,12 @@ export default async function OrderDetailPage({
               <p className="font-semibold text-admin-text-primary">{order.shippingAddress.name}</p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-admin-text-secondary">
-                  <Phone className="w-3.5 h-3.5 text-admin-text-subtle shrink-0" />
+                  <Phone className="w-3.5 h-3.5 text-admin-text-muted shrink-0" aria-hidden />
                   <span>{order.shippingAddress.phone}</span>
                 </div>
                 {order.guestEmail && (
                   <div className="flex items-center gap-2 text-sm text-admin-text-secondary">
-                    <Mail className="w-3.5 h-3.5 text-admin-text-subtle shrink-0" />
+                    <Mail className="w-3.5 h-3.5 text-admin-text-muted shrink-0" aria-hidden />
                     <span className="truncate">{order.guestEmail}</span>
                   </div>
                 )}
@@ -501,14 +503,14 @@ export default async function OrderDetailPage({
               </div>
 
               {order.paymentIntentId && (
-                <p className="text-xs text-admin-text-subtle font-mono truncate">
+                <p className="text-xs text-admin-text-muted font-mono truncate">
                   {order.paymentIntentId}
                 </p>
               )}
 
               <Link
                 href={`/admin/stores/${storeId}/payments`}
-                className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                className="inline-flex items-center gap-1 rounded text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors focus-ring"
               >
                 Manage payment →
               </Link>

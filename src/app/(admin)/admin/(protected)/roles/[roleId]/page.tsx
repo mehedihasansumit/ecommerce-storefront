@@ -3,6 +3,8 @@ import { getAdminDbUser } from "@/shared/lib/auth";
 import { RoleService } from "@/features/roles/service";
 import { RoleForm } from "@/features/roles/components/RoleForm";
 
+import { AdminBreadcrumbs } from "../../../_components/AdminBreadcrumbs";
+import { PageHeader } from "@/shared/components/ui";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Edit Role" };
@@ -21,10 +23,19 @@ export default async function EditRolePage({
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-admin-text-primary">Edit Role</h1>
-        <p className="text-sm text-admin-text-muted mt-1">{role.name}</p>
-      </div>
+      <PageHeader
+        title="Edit Role"
+        description={role.name}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Roles", href: "/admin/roles" },
+              { label: role.name },
+            ]}
+          />
+        }
+      />
       <RoleForm role={role} />
     </div>
   );

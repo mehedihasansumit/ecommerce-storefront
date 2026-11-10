@@ -1,5 +1,6 @@
-export { Button, ButtonLink, buttonClassName, buttonStyle } from "./Button";
-export type { ButtonVariant, ButtonSize } from "./Button";
+export { Button, ButtonLink } from "./Button";
+export { buttonClassName, buttonStyle } from "./buttonStyles";
+export type { ButtonVariant, ButtonSize } from "./buttonStyles";
 
 export { Input } from "./Input";
 export { Textarea } from "./Textarea";

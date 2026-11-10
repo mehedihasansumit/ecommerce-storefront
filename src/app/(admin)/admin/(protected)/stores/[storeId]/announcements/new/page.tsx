@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { Card, PageHeader } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { StoreService } from "@/features/stores/service";
@@ -23,21 +23,23 @@ export default async function NewAnnouncementPage({
 
   return (
     <div>
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">Dashboard</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">Stores</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}`} className="hover:text-admin-text-secondary transition-colors">{store.name}</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href={`/admin/stores/${storeId}/announcements`} className="hover:text-admin-text-secondary transition-colors">Announcements</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">New Announcement</span>
-      </nav>
-      <h1 className="text-2xl font-bold mb-6">Create Announcement</h1>
-      <div className="bg-admin-surface rounded-lg border border-admin-border p-6 overflow-visible">
+      <PageHeader
+        title="Create Announcement"
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Announcements", href: `/admin/stores/${storeId}/announcements` },
+              { label: "New Announcement" },
+            ]}
+          />
+        }
+      />
+      <Card padding="lg">
         <AnnouncementForm storeId={storeId} />
-      </div>
+      </Card>
     </div>
   );
 }

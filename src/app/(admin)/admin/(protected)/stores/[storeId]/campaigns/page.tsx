@@ -1,11 +1,22 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { Plus, ChevronRight } from "lucide-react";
+import { Plus, Megaphone } from "lucide-react";
+import { Badge, Card, EmptyState, PageHeader, buttonClassName } from "@/shared/components/ui";
+import { AdminBreadcrumbs } from "@/app/(admin)/admin/_components/AdminBreadcrumbs";
 import { getAdminDbUser } from "@/shared/lib/auth";
 import { hasPermission, canAccessStore, PERMISSIONS } from "@/shared/lib/permissions";
 import { CampaignService } from "@/features/campaigns/service";
 import { StoreService } from "@/features/stores/service";
 import { tAdmin } from "@/shared/lib/i18n";
+
+const STATUS_TONE = {
+  active: "success",
+  scheduled: "warning",
+  paused: "warning",
+  expired: "neutral",
+  archived: "neutral",
+  draft: "neutral",
+} as const;
 
 export default async function CampaignsPage({
   params,
@@ -29,91 +40,98 @@ export default async function CampaignsPage({
 
   return (
     <div>
-      <nav className="flex items-center gap-1.5 text-sm text-admin-text-muted mb-3 flex-wrap">
-        <Link href="/admin" className="hover:text-admin-text-secondary transition-colors">
-          Dashboard
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link href="/admin/stores" className="hover:text-admin-text-secondary transition-colors">
-          Stores
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <Link
-          href={`/admin/stores/${storeId}`}
-          className="hover:text-admin-text-secondary transition-colors"
-        >
-          {store.name}
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-admin-text-secondary font-medium">Campaigns</span>
-      </nav>
-
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-admin-text-primary">Campaigns</h1>
-          <p className="text-sm text-admin-text-muted mt-0.5">
-            {campaigns.length} {campaigns.length === 1 ? "campaign" : "campaigns"}
-          </p>
-        </div>
-        {canCreate && (
-          <Link
-            href={`/admin/stores/${storeId}/campaigns/new`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Campaign
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Campaigns"
+        description={`${campaigns.length} ${campaigns.length === 1 ? "campaign" : "campaigns"}`}
+        breadcrumbs={
+          <AdminBreadcrumbs
+            items={[
+              { label: "Dashboard", href: "/admin" },
+              { label: "Stores", href: "/admin/stores" },
+              { label: store.name, href: `/admin/stores/${storeId}` },
+              { label: "Campaigns" },
+            ]}
+          />
+        }
+        actions={
+          canCreate && (
+            <Link
+              href={`/admin/stores/${storeId}/campaigns/new`}
+              className={buttonClassName({ variant: "primary", size: "md" })}
+            >
+              <Plus aria-hidden className="w-4 h-4" />
+              New Campaign
+            </Link>
+          )
+        }
+      />
 
       {campaigns.length === 0 ? (
-        <div className="border border-dashed rounded-xl p-10 text-center text-admin-text-muted">
-          No campaigns yet. Create the first one to start running promotions.
-        </div>
+        <Card padding="none">
+          <EmptyState
+            icon={Megaphone}
+            title="No campaigns yet"
+            description="Create the first one to start running promotions."
+            action={
+              canCreate && (
+                <Link
+                  href={`/admin/stores/${storeId}/campaigns/new`}
+                  className={buttonClassName({ variant: "primary", size: "md" })}
+                >
+                  <Plus aria-hidden className="w-4 h-4" />
+                  New Campaign
+                </Link>
+              )
+            }
+          />
+        </Card>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-admin-border-md">
-          <table className="w-full text-sm">
-            <thead className="bg-admin-surface">
-              <tr className="text-left text-xs uppercase tracking-wide text-admin-text-muted">
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Window</th>
-                <th className="px-4 py-3">Usage</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {campaigns.map((c) => (
-                <tr key={c._id} className="border-t border-admin-border-md">
-                  <td className="px-4 py-3 font-medium">{tAdmin(c.name)}</td>
-                  <td className="px-4 py-3 capitalize">{c.type}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs capitalize bg-gray-100 dark:bg-gray-800">
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {new Date(c.startDate).toLocaleDateString()} →{" "}
-                    {new Date(c.endDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {c.usageCount}
-                    {c.usageLimit !== null ? ` / ${c.usageLimit}` : ""}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/stores/${storeId}/campaigns/${c._id}`}
-                      className="text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      Edit
-                    </Link>
-                  </td>
+        <Card padding="none" className="overflow-hidden">
+          <div className="relative overflow-x-auto">
+            <table className="w-full min-w-175 text-sm">
+              <thead className="bg-admin-surface-raised border-b border-admin-border-md">
+                <tr className="text-left text-xs uppercase tracking-wide text-admin-text-muted">
+                  <th scope="col" className="px-4 py-3 font-semibold">Name</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Type</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Status</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Window</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Usage</th>
+                  <th scope="col" className="px-4 py-3 font-semibold text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-admin-border">
+                {campaigns.map((c) => (
+                  <tr key={c._id} className="hover:bg-admin-surface-hover transition-colors">
+                    <td className="px-4 py-3 font-medium text-admin-text-primary">{tAdmin(c.name)}</td>
+                    <td className="px-4 py-3 capitalize text-admin-text-secondary">{c.type}</td>
+                    <td className="px-4 py-3">
+                      <Badge tone={STATUS_TONE[c.status as keyof typeof STATUS_TONE] ?? "neutral"} className="capitalize">
+                        {c.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-admin-text-muted whitespace-nowrap">
+                      {new Date(c.startDate).toLocaleDateString()} →{" "}
+                      {new Date(c.endDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-admin-text-secondary">
+                      {c.usageCount}
+                      {c.usageLimit !== null ? ` / ${c.usageLimit}` : ""}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={`/admin/stores/${storeId}/campaigns/${c._id}`}
+                        aria-label={`Edit ${tAdmin(c.name)}`}
+                        className={buttonClassName({ variant: "ghost", size: "sm" })}
+                      >
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
     </div>
   );

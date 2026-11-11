@@ -94,6 +94,7 @@ export const createStoreSchema = z.object({
       description: localizedStringSchema,
       keywords: z.array(z.string()).optional(),
       ogImage: z.string().optional(),
+      alternateNames: z.array(z.string().trim().max(100)).max(20).optional(),
     })
     .optional(),
   payment: z
@@ -144,6 +145,7 @@ export const updateStoreSchema = z.object({
       description: localizedStringSchema,
       keywords: z.array(z.string()).optional(),
       ogImage: z.string().optional(),
+      alternateNames: z.array(z.string().trim().max(100)).max(20).optional(),
     })
     .optional(),
   payment: z

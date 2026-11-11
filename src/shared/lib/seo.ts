@@ -336,8 +336,38 @@ export function buildBreadcrumbJsonLd(
  * one policy covers every product. A store with the policy switched off makes
  * no claim at all (off may mean "not set up", not "no returns").
  */
+/** The store's other spellings: trimmed, blanks, repeats and the store's own name dropped. */
+function storeAlternateNames(store: Pick<IStore, "name" | "seo">): string[] {
+  const seen = new Set([store.name.trim().toLowerCase()]);
+  const names: string[] = [];
+  for (const raw of store.seo?.alternateNames ?? []) {
+    const name = raw.trim();
+    const key = name.toLowerCase();
+    if (!name || seen.has(key)) continue;
+    seen.add(key);
+    names.push(name);
+  }
+  return names;
+}
+
+/**
+ * Home-page WebSite structured data: tells Google the site's name (shown above
+ * the link in results) and the other spellings people search for it by.
+ */
+export function buildWebSiteJsonLd(store: IStore) {
+  const alternateName = storeAlternateNames(store);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: store.name,
+    ...(alternateName.length && { alternateName }),
+    url: storeBaseUrl(store),
+  };
+}
+
 export function buildOrganizationJsonLd(store: IStore) {
   const baseUrl = storeBaseUrl(store);
+  const alternateName = storeAlternateNames(store);
   const logo = store.logo ? absoluteUrl(baseUrl, store.logo) : undefined;
 
   const sameAs = [
@@ -354,6 +384,7 @@ export function buildOrganizationJsonLd(store: IStore) {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
     name: store.name,
+    ...(alternateName.length && { alternateName }),
     url: baseUrl,
     ...(logo && { logo }),
     ...(store.contact?.email && { email: store.contact.email }),

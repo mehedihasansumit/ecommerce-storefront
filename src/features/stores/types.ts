@@ -121,6 +121,8 @@ export interface IStoreSeo {
   description: LocalizedString;
   keywords: string[];
   ogImage: string;
+  /** Other spellings people search for (e.g. "Lor House", "লর হাউস"); sent to Google as alternateName. */
+  alternateNames?: string[];
 }
 
 export interface IStorePayment {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { IStore } from "@/features/stores/types";
 import type { IProduct } from "@/features/products/types";
-import { buildOrganizationJsonLd, buildProductJsonLd, buildSitemapEntries, createStoreMetadata, hasBanglaContent, primaryDomainRedirect } from "./seo";
+import { buildOrganizationJsonLd, buildProductJsonLd, buildWebSiteJsonLd, buildSitemapEntries, createStoreMetadata, hasBanglaContent, primaryDomainRedirect } from "./seo";
 
 /** What the page actually ships: JSON, with undefined keys dropped. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,6 +145,32 @@ describe("buildOrganizationJsonLd", () => {
       refundPolicy: { enabled: false, windowDays: 0, description: "", autoApprove: false },
     });
     expect(asJson(buildOrganizationJsonLd(store)).hasMerchantReturnPolicy).toBeUndefined();
+  });
+
+  it("lists the store's other spellings as alternateName, trimmed and de-duplicated", () => {
+    const store = makeStore({
+      seo: { title: {}, description: {}, keywords: [], ogImage: "", alternateNames: [" Lor House ", "লর হাউস", "", "Lor House", "Punjabi House"] },
+    });
+    expect(asJson(buildOrganizationJsonLd(store)).alternateName).toEqual(["Lor House", "লর হাউস"]);
+  });
+
+  it("has no alternateName when the store lists none", () => {
+    expect(asJson(buildOrganizationJsonLd(makeStore())).alternateName).toBeUndefined();
+  });
+});
+
+describe("buildWebSiteJsonLd", () => {
+  it("names the site and its other spellings at the store's home URL", () => {
+    const store = makeStore({
+      seo: { title: {}, description: {}, keywords: [], ogImage: "", alternateNames: ["Panjabi House"] },
+    });
+    expect(asJson(buildWebSiteJsonLd(store))).toEqual({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Punjabi House",
+      alternateName: ["Panjabi House"],
+      url: "https://punjabi.example",
+    });
   });
 });
 

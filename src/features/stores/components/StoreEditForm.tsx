@@ -311,6 +311,7 @@ export default function StoreEditForm({
       title: toLocalized(store.seo?.title),
       description: toLocalized(store.seo?.description),
       keywords: store.seo?.keywords?.join(", ") || "",
+      alternateNames: store.seo?.alternateNames?.join(", ") || "",
       ogImage: store.seo?.ogImage || "",
     },
     socialOrdering: {
@@ -605,6 +606,10 @@ export default function StoreEditForm({
         .split(",")
         .map((k) => k.trim())
         .filter((k) => k);
+      const alternateNames = formData.seo.alternateNames
+        .split(",")
+        .map((n) => n.trim())
+        .filter((n) => n);
 
       const payload: Record<string, unknown> = {};
       if (canEditStore) {
@@ -626,6 +631,7 @@ export default function StoreEditForm({
           title: formData.seo.title,
           description: formData.seo.description,
           keywords,
+          alternateNames,
           ogImage: formData.seo.ogImage,
         };
         payload.supportedLanguages = formData.supportedLanguages;
@@ -2190,6 +2196,21 @@ export default function StoreEditForm({
                   className={inputCls}
                   disabled={loading}
                   placeholder="clothing, fashion, shirts, bangladeshi store"
+                />
+              </Field>
+
+              <Field
+                label="Other spellings of the store name"
+                hint="Comma-separated. Misspellings and the Bangla name people search for. Tells Google they mean this store; not shown to shoppers."
+              >
+                <input
+                  type="text"
+                  name="alternateNames"
+                  value={formData.seo.alternateNames}
+                  onChange={(e) => handleInputChange(e, "seo")}
+                  className={inputCls}
+                  disabled={loading}
+                  placeholder="Lor House, লর হাউস"
                 />
               </Field>
 

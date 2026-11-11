@@ -8,7 +8,7 @@ import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { ProductRail } from "@/features/products/components/ProductRail";
 import { getStoreTrustFacts } from "@/features/stores/trust";
 import { StoreTrustInfo } from "@/shared/components/storefront/StoreTrustInfo";
-import { createStoreMetadata, buildOrganizationJsonLd } from "@/shared/lib/seo";
+import { createStoreMetadata, buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/shared/lib/seo";
 import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
 import { t } from "@/shared/lib/i18n";
@@ -53,6 +53,7 @@ export default async function HomePage() {
   const showcase = await getTopLevelCategoriesWithProducts(tenant._id);
 
   const orgJsonLd = buildOrganizationJsonLd(tenant);
+  const webSiteJsonLd = buildWebSiteJsonLd(tenant);
   const { styles, motion } = resolveTheme(tenant.theme);
   // The styled full-bleed hero sits flush under the header (no gap strip).
   const flushHero =
@@ -66,6 +67,10 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
       />
       {/* Hero Banner */}
       <HeroBanner
